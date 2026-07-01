@@ -264,7 +264,7 @@ footer{background:var(--bg2);color:rgba(255,255,255,.3);padding:70px 0 36px;}
 @media(max-width:760px){.foot-grid{grid-template-columns:1fr 1fr;gap:28px;}}
 
 /* APPLY */
-.apply-shell{padding:60px 0 100px;}
+.apply-shell{padding:156px 0 100px;}
 .apply-box{max-width:640px;margin:0 auto;padding:40px;}
 .progress{height:5px;background:rgba(255,255,255,.06);border-radius:980px;overflow:hidden;margin-bottom:10px;}
 .progress-fill{height:100%;background:var(--teal);border-radius:980px;width:33%;transition:width .45s cubic-bezier(.4,0,.2,1);}
@@ -284,7 +284,7 @@ footer{background:var(--bg2);color:rgba(255,255,255,.3);padding:70px 0 36px;}
 @media(max-width:540px){.field-row{grid-template-columns:1fr;}.apply-box{padding:30px 22px;}}
 
 /* RESULT */
-.result-shell{padding:60px 0 100px;}
+.result-shell{padding:156px 0 100px;}
 .result-box{max-width:740px;margin:0 auto;}
 .result-head{border-radius:var(--r);padding:40px;text-align:center;border:1px solid var(--line);background:var(--card);}
 .result-head.APPROVED{border-color:var(--teal-bd);}
@@ -301,6 +301,7 @@ footer{background:var(--bg2);color:rgba(255,255,255,.3);padding:70px 0 36px;}
 .metric{border:1px solid var(--line);border-radius:var(--r2);padding:18px;}
 .metric .mk{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.32);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
 .metric .mv{font-family:'JetBrains Mono',monospace;font-size:1.18rem;font-weight:600;color:var(--teal);}
+#r-model{font-size:.82rem;line-height:1.35;word-break:keep-all;}
 .card-pad{padding:28px;margin-top:18px;}
 .card-pad h3{margin-bottom:18px;}
 .signal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
@@ -885,7 +886,10 @@ const signed = v => (Number(v)>=0?'+':'') + Math.round(Number(v)*100) + '%';
 function go(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  closeMenu(); window.scrollTo(0,0);
+  closeMenu();
+  window.scrollTo(0,0);
+  requestAnimationFrame(()=>window.scrollTo(0,0));
+  setTimeout(()=>window.scrollTo(0,0), 40);
   if(page==='dashboard') initDashboard();
   if(page==='apply') resetApply();
 }

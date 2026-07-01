@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pkl
+*.egg-info/
+backend/data/sellerflow.db
+backend/data/*.csv
+backend/venv/
+.env
+.env.local
+.DS_Store
+node_modules/
+dist/
+.railway/
