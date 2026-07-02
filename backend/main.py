@@ -1,10 +1,10 @@
-import os, uuid
+import os, uuid, hmac, secrets
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from models import SellerSubmission, WaitlistSignup
+from models import SellerSubmission, WaitlistSignup, LoginRequest
 from database import get_db, init_db
 from ml_engine import load_models, score, FEATURES
 
@@ -14,6 +14,25 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 load_models()
 init_db()
+
+# ── Auth ──
+DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD", "demo2025")
+_sessions: set[str] = set()
+
+
+def require_auth(authorization: str = Header(default="")):
+    token = authorization.removeprefix("Bearer ").strip()
+    if not token or token not in _sessions:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+
+@app.post("/api/auth/login")
+def login(data: LoginRequest):
+    if not hmac.compare_digest(data.password.encode(), DASHBOARD_PASSWORD.encode()):
+        raise HTTPException(status_code=401, detail="Invalid password")
+    token = secrets.token_urlsafe(32)
+    _sessions.add(token)
+    return {"token": token}
 
 # ── API Routes ──
 
@@ -61,7 +80,7 @@ def submit_seller(data: SellerSubmission):
 
 
 @app.get("/api/sellers/{seller_id}")
-def get_seller(seller_id: str):
+def get_seller(seller_id: str, _: None = Depends(require_auth)):
     conn = get_db()
     row = conn.execute("SELECT * FROM sellers WHERE id=?", (seller_id.upper(),)).fetchone()
     conn.close()
@@ -71,7 +90,7 @@ def get_seller(seller_id: str):
 
 
 @app.get("/api/portfolio")
-def get_portfolio():
+def get_portfolio(_: None = Depends(require_auth)):
     conn = get_db()
     rows = [dict(r) for r in conn.execute("SELECT * FROM sellers ORDER BY created_at DESC").fetchall()]
     conn.close()

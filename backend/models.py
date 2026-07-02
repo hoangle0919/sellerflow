@@ -25,6 +25,10 @@ class WaitlistSignup(BaseModel):
     role: str              # "lender" | "seller" | "investor" | "other"
 
 
+class LoginRequest(BaseModel):
+    password: str
+
+
 class AssessmentResult(BaseModel):
     seller_id: str
     timestamp: str

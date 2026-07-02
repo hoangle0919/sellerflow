@@ -327,7 +327,6 @@ footer{border-top:1px solid var(--hairline);padding:56px 0 32px}
 .login-box .brand{margin-bottom:22px}
 .login-box p{margin:6px 0 20px;font-size:.92rem}
 .login-err{display:none;color:var(--decline);font-size:.82rem;margin-top:10px}
-.login-hint{margin-top:14px;font-family:'Spline Sans Mono',monospace;font-size:.74rem;color:var(--ink-3)}
 .dash-layout{display:grid;grid-template-columns:224px 1fr;min-height:calc(100vh - 64px)}
 .dash-side{padding:24px 14px;border-right:1px solid var(--hairline)}
 .ds-group{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:18px 10px 8px}
@@ -443,7 +442,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
       <hr class="hero-rule">
       <div class="data-strip">
-        <span>10,247 assessments</span><span>1.2s median decision</span><span>3 platforms</span><span>Vietnam</span>
+        <span>RF+LR ensemble v1.0</span><span>sub-second decisions</span><span>3 platforms</span><span>Vietnam</span>
       </div>
 
       <div class="proof-card">
@@ -656,11 +655,10 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <div class="login-overlay" id="login-overlay">
     <div class="login-box">
       <div class="brand"><span class="brand-mark"></span>SellerFlow</div>
-      <h3>Lender dashboard</h3><p>Enter the demo password to view the live portfolio.</p>
+      <h3>Lender dashboard</h3><p>Enter your access password to view the portfolio.</p>
       <input id="login-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()">
-      <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="tryLogin()">Sign in</button>
+      <button class="btn btn-primary btn-block" style="margin-top:12px" id="login-btn" onclick="tryLogin()">Sign in</button>
       <div class="login-err" id="login-err">Incorrect password. Try again.</div>
-      <div class="login-hint">Demo access: demo2025</div>
     </div>
   </div>
   <div class="dash" id="dash-shell" style="display:none">
@@ -708,12 +706,14 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 
 <script>
 const API = window.location.origin;
+const getToken = () => sessionStorage.getItem('sf_token');
 async function callAPI(endpoint, options = {}) {
   try {
-    const res = await fetch(`${API}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json' },
-      ...options
-    });
+    const headers = { 'Content-Type': 'application/json' };
+    const token = getToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API}${endpoint}`, { headers, ...options });
+    if (res.status === 401) { sessionStorage.removeItem('sf_token'); return { __unauthorized: true }; }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
@@ -825,20 +825,12 @@ function renderPreview(){
   const rows=[['Shop',applyData.shop_name],['Platform',applyData.platform],['Monthly revenue',fmtVND(applyData.monthly_revenue)],['Revenue growth',signed(applyData.revenue_growth)],['Return rate',pct(applyData.return_rate)],['Late shipments',pct(applyData.late_ship_rate)],['Rating',applyData.rating+' / 5.0'],['Days active',applyData.days_active+' days']];
   document.getElementById('preview-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
 }
-function localScore(data){
-  let s=(data.return_rate/0.40)*0.28+((5-data.rating)/4)*0.20+(data.late_ship_rate/0.40)*0.18+Math.max(0,(0.35-data.revenue_growth)/1.25)*0.15+Math.max(0,(1800-data.days_active)/1800)*0.10+Math.max(0,(14-data.inventory_turnover)/14)*0.09;
-  const pd=Math.min(.99,Math.max(.01,s)), rev=data.monthly_revenue;
-  const base={pd_score:pd,pd_rf:pd,pd_lr:pd,model_version:'local-fallback',signals:{},reasoning:'Local fallback score generated because the API was unavailable.'};
-  if(pd<.25) return {...base,decision:'APPROVED',risk_tier:'Low Risk',credit_limit:rev*.45,interest_rate:12.5};
-  if(pd<.55) return {...base,decision:'CONDITIONAL',risk_tier:'Medium Risk',credit_limit:rev*.20,interest_rate:18.0};
-  return {...base,decision:'REJECTED',risk_tier:'High Risk',credit_limit:0,interest_rate:0};
-}
 async function submitApplication(){
   const btn=document.getElementById('submit-btn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Assessing';
   const data=await callAPI('/api/sellers/submit',{method:'POST',body:JSON.stringify(applyData)});
-  const result=data||localScore(applyData);
   btn.disabled=false; btn.textContent='Run assessment';
-  renderResult({...applyData,...result}); go('result');
+  if(!data){ toast('Could not reach the scoring service. Please try again.'); return; }
+  renderResult({...applyData,...data}); go('result');
 }
 const VERDICT={APPROVED:'Approved',CONDITIONAL:'Conditional',REJECTED:'Not approved'};
 const EXPLAIN={APPROVED:'The seller clears the underwriting bar. The recommended limit is sized to operating revenue and priced at the low-risk rate.',CONDITIONAL:'The seller has enough signal to approve a reduced facility, but monitoring is recommended before expanding exposure.',REJECTED:'The seller exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
@@ -867,11 +859,29 @@ function renderResult(s){
 }
 function shareResult(){ navigator.clipboard?.writeText(location.href).then(()=>toast('Link copied')).catch(()=>toast('Copy unavailable')); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window.toastT); window.toastT=setTimeout(()=>t.classList.remove('show'),2200); }
-let sellers=[], stats=null, filter='all', loggedIn=false;
-function initDashboard(){ document.getElementById('login-overlay').style.display=loggedIn?'none':'flex'; document.getElementById('dash-shell').style.display=loggedIn?'block':'none'; if(loggedIn&&!sellers.length) loadPortfolio(); if(!loggedIn) setTimeout(()=>document.getElementById('login-pw').focus(),120); }
-function tryLogin(){ if(document.getElementById('login-pw').value==='demo2025'){ loggedIn=true; document.getElementById('login-err').style.display='none'; initDashboard(); } else document.getElementById('login-err').style.display='block'; }
-async function loadPortfolio(){ const data=await callAPI('/api/portfolio'); if(data){ sellers=data.sellers; stats=data.stats; } else { sellers=DEMO_SELLERS; stats=computeStats(sellers); } renderStats(); renderCounts(); renderCharts(); renderTable(); }
-function computeStats(rows){ const total=rows.length, approved=rows.filter(r=>r.decision==='APPROVED').length, conditional=rows.filter(r=>r.decision==='CONDITIONAL').length, rejected=rows.filter(r=>r.decision==='REJECTED').length; return {total,approved,conditional,rejected,approval_rate:total?approved/total:0,total_exposure:rows.reduce((a,r)=>a+(+r.credit_limit||0),0),avg_pd:total?rows.reduce((a,r)=>a+(+r.pd_score||0),0)/total:0}; }
+let sellers=[], stats=null, filter='all';
+const loggedIn=()=>!!getToken();
+function initDashboard(){ const authed=loggedIn(); document.getElementById('login-overlay').style.display=authed?'none':'flex'; document.getElementById('dash-shell').style.display=authed?'block':'none'; if(authed&&!sellers.length) loadPortfolio(); if(!authed) setTimeout(()=>document.getElementById('login-pw').focus(),120); }
+async function tryLogin(){
+  const btn=document.getElementById('login-btn'); btn.disabled=true;
+  try {
+    const res=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('login-pw').value})});
+    if(!res.ok) throw new Error();
+    const d=await res.json();
+    sessionStorage.setItem('sf_token',d.token);
+    document.getElementById('login-err').style.display='none';
+    document.getElementById('login-pw').value='';
+    initDashboard();
+  } catch { document.getElementById('login-err').style.display='block'; }
+  btn.disabled=false;
+}
+async function loadPortfolio(){
+  const data=await callAPI('/api/portfolio');
+  if(data&&data.__unauthorized){ sellers=[]; stats=null; initDashboard(); return; }
+  if(!data){ toast('Could not load portfolio. Please retry.'); return; }
+  sellers=data.sellers; stats=data.stats;
+  renderStats(); renderCounts(); renderCharts(); renderTable();
+}
 function renderStats(){ document.getElementById('st-total').textContent=stats.total; document.getElementById('st-approval').textContent=Math.round(stats.approval_rate*100)+'%'; document.getElementById('st-exposure').textContent=fmtVND(stats.total_exposure); document.getElementById('st-pd').textContent=pct(stats.avg_pd); }
 function renderCounts(){ document.getElementById('c-all').textContent=stats.total; document.getElementById('c-approved').textContent=stats.approved; document.getElementById('c-conditional').textContent=stats.conditional; document.getElementById('c-rejected').textContent=stats.rejected; }
 function drawDonut(elId,data){ const total=data.reduce((s,d)=>s+d.value,0)||1; let offset=0, r=38, cx=50, cy=50, circ=2*Math.PI*r; const slices=data.map(d=>{ const p=d.value/total; const sl=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="16" stroke-dasharray="${p*circ} ${circ}" stroke-dashoffset="${-offset*circ}" transform="rotate(-90 ${cx} ${cy})"/>`; offset+=p; return sl; }); document.getElementById(elId).innerHTML=`<svg viewBox="0 0 100 100" style="width:124px;height:124px">${slices.join('')}<circle cx="50" cy="50" r="29" fill="#FFFFFF" stroke="#E8E8E5" stroke-width="1"/><text x="50" y="54" text-anchor="middle" font-family="Spline Sans Mono" font-size="15" fill="#1A1A1A">${total}</text></svg>`; }
@@ -879,7 +889,6 @@ function renderCharts(){ const dist=[{label:'Low risk',value:stats.approved,colo
 function setFilter(f){ filter=f; document.querySelectorAll('.ds-item[data-filter]').forEach(el=>el.classList.toggle('active',el.dataset.filter===f)); renderTable(); }
 function renderTable(){ const q=(document.getElementById('dash-search').value||'').toLowerCase(); let rows=sellers.filter(s=>filter==='all'||s.decision===filter); if(q) rows=rows.filter(s=>(s.shop_name||'').toLowerCase().includes(q)); const pdColor=pd=>pd<.25?'#2E6B4F':pd<.55?'#8A6D3B':'#8C3A38'; const tb=document.getElementById('tbody'); if(!rows.length){ tb.innerHTML='<tr><td colspan="8"><div class="empty">No sellers match this view.</div></td></tr>'; return; } tb.innerHTML=rows.map(s=>`<tr onclick="openSeller('${(s.id||'').replace(/'/g,'')}')"><td class="t-id">${s.id||'—'}</td><td><div class="tn">${s.shop_name||''}</div><div class="to">${s.owner_name||''}</div></td><td>${s.platform||''}</td><td class="t-num">${fmtVND(s.monthly_revenue)}</td><td><div class="pd-wrap"><span class="pd-dot" style="background:${pdColor(+s.pd_score||0)}"></span><span class="t-num">${pct(s.pd_score)}</span></div></td><td><span class="badge ${s.decision}">${s.decision||''}</span></td><td class="t-num">${fmtVND(s.credit_limit)}</td><td class="t-num">${(s.created_at||'').slice(0,10)}</td></tr>`).join(''); }
 function openSeller(id){ const s=sellers.find(x=>x.id===id); if(!s) return; renderResult({...s,seller_id:s.id}); go('result'); }
-const DEMO_SELLERS=[{id:'SF-A1B2C3',shop_name:'Thoi Trang Linh Chi',owner_name:'Nguyen Linh Chi',platform:'Shopee',monthly_revenue:185000000,revenue_growth:.22,return_rate:.028,late_ship_rate:.018,rating:4.9,days_active:680,inventory_turnover:6.2,pd_score:.011,decision:'APPROVED',credit_limit:83250000,interest_rate:12.5,created_at:'2026-04-12'},{id:'SF-778899',shop_name:'Do Gia Dung Kim Anh',owner_name:'Pham Kim Anh',platform:'Lazada',monthly_revenue:65000000,revenue_growth:.05,return_rate:.089,late_ship_rate:.071,rating:4.1,days_active:185,inventory_turnover:2.8,pd_score:.38,decision:'CONDITIONAL',credit_limit:13000000,interest_rate:18,created_at:'2026-05-18'},{id:'SF-AABBCC',shop_name:'Quan Ao Vintage',owner_name:'Vu Thi Ngoc',platform:'TikTok Shop',monthly_revenue:28000000,revenue_growth:-.18,return_rate:.212,late_ship_rate:.186,rating:3.2,days_active:45,inventory_turnover:2.1,pd_score:.85,decision:'REJECTED',credit_limit:0,interest_rate:0,created_at:'2026-06-01'}];
 setLang('curl',document.querySelector('.code-tab'));
 </script>
 </body>
