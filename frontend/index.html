@@ -679,6 +679,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <div class="ds-item" onclick="go('apply')"><span>New application</span></div>
         <div class="ds-item" onclick="loadPortfolio()"><span>Refresh</span></div>
         <div class="ds-item" onclick="exportCSV()"><span>Export CSV</span></div>
+        <div class="ds-item" onclick="exportLeads()"><span>Export leads</span></div>
         <div class="ds-item" onclick="signOut()"><span>Sign out</span></div>
       </aside>
       <section class="dash-main">
@@ -920,13 +921,23 @@ function renderTable(){ const q=(document.getElementById('dash-search').value||'
 function openSeller(id){ const s=sellers.find(x=>x.id===id); if(!s) return; renderResult({...s,seller_id:s.id}); go('result'); }
 function exportCSV(){
   if(!sellers.length){ toast('Nothing to export'); return; }
-  const cols=['id','shop_name','owner_name','platform','monthly_revenue','revenue_growth','order_volume','avg_order_value','return_rate','rating','days_active','inventory_turnover','late_ship_rate','previous_loans','pd_score','decision','credit_limit','interest_rate','risk_tier','created_at'];
+  downloadCSV(sellers,['id','shop_name','owner_name','platform','monthly_revenue','revenue_growth','order_volume','avg_order_value','return_rate','rating','days_active','inventory_turnover','late_ship_rate','previous_loans','pd_score','decision','credit_limit','interest_rate','risk_tier','created_at'],'sellerflow-portfolio.csv');
+  toast('Portfolio exported');
+}
+function downloadCSV(rows, cols, filename){
   const esc=v=>{ v=v==null?'':String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
-  const csv=[cols.join(',')].concat(sellers.map(s=>cols.map(c=>esc(s[c])).join(','))).join('\n');
+  const csv=[cols.join(',')].concat(rows.map(r=>cols.map(c=>esc(r[c])).join(','))).join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download='sellerflow-portfolio.csv'; a.click(); URL.revokeObjectURL(a.href);
-  toast('Portfolio exported');
+  a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+async function exportLeads(){
+  const data=await callAPI('/api/waitlist/entries');
+  if(data&&data.__unauthorized){ initDashboard(); return; }
+  if(!data){ toast('Could not load leads.'); return; }
+  if(!data.entries.length){ toast('No leads yet'); return; }
+  downloadCSV(data.entries,['position','email','company','role','created_at'],'sellerflow-leads.csv');
+  toast(`${data.entries.length} lead${data.entries.length>1?'s':''} exported`);
 }
 function signOut(){ sessionStorage.removeItem('sf_token'); sellers=[]; stats=null; initDashboard(); }
 setLang('curl',document.querySelector('.code-tab'));

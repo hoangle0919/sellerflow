@@ -1,7 +1,9 @@
 import os, uuid, hmac, secrets, time
+import json as jsonlib
+import urllib.request
 from collections import defaultdict, deque
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Header, Depends, Request
+from fastapi import FastAPI, HTTPException, Header, Depends, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -146,8 +148,33 @@ def get_portfolio(_: None = Depends(require_auth)):
     }
 
 
+# ── Signup notifications (active once RESEND_API_KEY + NOTIFY_EMAIL are set) ──
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "")
+NOTIFY_FROM = os.environ.get("NOTIFY_FROM", "SellerFlow <onboarding@resend.dev>")
+
+
+def notify_signup(email: str, role: str, position: int):
+    if not (RESEND_API_KEY and NOTIFY_EMAIL):
+        return
+    try:
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=jsonlib.dumps({
+                "from": NOTIFY_FROM,
+                "to": [NOTIFY_EMAIL],
+                "subject": f"SellerFlow lead #{position}: {email}",
+                "text": f"{email} ({role}) joined the waitlist at {datetime.now().isoformat()}.",
+            }).encode(),
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=8)
+    except Exception:
+        pass  # a failed notification must never affect the signup itself
+
+
 @app.post("/api/waitlist")
-def join_waitlist(data: WaitlistSignup, request: Request):
+def join_waitlist(data: WaitlistSignup, request: Request, background: BackgroundTasks):
     rate_limit(request, "waitlist", limit=10, window_s=3600)
     conn = get_db()
     existing = conn.execute("SELECT id FROM waitlist WHERE email=?", (data.email,)).fetchone()
@@ -164,7 +191,16 @@ def join_waitlist(data: WaitlistSignup, request: Request):
     conn.commit()
     count = conn.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
     conn.close()
+    background.add_task(notify_signup, data.email, data.role, count)
     return {"status": "registered", "position": count, "waitlist_id": wid}
+
+
+@app.get("/api/waitlist/entries")
+def waitlist_entries(_: None = Depends(require_auth)):
+    conn = get_db()
+    rows = [dict(r) for r in conn.execute("SELECT * FROM waitlist ORDER BY created_at DESC").fetchall()]
+    conn.close()
+    return {"entries": rows}
 
 
 @app.get("/api/waitlist/count")
