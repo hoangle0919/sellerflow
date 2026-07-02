@@ -1,6 +1,7 @@
-import os, uuid, hmac, secrets
+import os, uuid, hmac, secrets, time
+from collections import defaultdict, deque
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -15,24 +16,54 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 load_models()
 init_db()
 
+# ── Rate limiting (per-IP, in-memory sliding window) ──
+_hits: dict[str, deque] = defaultdict(deque)
+
+
+def client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def rate_limit(request: Request, bucket: str, limit: int, window_s: int):
+    key = f"{bucket}:{client_ip(request)}"
+    now = time.time()
+    q = _hits[key]
+    while q and q[0] < now - window_s:
+        q.popleft()
+    if len(q) >= limit:
+        raise HTTPException(status_code=429, detail="Too many requests. Try again later.")
+    q.append(now)
+
+
 # ── Auth ──
 DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD", "demo2025")
-_sessions: set[str] = set()
+SESSION_TTL_S = 12 * 3600
+_sessions: dict[str, float] = {}  # token -> expiry epoch
 
 
 def require_auth(authorization: str = Header(default="")):
     token = authorization.removeprefix("Bearer ").strip()
-    if not token or token not in _sessions:
+    expiry = _sessions.get(token)
+    if not token or expiry is None or expiry < time.time():
+        _sessions.pop(token, None)
         raise HTTPException(status_code=401, detail="Not authenticated")
 
 
 @app.post("/api/auth/login")
-def login(data: LoginRequest):
+def login(data: LoginRequest, request: Request):
+    rate_limit(request, "login", limit=10, window_s=300)
     if not hmac.compare_digest(data.password.encode(), DASHBOARD_PASSWORD.encode()):
         raise HTTPException(status_code=401, detail="Invalid password")
+    now = time.time()
+    for t, exp in list(_sessions.items()):
+        if exp < now:
+            _sessions.pop(t, None)
     token = secrets.token_urlsafe(32)
-    _sessions.add(token)
-    return {"token": token}
+    _sessions[token] = now + SESSION_TTL_S
+    return {"token": token, "expires_in": SESSION_TTL_S}
 
 # ── API Routes ──
 
@@ -54,7 +85,8 @@ def health():
 
 
 @app.post("/api/sellers/submit")
-def submit_seller(data: SellerSubmission):
+def submit_seller(data: SellerSubmission, request: Request):
+    rate_limit(request, "submit", limit=30, window_s=3600)
     result = score(data.dict())
     seller_id = f"SF-{str(uuid.uuid4())[:6].upper()}"
     conn = get_db()
@@ -115,7 +147,8 @@ def get_portfolio(_: None = Depends(require_auth)):
 
 
 @app.post("/api/waitlist")
-def join_waitlist(data: WaitlistSignup):
+def join_waitlist(data: WaitlistSignup, request: Request):
+    rate_limit(request, "waitlist", limit=10, window_s=3600)
     conn = get_db()
     existing = conn.execute("SELECT id FROM waitlist WHERE email=?", (data.email,)).fetchone()
     if existing:

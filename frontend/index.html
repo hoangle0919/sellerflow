@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SellerFlow — Credit decisions for digital merchants</title>
 <meta name="description" content="SellerFlow evaluates ecommerce merchants using operational data — orders, ratings, returns, growth. A full credit decision in 1.2 seconds.">
+<meta property="og:title" content="SellerFlow — Credit decisions for digital merchants">
+<meta property="og:description" content="Credit decisions from operational data — orders, ratings, returns, growth. No documents.">
+<meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' rx='2' fill='%231F3A2D'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -378,6 +381,9 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 .badge.CONDITIONAL{background:var(--caution-bg);color:var(--caution)}
 .badge.REJECTED{background:var(--decline-bg);color:var(--decline)}
 .empty{padding:36px;text-align:center;color:var(--ink-3)}
+.prose{max-width:640px}
+.prose h3{margin:26px 0 6px}
+.prose p{margin-bottom:10px;font-size:.95rem}
 
 @media(max-width:960px){
   .nav-links{display:none}.nav-actions .text-link{display:none}.hamburger{display:block}
@@ -672,6 +678,8 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <div class="ds-group">Actions</div>
         <div class="ds-item" onclick="go('apply')"><span>New application</span></div>
         <div class="ds-item" onclick="loadPortfolio()"><span>Refresh</span></div>
+        <div class="ds-item" onclick="exportCSV()"><span>Export CSV</span></div>
+        <div class="ds-item" onclick="signOut()"><span>Sign out</span></div>
       </aside>
       <section class="dash-main">
         <div class="dash-top"><h2>Portfolio</h2><input class="dash-search" id="dash-search" placeholder="Search shop name…" oninput="renderTable()"></div>
@@ -691,12 +699,29 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   </div>
 </div>
 
+<div id="page-privacy" class="page">
+  <div class="app-shell"><div class="wrap prose">
+    <span class="label">Privacy</span>
+    <h2 style="margin:10px 0 24px">How we handle your data</h2>
+    <h3>What we collect</h3>
+    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the credit decision our model produces. When you join the access list, we store your email address.</p>
+    <h3>How it is used</h3>
+    <p>Submitted metrics are used solely to generate your credit assessment and to display it to authenticated lenders in the portfolio dashboard. Waitlist emails are used only to contact you about access. We do not sell data, and we do not share it with third parties beyond the hosting infrastructure the service runs on.</p>
+    <h3>Retention and deletion</h3>
+    <p>Data is retained while the service operates. To have your records deleted, write to hello@sellerflow.io from the address you signed up with and we will remove them.</p>
+    <h3>Status</h3>
+    <p>SellerFlow is in pilot. The scoring model is a baseline trained on synthetic data and its output is not a lending commitment or an offer of credit.</p>
+    <p class="small" style="margin-top:24px">Last updated July 2026 · hello@sellerflow.io</p>
+    <div style="margin-top:32px"><button class="btn btn-ghost" onclick="go('landing')">Back</button></div>
+  </div></div>
+</div>
+
 <footer>
   <div class="wrap">
     <div class="foot-grid">
       <div><div class="brand"><span class="brand-mark"></span>SellerFlow</div><p style="margin-top:12px">Credit decisions for digital merchants in Southeast Asia.</p></div>
       <div class="foot-col"><h4>Product</h4><a onclick="go('apply')">Apply</a><a onclick="go('dashboard')">Dashboard</a><a onclick="jump('pricing')">Pricing</a></div>
-      <div class="foot-col"><h4>Company</h4><a onclick="jump('lenders')">For lenders</a><a onclick="jump('waitlist')">Request access</a><a href="/api/docs">API reference</a></div>
+      <div class="foot-col"><h4>Company</h4><a onclick="jump('lenders')">For lenders</a><a onclick="jump('waitlist')">Request access</a><a href="/api/docs">API reference</a><a onclick="go('privacy')">Privacy</a></div>
     </div>
     <div class="foot-bottom"><span>SellerFlow — Ho Chi Minh City &amp; Hanoi</span><span>hello@sellerflow.io</span></div>
   </div>
@@ -714,6 +739,7 @@ async function callAPI(endpoint, options = {}) {
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API}${endpoint}`, { headers, ...options });
     if (res.status === 401) { sessionStorage.removeItem('sf_token'); return { __unauthorized: true }; }
+    if (res.status === 429) return { __rate_limited: true };
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
@@ -785,7 +811,9 @@ async function submitWaitlist(){
   const btn=document.getElementById('wl-btn'); btn.disabled=true; btn.textContent='Requesting…';
   const data=await callAPI('/api/waitlist',{method:'POST',body:JSON.stringify({email,company:'',role:'lender'})});
   btn.disabled=false; btn.textContent='Request access';
-  const pos=data?data.position:1;
+  if(data&&data.__rate_limited){ toast('Too many requests. Try again later.'); return; }
+  if(!data){ toast('Could not reach the server. Please try again.'); return; }
+  const pos=data.position;
   document.getElementById('wl-form-wrap').style.display='none';
   const box=document.getElementById('wl-success'); box.style.display='block';
   box.textContent=`You're №${pos.toLocaleString('en-US')} in line. We'll write to you.`;
@@ -829,6 +857,7 @@ async function submitApplication(){
   const btn=document.getElementById('submit-btn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Assessing';
   const data=await callAPI('/api/sellers/submit',{method:'POST',body:JSON.stringify(applyData)});
   btn.disabled=false; btn.textContent='Run assessment';
+  if(data&&data.__rate_limited){ toast('Too many submissions from this connection. Try again later.'); return; }
   if(!data){ toast('Could not reach the scoring service. Please try again.'); return; }
   renderResult({...applyData,...data}); go('result');
 }
@@ -866,7 +895,7 @@ async function tryLogin(){
   const btn=document.getElementById('login-btn'); btn.disabled=true;
   try {
     const res=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('login-pw').value})});
-    if(!res.ok) throw new Error();
+    if(!res.ok){ document.getElementById('login-err').textContent=res.status===429?'Too many attempts. Try again in a few minutes.':'Incorrect password. Try again.'; throw new Error(); }
     const d=await res.json();
     sessionStorage.setItem('sf_token',d.token);
     document.getElementById('login-err').style.display='none';
@@ -889,6 +918,17 @@ function renderCharts(){ const dist=[{label:'Low risk',value:stats.approved,colo
 function setFilter(f){ filter=f; document.querySelectorAll('.ds-item[data-filter]').forEach(el=>el.classList.toggle('active',el.dataset.filter===f)); renderTable(); }
 function renderTable(){ const q=(document.getElementById('dash-search').value||'').toLowerCase(); let rows=sellers.filter(s=>filter==='all'||s.decision===filter); if(q) rows=rows.filter(s=>(s.shop_name||'').toLowerCase().includes(q)); const pdColor=pd=>pd<.25?'#2E6B4F':pd<.55?'#8A6D3B':'#8C3A38'; const tb=document.getElementById('tbody'); if(!rows.length){ tb.innerHTML='<tr><td colspan="8"><div class="empty">No sellers match this view.</div></td></tr>'; return; } tb.innerHTML=rows.map(s=>`<tr onclick="openSeller('${(s.id||'').replace(/'/g,'')}')"><td class="t-id">${s.id||'—'}</td><td><div class="tn">${s.shop_name||''}</div><div class="to">${s.owner_name||''}</div></td><td>${s.platform||''}</td><td class="t-num">${fmtVND(s.monthly_revenue)}</td><td><div class="pd-wrap"><span class="pd-dot" style="background:${pdColor(+s.pd_score||0)}"></span><span class="t-num">${pct(s.pd_score)}</span></div></td><td><span class="badge ${s.decision}">${s.decision||''}</span></td><td class="t-num">${fmtVND(s.credit_limit)}</td><td class="t-num">${(s.created_at||'').slice(0,10)}</td></tr>`).join(''); }
 function openSeller(id){ const s=sellers.find(x=>x.id===id); if(!s) return; renderResult({...s,seller_id:s.id}); go('result'); }
+function exportCSV(){
+  if(!sellers.length){ toast('Nothing to export'); return; }
+  const cols=['id','shop_name','owner_name','platform','monthly_revenue','revenue_growth','order_volume','avg_order_value','return_rate','rating','days_active','inventory_turnover','late_ship_rate','previous_loans','pd_score','decision','credit_limit','interest_rate','risk_tier','created_at'];
+  const esc=v=>{ v=v==null?'':String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  const csv=[cols.join(',')].concat(sellers.map(s=>cols.map(c=>esc(s[c])).join(','))).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='sellerflow-portfolio.csv'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Portfolio exported');
+}
+function signOut(){ sessionStorage.removeItem('sf_token'); sellers=[]; stats=null; initDashboard(); }
 setLang('curl',document.querySelector('.code-tab'));
 </script>
 </body>
