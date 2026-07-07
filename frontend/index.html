@@ -552,14 +552,14 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
           <div class="price">Free</div>
           <p class="price-desc">100 assessments monthly. For evaluation.</p>
           <ul class="price-list"><li>Full API access</li><li>Portfolio dashboard</li><li>Email support</li></ul>
-          <button class="btn btn-ghost" onclick="go('apply')">Start pilot</button>
+          <button class="btn btn-ghost" onclick="openKeyModal()">Get API key</button>
         </div>
         <div class="price-card featured">
           <h3>Scale</h3>
           <div class="price">$299 <small>/month</small></div>
           <p class="price-desc">5,000 assessments. Webhooks. Priority support.</p>
           <ul class="price-list"><li>Custom risk thresholds</li><li>Webhook delivery</li><li>Priority support</li></ul>
-          <button class="btn btn-primary" onclick="go('apply')">Get started</button>
+          <button class="btn btn-primary" id="scale-cta" onclick="jump('waitlist')">Talk to us</button>
         </div>
         <div class="price-card">
           <h3>Infrastructure</h3>
@@ -728,6 +728,25 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   </div>
 </footer>
 
+<div class="login-overlay" id="key-modal" style="display:none">
+  <div class="login-box">
+    <div class="brand"><span class="brand-mark"></span>SellerFlow</div>
+    <h3>Pilot API key</h3>
+    <div id="key-form">
+      <p>Free tier — 100 assessments per month. One key per email.</p>
+      <input id="key-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')requestKey()">
+      <button class="btn btn-primary btn-block" style="margin-top:12px" id="key-btn" onclick="requestKey()">Issue key</button>
+      <div class="login-err" id="key-err"></div>
+    </div>
+    <div id="key-result" style="display:none">
+      <p>Your key — shown once, store it now. Send it as an <span class="mono">X-API-Key</span> header.</p>
+      <div class="mono small" id="key-value" style="word-break:break-all;padding:12px;border:1px solid var(--hairline);border-radius:6px;background:var(--paper)"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="copyKey()">Copy key</button>
+    </div>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="closeKeyModal()">Close</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -770,6 +789,7 @@ function closeMenu(){ document.getElementById('hamburger').classList.remove('ope
 const CODE = {
 curl:`<span class="c"># Score a seller</span>
 curl -X POST https://api.sellerflow.io<span class="k">/api/sellers/submit</span> \\
+  -H <span class="s">"X-API-Key: sf_live_..."</span> \\
   -H <span class="s">"Content-Type: application/json"</span> \\
   -d '{
     <span class="k">"shop_name"</span>: <span class="s">"Thoi Trang Linh Chi"</span>,
@@ -788,11 +808,12 @@ payload = {
   <span class="k">"rating"</span>: 4.9
 }
 
-r = requests.post(<span class="s">"https://api.sellerflow.io/api/sellers/submit"</span>, json=payload)
+r = requests.post(<span class="s">"https://api.sellerflow.io/api/sellers/submit"</span>,
+                  headers={<span class="k">"X-API-Key"</span>: <span class="s">"sf_live_..."</span>}, json=payload)
 print(r.json())`,
 node:`<span class="k">const</span> res = <span class="k">await</span> fetch(<span class="s">"/api/sellers/submit"</span>, {
   method: <span class="s">"POST"</span>,
-  headers: { <span class="k">"Content-Type"</span>: <span class="s">"application/json"</span> },
+  headers: { <span class="k">"X-API-Key"</span>: <span class="s">"sf_live_..."</span>, <span class="k">"Content-Type"</span>: <span class="s">"application/json"</span> },
   body: JSON.stringify({
     shop_name: <span class="s">"Thoi Trang Linh Chi"</span>,
     platform: <span class="s">"Shopee"</span>,
@@ -940,6 +961,31 @@ async function exportLeads(){
   toast(`${data.entries.length} lead${data.entries.length>1?'s':''} exported`);
 }
 function signOut(){ sessionStorage.removeItem('sf_token'); sellers=[]; stats=null; initDashboard(); }
+function openKeyModal(){ document.getElementById('key-modal').style.display='flex'; document.getElementById('key-form').style.display='block'; document.getElementById('key-result').style.display='none'; document.getElementById('key-err').style.display='none'; setTimeout(()=>document.getElementById('key-email').focus(),120); }
+function closeKeyModal(){ document.getElementById('key-modal').style.display='none'; }
+async function requestKey(){
+  const email=document.getElementById('key-email').value.trim();
+  const err=document.getElementById('key-err');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Enter a valid email.'; err.style.display='block'; return; }
+  const btn=document.getElementById('key-btn'); btn.disabled=true; btn.textContent='Issuing…';
+  try {
+    const res=await fetch(`${API}/api/keys/issue`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,company:'',plan:'pilot'})});
+    const d=await res.json();
+    if(!res.ok){ err.textContent=d.detail||'Could not issue a key. Try again.'; err.style.display='block'; return; }
+    document.getElementById('key-form').style.display='none';
+    document.getElementById('key-result').style.display='block';
+    document.getElementById('key-value').textContent=d.api_key;
+  } catch { err.textContent='Could not reach the server.'; err.style.display='block'; }
+  finally { btn.disabled=false; btn.textContent='Issue key'; }
+}
+function copyKey(){ navigator.clipboard?.writeText(document.getElementById('key-value').textContent).then(()=>toast('Key copied')).catch(()=>toast('Copy unavailable')); }
+callAPI('/api/config').then(cfg=>{
+  if(cfg&&cfg.stripe_payment_link){
+    const b=document.getElementById('scale-cta');
+    b.textContent='Subscribe — $299/mo';
+    b.onclick=()=>window.open(cfg.stripe_payment_link,'_blank','noopener');
+  }
+});
 setLang('curl',document.querySelector('.code-tab'));
 </script>
 </body>

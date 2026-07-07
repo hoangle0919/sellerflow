@@ -1,4 +1,4 @@
-import os, uuid, hmac, secrets, time
+import os, uuid, hmac, secrets, time, hashlib
 import json as jsonlib
 import urllib.request
 from collections import defaultdict, deque
@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Header, Depends, Request, Background
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from models import SellerSubmission, WaitlistSignup, LoginRequest
+from models import SellerSubmission, WaitlistSignup, LoginRequest, KeyRequest
 from database import get_db, init_db
 from ml_engine import load_models, score, FEATURES
 
@@ -86,9 +86,106 @@ def health():
     }
 
 
+# ── API keys & plan metering ──
+PLAN_LIMITS = {"pilot": 100, "scale": 5000}
+STRIPE_PAYMENT_LINK = os.environ.get("STRIPE_PAYMENT_LINK", "")
+
+
+def _hash_key(raw: str) -> str:
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def _current_period() -> str:
+    return datetime.now().strftime("%Y-%m")
+
+
+def consume_api_key(request: Request):
+    """If an X-API-Key header is present, validate it and consume one assessment
+    from the monthly quota. Returns usage info, or None for keyless requests."""
+    raw = request.headers.get("x-api-key", "").strip()
+    if not raw:
+        return None
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT * FROM api_keys WHERE key_hash=? AND active=1", (_hash_key(raw),)
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=401, detail="Invalid API key")
+        period = _current_period()
+        used = row["assessments_used"] if row["period"] == period else 0
+        if used >= row["assessments_limit"]:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Monthly quota reached ({row['assessments_limit']} on the "
+                       f"{row['plan']} plan). Resets next month or upgrade at /#pricing.",
+            )
+        conn.execute(
+            "UPDATE api_keys SET assessments_used=?, period=? WHERE id=?",
+            (used + 1, period, row["id"]),
+        )
+        conn.commit()
+        return {"plan": row["plan"], "used": used + 1,
+                "limit": row["assessments_limit"], "period": period}
+    finally:
+        conn.close()
+
+
+@app.post("/api/keys/issue")
+def issue_key(data: KeyRequest, request: Request, authorization: str = Header(default="")):
+    rate_limit(request, "keys", limit=5, window_s=86400)
+    plan = data.plan.lower()
+    if plan not in PLAN_LIMITS:
+        raise HTTPException(status_code=422, detail=f"plan must be one of {sorted(PLAN_LIMITS)}")
+    if plan != "pilot":
+        # Paid plans are issued by the operator (post-payment), not self-serve
+        require_auth(authorization)
+    conn = get_db()
+    try:
+        existing = conn.execute(
+            "SELECT id FROM api_keys WHERE email=? AND active=1", (data.email,)
+        ).fetchone()
+        if existing:
+            raise HTTPException(status_code=409, detail="An active key already exists for this email. Write to hello@sellerflow.io to rotate it.")
+        raw = f"sf_live_{secrets.token_urlsafe(24)}"
+        conn.execute(
+            "INSERT INTO api_keys (id, key_hash, company, email, plan, assessments_used, assessments_limit, created_at, active, period) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (str(uuid.uuid4())[:8].upper(), _hash_key(raw), data.company or "", data.email,
+             plan, 0, PLAN_LIMITS[plan], datetime.now().isoformat(), 1, _current_period()),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"api_key": raw, "plan": plan, "monthly_limit": PLAN_LIMITS[plan],
+            "note": "Store this key now — it is shown only once. Send it as an X-API-Key header."}
+
+
+@app.get("/api/keys/usage")
+def key_usage(request: Request):
+    raw = request.headers.get("x-api-key", "").strip()
+    if not raw:
+        raise HTTPException(status_code=401, detail="Send your key as an X-API-Key header")
+    conn = get_db()
+    row = conn.execute("SELECT * FROM api_keys WHERE key_hash=? AND active=1", (_hash_key(raw),)).fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    period = _current_period()
+    used = row["assessments_used"] if row["period"] == period else 0
+    return {"plan": row["plan"], "used": used, "limit": row["assessments_limit"],
+            "remaining": row["assessments_limit"] - used, "period": period}
+
+
+@app.get("/api/config")
+def public_config():
+    return {"stripe_payment_link": STRIPE_PAYMENT_LINK}
+
+
 @app.post("/api/sellers/submit")
 def submit_seller(data: SellerSubmission, request: Request):
-    rate_limit(request, "submit", limit=30, window_s=3600)
+    usage = consume_api_key(request)
+    if usage is None:
+        rate_limit(request, "submit", limit=30, window_s=3600)
     result = score(data.dict())
     seller_id = f"SF-{str(uuid.uuid4())[:6].upper()}"
     conn = get_db()
@@ -106,11 +203,14 @@ def submit_seller(data: SellerSubmission, request: Request):
     ))
     conn.commit()
     conn.close()
-    return {
+    payload = {
         "seller_id": seller_id,
         "timestamp": datetime.now().isoformat(),
         **result
     }
+    if usage is not None:
+        payload["usage"] = usage
+    return payload
 
 
 @app.get("/api/sellers/{seller_id}")

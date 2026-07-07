@@ -57,7 +57,7 @@ def init_db():
         )
     """)
 
-    # API keys table (for future use)
+    # API keys table
     conn.execute("""
         CREATE TABLE IF NOT EXISTS api_keys (
             id TEXT PRIMARY KEY,
@@ -71,6 +71,12 @@ def init_db():
             active INTEGER DEFAULT 1
         )
     """)
+
+    # Migration: monthly quota period (YYYY-MM) for databases created before metering
+    try:
+        conn.execute("ALTER TABLE api_keys ADD COLUMN period TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass  # column already exists
 
     conn.commit()
 

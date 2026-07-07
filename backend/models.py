@@ -48,6 +48,20 @@ class LoginRequest(BaseModel):
     password: str = Field(max_length=200)
 
 
+class KeyRequest(BaseModel):
+    email: str = Field(max_length=254)
+    company: Optional[str] = Field(default="", max_length=120)
+    plan: str = Field(default="pilot", max_length=20)
+
+    @field_validator("email")
+    @classmethod
+    def email_valid(cls, v):
+        v = v.strip().lower()
+        if not EMAIL_RE.match(v):
+            raise ValueError("invalid email address")
+        return v
+
+
 class AssessmentResult(BaseModel):
     seller_id: str
     timestamp: str
