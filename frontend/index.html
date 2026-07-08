@@ -731,7 +731,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 <div class="login-overlay" id="key-modal" style="display:none">
   <div class="login-box">
     <div class="brand"><span class="brand-mark"></span>SellerFlow</div>
-    <h3>Pilot API key</h3>
+    <h3 id="key-title">Pilot API key</h3>
     <div id="key-form">
       <p>Free tier — 100 assessments per month. One key per email.</p>
       <input id="key-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')requestKey()">
@@ -961,7 +961,7 @@ async function exportLeads(){
   toast(`${data.entries.length} lead${data.entries.length>1?'s':''} exported`);
 }
 function signOut(){ sessionStorage.removeItem('sf_token'); sellers=[]; stats=null; initDashboard(); }
-function openKeyModal(){ document.getElementById('key-modal').style.display='flex'; document.getElementById('key-form').style.display='block'; document.getElementById('key-result').style.display='none'; document.getElementById('key-err').style.display='none'; setTimeout(()=>document.getElementById('key-email').focus(),120); }
+function openKeyModal(){ document.getElementById('key-modal').style.display='flex'; document.getElementById('key-title').textContent='Pilot API key'; document.getElementById('key-form').style.display='block'; document.getElementById('key-result').style.display='none'; document.getElementById('key-err').style.display='none'; setTimeout(()=>document.getElementById('key-email').focus(),120); }
 function closeKeyModal(){ document.getElementById('key-modal').style.display='none'; }
 async function requestKey(){
   const email=document.getElementById('key-email').value.trim();
@@ -986,6 +986,25 @@ callAPI('/api/config').then(cfg=>{
     b.onclick=()=>window.open(cfg.stripe_payment_link,'_blank','noopener');
   }
 });
+async function claimPurchase(sid){
+  openKeyModal();
+  document.getElementById('key-title').textContent='Your Scale API key';
+  document.getElementById('key-form').style.display='none';
+  const err=document.getElementById('key-err');
+  try {
+    const res=await fetch(`${API}/api/stripe/claim?session_id=${encodeURIComponent(sid)}`);
+    const d=await res.json();
+    if(res.ok&&d.api_key){
+      document.getElementById('key-result').style.display='block';
+      document.getElementById('key-value').textContent=d.api_key;
+    } else {
+      err.textContent=d.detail||'Could not verify the payment. Write to hello@sellerflow.io.';
+      err.style.display='block';
+    }
+  } catch { err.textContent='Could not reach the server. Refresh to retry.'; err.style.display='block'; }
+}
+const _sid=new URLSearchParams(location.search).get('session_id');
+if(_sid){ history.replaceState({},'',location.pathname); claimPurchase(_sid); }
 setLang('curl',document.querySelector('.code-tab'));
 </script>
 </body>

@@ -181,6 +181,64 @@ def public_config():
     return {"stripe_payment_link": STRIPE_PAYMENT_LINK}
 
 
+# ── Stripe checkout → instant key issuance ──
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+
+
+@app.get("/api/stripe/claim")
+def stripe_claim(session_id: str, request: Request, background: BackgroundTasks):
+    """Called by the frontend after Stripe redirects back with a checkout
+    session id. Verifies the session was paid, then issues a Scale key —
+    exactly once per session."""
+    rate_limit(request, "claim", limit=15, window_s=3600)
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Payments are not configured yet.")
+    if not session_id.startswith("cs_") or len(session_id) > 200:
+        raise HTTPException(status_code=422, detail="Invalid checkout session id.")
+
+    req = urllib.request.Request(
+        f"https://api.stripe.com/v1/checkout/sessions/{session_id}",
+        headers={"Authorization": f"Bearer {STRIPE_SECRET_KEY}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            sess = jsonlib.load(r)
+    except urllib.error.HTTPError:
+        raise HTTPException(status_code=404, detail="Payment session not found.")
+    except Exception:
+        raise HTTPException(status_code=502, detail="Could not reach Stripe. Try again in a moment.")
+
+    if sess.get("payment_status") != "paid":
+        raise HTTPException(status_code=402, detail="Payment not completed for this session.")
+    email = (sess.get("customer_details") or {}).get("email") or sess.get("customer_email") or ""
+    email = email.strip().lower()
+    if not email:
+        raise HTTPException(status_code=422, detail="No email found on the payment. Write to hello@sellerflow.io.")
+
+    conn = get_db()
+    try:
+        if conn.execute("SELECT 1 FROM stripe_claims WHERE session_id=?", (session_id,)).fetchone():
+            return {"status": "already_claimed",
+                    "detail": "A key was already issued for this payment. If you lost it, write to hello@sellerflow.io."}
+        # Upgrade path: retire any existing (e.g. pilot) key for this email
+        conn.execute("UPDATE api_keys SET active=0 WHERE email=? AND active=1", (email,))
+        raw = f"sf_live_{secrets.token_urlsafe(24)}"
+        kid = str(uuid.uuid4())[:8].upper()
+        conn.execute(
+            "INSERT INTO api_keys (id, key_hash, company, email, plan, assessments_used, assessments_limit, created_at, active, period) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (kid, _hash_key(raw), "", email, "scale", 0, PLAN_LIMITS["scale"],
+             datetime.now().isoformat(), 1, _current_period()),
+        )
+        conn.execute("INSERT INTO stripe_claims VALUES (?,?,?,?)",
+                     (session_id, kid, email, datetime.now().isoformat()))
+        conn.commit()
+    finally:
+        conn.close()
+    background.add_task(notify_signup, email, "PAID — Scale subscription", 0)
+    return {"api_key": raw, "plan": "scale", "monthly_limit": PLAN_LIMITS["scale"], "email": email,
+            "note": "Store this key now — it is shown only once. Send it as an X-API-Key header."}
+
+
 @app.post("/api/sellers/submit")
 def submit_seller(data: SellerSubmission, request: Request):
     usage = consume_api_key(request)

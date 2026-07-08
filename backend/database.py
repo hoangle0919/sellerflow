@@ -78,6 +78,16 @@ def init_db():
     except sqlite3.OperationalError:
         pass  # column already exists
 
+    # One key issuance per Stripe checkout session (replay protection)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS stripe_claims (
+            session_id TEXT PRIMARY KEY,
+            key_id TEXT,
+            email TEXT,
+            created_at TEXT
+        )
+    """)
+
     conn.commit()
 
     # Seed sellers if empty
