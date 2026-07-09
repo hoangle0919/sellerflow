@@ -146,7 +146,7 @@ def issue_key(data: KeyRequest, request: Request, authorization: str = Header(de
             "SELECT id FROM api_keys WHERE email=? AND active=1", (data.email,)
         ).fetchone()
         if existing:
-            raise HTTPException(status_code=409, detail="An active key already exists for this email. Write to hello@sellerflow.io to rotate it.")
+            raise HTTPException(status_code=409, detail="An active key already exists for this email. Write to lehuuhoang1909@gmail.com to rotate it.")
         raw = f"sf_live_{secrets.token_urlsafe(24)}"
         conn.execute(
             "INSERT INTO api_keys (id, key_hash, company, email, plan, assessments_used, assessments_limit, created_at, active, period) VALUES (?,?,?,?,?,?,?,?,?,?)",
@@ -213,13 +213,13 @@ def stripe_claim(session_id: str, request: Request, background: BackgroundTasks)
     email = (sess.get("customer_details") or {}).get("email") or sess.get("customer_email") or ""
     email = email.strip().lower()
     if not email:
-        raise HTTPException(status_code=422, detail="No email found on the payment. Write to hello@sellerflow.io.")
+        raise HTTPException(status_code=422, detail="No email found on the payment. Write to lehuuhoang1909@gmail.com.")
 
     conn = get_db()
     try:
         if conn.execute("SELECT 1 FROM stripe_claims WHERE session_id=?", (session_id,)).fetchone():
             return {"status": "already_claimed",
-                    "detail": "A key was already issued for this payment. If you lost it, write to hello@sellerflow.io."}
+                    "detail": "A key was already issued for this payment. If you lost it, write to lehuuhoang1909@gmail.com."}
         # Upgrade path: retire any existing (e.g. pilot) key for this email
         conn.execute("UPDATE api_keys SET active=0 WHERE email=? AND active=1", (email,))
         raw = f"sf_live_{secrets.token_urlsafe(24)}"

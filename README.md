@@ -84,7 +84,7 @@ railway login && railway init && railway up && railway domain
 
 ## Status
 
-Pilot. The scoring model is a synthetic baseline — output is not a lending commitment or an offer of credit. Contact: hello@sellerflow.io
+Pilot. The scoring model is a synthetic baseline — output is not a lending commitment or an offer of credit. Contact: lehuuhoang1909@gmail.com
 
 ---
 
