@@ -454,7 +454,8 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   .section{padding:88px 0 0}
   .lenders{margin-top:88px;padding:72px 0}
   .waitlist{padding:88px 0}
-  .price-grid,.field-row,.metric-grid,.signal-grid,.foot-grid,.stat-row{grid-template-columns:1fr}
+  .price-grid,.field-row,.metric-grid,.signal-grid,.foot-grid,.stat-row,.why-grid{grid-template-columns:1fr}
+  .hc-row{grid-template-columns:98px 1fr 92px;gap:8px}
   .waitlist-form{flex-direction:column}
   .app-card{padding:24px}
   .result-actions{flex-direction:column}
@@ -683,6 +684,10 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       <div id="step-3" style="display:none">
         <h2>Review application</h2><p class="sub">Confirm the submitted seller profile.</p>
         <div class="preview-list" id="preview-list"></div>
+        <div class="decide-seq" id="decide-seq">
+          <div class="progress"><div class="progress-fill" id="seq-fill" style="width:0%"></div></div>
+          <div class="seq-text" id="seq-text">Reading seller profile</div>
+        </div>
         <div class="apply-nav"><button class="btn btn-ghost" onclick="back(3)">Back</button><button class="btn btn-primary" id="submit-btn" onclick="submitApplication()">Run assessment</button></div>
       </div>
     </div>
@@ -704,6 +709,13 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
     </div>
     <div class="result-section"><h3>Risk signals</h3><div class="signal-grid" id="signal-grid"></div></div>
+    <div class="result-section"><h3>Why this decision?</h3>
+      <div class="why-grid">
+        <div class="why-col pos"><h4>Approval drivers</h4><ul id="why-pos"></ul></div>
+        <div class="why-col adj"><h4>Risk adjustments</h4><ul id="why-adj"></ul></div>
+        <div class="why-col next"><h4>What would improve this offer</h4><ul id="why-next"></ul></div>
+      </div>
+    </div>
     <div class="result-section"><h3>Assessment reasoning</h3><p class="reasoning" id="r-reasoning"></p><details class="explain"><summary>What this means</summary><div class="ex-body" id="r-explain"></div></details>
       <div class="result-actions"><button class="btn btn-ghost" onclick="go('apply')">New application</button><button class="btn btn-primary" onclick="go('dashboard')">View dashboard</button></div>
     </div>
@@ -928,10 +940,24 @@ function renderPreview(){
   const rows=[['Shop',applyData.shop_name],['Platform',applyData.platform],['Monthly revenue',fmtVND(applyData.monthly_revenue)],['Revenue growth',signed(applyData.revenue_growth)],['Return rate',pct(applyData.return_rate)],['Late shipments',pct(applyData.late_ship_rate)],['Rating',applyData.rating+' / 5.0'],['Days active',applyData.days_active+' days']];
   document.getElementById('preview-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
 }
+const DECISION_STEPS=['Reading seller profile','Normalizing platform metrics','Checking revenue stability','Estimating default probability','Pricing risk','Generating explanation','Decision ready'];
+async function runDecisionSequence(){
+  const fill=document.getElementById('seq-fill'), text=document.getElementById('seq-text');
+  for(let i=0;i<DECISION_STEPS.length;i++){
+    text.textContent=DECISION_STEPS[i];
+    fill.style.width=((i+1)/DECISION_STEPS.length*100)+'%';
+    await new Promise(r=>setTimeout(r, i<DECISION_STEPS.length-1?155:60));
+  }
+}
 async function submitApplication(){
-  const btn=document.getElementById('submit-btn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Assessing';
-  const data=await callAPI('/api/sellers/submit',{method:'POST',body:JSON.stringify(applyData)});
-  btn.disabled=false; btn.textContent='Run assessment';
+  const btn=document.getElementById('submit-btn'), seq=document.getElementById('decide-seq'), pv=document.getElementById('preview-list');
+  btn.disabled=true; btn.style.display='none'; pv.style.display='none'; seq.style.display='block';
+  document.getElementById('seq-fill').style.width='0%';
+  const [_, data]=await Promise.all([
+    runDecisionSequence(),
+    callAPI('/api/sellers/submit',{method:'POST',body:JSON.stringify(applyData)}),
+  ]);
+  seq.style.display='none'; pv.style.display=''; btn.disabled=false; btn.style.display=''; btn.textContent='Run assessment';
   if(data&&data.__rate_limited){ toast('Too many submissions from this connection. Try again later.'); return; }
   if(!data){ toast('Could not reach the scoring service. Please try again.'); return; }
   renderResult({...applyData,...data}); go('result');
@@ -960,6 +986,40 @@ function renderResult(s){
   const signals=(s.signals&&Object.keys(s.signals).length)?s.signals:computeSignals(s);
   const order=['return_rate','late_ship_rate','revenue_growth','rating','days_active','inventory_turnover'];
   document.getElementById('signal-grid').innerHTML=order.map(k=>{ const sig=signals[k]; if(!sig) return ''; const cls=FLAG_CLASS[sig.flag]||'warn'; return `<div class="signal-tile ${cls}"><div class="sk">${SIGNAL_LABEL[k]}</div><div class="sv"><span class="dot-flag ${cls}"></span>${signalDisplay(k,sig.value)}</div></div>`; }).join('');
+  renderWhyPanel(signals);
+}
+const WHY_DRIVER={
+  revenue_growth:v=>`${signed(v)} MoM revenue growth`, return_rate:v=>`${pct(v)} return rate`,
+  rating:v=>`${Number(v).toFixed(1)} store rating`, late_ship_rate:v=>`${pct(v)} late shipment rate`,
+  days_active:v=>`${Math.round(v)} days operating history`, inventory_turnover:v=>`${Number(v).toFixed(1)}x inventory turnover`,
+};
+const WHY_RISK={
+  revenue_growth:v=>v<0?'revenue growth is negative':'revenue growth needs monitoring', return_rate:v=>`return rate elevated at ${pct(v)}`,
+  rating:()=>'store rating below premium tier', late_ship_rate:v=>`late shipments elevated at ${pct(v)}`,
+  days_active:v=>`limited operating history (${Math.round(v)}d)`, inventory_turnover:()=>'slow-moving inventory',
+};
+const WHY_IMPROVE={
+  revenue_growth:'Stabilize month-over-month revenue growth', return_rate:'Bring the return rate below 2.5%',
+  rating:'Raise the store rating above 4.5', late_ship_rate:'Cut late shipments below 3%',
+  days_active:'Build 90+ more days of stable revenue', inventory_turnover:'Improve inventory turnover',
+};
+const WHY_ORDER=['revenue_growth','return_rate','rating','late_ship_rate','days_active','inventory_turnover'];
+const WHY_SEVERITY={red:0,amber:1,green:2};
+function renderWhyPanel(signals){
+  const drivers=[], risks=[], weak=[];
+  WHY_ORDER.forEach(k=>{
+    const sig=signals[k]; if(!sig) return;
+    if(sig.flag==='green') drivers.push(WHY_DRIVER[k](sig.value));
+    else { risks.push(WHY_RISK[k](sig.value)); weak.push({k,sev:WHY_SEVERITY[sig.flag]}); }
+  });
+  risks.push('limited verified payout data (self-reported only)');
+  weak.sort((a,b)=>a.sev-b.sev);
+  const improve=weak.slice(0,3).map(w=>WHY_IMPROVE[w.k]);
+  improve.push('Provide verified payout history from the platform');
+  const li=arr=>arr.map(t=>`<li>${t}</li>`).join('') || '<li>No strong signal in this category yet.</li>';
+  document.getElementById('why-pos').innerHTML=li(drivers);
+  document.getElementById('why-adj').innerHTML=li(risks);
+  document.getElementById('why-next').innerHTML=li(improve.slice(0,4));
 }
 function shareResult(){ navigator.clipboard?.writeText(location.href).then(()=>toast('Link copied')).catch(()=>toast('Copy unavailable')); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window.toastT); window.toastT=setTimeout(()=>t.classList.remove('show'),2200); }
