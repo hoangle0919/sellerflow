@@ -371,6 +371,7 @@ def waitlist_count():
 
 @app.get("/api/assess/preview")
 def preview_assess(
+    request: Request,
     monthly_revenue: float = 150_000_000,
     revenue_growth: float = 0.15,
     order_volume: int = 300,
@@ -382,6 +383,17 @@ def preview_assess(
     late_ship_rate: float = 0.03,
     previous_loans: int = 1,
 ):
+    rate_limit(request, "preview", limit=400, window_s=3600)
+    monthly_revenue = max(1.0, min(monthly_revenue, 1e13))
+    revenue_growth = max(-0.35, min(revenue_growth, 0.90))
+    order_volume = max(1, min(order_volume, 10_000_000))
+    avg_order_value = max(1.0, min(avg_order_value, 1e10))
+    return_rate = max(0.0, min(return_rate, 0.40))
+    rating = max(1.0, min(rating, 5.0))
+    days_active = max(1, min(days_active, 20_000))
+    inventory_turnover = max(0.0, min(inventory_turnover, 1000.0))
+    late_ship_rate = max(0.0, min(late_ship_rate, 0.40))
+    previous_loans = max(0, min(previous_loans, 1000))
     data = dict(
         monthly_revenue=monthly_revenue, revenue_growth=revenue_growth,
         order_volume=order_volume, avg_order_value=avg_order_value,

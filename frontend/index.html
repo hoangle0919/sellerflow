@@ -166,6 +166,57 @@ label{display:block;font-size:.78rem;font-weight:600;color:var(--ink);margin-bot
   font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:var(--ink-3);
 }
 
+/* Interactive hero controls */
+.hero-controls{margin-top:4px}
+.hc-row{display:grid;grid-template-columns:128px 1fr 108px;gap:14px;align-items:center;padding:9px 0;border-top:1px solid var(--hairline)}
+.hc-row label{font-size:.8rem;font-weight:500;color:var(--ink-2);margin:0}
+.hc-val{font-size:.84rem;text-align:right;color:var(--ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;min-height:2px;background:var(--hairline-2);border:none;border-radius:1px;padding:0;cursor:pointer}
+input[type=range]:focus{border:none;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;background:var(--ink);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--hairline-2)}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--ink);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--hairline-2)}
+.decision-box.warn{background:var(--caution-bg)}
+.decision-box.fail{background:var(--decline-bg)}
+.decision-word.warn{color:var(--caution)}
+.decision-word.fail{color:var(--decline)}
+.hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:4px;padding:4px 9px;font-size:.72rem;font-weight:600;letter-spacing:.02em}
+.chip i{width:6px;height:6px;border-radius:50%;font-style:normal}
+.chip.pos{background:var(--approve-bg);color:var(--approve)}.chip.pos i{background:var(--approve)}
+.chip.watch{background:var(--caution-bg);color:var(--caution)}.chip.watch i{background:var(--caution)}
+.chip.neg{background:var(--decline-bg);color:var(--decline)}.chip.neg i{background:var(--decline)}
+.chip.miss{background:var(--paper);color:var(--ink-3);border:1px dashed var(--hairline-2)}.chip.miss i{background:var(--ink-3)}
+
+/* Methodology flow */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:56px;padding-top:32px;border-top:1px solid var(--hairline)}
+.flow-node{border:1px solid var(--hairline-2);border-radius:6px;padding:9px 14px;font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--ink-2);cursor:default;transition:border-color .15s,color .15s;background:var(--surface)}
+.flow-node:hover,.flow-node.active{border-color:var(--ink);color:var(--ink)}
+.flow-sep{color:var(--ink-3);font-family:'Spline Sans Mono',monospace}
+.flow-desc{margin-top:14px;font-size:.9rem;color:var(--ink-2);min-height:3.2em;max-width:560px}
+.flow-desc b{font-weight:600;color:var(--ink)}
+
+/* Decision sequence */
+.decide-seq{margin-top:22px;display:none}
+.decide-seq .progress{margin-bottom:10px}
+.seq-text{font-family:'Spline Sans Mono',monospace;font-size:.78rem;color:var(--ink-2)}
+
+/* API console */
+.console-run{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--hairline)}
+.latency-badge{font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:var(--approve);background:var(--approve-bg);border-radius:4px;padding:3px 8px;display:none}
+.api-out{display:none;border-top:1px solid var(--hairline);padding:16px 20px;background:var(--paper)}
+.api-out .label{display:block;margin-bottom:8px}
+.api-out pre{font-family:'Spline Sans Mono',monospace;font-size:.76rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+
+/* Explainability */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:16px}
+.why-col h4{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.why-col ul{list-style:none;display:grid;gap:7px}
+.why-col li{font-size:.88rem;color:var(--ink-2);padding-left:16px;position:relative}
+.why-col li:before{position:absolute;left:0;font-family:'Spline Sans Mono',monospace}
+.why-col.pos li:before{content:"+";color:var(--approve)}
+.why-col.adj li:before{content:"−";color:var(--caution)}
+.why-col.next li:before{content:"→";color:var(--ink-3)}
+
 /* Sections */
 .section{padding:120px 0 0}
 .argument{display:grid;grid-template-columns:40% 1fr;gap:64px}
@@ -452,29 +503,31 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
 
       <div class="proof-card">
-        <div class="proof-head"><span>ASSESSMENT #SF-2K4A7</span><span>29 JUN 2026 · 14:32:07</span></div>
+        <div class="proof-head"><span>LIVE ASSESSMENT · ADJUST THE PROFILE</span><span id="hero-model">RF+LR ENSEMBLE v1.0</span></div>
         <div class="proof-body">
           <div>
             <div class="proof-shop">Thời Trang Linh Chi</div>
-            <div class="proof-sub">Shopee · 680 days active</div>
-            <div class="proof-rows">
-              <div class="proof-row"><span>Monthly revenue</span><span>185,000,000₫</span></div>
-              <div class="proof-row"><span>Growth (MoM)</span><span>+22%</span></div>
-              <div class="proof-row"><span>Return rate</span><span>2.8%</span></div>
-              <div class="proof-row"><span>Store rating</span><span>4.9</span></div>
-              <div class="proof-row"><span>Late shipments</span><span>1.8%</span></div>
+            <div class="proof-sub">Shopee · <span id="hv-days-sub">680</span> days active</div>
+            <div class="hero-controls">
+              <div class="hc-row"><label for="hc-rev">Monthly revenue</label><input type="range" id="hc-rev" min="10" max="500" step="5" value="185"><span class="hc-val mono" id="hv-rev">185,000,000₫</span></div>
+              <div class="hc-row"><label for="hc-growth">Growth (MoM)</label><input type="range" id="hc-growth" min="-30" max="60" step="1" value="22"><span class="hc-val mono" id="hv-growth">+22%</span></div>
+              <div class="hc-row"><label for="hc-return">Return rate</label><input type="range" id="hc-return" min="0" max="25" step="0.2" value="2.8"><span class="hc-val mono" id="hv-return">2.8%</span></div>
+              <div class="hc-row"><label for="hc-rating">Store rating</label><input type="range" id="hc-rating" min="3" max="5" step="0.1" value="4.9"><span class="hc-val mono" id="hv-rating">4.9</span></div>
+              <div class="hc-row"><label for="hc-late">Late shipments</label><input type="range" id="hc-late" min="0" max="20" step="0.2" value="1.8"><span class="hc-val mono" id="hv-late">1.8%</span></div>
+              <div class="hc-row"><label for="hc-days">Days active</label><input type="range" id="hc-days" min="30" max="1000" step="10" value="680"><span class="hc-val mono" id="hv-days">680d</span></div>
             </div>
+            <div class="hero-chips" id="hero-chips"></div>
           </div>
-          <div class="decision-box">
+          <div class="decision-box" id="hd-box">
             <span class="label">Decision</span>
-            <div class="decision-word">Approved</div>
+            <div class="decision-word" id="hd-word">Approved</div>
             <hr>
-            <div class="decision-row"><span>Limit</span><span>83,250,000₫</span></div>
-            <div class="decision-row"><span>Rate</span><span>12.5% p.a.</span></div>
-            <div class="decision-row"><span>PD</span><span>5.2%</span></div>
+            <div class="decision-row"><span>Limit</span><span id="hd-limit">83,250,000₫</span></div>
+            <div class="decision-row"><span>Rate</span><span id="hd-rate">12.5% p.a.</span></div>
+            <div class="decision-row"><span>PD</span><span id="hd-pd">5.2%</span></div>
           </div>
         </div>
-        <div class="proof-foot">Model v1.0 · RF+LR ensemble · Response 1.18s</div>
+        <div class="proof-foot" id="hero-foot">Model v1.0 · RF+LR ensemble · move a slider — this card is scored by the live model</div>
       </div>
     </div>
   </section>
@@ -1006,6 +1059,84 @@ async function claimPurchase(sid){
 const _sid=new URLSearchParams(location.search).get('session_id');
 if(_sid){ history.replaceState({},'',location.pathname); claimPurchase(_sid); }
 setLang('curl',document.querySelector('.code-tab'));
+
+/* ── Interactive hero: sliders call the live model (GET /api/assess/preview) ── */
+const HERO_FIXED={order_volume:420,avg_order_value:440000,inventory_turnover:6.2,previous_loans:2};
+const CHIP_DEFS={
+  return_rate:{pos:'Low return rate',watch:'Return rate needs watching',neg:'High return risk'},
+  late_ship_rate:{pos:'Reliable fulfillment',watch:'Shipping delays creeping in',neg:'Late shipment risk'},
+  revenue_growth:{pos:'Strong revenue growth',watch:'Growth volatility',neg:'Declining revenue'},
+  rating:{pos:'High customer trust',watch:'Rating below premium tier',neg:'Weak store rating'},
+  days_active:{pos:'High platform tenure',watch:'Limited operating history',neg:'Thin operating history'},
+  inventory_turnover:{pos:'Healthy inventory turnover',watch:'Slow-moving inventory',neg:'Inventory turnover risk'},
+};
+const FLAG_CHIP_CLASS={green:'pos',amber:'watch',red:'neg'};
+function renderChips(signals){
+  const order=['revenue_growth','return_rate','rating','late_ship_rate','days_active','inventory_turnover'];
+  const chips=order.filter(k=>signals[k]).map(k=>{
+    const cls=FLAG_CHIP_CLASS[signals[k].flag]||'watch';
+    return `<span class="chip ${cls}"><i></i>${CHIP_DEFS[k]?.[cls]||k}</span>`;
+  });
+  chips.push('<span class="chip miss"><i></i>Verified payout data — self-reported only</span>');
+  return chips.join('');
+}
+function heroReadValues(){
+  return {
+    monthly_revenue: Number(document.getElementById('hc-rev').value)*1_000_000,
+    revenue_growth: Number(document.getElementById('hc-growth').value)/100,
+    return_rate: Number(document.getElementById('hc-return').value)/100,
+    rating: Number(document.getElementById('hc-rating').value),
+    late_ship_rate: Number(document.getElementById('hc-late').value)/100,
+    days_active: Number(document.getElementById('hc-days').value),
+  };
+}
+function heroUpdateLabels(v){
+  document.getElementById('hv-rev').textContent=fmtVND(v.monthly_revenue);
+  document.getElementById('hv-growth').textContent=signed(v.revenue_growth);
+  document.getElementById('hv-return').textContent=pct(v.return_rate);
+  document.getElementById('hv-rating').textContent=v.rating.toFixed(1);
+  document.getElementById('hv-late').textContent=pct(v.late_ship_rate);
+  document.getElementById('hv-days').textContent=Math.round(v.days_active)+'d';
+  document.getElementById('hv-days-sub').textContent=Math.round(v.days_active);
+}
+function heroRenderDecision(d, ms){
+  const cls=d.decision==='APPROVED'?'':d.decision==='CONDITIONAL'?'warn':'fail';
+  const box=document.getElementById('hd-box'), word=document.getElementById('hd-word');
+  box.className='decision-box'+(cls?' '+cls:'');
+  word.className='decision-word'+(cls?' '+cls:'');
+  word.textContent=VERDICT[d.decision]||d.decision;
+  document.getElementById('hd-limit').textContent=fmtVND(d.credit_limit);
+  document.getElementById('hd-rate').textContent=d.interest_rate?Number(d.interest_rate).toFixed(1)+'% p.a.':'—';
+  document.getElementById('hd-pd').textContent=pct(d.pd_score);
+  document.getElementById('hero-chips').innerHTML=renderChips(d.signals||{});
+  if(ms!=null) document.getElementById('hero-foot').textContent=`Model v1.0 · RF+LR ensemble · live response ${ms}ms`;
+}
+let heroDebounce, heroInFlight=false, heroPending=false;
+async function heroRunPreview(){
+  if(heroInFlight){ heroPending=true; return; }
+  heroInFlight=true;
+  const v=heroReadValues();
+  heroUpdateLabels(v);
+  const params=new URLSearchParams({
+    monthly_revenue:v.monthly_revenue, revenue_growth:v.revenue_growth,
+    order_volume:HERO_FIXED.order_volume, avg_order_value:HERO_FIXED.avg_order_value,
+    return_rate:v.return_rate, rating:v.rating, days_active:v.days_active,
+    inventory_turnover:HERO_FIXED.inventory_turnover, late_ship_rate:v.late_ship_rate,
+    previous_loans:HERO_FIXED.previous_loans,
+  });
+  const t0=performance.now();
+  const data=await callAPI('/api/assess/preview?'+params.toString());
+  heroInFlight=false;
+  if(data&&!data.__rate_limited&&!data.__unauthorized) heroRenderDecision(data, Math.round(performance.now()-t0));
+  if(heroPending){ heroPending=false; heroRunPreview(); }
+}
+function heroOnInput(){
+  heroUpdateLabels(heroReadValues());
+  clearTimeout(heroDebounce);
+  heroDebounce=setTimeout(heroRunPreview, 220);
+}
+document.querySelectorAll('.hero-controls input[type=range]').forEach(el=>el.addEventListener('input', heroOnInput));
+heroRunPreview();
 </script>
 </body>
 </html>
