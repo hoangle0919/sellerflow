@@ -567,6 +567,17 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces a probability of default and signal flags.</p></div>
         <div class="step"><span class="step-num">3</span><h3>Receive a decision</h3><p>Approval status, credit limit, interest rate, and the reasoning behind each — in 1.2 seconds.</p></div>
       </div>
+
+      <div class="flow" id="methodology-flow">
+        <div class="flow-node" data-key="signals">Operational signals</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="normalize">Feature normalization</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="ensemble">RF + LR ensemble</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="pd">PD estimate</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="limit">Credit limit</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="rate">Rate</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="explain">Explanation</div>
+      </div>
+      <p class="flow-desc" id="flow-desc">Hover a step to see what it does.</p>
     </div>
   </section>
 
@@ -590,6 +601,14 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
           <button class="copy-btn code-tab" id="code-copy" onclick="copyCode()">Copy</button>
         </div>
         <div class="code-body"><pre id="code-block"></pre></div>
+        <div class="console-run">
+          <button class="btn btn-ghost" id="console-run-btn" onclick="runConsole()">Run sample request</button>
+          <span class="latency-badge" id="console-latency"></span>
+        </div>
+        <div class="api-out" id="console-out">
+          <span class="label">Response</span>
+          <pre id="console-out-pre"></pre>
+        </div>
       </div>
     </div>
   </section>
@@ -892,6 +911,38 @@ console.log(<span class="k">await</span> res.json());`
 };
 function setLang(lang, btn){ document.querySelectorAll('.code-tab').forEach(t=>t.classList.remove('active')); if(btn) btn.classList.add('active'); document.getElementById('code-block').innerHTML = CODE[lang]; }
 function copyCode(){ navigator.clipboard?.writeText(document.getElementById('code-block').innerText).then(()=>toast('API example copied')).catch(()=>toast('Copy unavailable')); }
+async function runConsole(){
+  const btn=document.getElementById('console-run-btn'), out=document.getElementById('console-out'),
+        pre=document.getElementById('console-out-pre'), badge=document.getElementById('console-latency');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Running'; badge.style.display='none';
+  const params=new URLSearchParams({monthly_revenue:185000000,revenue_growth:0.22,order_volume:420,avg_order_value:440000,return_rate:0.028,rating:4.9,days_active:680,inventory_turnover:6.2,late_ship_rate:0.018,previous_loans:2});
+  const t0=performance.now();
+  const data=await callAPI('/api/assess/preview?'+params.toString());
+  const ms=Math.round(performance.now()-t0);
+  btn.disabled=false; btn.textContent='Run sample request';
+  out.style.display='block';
+  if(!data||data.__rate_limited){ pre.textContent='Request failed. Try again in a moment.'; return; }
+  pre.textContent=JSON.stringify({decision:data.decision,credit_limit_vnd:data.credit_limit,rate_pa:Number(data.interest_rate)/100,pd:data.pd_score,model:data.model_version,response_time_ms:ms},null,2);
+  badge.style.display='inline-block'; badge.textContent=ms+'ms';
+}
+const FLOW_DESC={
+  signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the seller submission.',
+  normalize:'Raw metrics are scaled and bounded so a fast-growing large seller and a stable small seller are compared fairly.',
+  ensemble:'A Random Forest and a Logistic Regression model each score the normalized profile independently.',
+  pd:'The two model outputs are blended into a single probability of default — 65% RF, 35% LR.',
+  limit:'PD under 25% unlocks a facility sized to 45% of monthly revenue; 25–55% unlocks a reduced facility.',
+  rate:'Low-risk tier prices at 12.5% p.a.; medium-risk tier prices at 18.0% p.a.',
+  explain:'Per-signal flags and a plain-language rationale are generated alongside the numeric decision.',
+};
+document.querySelectorAll('#methodology-flow .flow-node').forEach(node=>{
+  const activate=()=>{
+    document.querySelectorAll('#methodology-flow .flow-node').forEach(n=>n.classList.remove('active'));
+    node.classList.add('active');
+    document.getElementById('flow-desc').innerHTML=`<b>${node.textContent}</b> — ${FLOW_DESC[node.dataset.key]}`;
+  };
+  node.addEventListener('mouseenter', activate);
+  node.addEventListener('click', activate);
+});
 async function submitWaitlist(){
   const email=document.getElementById('wl-email').value.trim();
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ toast('Enter a valid email'); return; }
