@@ -6,7 +6,7 @@ PLATFORMS = {"Shopee", "TikTok Shop", "Lazada"}
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-class SellerSubmission(BaseModel):
+class MerchantSubmission(BaseModel):
     shop_name: str = Field(min_length=1, max_length=120)
     platform: str          # "Shopee" | "TikTok Shop" | "Lazada"
     owner_name: str = Field(default="", max_length=120)

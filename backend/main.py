@@ -7,12 +7,13 @@ from fastapi import FastAPI, HTTPException, Header, Depends, Request, Background
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from models import SellerSubmission, WaitlistSignup, LoginRequest, KeyRequest
+from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest
 from database import get_db, init_db
 from ml_engine import load_models, score, FEATURES
+from financing_engine import build_financing_analysis
 
 # ── Init ──
-app = FastAPI(title="SellerFlow API", version="1.0.0", docs_url="/api/docs")
+app = FastAPI(title="RBF API", version="1.0.0", docs_url="/api/docs")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 load_models()
@@ -240,12 +241,12 @@ def stripe_claim(session_id: str, request: Request, background: BackgroundTasks)
 
 
 @app.post("/api/sellers/submit")
-def submit_seller(data: SellerSubmission, request: Request):
+def submit_seller(data: MerchantSubmission, request: Request):
     usage = consume_api_key(request)
     if usage is None:
         rate_limit(request, "submit", limit=30, window_s=3600)
     result = score(data.dict())
-    seller_id = f"SF-{str(uuid.uuid4())[:6].upper()}"
+    seller_id = f"RBF-{str(uuid.uuid4())[:6].upper()}"
     conn = get_db()
     conn.execute("""
         INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
@@ -264,7 +265,8 @@ def submit_seller(data: SellerSubmission, request: Request):
     payload = {
         "seller_id": seller_id,
         "timestamp": datetime.now().isoformat(),
-        **result
+        **result,
+        "financing": build_financing_analysis(data.dict(), result["risk_tier"]),
     }
     if usage is not None:
         payload["usage"] = usage
@@ -278,7 +280,9 @@ def get_seller(seller_id: str, _: None = Depends(require_auth)):
     conn.close()
     if not row:
         raise HTTPException(status_code=404, detail="Seller not found")
-    return dict(row)
+    record = dict(row)
+    record["financing"] = build_financing_analysis(record, record.get("risk_tier", "High Risk"))
+    return record
 
 
 @app.get("/api/portfolio")
@@ -309,7 +313,7 @@ def get_portfolio(_: None = Depends(require_auth)):
 # ── Signup notifications (active once RESEND_API_KEY + NOTIFY_EMAIL are set) ──
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "")
-NOTIFY_FROM = os.environ.get("NOTIFY_FROM", "SellerFlow <onboarding@resend.dev>")
+NOTIFY_FROM = os.environ.get("NOTIFY_FROM", "RBF <onboarding@resend.dev>")
 
 
 def notify_signup(email: str, role: str, position: int):
@@ -321,7 +325,7 @@ def notify_signup(email: str, role: str, position: int):
             data=jsonlib.dumps({
                 "from": NOTIFY_FROM,
                 "to": [NOTIFY_EMAIL],
-                "subject": f"SellerFlow lead #{position}: {email}",
+                "subject": f"RBF lead #{position}: {email}",
                 "text": f"{email} ({role}) joined the waitlist at {datetime.now().isoformat()}.",
             }).encode(),
             headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
@@ -401,7 +405,12 @@ def preview_assess(
         inventory_turnover=inventory_turnover, late_ship_rate=late_ship_rate,
         previous_loans=previous_loans
     )
-    return {"timestamp": datetime.now().isoformat(), **score(data)}
+    result = score(data)
+    return {
+        "timestamp": datetime.now().isoformat(),
+        **result,
+        "financing": build_financing_analysis(data, result["risk_tier"]),
+    }
 
 
 # ── Serve Frontend ──
@@ -414,7 +423,7 @@ def serve_spa(path: str = ""):
     index = os.path.join(FRONTEND, "index.html")
     if os.path.exists(index):
         return FileResponse(index)
-    return JSONResponse({"message": "SellerFlow API running. Frontend not found.", "docs": "/api/docs"})
+    return JSONResponse({"message": "RBF API running. Frontend not found.", "docs": "/api/docs"})
 
 
 if __name__ == "__main__":

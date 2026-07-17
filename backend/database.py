@@ -145,7 +145,7 @@ def _seed_sellers(conn):
 
     for i, s in enumerate(sellers):
         (shop, plat, owner, phone, rev, grow, orders, aov, ret, rat, days, inv, late, loans) = s
-        sid = f"SF-{str(uuid.uuid4())[:6].upper()}"
+        sid = f"RBF-{str(uuid.uuid4())[:6].upper()}"
 
         features = {
             'monthly_revenue': rev, 'revenue_growth': grow, 'order_volume': orders,

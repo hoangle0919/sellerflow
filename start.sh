@@ -2,7 +2,7 @@
 set -e
 
 echo ""
-echo "  SellerFlow — Starting"
+echo "  RBF — Starting"
 echo ""
 cd "$(dirname "$0")/backend"
 pip install -r requirements.txt -q --break-system-packages 2>/dev/null || pip3 install -r requirements.txt -q

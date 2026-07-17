@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SellerFlow — Credit decisions for digital merchants</title>
-<meta name="description" content="SellerFlow evaluates ecommerce merchants using operational data — orders, ratings, returns, growth. A full credit decision in 1.2 seconds.">
-<meta property="og:title" content="SellerFlow — Credit decisions for digital merchants">
-<meta property="og:description" content="Credit decisions from operational data — orders, ratings, returns, growth. No documents.">
+<title>RBF — Revenue-Based Financing analysis and underwriting support</title>
+<meta name="description" content="RBF (Revenue-Based Financing) analyzes merchant revenue, tests repayment scenarios, and surfaces the risks and assumptions behind every financing recommendation.">
+<meta property="og:title" content="RBF — Revenue-Based Financing analysis and underwriting support">
+<meta property="og:description" content="Evaluate revenue-based financing with evidence, not guesswork. Merchant revenue analysis, repayment scenario modeling, and inspectable financing recommendations.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' rx='2' fill='%231F3A2D'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -217,6 +217,22 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .why-col.adj li:before{content:"−";color:var(--caution)}
 .why-col.next li:before{content:"→";color:var(--ink-3)}
 
+/* Financing structure / scenarios / risk findings */
+.scenario-table tr{cursor:default}
+.scenario-table tbody tr:hover td{background:transparent}
+.finding-list{display:grid;gap:10px;margin-top:16px}
+.finding-card{border:1px solid var(--hairline);border-radius:8px;padding:16px 18px;background:var(--surface)}
+.finding-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.finding-cat{font-weight:600;font-size:.92rem;color:var(--ink)}
+.sev-badge{font-size:.66rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;flex:0 0 auto}
+.sev-badge.low{background:var(--approve-bg);color:var(--approve)}
+.sev-badge.medium{background:var(--caution-bg);color:var(--caution)}
+.sev-badge.high{background:var(--decline-bg);color:var(--decline)}
+.sev-badge.unknown{background:var(--paper);color:var(--ink-3);border:1px dashed var(--hairline-2)}
+.finding-evidence{font-family:'Spline Sans Mono',monospace;font-size:.84rem;color:var(--ink);margin-bottom:6px}
+.finding-why{font-size:.88rem;color:var(--ink-2)}
+.finding-resolution{font-size:.82rem;color:var(--ink-3);margin-top:10px;padding-top:10px;border-top:1px dashed var(--hairline)}
+
 /* Sections */
 .section{padding:120px 0 0}
 .argument{display:grid;grid-template-columns:40% 1fr;gap:64px}
@@ -344,15 +360,6 @@ footer{border-top:1px solid var(--hairline);padding:56px 0 32px}
 .metric{border:1px solid var(--hairline);border-radius:8px;padding:16px}
 .metric .mv{font-family:'Spline Sans Mono',monospace;font-size:1.05rem;margin-top:8px;color:var(--ink)}
 .result-section{margin-top:14px;padding:28px;background:var(--surface);border:1px solid var(--hairline);border-radius:10px}
-.signal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
-.signal-tile{padding:15px;border-radius:8px;border:1px solid var(--hairline)}
-.signal-tile.pass{background:var(--approve-bg)}
-.signal-tile.warn{background:var(--caution-bg)}
-.signal-tile.fail{background:var(--decline-bg)}
-.sk{font-size:.74rem;font-weight:600;color:var(--ink-2)}
-.sv{display:flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;margin-top:7px;color:var(--ink)}
-.dot-flag{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--approve);flex:0 0 8px}
-.dot-flag.warn{background:var(--caution)}.dot-flag.fail{background:var(--decline)}
 .reasoning{margin-top:14px}
 .explain{border:1px solid var(--hairline);border-radius:8px;margin-top:18px;overflow:hidden}
 .explain summary{padding:14px 18px;font-weight:600;font-size:.9rem;cursor:pointer;list-style:none}
@@ -454,7 +461,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   .section{padding:88px 0 0}
   .lenders{margin-top:88px;padding:72px 0}
   .waitlist{padding:88px 0}
-  .price-grid,.field-row,.metric-grid,.signal-grid,.foot-grid,.stat-row,.why-grid{grid-template-columns:1fr}
+  .price-grid,.field-row,.metric-grid,.foot-grid,.stat-row,.why-grid{grid-template-columns:1fr}
   .hc-row{grid-template-columns:98px 1fr 92px;gap:8px}
   .waitlist-form{flex-direction:column}
   .app-card{padding:24px}
@@ -467,7 +474,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 <body>
 <nav class="nav">
   <div class="wrap">
-    <div class="brand" onclick="go('landing')"><span class="brand-mark"></span>SellerFlow</div>
+    <div class="brand" onclick="go('landing')"><span class="brand-mark"></span>RBF</div>
     <div class="nav-links">
       <a onclick="jump('how')">How it works</a>
       <a onclick="jump('pricing')">Pricing</a>
@@ -475,7 +482,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     </div>
     <div class="nav-actions">
       <a class="text-link" onclick="go('dashboard')">Sign in</a>
-      <button class="btn btn-primary" onclick="go('apply')">Apply</button>
+      <button class="btn btn-primary" onclick="go('apply')">Assess a merchant</button>
       <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -485,22 +492,22 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <a onclick="jump('pricing')">Pricing</a>
   <a onclick="jump('lenders')">For lenders</a>
   <a onclick="go('dashboard')">Sign in</a>
-  <button class="btn btn-primary btn-block" onclick="go('apply')">Apply for credit</button>
+  <button class="btn btn-primary btn-block" onclick="go('apply')">Start an assessment</button>
 </div>
 
 <main id="page-landing" class="page active">
   <section class="hero">
     <div class="wrap">
-      <span class="label">Credit decisioning · Southeast Asia</span>
-      <h1>Credit decisions for sellers banks cannot see.</h1>
-      <p class="hero-body">SellerFlow evaluates ecommerce merchants using operational data — orders, ratings, returns, growth. A full credit decision in 1.2 seconds. No documents.</p>
+      <span class="label">Revenue-Based Financing · Southeast Asia</span>
+      <h1>Evaluate revenue-based financing with evidence, not guesswork.</h1>
+      <p class="hero-body">RBF analyzes merchant revenue, tests repayment scenarios, and surfaces the risks and assumptions behind every financing recommendation — for merchants without a bank credit file, and the capital providers evaluating them.</p>
       <div class="hero-actions">
-        <button class="btn btn-primary" onclick="go('apply')">Apply for credit</button>
+        <button class="btn btn-primary" onclick="go('apply')">Start an assessment</button>
         <a class="text-link" onclick="jump('how')">Read the methodology →</a>
       </div>
       <hr class="hero-rule">
       <div class="data-strip">
-        <span>RF+LR ensemble v1.0</span><span>sub-second decisions</span><span>3 platforms</span><span>Vietnam</span>
+        <span>RF+LR risk model</span><span>deterministic financing engine</span><span>3 platforms</span><span>Vietnam</span>
       </div>
 
       <div class="proof-card">
@@ -520,15 +527,15 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
             <div class="hero-chips" id="hero-chips"></div>
           </div>
           <div class="decision-box" id="hd-box">
-            <span class="label">Decision</span>
+            <span class="label">Recommendation</span>
             <div class="decision-word" id="hd-word">Approved</div>
             <hr>
-            <div class="decision-row"><span>Limit</span><span id="hd-limit">83,250,000₫</span></div>
-            <div class="decision-row"><span>Rate</span><span id="hd-rate">12.5% p.a.</span></div>
-            <div class="decision-row"><span>PD</span><span id="hd-pd">5.2%</span></div>
+            <div class="decision-row"><span>Advance</span><span id="hd-limit">83,250,000₫</span></div>
+            <div class="decision-row"><span>Remittance</span><span id="hd-rate">8.0% of revenue</span></div>
+            <div class="decision-row"><span>Repayment cap</span><span id="hd-pd">95,738,000₫</span></div>
           </div>
         </div>
-        <div class="proof-foot" id="hero-foot">Model v1.0 · RF+LR ensemble · move a slider — this card is scored by the live model</div>
+        <div class="proof-foot" id="hero-foot">Deterministic financing engine · move a slider — this card is scored by the live model</div>
       </div>
     </div>
   </section>
@@ -550,7 +557,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         </div>
         <div class="arg-entry">
           <span class="arg-num">03</span>
-          <div><h3>Risk priced correctly</h3><p>Our model prices risk from operations — so strong sellers get 12.5% instead of the 40–80% informal market rate.</p></div>
+          <div><h3>Structure that flexes with revenue</h3><p>Repayment is a percentage of revenue, not a fixed installment — a slow month extends the term instead of triggering a default.</p></div>
         </div>
       </div>
     </div>
@@ -560,12 +567,12 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="wrap">
       <div class="how-head">
         <span class="label">How it works</span>
-        <h2>From shop data to decision.</h2>
+        <h2>From revenue data to a financing structure.</h2>
       </div>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><h3>Submit shop data</h3><p>Operational metrics from your platform. Three minutes, no documents.</p></div>
-        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces a probability of default and signal flags.</p></div>
-        <div class="step"><span class="step-num">3</span><h3>Receive a decision</h3><p>Approval status, credit limit, interest rate, and the reasoning behind each — in 1.2 seconds.</p></div>
+        <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics from the platform. Three minutes, no documents.</p></div>
+        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces a probability of default and per-signal risk flags.</p></div>
+        <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Recommended advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each, in about a second.</p></div>
       </div>
 
       <div class="flow" id="methodology-flow">
@@ -573,8 +580,8 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <div class="flow-node" data-key="normalize">Feature normalization</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="ensemble">RF + LR ensemble</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="pd">PD estimate</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="limit">Credit limit</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="rate">Rate</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="limit">Financing structure</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="rate">Repayment scenarios</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="explain">Explanation</div>
       </div>
       <p class="flow-desc" id="flow-desc">Hover a step to see what it does.</p>
@@ -585,11 +592,11 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="wrap lenders-grid">
       <div>
         <span class="label">For lenders</span>
-        <h2>A decisioning layer for your existing stack.</h2>
-        <p class="lenders-lead">Score applications, monitor portfolio quality, and explain every decision to risk teams.</p>
+        <h2>An underwriting layer for your existing stack.</h2>
+        <p class="lenders-lead">Assess merchant revenue, structure financing terms, and document every recommendation for risk review.</p>
         <div>
-          <div class="feature-row"><h3>Direct API</h3><p>One endpoint. Submit merchant data, receive decision.</p></div>
-          <div class="feature-row"><h3>Your capital, your license</h3><p>We score. You lend.</p></div>
+          <div class="feature-row"><h3>Direct API</h3><p>One endpoint. Submit merchant data, receive a structured financing analysis.</p></div>
+          <div class="feature-row"><h3>Your capital, your license</h3><p>RBF analyzes. You finance.</p></div>
           <div class="feature-row"><h3>Portfolio view</h3><p>Every assessment, searchable, exportable.</p></div>
         </div>
       </div>
@@ -648,7 +655,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <section class="waitlist" id="waitlist">
     <div class="wrap waitlist-inner">
       <h2>Request access</h2>
-      <p>We're onboarding lenders in small cohorts.</p>
+      <p>We're onboarding financing teams in small cohorts.</p>
       <div id="wl-form-wrap">
         <div class="waitlist-form">
           <input id="wl-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')submitWaitlist()">
@@ -667,8 +674,8 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
       <div class="progress-label label" id="progress-label">Step 1 of 3</div>
       <div id="step-1">
-        <h2>Tell us about your shop</h2><p class="sub">Basic seller and channel information.</p>
-        <div class="field"><label>Shop name</label><input id="f_shop_name" data-req><div class="err-msg">Shop name is required.</div></div>
+        <h2>Tell us about the merchant</h2><p class="sub">Basic merchant and channel information.</p>
+        <div class="field"><label>Merchant name</label><input id="f_shop_name" data-req><div class="err-msg">Merchant name is required.</div></div>
         <div class="field"><label>Platform</label><select id="f_platform"><option>Shopee</option><option>TikTok Shop</option><option>Lazada</option></select></div>
         <div class="field-row">
           <div class="field"><label>Owner name</label><input id="f_owner_name"></div>
@@ -701,11 +708,11 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <div class="apply-nav"><button class="btn btn-ghost" onclick="back(2)">Back</button><button class="btn btn-primary" onclick="next(2)">Review</button></div>
       </div>
       <div id="step-3" style="display:none">
-        <h2>Review application</h2><p class="sub">Confirm the submitted seller profile.</p>
+        <h2>Review assessment</h2><p class="sub">Confirm the submitted merchant profile.</p>
         <div class="preview-list" id="preview-list"></div>
         <div class="decide-seq" id="decide-seq">
           <div class="progress"><div class="progress-fill" id="seq-fill" style="width:0%"></div></div>
-          <div class="seq-text" id="seq-text">Reading seller profile</div>
+          <div class="seq-text" id="seq-text">Reading merchant profile</div>
         </div>
         <div class="apply-nav"><button class="btn btn-ghost" onclick="back(3)">Back</button><button class="btn btn-primary" id="submit-btn" onclick="submitApplication()">Run assessment</button></div>
       </div>
@@ -717,17 +724,25 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <div class="app-shell"><div class="wrap result-wrap">
     <div class="result-head" id="result-head">
       <div class="result-top">
-        <div><div class="result-id" id="r-id">SF-</div><div class="result-verdict" id="r-verdict">Decision</div><div class="result-shop"><span id="r-shop">Seller</span> <span id="r-plat"></span></div></div>
+        <div><div class="result-id" id="r-id">RBF-</div><div class="result-verdict" id="r-verdict">Decision</div><div class="result-shop"><span id="r-shop">Merchant</span> <span id="r-plat"></span></div></div>
         <button class="btn btn-ghost" onclick="shareResult()">Share</button>
       </div>
       <div class="metric-grid">
-        <div class="metric"><div class="label">Credit limit</div><div class="mv" id="r-limit">—</div></div>
-        <div class="metric"><div class="label">Rate</div><div class="mv" id="r-rate">—</div></div>
+        <div class="metric"><div class="label">Recommended advance</div><div class="mv" id="r-limit">—</div></div>
+        <div class="metric"><div class="label">Remittance</div><div class="mv" id="r-rate">—</div></div>
+        <div class="metric"><div class="label">Repayment cap</div><div class="mv" id="r-cap">—</div></div>
         <div class="metric"><div class="label">PD score</div><div class="mv" id="r-pd">—</div></div>
-        <div class="metric"><div class="label">Model</div><div class="mv" id="r-model">—</div></div>
       </div>
     </div>
-    <div class="result-section"><h3>Risk signals</h3><div class="signal-grid" id="signal-grid"></div></div>
+    <div class="result-section"><h3>Structure the financing</h3>
+      <div class="preview-list" id="structure-list"></div>
+      <p class="small" id="structure-note" style="margin-top:12px"></p>
+    </div>
+    <div class="result-section" id="scenario-section"><h3>Test downside scenarios</h3>
+      <p class="small" style="margin-bottom:14px">Remittance is a percentage of revenue, so a decline doesn't miss a payment — it extends the term. Duration is what moves.</p>
+      <div class="table-scroll"><table class="scenario-table"><thead><tr><th>Scenario</th><th>Monthly revenue</th><th>Periodic remittance</th><th>Repayment duration</th></tr></thead><tbody id="scenario-body"></tbody></table></div>
+    </div>
+    <div class="result-section"><h3>Review the evidence</h3><div class="finding-list" id="finding-list"></div></div>
     <div class="result-section"><h3>Why this decision?</h3>
       <div class="why-grid">
         <div class="why-col pos"><h4>Approval drivers</h4><ul id="why-pos"></ul></div>
@@ -744,7 +759,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 <div id="page-dashboard" class="page">
   <div class="login-overlay" id="login-overlay">
     <div class="login-box">
-      <div class="brand"><span class="brand-mark"></span>SellerFlow</div>
+      <div class="brand"><span class="brand-mark"></span>RBF</div>
       <h3>Lender dashboard</h3><p>Enter your access password to view the portfolio.</p>
       <input id="login-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()">
       <button class="btn btn-primary btn-block" style="margin-top:12px" id="login-btn" onclick="tryLogin()">Sign in</button>
@@ -755,7 +770,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="dash-layout">
       <aside class="dash-side">
         <div class="ds-group">Portfolio</div>
-        <div class="ds-item active" data-filter="all" onclick="setFilter('all')"><span>All sellers</span><span class="cnt" id="c-all">0</span></div>
+        <div class="ds-item active" data-filter="all" onclick="setFilter('all')"><span>All merchants</span><span class="cnt" id="c-all">0</span></div>
         <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span>Approved</span><span class="cnt" id="c-approved">0</span></div>
         <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span>Conditional</span><span class="cnt" id="c-conditional">0</span></div>
         <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span>Declined</span><span class="cnt" id="c-rejected">0</span></div>
@@ -767,18 +782,18 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <div class="ds-item" onclick="signOut()"><span>Sign out</span></div>
       </aside>
       <section class="dash-main">
-        <div class="dash-top"><h2>Portfolio</h2><input class="dash-search" id="dash-search" placeholder="Search shop name…" oninput="renderTable()"></div>
+        <div class="dash-top"><h2>Portfolio</h2><input class="dash-search" id="dash-search" placeholder="Search merchant name…" oninput="renderTable()"></div>
         <div class="stat-row">
-          <div class="dstat"><div class="label">Total sellers</div><div class="dv" id="st-total">0</div></div>
+          <div class="dstat"><div class="label">Total merchants</div><div class="dv" id="st-total">0</div></div>
           <div class="dstat"><div class="label">Approval rate</div><div class="dv" id="st-approval">0%</div></div>
           <div class="dstat"><div class="label">Exposure</div><div class="dv" id="st-exposure">—</div></div>
           <div class="dstat"><div class="label">Avg PD</div><div class="dv" id="st-pd">0%</div></div>
         </div>
         <div class="charts-row">
           <div class="chart-card"><h3>Risk distribution</h3><div class="donut-wrap"><div id="donut"></div><div class="donut-legend" id="donut-legend"></div></div></div>
-          <div class="chart-card"><h3>Sellers by platform</h3><div class="bars" id="platform-bars"></div></div>
+          <div class="chart-card"><h3>Merchants by platform</h3><div class="bars" id="platform-bars"></div></div>
         </div>
-        <div class="table-card"><div class="table-scroll"><table><thead><tr><th>ID</th><th>Shop</th><th>Platform</th><th>Revenue</th><th>PD</th><th>Decision</th><th>Limit</th><th>Date</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
+        <div class="table-card"><div class="table-scroll"><table><thead><tr><th>ID</th><th>Merchant</th><th>Platform</th><th>Revenue</th><th>PD</th><th>Decision</th><th>Advance</th><th>Date</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
       </section>
     </div>
   </div>
@@ -795,7 +810,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <h3>Retention and deletion</h3>
     <p>Data is retained while the service operates. To have your records deleted, write to lehuuhoang1909@gmail.com from the address you signed up with and we will remove them.</p>
     <h3>Status</h3>
-    <p>SellerFlow is in pilot. The scoring model is a baseline trained on synthetic data and its output is not a lending commitment or an offer of credit.</p>
+    <p>RBF is in pilot. The risk model is a baseline trained on synthetic data; the financing structure is computed deterministically from submitted revenue data. Neither is a lending commitment or an offer of credit, and results should be reviewed before any financing decision.</p>
     <p class="small" style="margin-top:24px">Last updated July 2026 · lehuuhoang1909@gmail.com</p>
     <div style="margin-top:32px"><button class="btn btn-ghost" onclick="go('landing')">Back</button></div>
   </div></div>
@@ -804,17 +819,17 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 <footer>
   <div class="wrap">
     <div class="foot-grid">
-      <div><div class="brand"><span class="brand-mark"></span>SellerFlow</div><p style="margin-top:12px">Credit decisions for digital merchants in Southeast Asia.</p></div>
+      <div><div class="brand"><span class="brand-mark"></span>RBF</div><p style="margin-top:12px">Revenue-based financing analysis for digital merchants in Southeast Asia.</p></div>
       <div class="foot-col"><h4>Product</h4><a onclick="go('apply')">Apply</a><a onclick="go('dashboard')">Dashboard</a><a onclick="jump('pricing')">Pricing</a></div>
       <div class="foot-col"><h4>Company</h4><a onclick="jump('lenders')">For lenders</a><a onclick="jump('waitlist')">Request access</a><a href="/api/docs">API reference</a><a onclick="go('privacy')">Privacy</a></div>
     </div>
-    <div class="foot-bottom"><span>SellerFlow — Ho Chi Minh City &amp; Hanoi</span><span>lehuuhoang1909@gmail.com</span></div>
+    <div class="foot-bottom"><span>RBF — Ho Chi Minh City &amp; Hanoi</span><span>lehuuhoang1909@gmail.com</span></div>
   </div>
 </footer>
 
 <div class="login-overlay" id="key-modal" style="display:none">
   <div class="login-box">
-    <div class="brand"><span class="brand-mark"></span>SellerFlow</div>
+    <div class="brand"><span class="brand-mark"></span>RBF</div>
     <h3 id="key-title">Pilot API key</h3>
     <div id="key-form">
       <p>Free tier — 100 assessments per month. One key per email.</p>
@@ -871,7 +886,7 @@ function jump(id){ go('landing'); setTimeout(()=>{ const el=document.getElementB
 function toggleMenu(){ document.getElementById('hamburger').classList.toggle('open'); document.getElementById('mobile-menu').classList.toggle('open'); }
 function closeMenu(){ document.getElementById('hamburger').classList.remove('open'); document.getElementById('mobile-menu').classList.remove('open'); }
 const CODE = {
-curl:`<span class="c"># Score a seller</span>
+curl:`<span class="c"># Analyze a merchant</span>
 curl -X POST https://sellerflow-production.up.railway.app<span class="k">/api/sellers/submit</span> \\
   -H <span class="s">"X-API-Key: sf_live_..."</span> \\
   -H <span class="s">"Content-Type: application/json"</span> \\
@@ -922,17 +937,23 @@ async function runConsole(){
   btn.disabled=false; btn.textContent='Run sample request';
   out.style.display='block';
   if(!data||data.__rate_limited){ pre.textContent='Request failed. Try again in a moment.'; return; }
-  pre.textContent=JSON.stringify({decision:data.decision,credit_limit_vnd:data.credit_limit,rate_pa:Number(data.interest_rate)/100,pd:data.pd_score,model:data.model_version,response_time_ms:ms},null,2);
+  const s=(data.financing&&data.financing.structure)||{};
+  pre.textContent=JSON.stringify({
+    decision:data.decision, pd:data.pd_score,
+    recommended_amount_vnd:s.recommended_amount, remittance_pct:s.remittance_pct,
+    repayment_cap_vnd:s.repayment_cap, base_case_duration_months:s.base_case_duration_months,
+    model:data.model_version, response_time_ms:ms
+  },null,2);
   badge.style.display='inline-block'; badge.textContent=ms+'ms';
 }
 const FLOW_DESC={
-  signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the seller submission.',
-  normalize:'Raw metrics are scaled and bounded so a fast-growing large seller and a stable small seller are compared fairly.',
+  signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the merchant submission.',
+  normalize:'Raw metrics are scaled and bounded so a fast-growing large merchant and a stable small merchant are compared fairly.',
   ensemble:'A Random Forest and a Logistic Regression model each score the normalized profile independently.',
   pd:'The two model outputs are blended into a single probability of default — 65% RF, 35% LR.',
-  limit:'PD under 25% unlocks a facility sized to 45% of monthly revenue; 25–55% unlocks a reduced facility.',
-  rate:'Low-risk tier prices at 12.5% p.a.; medium-risk tier prices at 18.0% p.a.',
-  explain:'Per-signal flags and a plain-language rationale are generated alongside the numeric decision.',
+  limit:'Low risk unlocks an advance sized to 15% of annual revenue; medium risk unlocks a reduced advance at 8%. All deterministic — no model computes this arithmetic.',
+  rate:'Repayment is simulated as a percentage of revenue (the remittance) collected until a fixed repayment cap is reached — under base, decline, and growth assumptions.',
+  explain:'Per-signal risk findings and a plain-language rationale are generated alongside the numeric structure.',
 };
 document.querySelectorAll('#methodology-flow .flow-node').forEach(node=>{
   const activate=()=>{
@@ -991,7 +1012,7 @@ function renderPreview(){
   const rows=[['Shop',applyData.shop_name],['Platform',applyData.platform],['Monthly revenue',fmtVND(applyData.monthly_revenue)],['Revenue growth',signed(applyData.revenue_growth)],['Return rate',pct(applyData.return_rate)],['Late shipments',pct(applyData.late_ship_rate)],['Rating',applyData.rating+' / 5.0'],['Days active',applyData.days_active+' days']];
   document.getElementById('preview-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
 }
-const DECISION_STEPS=['Reading seller profile','Normalizing platform metrics','Checking revenue stability','Estimating default probability','Pricing risk','Generating explanation','Decision ready'];
+const DECISION_STEPS=['Reading merchant profile','Normalizing platform metrics','Checking revenue stability','Estimating default probability','Structuring the financing','Simulating repayment scenarios','Decision ready'];
 async function runDecisionSequence(){
   const fill=document.getElementById('seq-fill'), text=document.getElementById('seq-text');
   for(let i=0;i<DECISION_STEPS.length;i++){
@@ -1014,7 +1035,7 @@ async function submitApplication(){
   renderResult({...applyData,...data}); go('result');
 }
 const VERDICT={APPROVED:'Approved',CONDITIONAL:'Conditional',REJECTED:'Not approved'};
-const EXPLAIN={APPROVED:'The seller clears the underwriting bar. The recommended limit is sized to operating revenue and priced at the low-risk rate.',CONDITIONAL:'The seller has enough signal to approve a reduced facility, but monitoring is recommended before expanding exposure.',REJECTED:'The seller exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
+const EXPLAIN={APPROVED:'The merchant clears the underwriting bar. The recommended advance is sized to annual revenue and structured at the low-risk remittance and repayment cap.',CONDITIONAL:'The merchant has enough signal to support a reduced advance, but monitoring is recommended before increasing exposure.',REJECTED:'The merchant exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
 const FLAG_CLASS={green:'pass',amber:'warn',red:'fail'}, SIGNAL_LABEL={return_rate:'Return rate',late_ship_rate:'Late shipments',revenue_growth:'Revenue growth',rating:'Store rating',days_active:'Days active',inventory_turnover:'Inventory turnover'};
 function computeSignals(s){
   const f=(v,lo,hi)=>v<=lo?'green':v<=hi?'amber':'red';
@@ -1023,21 +1044,55 @@ function computeSignals(s){
 function signalDisplay(k,v){ if(k==='revenue_growth') return signed(v); if(k==='rating') return Number(v).toFixed(1)+' / 5'; if(k==='days_active') return Math.round(v)+'d'; if(k==='inventory_turnover') return Number(v).toFixed(1)+'x'; return pct(v); }
 function renderResult(s){
   const dec=s.decision||'CONDITIONAL';
+  const financing=s.financing||{structure:{},scenarios:[],risk_findings:[],information_needed:[],data_completeness_pct:null};
+  const structure=financing.structure||{};
   document.getElementById('result-head').className='result-head '+dec;
-  document.getElementById('r-id').textContent=s.seller_id||s.id||'SF-';
+  document.getElementById('r-id').textContent=s.seller_id||s.id||'RBF-';
   document.getElementById('r-verdict').textContent=VERDICT[dec]||dec;
-  document.getElementById('r-shop').textContent=s.shop_name||'Seller';
+  document.getElementById('r-shop').textContent=s.shop_name||'Merchant';
   document.getElementById('r-plat').textContent=s.platform?' · '+s.platform:'';
-  document.getElementById('r-limit').textContent=fmtVND(s.credit_limit);
-  document.getElementById('r-rate').textContent=s.interest_rate?Number(s.interest_rate).toFixed(1)+'%':'—';
+  document.getElementById('r-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
+  document.getElementById('r-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
+  document.getElementById('r-cap').textContent=fmtVND(structure.repayment_cap);
   document.getElementById('r-pd').textContent=pct(s.pd_score);
-  document.getElementById('r-model').textContent=s.model_version||'RF+LR v1.0';
   document.getElementById('r-reasoning').textContent=s.reasoning||'—';
   document.getElementById('r-explain').textContent=EXPLAIN[dec]||'';
   const signals=(s.signals&&Object.keys(s.signals).length)?s.signals:computeSignals(s);
-  const order=['return_rate','late_ship_rate','revenue_growth','rating','days_active','inventory_turnover'];
-  document.getElementById('signal-grid').innerHTML=order.map(k=>{ const sig=signals[k]; if(!sig) return ''; const cls=FLAG_CLASS[sig.flag]||'warn'; return `<div class="signal-tile ${cls}"><div class="sk">${SIGNAL_LABEL[k]}</div><div class="sv"><span class="dot-flag ${cls}"></span>${signalDisplay(k,sig.value)}</div></div>`; }).join('');
   renderWhyPanel(signals);
+  renderStructure(structure, financing);
+  renderScenarios(financing.scenarios||[]);
+  renderFindings(financing.risk_findings||[]);
+}
+function renderStructure(structure, financing){
+  const rows=[];
+  rows.push(['Recommended advance', fmtVND(structure.recommended_amount)]);
+  if(structure.requested_amount) rows.push(['Requested amount', fmtVND(structure.requested_amount)+(structure.exceeds_recommendation?' — exceeds recommendation':'')]);
+  rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+' of monthly revenue':'—']);
+  rows.push(['Repayment cap', fmtVND(structure.repayment_cap)]);
+  rows.push(['Base-case repayment term', structure.base_case_duration_months?structure.base_case_duration_months+' months':'—']);
+  const severe=(financing.scenarios||[]).find(sc=>sc.case==='severe_decline');
+  rows.push(['Downside repayment term (-40% revenue)', severe&&severe.repayment_duration_months?severe.repayment_duration_months+' months':'—']);
+  rows.push(['Data completeness', financing.data_completeness_pct!=null?financing.data_completeness_pct+'%':'—']);
+  document.getElementById('structure-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
+  const note=document.getElementById('structure-note');
+  if(structure.note){ note.textContent=structure.note; }
+  else if((financing.information_needed||[]).length){ note.textContent='Information still required: '+financing.information_needed[0]+(financing.information_needed.length>1?` (+${financing.information_needed.length-1} more below)`:''); }
+  else { note.textContent='Base case assumes revenue holds at the reported level; downside cases apply a persistent revenue decline.'; }
+}
+function renderScenarios(scenarios){
+  const body=document.getElementById('scenario-body');
+  if(!scenarios.length){ body.innerHTML='<tr><td colspan="4"><div class="empty">No financing structure was recommended for this risk tier, so no repayment scenario applies.</div></td></tr>'; return; }
+  body.innerHTML=scenarios.map(sc=>`<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' mo':'—'}</td></tr>`).join('');
+}
+const SEV_LABEL={low:'Low',medium:'Medium',high:'High',unknown:'Unknown'};
+function renderFindings(findings){
+  document.getElementById('finding-list').innerHTML=findings.map(f=>`
+    <div class="finding-card">
+      <div class="finding-top"><span class="finding-cat">${f.category}</span><span class="sev-badge ${f.severity}">${SEV_LABEL[f.severity]||f.severity}</span></div>
+      <div class="finding-evidence">${f.evidence}</div>
+      <div class="finding-why">${f.why_it_matters}</div>
+      ${f.resolution_needed?`<div class="finding-resolution">Needed to resolve: ${f.resolution_needed}</div>`:''}
+    </div>`).join('');
 }
 const WHY_DRIVER={
   revenue_growth:v=>`${signed(v)} MoM revenue growth`, return_rate:v=>`${pct(v)} return rate`,
@@ -1106,7 +1161,7 @@ function renderTable(){ const q=(document.getElementById('dash-search').value||'
 function openSeller(id){ const s=sellers.find(x=>x.id===id); if(!s) return; renderResult({...s,seller_id:s.id}); go('result'); }
 function exportCSV(){
   if(!sellers.length){ toast('Nothing to export'); return; }
-  downloadCSV(sellers,['id','shop_name','owner_name','platform','monthly_revenue','revenue_growth','order_volume','avg_order_value','return_rate','rating','days_active','inventory_turnover','late_ship_rate','previous_loans','pd_score','decision','credit_limit','interest_rate','risk_tier','created_at'],'sellerflow-portfolio.csv');
+  downloadCSV(sellers,['id','shop_name','owner_name','platform','monthly_revenue','revenue_growth','order_volume','avg_order_value','return_rate','rating','days_active','inventory_turnover','late_ship_rate','previous_loans','pd_score','decision','credit_limit','interest_rate','risk_tier','created_at'],'rbf-portfolio.csv');
   toast('Portfolio exported');
 }
 function downloadCSV(rows, cols, filename){
@@ -1121,7 +1176,7 @@ async function exportLeads(){
   if(data&&data.__unauthorized){ initDashboard(); return; }
   if(!data){ toast('Could not load leads.'); return; }
   if(!data.entries.length){ toast('No leads yet'); return; }
-  downloadCSV(data.entries,['position','email','company','role','created_at'],'sellerflow-leads.csv');
+  downloadCSV(data.entries,['position','email','company','role','created_at'],'rbf-leads.csv');
   toast(`${data.entries.length} lead${data.entries.length>1?'s':''} exported`);
 }
 function signOut(){ sessionStorage.removeItem('sf_token'); sellers=[]; stats=null; initDashboard(); }
@@ -1213,14 +1268,15 @@ function heroUpdateLabels(v){
 function heroRenderDecision(d, ms){
   const cls=d.decision==='APPROVED'?'':d.decision==='CONDITIONAL'?'warn':'fail';
   const box=document.getElementById('hd-box'), word=document.getElementById('hd-word');
+  const structure=(d.financing&&d.financing.structure)||{};
   box.className='decision-box'+(cls?' '+cls:'');
   word.className='decision-word'+(cls?' '+cls:'');
   word.textContent=VERDICT[d.decision]||d.decision;
-  document.getElementById('hd-limit').textContent=fmtVND(d.credit_limit);
-  document.getElementById('hd-rate').textContent=d.interest_rate?Number(d.interest_rate).toFixed(1)+'% p.a.':'—';
-  document.getElementById('hd-pd').textContent=pct(d.pd_score);
+  document.getElementById('hd-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
+  document.getElementById('hd-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
+  document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);
   document.getElementById('hero-chips').innerHTML=renderChips(d.signals||{});
-  if(ms!=null) document.getElementById('hero-foot').textContent=`Model v1.0 · RF+LR ensemble · live response ${ms}ms`;
+  if(ms!=null) document.getElementById('hero-foot').textContent=`Deterministic financing engine · live response ${ms}ms`;
 }
 let heroDebounce, heroInFlight=false, heroPending=false;
 async function heroRunPreview(){

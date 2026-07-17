@@ -2,7 +2,7 @@
 set -e
 
 echo ""
-echo "  SellerFlow — Dev mode"
+echo "  RBF — Dev mode"
 echo ""
 
 cd "$(dirname "$0")/backend"
