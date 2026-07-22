@@ -134,7 +134,7 @@ def consume_api_key(request: Request):
 
 
 @app.post("/api/keys/issue")
-def issue_key(data: KeyRequest, request: Request, authorization: str = Header(default="")):
+def issue_key(data: KeyRequest, request: Request, background: BackgroundTasks, authorization: str = Header(default="")):
     rate_limit(request, "keys", limit=5, window_s=86400)
     plan = data.plan.lower()
     if plan not in PLAN_LIMITS:
@@ -156,6 +156,13 @@ def issue_key(data: KeyRequest, request: Request, authorization: str = Header(de
              plan, 0, PLAN_LIMITS[plan], datetime.now().isoformat(), 1, _current_period()),
         )
         conn.commit()
+        background.add_task(
+            notify,
+            f"RBF API key issued · {data.email} ({plan})",
+            f"An API key was issued to {data.email} "
+            f"(company: {data.company or '-'}) on the {plan} plan "
+            f"at {datetime.now().isoformat()}.",
+        )
     finally:
         conn.close()
     return {"api_key": raw, "plan": plan, "monthly_limit": PLAN_LIMITS[plan],
@@ -242,7 +249,7 @@ def stripe_claim(session_id: str, request: Request, background: BackgroundTasks)
 
 
 @app.post("/api/sellers/submit")
-def submit_seller(data: MerchantSubmission, request: Request):
+def submit_seller(data: MerchantSubmission, request: Request, background: BackgroundTasks):
     usage = consume_api_key(request)
     if usage is None:
         rate_limit(request, "submit", limit=30, window_s=3600)
@@ -259,7 +266,7 @@ def submit_seller(data: MerchantSubmission, request: Request):
     ).fetchall()]
     integrity = screen_integrity(data.dict(), prior_submissions=priors)
     conn.execute("""
-        INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
         seller_id, data.shop_name, data.platform, data.owner_name, data.phone,
         data.monthly_revenue, data.revenue_growth, data.order_volume, data.avg_order_value,
@@ -268,10 +275,22 @@ def submit_seller(data: MerchantSubmission, request: Request):
         result['pd_score'], result['pd_rf'], result['pd_lr'],
         result['decision'], result['credit_limit'], result['interest_rate'],
         result['risk_tier'], result['reasoning'],
-        datetime.now().isoformat(), 'active'
+        datetime.now().isoformat(), 'active', 'live'
     ))
     conn.commit()
     conn.close()
+    channel = "API key" if usage is not None else "web form"
+    background.add_task(
+        notify,
+        f"RBF assessment · {data.shop_name} -> {result['decision']}",
+        f"A real merchant was assessed via {channel} at {datetime.now().isoformat()}.\n\n"
+        f"Merchant : {data.shop_name} ({data.platform})\n"
+        f"Revenue  : {data.monthly_revenue:,.0f}/mo\n"
+        f"Decision : {result['decision']} · {result['risk_tier']} · PD {result['pd_score']:.1%}\n"
+        f"Integrity: {integrity['level']} ({integrity['flags']} flag(s))\n"
+        f"Seller ID: {seller_id}\n\n"
+        f"See the dashboard: https://sellerflow-production.up.railway.app",
+    )
     payload = {
         "seller_id": seller_id,
         "timestamp": datetime.now().isoformat(),
@@ -440,7 +459,9 @@ NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "")
 NOTIFY_FROM = os.environ.get("NOTIFY_FROM", "RBF <onboarding@resend.dev>")
 
 
-def notify_signup(email: str, role: str, position: int):
+def notify(subject: str, text: str):
+    """Best-effort operator alert via Resend. No-op unless RESEND_API_KEY and
+    NOTIFY_EMAIL are set. A failed notification must never affect the request."""
     if not (RESEND_API_KEY and NOTIFY_EMAIL):
         return
     try:
@@ -449,14 +470,19 @@ def notify_signup(email: str, role: str, position: int):
             data=jsonlib.dumps({
                 "from": NOTIFY_FROM,
                 "to": [NOTIFY_EMAIL],
-                "subject": f"RBF lead #{position}: {email}",
-                "text": f"{email} ({role}) joined the waitlist at {datetime.now().isoformat()}.",
+                "subject": subject,
+                "text": text,
             }).encode(),
             headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
         )
         urllib.request.urlopen(req, timeout=8)
     except Exception:
-        pass  # a failed notification must never affect the signup itself
+        pass  # a failed notification must never affect the request itself
+
+
+def notify_signup(email: str, role: str, position: int):
+    notify(f"RBF lead #{position}: {email}",
+           f"{email} ({role}) joined the waitlist at {datetime.now().isoformat()}.")
 
 
 @app.post("/api/waitlist")

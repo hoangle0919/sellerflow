@@ -41,7 +41,8 @@ def init_db():
             risk_tier TEXT,
             reasoning TEXT,
             created_at TEXT,
-            status TEXT DEFAULT 'active'
+            status TEXT DEFAULT 'active',
+            source TEXT DEFAULT 'live'
         )
     """)
 
@@ -75,6 +76,13 @@ def init_db():
     # Migration: monthly quota period (YYYY-MM) for databases created before metering
     try:
         conn.execute("ALTER TABLE api_keys ADD COLUMN period TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
+    # Migration: seed-vs-live source tag. Rows that predate this column are all
+    # seed/test data, so they default to 'seed'; real submissions insert 'live'.
+    try:
+        conn.execute("ALTER TABLE sellers ADD COLUMN source TEXT DEFAULT 'seed'")
     except sqlite3.OperationalError:
         pass  # column already exists
 
@@ -206,9 +214,9 @@ def _seed_sellers(conn):
         created = (base_date - timedelta(days=random.randint(0, 180))).isoformat()
 
         conn.execute("""
-            INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (sid, shop, plat, owner, phone, rev, grow, orders, aov, ret, rat, days,
-              inv, late, loans, pd_s, pd_rf, pd_lr, dec, round(cl, -3), ir, tier, reasoning, created, 'active'))
+              inv, late, loans, pd_s, pd_rf, pd_lr, dec, round(cl, -3), ir, tier, reasoning, created, 'active', 'seed'))
 
     conn.commit()
 
