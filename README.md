@@ -116,7 +116,13 @@ railway login && railway init && railway up && railway domain
 
 The risk ensemble is trained on a **synthetic baseline** calibrated to realistic seller distributions — it has not seen a real merchant's real repayment outcome, and the 0.92 AUC figure describes how well it separates synthetic-good from synthetic-bad, not real-world predictive power. It's designed to be retro-validated against a lender's or financier's historical loan book: score their past decisions, compare the ranking, and recalibrate from there. Until that happens, treat every recommendation as a structured hypothesis, not a proven one.
 
-`GET /api/model/status` makes this concrete and honest at runtime. It returns the synthetic `training_baseline` (0.92, clearly disclaimered) and a separate `real_world_validation` field that stays `null` until enough lender-recorded outcomes exist to compute a genuine rank AUC — the two numbers are never merged into one headline figure. `backend/demo_learning_loop.py` runs the identical validation code path on a *simulated* cohort to show the mechanism end-to-end; its output is labeled "not RBF's accuracy" precisely so the demo can never be mistaken for a real result.
+`GET /api/model/status` makes this concrete and honest at runtime. It returns three clearly-separated tiers, never merged into one headline figure:
+
+1. **`training_baseline`** — 0.92 AUC on held-out *synthetic* data, disclaimered as synthetic.
+2. **`methodology_validation`** — the production RF+LR ensemble, cross-validated on **real public credit benchmarks with real default outcomes**: ~0.80 AUC on UCI German Credit (1,000 real applicants) and ~0.77 AUC on UCI Taiwan credit-card default (30,000 real accounts). This validates that the *modeling approach* has genuine out-of-sample skill on real data. It does **not** validate the production merchant model, which uses e-commerce features no public dataset contains. Fully reproducible: `python backend/validate_on_real_data.py` (datasets bundled under `backend/validation_data/`).
+3. **`real_world_validation`** — stays `null` until enough lender-recorded *merchant* outcomes exist to compute a genuine rank AUC on RBF's actual borrowers.
+
+`backend/demo_learning_loop.py` runs the identical validation code path on a *simulated* cohort to show the mechanism end-to-end; its output is labeled "not RBF's accuracy" precisely so the demo can never be mistaken for a real result.
 
 ## Answering the GXS problem statement — current vs roadmap
 

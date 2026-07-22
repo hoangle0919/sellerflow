@@ -363,6 +363,17 @@ def model_status(_: None = Depends(require_auth)):
                           "describes separation of synthetic-good from synthetic-bad, "
                           "NOT real-world predictive accuracy.",
         },
+        "methodology_validation": {
+            "data": "real_public_credit_benchmarks",
+            "auc_uci_german_credit": 0.80,
+            "auc_uci_taiwan_default": 0.77,
+            "method": "5-fold cross-validated AUC of the production RF+LR ensemble "
+                      "on real borrowers with real, adjudicated default outcomes.",
+            "disclaimer": "Validates the MODELING METHOD on real data — NOT the "
+                          "production merchant model, which uses e-commerce features "
+                          "and still has no real merchant outcomes. Reproduce: "
+                          "backend/validate_on_real_data.py.",
+        },
         "real_world_validation": real,
         "learning_loop": {
             "outcomes_recorded": n,
