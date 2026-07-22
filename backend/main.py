@@ -2,15 +2,16 @@ import os, uuid, hmac, secrets, time, hashlib
 import json as jsonlib
 import urllib.request
 from collections import defaultdict, deque
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, Header, Depends, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest
+from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord
 from database import get_db, init_db
 from ml_engine import load_models, score, FEATURES
 from financing_engine import build_financing_analysis
+from integrity_engine import screen_integrity
 
 # ── Init ──
 app = FastAPI(title="RBF API", version="1.0.0", docs_url="/api/docs")
@@ -248,6 +249,15 @@ def submit_seller(data: MerchantSubmission, request: Request):
     result = score(data.dict())
     seller_id = f"RBF-{str(uuid.uuid4())[:6].upper()}"
     conn = get_db()
+    # Integrity screen: compare against this merchant's own recent submissions
+    # (matched on shop name or phone) before this one is inserted.
+    cutoff = (datetime.now() - timedelta(days=90)).isoformat()
+    priors = [dict(r) for r in conn.execute(
+        "SELECT monthly_revenue FROM sellers WHERE created_at >= ? AND "
+        "(LOWER(TRIM(shop_name)) = LOWER(TRIM(?)) OR (phone != '' AND phone = ?))",
+        (cutoff, data.shop_name, data.phone or ""),
+    ).fetchall()]
+    integrity = screen_integrity(data.dict(), prior_submissions=priors)
     conn.execute("""
         INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
@@ -266,6 +276,7 @@ def submit_seller(data: MerchantSubmission, request: Request):
         "seller_id": seller_id,
         "timestamp": datetime.now().isoformat(),
         **result,
+        "integrity": integrity,
         "financing": build_financing_analysis(data.dict(), result["risk_tier"]),
     }
     if usage is not None:
@@ -282,7 +293,109 @@ def get_seller(seller_id: str, _: None = Depends(require_auth)):
         raise HTTPException(status_code=404, detail="Seller not found")
     record = dict(row)
     record["financing"] = build_financing_analysis(record, record.get("risk_tier", "High Risk"))
+    conn2 = get_db()
+    record["outcomes"] = [dict(r) for r in conn2.execute(
+        "SELECT outcome, amount_remitted, note, recorded_at FROM outcomes "
+        "WHERE seller_id=? ORDER BY recorded_at DESC", (seller_id.upper(),)
+    ).fetchall()]
+    conn2.close()
     return record
+
+
+@app.post("/api/sellers/{seller_id}/outcome")
+def record_outcome(seller_id: str, data: OutcomeRecord, _: None = Depends(require_auth)):
+    """Record a real, adjudicated repayment outcome. This is the only way a
+    ground-truth label enters the system — always lender-recorded, never
+    inferred by the model. These labels are what the learning loop trains on
+    once enough accumulate (see /api/model/status)."""
+    conn = get_db()
+    row = conn.execute("SELECT id FROM sellers WHERE id=?", (seller_id.upper(),)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Seller not found")
+    oid = str(uuid.uuid4())[:8].upper()
+    conn.execute(
+        "INSERT INTO outcomes VALUES (?,?,?,?,?,?)",
+        (oid, seller_id.upper(), data.outcome, data.amount_remitted,
+         data.note, datetime.now().isoformat()),
+    )
+    conn.commit()
+    total = conn.execute("SELECT COUNT(*) FROM outcomes").fetchone()[0]
+    conn.close()
+    return {"status": "recorded", "outcome_id": oid, "total_outcomes": total}
+
+
+@app.get("/api/model/status")
+def model_status(_: None = Depends(require_auth)):
+    """The learning loop's honest state. Reports the synthetic training
+    baseline AND real-world validation computed from recorded outcomes —
+    never conflating the two. Real metrics appear only once enough
+    adjudicated outcomes exist to compute them."""
+    conn = get_db()
+    rows = [dict(r) for r in conn.execute(
+        "SELECT s.pd_score, s.decision, o.outcome FROM outcomes o "
+        "JOIN sellers s ON s.id = o.seller_id"
+    ).fetchall()]
+    conn.close()
+
+    MIN_FOR_METRICS = 30
+    n = len(rows)
+    # A defaulted or late outcome is the positive class (bad); repaid is good.
+    labels = [1 if r["outcome"] in ("defaulted", "late") else 0 for r in rows]
+    scores = [float(r["pd_score"] or 0) for r in rows]
+    bad = sum(labels)
+    good = n - bad
+
+    real = None
+    if n >= MIN_FOR_METRICS and bad > 0 and good > 0:
+        real = {
+            "outcomes_used": n,
+            "observed_default_rate": round(bad / n, 4),
+            "real_auc": _auc(scores, labels),
+            "note": "Computed from lender-recorded outcomes on real merchants.",
+        }
+
+    return {
+        "training_baseline": {
+            "auc": 0.92,
+            "data": "synthetic",
+            "disclaimer": "Measured on held-out SYNTHETIC validation data. It "
+                          "describes separation of synthetic-good from synthetic-bad, "
+                          "NOT real-world predictive accuracy.",
+        },
+        "real_world_validation": real,
+        "learning_loop": {
+            "outcomes_recorded": n,
+            "outcomes_needed_for_metrics": max(0, MIN_FOR_METRICS - n),
+            "status": "collecting_outcomes" if real is None else "validated",
+            "retrain_policy": "Retrain + recalibrate when a cohort of adjudicated "
+                              "outcomes is available; promote only if real-world AUC "
+                              "on a holdout beats the incumbent.",
+        },
+    }
+
+
+def _auc(scores, labels):
+    """Rank-based ROC AUC (Mann-Whitney U). No sklearn dependency at request time."""
+    pairs = sorted(zip(scores, labels), key=lambda p: p[0])
+    ranks = {}
+    i = 0
+    # average ranks for ties
+    while i < len(pairs):
+        j = i
+        while j < len(pairs) and pairs[j][0] == pairs[i][0]:
+            j += 1
+        avg_rank = (i + j - 1) / 2 + 1
+        for k in range(i, j):
+            ranks[k] = avg_rank
+        i = j
+    pos = sum(ranks[idx] for idx, (_, lab) in enumerate(pairs) if lab == 1)
+    n_pos = sum(labels)
+    n_neg = len(labels) - n_pos
+    if n_pos == 0 or n_neg == 0:
+        return None
+    auc = (pos - n_pos * (n_pos + 1) / 2) / (n_pos * n_neg)
+    return round(auc, 4)
 
 
 @app.get("/api/portfolio")
@@ -409,6 +522,7 @@ def preview_assess(
     return {
         "timestamp": datetime.now().isoformat(),
         **result,
+        "integrity": screen_integrity(data),  # keyless preview: no identity, resubmission check skipped
         "financing": build_financing_analysis(data, result["risk_tier"]),
     }
 
@@ -420,6 +534,11 @@ FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")
 @app.get("/")
 @app.get("/{path:path}")
 def serve_spa(path: str = ""):
+    if path:
+        root = os.path.realpath(FRONTEND)
+        candidate = os.path.realpath(os.path.join(root, path))
+        if candidate.startswith(root + os.sep) and os.path.isfile(candidate):
+            return FileResponse(candidate)
     index = os.path.join(FRONTEND, "index.html")
     if os.path.exists(index):
         return FileResponse(index)

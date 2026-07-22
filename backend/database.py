@@ -78,6 +78,19 @@ def init_db():
     except sqlite3.OperationalError:
         pass  # column already exists
 
+    # Adjudicated repayment outcomes — the label source for the learning loop.
+    # A row here is ground truth recorded by the lender, never inferred.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS outcomes (
+            id TEXT PRIMARY KEY,
+            seller_id TEXT NOT NULL,
+            outcome TEXT NOT NULL,          -- repaid | late | defaulted
+            amount_remitted REAL,
+            note TEXT,
+            recorded_at TEXT
+        )
+    """)
+
     # One key issuance per Stripe checkout session (replay protection)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS stripe_claims (
@@ -99,7 +112,7 @@ def init_db():
 
 
 def _seed_sellers(conn):
-    """20 realistic Vietnamese ecommerce sellers with varied risk profiles"""
+    """35 realistic Vietnamese ecommerce sellers with varied risk profiles"""
     import sys
     sys.path.insert(0, os.path.dirname(__file__))
 
@@ -138,6 +151,21 @@ def _seed_sellers(conn):
         ("Quần Áo Vintage",       "TikTok Shop", "Vũ Thị Ngọc",        "0978901235",  28_000_000, -0.18,  72, 389_000, 0.212, 3.2,  45,  2.1, 0.186, 0),
         ("Đặc Sản Vùng Miền",     "Shopee",     "Hoàng Thị Cúc",       "0989012346",  88_000_000, 0.17, 295, 298_000, 0.041, 4.6, 490,  5.8, 0.033, 1),
         ("Camera & Photography",  "Shopee",     "Nguyễn Văn Hùng",     "0990123457", 375_000_000, 0.25, 245, 1_531_000, 0.018, 4.9, 1080, 4.6, 0.014, 3),
+        ("Hải Sản Tươi Sống",     "Shopee",     "Đỗ Văn Hải",          "0901111222",  72_000_000, 0.12, 240, 300_000, 0.058, 4.4, 300,  4.5, 0.041, 1),
+        ("Cây Cảnh Mini Home",    "Lazada",     "Nguyễn Thị Thu",      "0902222333",  41_000_000, 0.15, 180, 228_000, 0.048, 4.6, 210,  3.9, 0.030, 0),
+        ("Đồ Da Handmade",        "TikTok Shop", "Trần Minh Khoa",     "0903333444",  63_000_000, 0.20, 130, 485_000, 0.036, 4.7, 340,  3.2, 0.026, 0),
+        ("Vợt Cầu Lông Pro",      "Shopee",     "Lê Văn Sơn",          "0904444555", 110_000_000, 0.10, 260, 423_000, 0.031, 4.5, 520,  5.6, 0.024, 1),
+        ("Trang Sức Bạc An",      "Shopee",     "Phạm Thị Ngọc An",    "0905555666",  88_000_000, 0.26, 410, 215_000, 0.044, 4.8, 380,  6.4, 0.028, 1),
+        ("Đồ Bơi Ocean",          "TikTok Shop", "Vũ Thị Hạ",          "0906666777",  34_000_000, -0.05, 120, 283_000, 0.096, 4.0, 160,  2.6, 0.082, 0),
+        ("Phụ Kiện Điện Thoại 24h","Shopee",    "Hoàng Minh Đức",      "0907777888", 240_000_000, 0.33, 980, 245_000, 0.052, 4.4, 610,  9.1, 0.038, 2),
+        ("Nến Thơm & Decor",      "Lazada",     "Đặng Thị Quỳnh",      "0908888999",  46_000_000, 0.08, 155, 297_000, 0.061, 4.3, 240,  3.4, 0.045, 0),
+        ("Thực Phẩm Chức Năng VN","Shopee",     "Bùi Văn Tài",         "0909999000", 178_000_000, 0.19, 320, 556_000, 0.029, 4.7, 700,  5.9, 0.020, 2),
+        ("Đồ Câu Cá Sài Gòn",     "Lazada",     "Trương Văn Phúc",     "0910101010",  58_000_000, 0.04, 140, 414_000, 0.073, 4.2, 290,  3.7, 0.056, 0),
+        ("Mẹ Và Bé Happy",        "TikTok Shop", "Nguyễn Thị Hồng",    "0911121314", 132_000_000, 0.27, 480, 275_000, 0.034, 4.8, 450,  7.0, 0.023, 1),
+        ("Văn Phòng Phẩm Sao",    "Shopee",     "Lý Thị Mai",          "0912131415",  44_000_000, 0.02, 260, 169_000, 0.088, 3.9, 130,  4.1, 0.069, 0),
+        ("Giày Sneaker Local",    "TikTok Shop", "Phan Văn Kiên",      "0913141516", 165_000_000, 0.31, 390, 423_000, 0.047, 4.6, 360,  6.1, 0.033, 1),
+        ("Đồng Hồ Nam Luxury",    "Shopee",     "Đinh Văn Hòa",        "0914151617", 310_000_000, 0.14, 150, 2_060_000, 0.021, 4.8, 830,  3.9, 0.016, 3),
+        ("Rau Củ Organic Farm",   "Shopee",     "Ngô Thị Lan",         "0915161718",  31_000_000, -0.15,  95, 326_000, 0.155, 3.6,  80,  2.9, 0.121, 0),
     ]
 
     # Spread created_at dates over the last 6 months

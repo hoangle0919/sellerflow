@@ -75,3 +75,10 @@ class AssessmentResult(BaseModel):
     risk_tier: str
     signals: dict
     reasoning: str
+
+
+class OutcomeRecord(BaseModel):
+    """Adjudicated repayment outcome — ground truth for the learning loop."""
+    outcome: str = Field(pattern="^(repaid|late|defaulted)$")
+    amount_remitted: Optional[float] = Field(default=None, ge=0, le=1e13)
+    note: str = Field(default="", max_length=500)

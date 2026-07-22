@@ -12,3 +12,6 @@ backend/venv/
 node_modules/
 dist/
 .railway/
+
+# Internal / competition materials — never publish to the public repo
+docs/
