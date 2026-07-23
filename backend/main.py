@@ -97,6 +97,7 @@ def health():
         "sellers_assessed": sellers,
         "waitlist_count": waitlist,
         "avg_response_ms": 1200,
+        "alerts_configured": bool(RESEND_API_KEY and NOTIFY_EMAIL),
     }
 
 
