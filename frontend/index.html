@@ -524,6 +524,8 @@ footer{border-top:1px solid var(--hairline);padding:56px 0 32px}
 .dash-main{padding:28px 30px;min-width:0}
 .dash-top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}
 .dash-top h2{font-size:1.9rem}
+.traffic-line{font-size:.82rem;color:var(--ink-3);margin:-4px 0 18px}
+.traffic-line b{font-family:'Spline Sans Mono',monospace;font-weight:500;color:var(--ink-2)}
 .dash-search{max-width:260px}
 .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .dstat{padding:18px;background:var(--surface);border:1px solid var(--hairline);border-radius:8px}
@@ -945,6 +947,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </aside>
       <section class="dash-main">
         <div class="dash-top"><h2>Portfolio</h2><input class="dash-search" id="dash-search" placeholder="Search merchant name…" oninput="renderTable()"></div>
+        <div class="traffic-line" id="traffic-line"></div>
         <div class="stat-row">
           <div class="dstat"><div class="label">Total merchants</div><div class="dv" id="st-total">0</div></div>
           <div class="dstat"><div class="label">Approval rate</div><div class="dv" id="st-approval">0%</div></div>
@@ -1349,7 +1352,7 @@ async function loadPortfolio(){
   sellers=data.sellers; stats=data.stats;
   renderStats(); renderCounts(); renderCharts(); renderTable();
 }
-function renderStats(){ document.getElementById('st-total').textContent=stats.total; document.getElementById('st-approval').textContent=Math.round(stats.approval_rate*100)+'%'; document.getElementById('st-exposure').textContent=fmtVND(stats.total_exposure); document.getElementById('st-pd').textContent=pct(stats.avg_pd); }
+function renderStats(){ document.getElementById('st-total').textContent=stats.total; document.getElementById('st-approval').textContent=Math.round(stats.approval_rate*100)+'%'; document.getElementById('st-exposure').textContent=fmtVND(stats.total_exposure); document.getElementById('st-pd').textContent=pct(stats.avg_pd); const t=document.getElementById('traffic-line'); if(t){ const last=stats.last_visit?new Date(stats.last_visit).toLocaleString():'—'; t.innerHTML=`<b>${stats.visits_total||0}</b> visits · <b>${stats.visits_today||0}</b> today · <b>${stats.live_submissions||0}</b> real submissions · last visit ${last}`; } }
 function renderCounts(){ document.getElementById('c-all').textContent=stats.total; document.getElementById('c-approved').textContent=stats.approved; document.getElementById('c-conditional').textContent=stats.conditional; document.getElementById('c-rejected').textContent=stats.rejected; document.getElementById('c-live').textContent=sellers.filter(s=>s.source==='live').length; }
 function drawDonut(elId,data){ const total=data.reduce((s,d)=>s+d.value,0)||1; let offset=0, r=38, cx=50, cy=50, circ=2*Math.PI*r; const slices=data.map(d=>{ const p=d.value/total; const sl=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="16" stroke-dasharray="${p*circ} ${circ}" stroke-dashoffset="${-offset*circ}" transform="rotate(-90 ${cx} ${cy})"/>`; offset+=p; return sl; }); document.getElementById(elId).innerHTML=`<svg viewBox="0 0 100 100" style="width:124px;height:124px">${slices.join('')}<circle cx="50" cy="50" r="29" fill="#FFFFFF" stroke="#E8E8E5" stroke-width="1"/><text x="50" y="54" text-anchor="middle" font-family="Spline Sans Mono" font-size="15" fill="#1A1A1A">${total}</text></svg>`; }
 function renderCharts(){ const dist=[{label:'Low risk',value:stats.approved,color:'#2E6B4F'},{label:'Medium risk',value:stats.conditional,color:'#8A6D3B'},{label:'High risk',value:stats.rejected,color:'#8C3A38'}]; drawDonut('donut',dist); document.getElementById('donut-legend').innerHTML=dist.map(d=>`<div class="leg"><span class="sw" style="background:${d.color}"></span>${d.label}<b>${d.value}</b></div>`).join(''); const plats=['Shopee','TikTok Shop','Lazada']; const counts=plats.map(p=>sellers.filter(s=>s.platform===p).length), max=Math.max(...counts,1); document.getElementById('platform-bars').innerHTML=plats.map((p,i)=>`<div><div class="bl"><span>${p}</span><b>${counts[i]}</b></div><div class="bar-track"><div class="bar-fill" style="width:${counts[i]/max*100}%"></div></div></div>`).join(''); }
@@ -1563,6 +1566,17 @@ heroRunPreview();
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
   },{rootMargin:'0px 0px -6% 0px',threshold:0.04});
   targets.forEach(function(el){io.observe(el);});
+})();
+
+/* Anonymous visit beacon — fires once per browser session, no PII */
+(function(){
+  try{
+    if(sessionStorage.getItem('rbf_seen')) return;
+    sessionStorage.setItem('rbf_seen','1');
+    fetch('/api/visit',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({path:(location.pathname+location.hash).slice(0,200),referrer:(document.referrer||'').slice(0,300)}),
+      keepalive:true}).catch(function(){});
+  }catch(e){}
 })();
 </script>
 </body>

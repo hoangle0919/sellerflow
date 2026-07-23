@@ -58,6 +58,16 @@ def init_db():
         )
     """)
 
+    # Anonymous visit beacons (no IP / cookie / fingerprint stored)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS visits (
+            id TEXT PRIMARY KEY,
+            path TEXT,
+            referrer TEXT,
+            created_at TEXT
+        )
+    """)
+
     # API keys table
     conn.execute("""
         CREATE TABLE IF NOT EXISTS api_keys (

@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Header, Depends, Request, Background
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord
+from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord, VisitPing
 from database import get_db, init_db
 from ml_engine import load_models, score, FEATURES
 from financing_engine import build_financing_analysis
@@ -432,6 +432,10 @@ def _auc(scores, labels):
 def get_portfolio(_: None = Depends(require_auth)):
     conn = get_db()
     rows = [dict(r) for r in conn.execute("SELECT * FROM sellers ORDER BY created_at DESC").fetchall()]
+    today = datetime.now().date().isoformat()
+    v_total = conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
+    v_today = conn.execute("SELECT COUNT(*) FROM visits WHERE created_at >= ?", (today,)).fetchone()[0]
+    v_last = conn.execute("SELECT MAX(created_at) FROM visits").fetchone()[0]
     conn.close()
     total = len(rows)
     approved = sum(1 for r in rows if r['decision'] == 'APPROVED')
@@ -439,6 +443,7 @@ def get_portfolio(_: None = Depends(require_auth)):
     rejected = sum(1 for r in rows if r['decision'] == 'REJECTED')
     exposure = sum(r['credit_limit'] or 0 for r in rows)
     avg_pd = round(sum(r['pd_score'] or 0 for r in rows) / total, 4) if total else 0
+    live = sum(1 for r in rows if r.get('source') == 'live')
     return {
         "sellers": rows,
         "stats": {
@@ -449,8 +454,29 @@ def get_portfolio(_: None = Depends(require_auth)):
             "approval_rate": round(approved / total, 3) if total else 0,
             "total_exposure": exposure,
             "avg_pd": avg_pd,
+            "live_submissions": live,
+            "visits_total": v_total,
+            "visits_today": v_today,
+            "last_visit": v_last,
         }
     }
+
+
+@app.post("/api/visit")
+def record_visit(data: VisitPing, request: Request):
+    """Anonymous page-view beacon — no IP, no cookie, no fingerprint stored.
+    The frontend fires it once per browser session so this counts visits,
+    not reloads."""
+    rate_limit(request, "visit", limit=240, window_s=3600)
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO visits VALUES (?,?,?,?)",
+        (str(uuid.uuid4())[:8], (data.path or "/")[:200],
+         (data.referrer or "")[:300], datetime.now().isoformat()),
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True}
 
 
 # ── Signup notifications (active once RESEND_API_KEY + NOTIFY_EMAIL are set) ──
