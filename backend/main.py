@@ -17,6 +17,18 @@ from integrity_engine import screen_integrity
 app = FastAPI(title="RBF API", version="1.0.0", docs_url="/api/docs")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+
+@app.exception_handler(Exception)
+async def _unhandled_exception(request: Request, exc: Exception):
+    """Never show a user a stack trace. HTTPException/validation errors are
+    handled by FastAPI; this catches genuine bugs and returns a clean 500."""
+    return JSONResponse(
+        status_code=500,
+        content={"error": "internal_error",
+                 "detail": "Something went wrong on our end. Please try again."},
+    )
+
+
 load_models()
 init_db()
 
@@ -253,7 +265,7 @@ def submit_seller(data: MerchantSubmission, request: Request, background: Backgr
     usage = consume_api_key(request)
     if usage is None:
         rate_limit(request, "submit", limit=30, window_s=3600)
-    result = score(data.dict())
+    result = score(data.model_dump())
     seller_id = f"RBF-{str(uuid.uuid4())[:6].upper()}"
     conn = get_db()
     # Integrity screen: compare against this merchant's own recent submissions
@@ -264,7 +276,7 @@ def submit_seller(data: MerchantSubmission, request: Request, background: Backgr
         "(LOWER(TRIM(shop_name)) = LOWER(TRIM(?)) OR (phone != '' AND phone = ?))",
         (cutoff, data.shop_name, data.phone or ""),
     ).fetchall()]
-    integrity = screen_integrity(data.dict(), prior_submissions=priors)
+    integrity = screen_integrity(data.model_dump(), prior_submissions=priors)
     conn.execute("""
         INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, (
@@ -296,7 +308,7 @@ def submit_seller(data: MerchantSubmission, request: Request, background: Backgr
         "timestamp": datetime.now().isoformat(),
         **result,
         "integrity": integrity,
-        "financing": build_financing_analysis(data.dict(), result["risk_tier"]),
+        "financing": build_financing_analysis(data.model_dump(), result["risk_tier"]),
     }
     if usage is not None:
         payload["usage"] = usage
