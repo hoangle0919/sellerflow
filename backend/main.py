@@ -1,6 +1,6 @@
-import os, uuid, hmac, secrets, time, hashlib
+import os, uuid, hmac, secrets, time, hashlib, ssl
 import json as jsonlib
-import urllib.request
+import urllib.request, urllib.error
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, Header, Depends, Request, BackgroundTasks
@@ -504,6 +504,11 @@ def notify(subject: str, text: str):
     if not (RESEND_API_KEY and NOTIFY_EMAIL):
         return
     try:
+        try:
+            import certifi
+            ctx = ssl.create_default_context(cafile=certifi.where())
+        except Exception:
+            ctx = ssl.create_default_context()
         req = urllib.request.Request(
             "https://api.resend.com/emails",
             data=jsonlib.dumps({
@@ -512,11 +517,19 @@ def notify(subject: str, text: str):
                 "subject": subject,
                 "text": text,
             }).encode(),
-            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+                # Resend is behind Cloudflare, which blocks the default
+                # Python-urllib User-Agent (error 1010). Send a normal one.
+                "User-Agent": "Mozilla/5.0 (compatible; RBF-notify/1.0)",
+            },
         )
-        urllib.request.urlopen(req, timeout=8)
-    except Exception:
-        pass  # a failed notification must never affect the request itself
+        urllib.request.urlopen(req, timeout=8, context=ctx)
+    except Exception as e:
+        # A failed alert must never affect the request — but log it so a
+        # silent failure (like the SSL + Cloudflare bugs) can't hide again.
+        print(f"[notify] alert send failed: {type(e).__name__}: {e}", flush=True)
 
 
 def notify_signup(email: str, role: str, position: int):
