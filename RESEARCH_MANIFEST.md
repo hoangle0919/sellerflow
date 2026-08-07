@@ -62,7 +62,9 @@
 
 | File | Purpose |
 |---|---|
-| `baseline_v2.json` | **Current baseline.** `net_sales` remittance basis. |
+| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds produce byte-identical output. SHA-256 `264d319b…ac5a7849`. |
+| `baseline_v2_provenance.json` | Execution record for the above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
+| `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
 | `baseline_v1.json` | Superseded (`gmv` basis). Audit trail. |
 | `validation_v1.json` | Convergence, pricing, equal-cost cap, recovery boundary, RBF-G breakpoint, revenue definition. |
 | `baseline_v2_log.txt` | Full console output of the baseline run. |
@@ -82,11 +84,13 @@
 cd research                       # from the repository root
 pip install pytest numpy          # only dependencies
 
-# 1. Test suite  (expect: 604 passed)
+# 1. Test suite  (expect: 629 passed)
 python3 -m pytest rbf_sim/tests/ -q
 
 # 2. Baseline — 10 scenarios x 4 contracts x 500 paths
-python3 run_baseline.py                     # -> results/baseline_v2.json
+#    -> results/baseline_v2_canonical.json   (deterministic; checksum it)
+#    -> results/baseline_v2_provenance.json  (execution record)
+python3 run_baseline.py
 
 # 3. Validation battery
 python3 run_validation.py 2                 # pricing + equal-effective-cost cap
@@ -127,8 +131,9 @@ Spot-check any reproduction against these:
 
 | Quantity | Value | Source |
 |---|---|---|
-| Simulation tests passing | 604 (461 inherited + 143 settlement) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | 48 (47 inherited + 1 credential regression guard, D-025) | `pytest backend/tests/ -q` |
+| Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
+| Backend tests passing | 56 (47 inherited + 1 credential guard D-025 + 8 withdrawn-claim guards D-026) | `pytest backend/tests/ -q` |
+| Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |
 | Benchmark B effective APR | 19.5618% | `validation_v1` |

@@ -166,6 +166,33 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-027 — Canonical, checksummable results; wall-clock moved to provenance
+**Date:** 2026-08-07
+**Raised by:** the research-foundation gate report; prioritized by Hoang as *"worth fixing but cheap."*
+
+**The problem.** `results/baseline_v2.json` embedded `date.today()`. Every quantity in it reproduced bit-for-bit, but the *file* did not: two runs of identical code, configuration and seeds produced two different checksums. A result that cannot be checksummed cannot be cited by checksum, and "reproducible" then rests on someone diffing 1,553 lines by hand — which is exactly what the gate report had to do to prove nothing changed.
+
+**Decision.** Split the artifact in two.
+
+| | Contents | Expected to vary? |
+|---|---|---|
+| `baseline_v2_canonical.json` | the analytical result + deterministic identity metadata: schema version, spec version, generator fingerprint, scenario-config hash | **No.** Byte-identical for identical code, config and seeds. |
+| `baseline_v2_provenance.json` | wall-clock UTC, git commit, tree-dirty flag, Python/NumPy versions, platform, and the canonical file's SHA-256 | **Yes.** That is its job. |
+
+**`baseline_v2.json` is preserved unmodified** as historical evidence and is no longer written by `run_baseline.py`. A test asserts it still exists, still carries its date, and still agrees with the canonical artifact on **every** number — that equivalence is what licenses citing the canonical one instead.
+
+**Why `source_commit` is in provenance, not canonical.** Hoang's list named it as canonical metadata; putting it there is self-defeating. Committing the artifact changes `HEAD`, which changes what the next run emits, so the file could never be both committed and reproducible. Code identity is captured instead by `generator_fingerprint`, a SHA-256 over the generating source. That is strictly stronger here: stable across commits that do not touch the generator, and changing exactly when the generator changes. The commit is still recorded — in provenance.
+
+**A real defect the tests caught.** The first implementation was stable across runs but **not idempotent under round-trip**. `post_shock_recovery` uses integer keys `{6: …, 12: …}`; `sort_keys=True` sorts them numerically on write (6, 12) and lexicographically after re-reading, since JSON keys are strings ("12", "6"). A consumer who loaded the artifact, re-encoded it, and checksummed the result would have got a hash different from the file's own — defeating the purpose. Keys are now normalised to `str` before encoding, making the encoding a fixed point: `canonical_bytes(json.loads(canonical_bytes(x))) == canonical_bytes(x)`. This was found by a test written to check exactly that property, not by inspection.
+
+**Encoding.** `sort_keys` removes dict-ordering dependence; `ensure_ascii` removes locale/encoding variation; floats use shortest round-trip `repr`, asserted on the running interpreter rather than assumed across versions.
+
+**Verification.** Two full baseline runs produce byte-identical canonical files (SHA-256 `264d319b…ac5a7849`); the provenance sidecars differ only in `run_utc`. Numerical comparison against the frozen `baseline_v2.json`: **0 differing leaves.** No finding changes.
+
+**Consequence:** 25 tests added (`rbf_sim/tests/test_canonical.py`). Simulation tests 604 → 629. `RESULTS_REGISTRY.md` gains the canonical artifact and its checksum. `validation_v1.json` is **not** migrated in this commit — it has the same `_meta.date` issue and should follow the same split when next regenerated; recorded so it is not forgotten.
+
+---
+
 ### D-026 — Withdrawn 0.92 benchmark purged from every public surface (P0-2 closed)
 **Date:** 2026-08-07
 **Raised by:** Hoang, reviewing the research-foundation gate report.

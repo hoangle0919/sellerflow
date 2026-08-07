@@ -8,6 +8,21 @@ README, app, or resume.
 
 ---
 
+## Canonical artifacts *(added 2026-08-07, D-027)*
+
+Results are cited by **checksum**, from the canonical artifact. Canonical files contain only quantities and deterministic identity metadata; wall-clock time, git commit and environment live in the provenance sidecar. Identical code, configuration and seeds produce a byte-identical canonical file.
+
+| Artifact | SHA-256 | Status |
+|---|---|---|
+| `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **Canonical.** Cite this. |
+| `results/baseline_v2_provenance.json` | *(varies by run — that is its purpose)* | Execution record for the above |
+| `results/baseline_v2.json` | `b09ae1f7ec3a92c6b751222f639cc562ee793d71c453298612a5d30e6da356e0` | **Frozen historical evidence.** Not rewritten. Numerically identical to the canonical artifact (0 differing leaves); differs only by an embedded run date. |
+| `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Not yet canonicalized** — carries the same `_meta.date` problem. Migrate on next regeneration. |
+
+Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v2_canonical.json`
+
+---
+
 ## R-000 — Phase 0 audit evidence
 
 | Field | Value |

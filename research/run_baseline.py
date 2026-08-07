@@ -7,6 +7,8 @@ seller outcome appears anywhere. See spec section 15 for binding interpretation
 limits.
 """
 import json
+
+from rbf_sim.canonical import write_canonical_pair
 import os
 import sys
 from datetime import date
@@ -169,9 +171,13 @@ def main():
     print("  Positive provider column = fixed recovers more capital by month 12.")
 
     # ── persist ───────────────────────────────────────────────────────────────
+    # D-027: `results/baseline_v2.json` is FROZEN historical evidence and is no
+    # longer written by this script. Its numbers are identical to the canonical
+    # artifact below; it differs only by carrying an embedded wall-clock date,
+    # which is what made it un-checksummable. It is preserved, not rewritten.
     os.makedirs("results", exist_ok=True)
     payload = {
-        "run": "baseline_v2", "date": str(date.today()),
+        "run": "baseline_v2",
         "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03)",
         "provenance": "SIMULATED — no observed seller data",
         "n_paths": N_PATHS, "base_seed": 20260803,
@@ -182,11 +188,24 @@ def main():
         "underreporting": {str(k): v for k, v in ur.items()},
         "tradeoff": tradeoff,
     }
-    with open("results/baseline_v2.json", "w") as fh:
-        json.dump(payload, fh, indent=2, default=str)
+    written = write_canonical_pair(
+        payload,
+        stem="baseline_v2",
+        scenario_config={"scenarios": SCENARIOS, "n_paths": N_PATHS,
+                         "base_seed": 20260803,
+                         "terms": {"A": TERMS.A, "r": TERMS.r, "f": TERMS.f,
+                                   "j": TERMS.j, "N_B": TERMS.N_B}},
+        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+        extra_sources=("run_baseline.py",),
+    )
     print("\n" + "=" * W)
-    print("  Written: results/baseline_v2.json")
-    print("  Reproduce: python3 run_baseline.py  (deterministic given seeds)")
+    print("  Written: results/baseline_v2_canonical.json")
+    print("           results/baseline_v2_provenance.json")
+    print(f"  SHA-256: {written['sha256']}")
+    print("  Reproduce: python3 run_baseline.py  — identical code, config and")
+    print("             seeds produce a byte-identical canonical file.")
+    print("  Note:    results/baseline_v2.json is frozen historical evidence")
+    print("           (same numbers, embedded run date) and is not rewritten.")
     print("=" * W)
 
 
