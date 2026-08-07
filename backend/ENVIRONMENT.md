@@ -27,14 +27,21 @@ it, which is the property that matters; a pickle is not a portable format.
 | scikit-learn | **>= 1.9.0, < 1.10** | Pinned range |
 | numpy / pandas / joblib | bounded ranges | See `requirements.txt` |
 
-**Verification status — stated precisely, because it is incomplete.** The
-pinned set was **not installed during the hardening gate**: that verification
-ran on Python 3.10, where scikit-learn 1.9 cannot be installed at all
-(`Requires-Python >=3.11`). What *was* verified there, under scikit-learn
-1.7.2, is that the suite passes with **no model artifact present** — which is
-the clean-checkout state and the path the pins do not affect. **The pinned
-combination needs one confirming `pip install -r requirements.txt` plus test
-run on a Python 3.11+ machine.** It is recorded here rather than assumed.
+**Verification status: VERIFIED** on 2026-08-07, commit `68b8c3d`.
+
+The pinned set was installed and exercised on macOS 26.0 / arm64 with Python
+3.11.5. Resolved: scikit-learn 1.9.0, numpy 2.4.6, pandas 2.3.3, joblib 1.5.3 —
+all inside the declared bounds. 196 backend and 629 simulation tests passed,
+counts identical to the Linux sandbox, so nothing was masked by the earlier
+environment. Evidence:
+[`evidence/2026-08-07-native-macos-verification.md`](../evidence/2026-08-07-native-macos-verification.md).
+
+Re-verify at any time with `./verify_native_macos.sh` from the repository root.
+
+*Historical note:* the pre-UI hardening gate could not check this. It ran on
+Python 3.10, where scikit-learn 1.9 cannot be installed at all
+(`Requires-Python >=3.11`), so the pins were declared but untested and that gap
+was recorded here rather than glossed over. This entry replaces it.
 
 ## 3. What happens when the model is missing or incompatible?
 
