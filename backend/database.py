@@ -134,14 +134,18 @@ def _seed_sellers(conn):
     import sys
     sys.path.insert(0, os.path.dirname(__file__))
 
+    # D-028: seeding used to joblib.load these directly. A pickle from another
+    # scikit-learn loads fine and then raises at predict_proba, which crashed
+    # seeding — and therefore app startup — outside this guard. Reuse
+    # ml_engine's validated loader instead of duplicating a weaker check.
     try:
-        import joblib, pandas as pd
-        rf     = joblib.load(f"{os.path.dirname(__file__)}/models/rf_model.pkl")
-        lr     = joblib.load(f"{os.path.dirname(__file__)}/models/lr_model.pkl")
-        scaler = joblib.load(f"{os.path.dirname(__file__)}/models/scaler.pkl")
-        models_loaded = True
+        import pandas as pd
+        import ml_engine
+        models_loaded = ml_engine.load_models()
+        rf, lr, scaler = ml_engine._rf, ml_engine._lr, ml_engine._scaler
     except Exception:
         models_loaded = False
+        rf = lr = scaler = None
 
     FEATURES = ['monthly_revenue', 'revenue_growth', 'order_volume', 'avg_order_value',
                 'return_rate', 'rating', 'days_active', 'inventory_turnover',

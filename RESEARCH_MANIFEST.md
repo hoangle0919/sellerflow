@@ -132,7 +132,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | 56 (47 inherited + 1 credential guard D-025 + 8 withdrawn-claim guards D-026) | `pytest backend/tests/ -q` |
+| Backend tests passing | 71 (47 inherited + 1 credential guard D-025 + 8 withdrawn-claim guards D-026 + 15 model-artifact guards D-028) | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |

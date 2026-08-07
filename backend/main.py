@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord, VisitPing
 from database import get_db, init_db
+import ml_engine as _ml_engine
 from ml_engine import load_models, score, FEATURES
 from financing_engine import build_financing_analysis
 from integrity_engine import screen_integrity
@@ -102,7 +103,13 @@ def health():
     return {
         "status": "operational",
         "version": "1.0.0",
-        "model": "RF+LR ensemble v1.0 (synthetic baseline)",
+        # D-028: must describe what is actually loaded. Advertising the
+        # ensemble while the heuristic is scoring is the same defect class as
+        # the withdrawn AUC — the label contradicting the artifact.
+        "model": ("RF+LR ensemble v1.0 (synthetic baseline, unvalidated)"
+                  if _ml_engine.model_status()["available"]
+                  else "deterministic heuristic fallback (no model artifact loaded)"),
+        "scoring_path": _ml_engine.model_status()["scoring_path"],
         "sellers_assessed": sellers,
         "waitlist_count": waitlist,
         "avg_response_ms": 1200,
@@ -428,6 +435,11 @@ def model_status(_: None = Depends(require_auth)):
                           "backend/validate_on_real_data.py.",
         },
         "real_world_validation": real,
+        # D-028: whether an ensemble is actually loaded, and if not, why. A
+        # clean checkout has no model artifact (`*.pkl` is gitignored) and
+        # scores via the deterministic heuristic; the API says so rather than
+        # implying a model is running.
+        "model_artifact": _ml_engine.model_status(),
         "learning_loop": {
             "outcomes_recorded": n,
             "outcomes_needed_for_metrics": max(0, MIN_FOR_METRICS - n),

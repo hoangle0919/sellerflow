@@ -166,6 +166,38 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-028 — Backend no longer depends on an untracked model artifact
+**Date:** 2026-08-07
+**Raised by:** Hoang — *"a clean checkout must not claim backend reproduction while relying on a local `.pkl` produced under another scikit-learn version."*
+
+**How the model is obtained.** It is never committed: `.gitignore` excludes `*.pkl`. Production trains its own at deploy (`railway.toml` → `train_model.py --skip-if-exists`) from `generate_data.py`, so the artifact is always built by the interpreter and scikit-learn that will consume it. A clean checkout has **no model**, by design.
+
+**The defect.** `ml_engine.load_models()` wrapped only `joblib.load` in `try/except`. A pickle from a different scikit-learn **unpickles successfully and raises at first use**, because estimator attributes are added or renamed between minor versions. The guard therefore caught the easy failure (file absent) and missed the dangerous one (file present, unusable) — which surfaced during the previous gate as a *collection error that took down the entire backend suite*, and in production would surface as a 500 from a request handler. `database._seed_sellers()` had a second, weaker copy of the same guard, so an unusable artifact crashed app startup outside either.
+
+**Three classified outcomes, none of which crash and none of which misreport:**
+
+| Condition | `reason` | Behaviour |
+|---|---|---|
+| No `.pkl` present | `artifacts_absent` | Heuristic; informational log naming `train_model.py` |
+| Present, unreadable | `artifact_unreadable` | Heuristic; warning with the exception |
+| Loads, cannot predict | `artifact_incompatible` | Heuristic; warning naming the runtime scikit-learn |
+
+Every artifact is **smoke-tested against a fixed feature row at load time**. Loading is not evidence of usability, so usability is what gets checked.
+
+**Honest labelling, which is the same principle as D-026.** A heuristic score now reports `model_version: "heuristic-fallback-v1"` and `scoring_path: "heuristic"` — never `v1.0-synthetic`. `/api/health` said *"RF+LR ensemble v1.0 (synthetic baseline)"* unconditionally, including when no model existed; it now describes what is actually loaded. Reporting the model's label while the fallback ran is the artifact contradicting its own description, which is the defect this project exists to avoid.
+
+**Tests no longer depend on anyone's artifacts.** `conftest.py` points `RBF_MODEL_DIR` at an empty temp directory before import, so the suite runs in clean-checkout state. The incompatible-artifact case is exercised with objects that unpickle cleanly and raise on use — the same *shape* as a cross-version failure, without needing two scikit-learns installed. The acceptance path is covered by a deterministically-built throwaway ensemble (seed 20260803) that is created in `tmp_path` and never committed. **No pickle was committed to make anything pass.**
+
+**Environment.** `scikit-learn>=1.4.0` had no ceiling — the exact condition that lets a build/consume mismatch appear silently. Now bounded (`>=1.9.0,<1.10`), with numpy/pandas/joblib bounded likewise, and Python `>= 3.11` documented. `backend/ENVIRONMENT.md` answers the four questions in full.
+
+**Verification limit, stated rather than buried.** The pinned set was **not installed during this gate**: verification ran on Python 3.10, where scikit-learn 1.9 cannot be installed (`Requires-Python >=3.11`). What was verified is that the suite passes with **no artifact present** — the clean-checkout path, which the pins do not affect — and that all three failure modes are classified correctly under scikit-learn 1.7.2. **The pinned combination needs one confirming install-and-test run on a Python 3.11+ machine.**
+
+**The model is not necessary.** Everything downstream of the PD estimate is deterministic arithmetic in `financing_engine.py`; `research/rbf_sim/` does not import the backend or scikit-learn at all. Both independence claims are asserted by test, by source inspection, so they cannot rot silently.
+
+**Consequence:** backend tests 56 → 71. Mutation-tested: removing the smoke test, always reporting the ensemble version, failing to clear the globals on rejection, and dropping the `RBF_MODEL_DIR` redirect are each caught.
+
+---
+
 ### D-027 — Canonical, checksummable results; wall-clock moved to provenance
 **Date:** 2026-08-07
 **Raised by:** the research-foundation gate report; prioritized by Hoang as *"worth fixing but cheap."*
