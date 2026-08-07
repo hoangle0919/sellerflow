@@ -3,6 +3,7 @@ __pycache__/
 *.pyo
 *.pkl
 *.egg-info/
+.pytest_cache/
 backend/data/sellerflow.db
 backend/data/*.csv
 backend/venv/
@@ -15,3 +16,13 @@ dist/
 
 # Internal / competition materials — never publish to the public repo
 docs/
+
+# Research bundle archives. v5 is committed as immutable provenance (its
+# SHA-256 is recorded in RESEARCH_MANIFEST.md); v4 and earlier are obsolete
+# and deliberately excluded so no one integrates from the wrong one.
+rbf-research-bundle-v4.zip
+
+# Native verification artifacts (SSD-local; never the internal disk)
+.venv/
+.cache/
+NATIVE_VERIFICATION.md

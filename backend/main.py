@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord, VisitPing
 from database import get_db, init_db
+import ml_engine as _ml_engine
 from ml_engine import load_models, score, FEATURES
 from financing_engine import build_financing_analysis
 from integrity_engine import screen_integrity
@@ -55,7 +56,12 @@ def rate_limit(request: Request, bucket: str, limit: int, window_s: int):
 
 
 # ── Auth ──
-DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD", "demo2025")
+# No default. A shipped fallback credential is a published credential, so an
+# unset DASHBOARD_PASSWORD DISABLES dashboard login rather than silently
+# accepting a value that is in the repository's history. The rest of the API
+# and the health check keep working, so a misconfigured deploy fails closed and
+# visibly instead of failing open and quietly.
+DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD") or None
 SESSION_TTL_S = 12 * 3600
 _sessions: dict[str, float] = {}  # token -> expiry epoch
 
@@ -71,6 +77,10 @@ def require_auth(authorization: str = Header(default="")):
 @app.post("/api/auth/login")
 def login(data: LoginRequest, request: Request):
     rate_limit(request, "login", limit=10, window_s=300)
+    if DASHBOARD_PASSWORD is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Dashboard login is not configured. Set DASHBOARD_PASSWORD.")
     if not hmac.compare_digest(data.password.encode(), DASHBOARD_PASSWORD.encode()):
         raise HTTPException(status_code=401, detail="Invalid password")
     now = time.time()
@@ -93,7 +103,13 @@ def health():
     return {
         "status": "operational",
         "version": "1.0.0",
-        "model": "RF+LR ensemble v1.0 (synthetic baseline)",
+        # D-028: must describe what is actually loaded. Advertising the
+        # ensemble while the heuristic is scoring is the same defect class as
+        # the withdrawn AUC — the label contradicting the artifact.
+        "model": ("RF+LR ensemble v1.0 (synthetic baseline, unvalidated)"
+                  if _ml_engine.model_status()["available"]
+                  else "deterministic heuristic fallback (no model artifact loaded)"),
+        "scoring_path": _ml_engine.model_status()["scoring_path"],
         "sellers_assessed": sellers,
         "waitlist_count": waitlist,
         "avg_response_ms": 1200,
@@ -389,11 +405,23 @@ def model_status(_: None = Depends(require_auth)):
 
     return {
         "training_baseline": {
-            "auc": 0.92,
+            # WITHDRAWN 2026-08-07. `auc` is null, not omitted: the key stays so
+            # existing consumers read a null instead of raising, and so the
+            # withdrawal is visible rather than silently absent.
+            "auc": None,
             "data": "synthetic",
-            "disclaimer": "Measured on held-out SYNTHETIC validation data. It "
-                          "describes separation of synthetic-good from synthetic-bad, "
-                          "NOT real-world predictive accuracy.",
+            "validation_status": "withdrawn",
+            "reason": "synthetic circular-label benchmark",
+            "withdrawn_value": 0.92,
+            "disclaimer": "This benchmark is WITHDRAWN and carries no predictive "
+                          "claim. generate_data.py built the `defaulted` label by "
+                          "evaluating a hand-written weighted formula over the same "
+                          "ten features the model consumes, so the model was scored "
+                          "on its ability to rediscover that formula. The figure "
+                          "measured the chosen noise variance, not skill. Evidence: "
+                          "the generating function scores 0.9098 against its own "
+                          "label versus the model's 0.9182 — reproduce with "
+                          "research/analysis/00_audit_evidence.py.",
         },
         "methodology_validation": {
             "data": "real_public_credit_benchmarks",
@@ -407,6 +435,11 @@ def model_status(_: None = Depends(require_auth)):
                           "backend/validate_on_real_data.py.",
         },
         "real_world_validation": real,
+        # D-028: whether an ensemble is actually loaded, and if not, why. A
+        # clean checkout has no model artifact (`*.pkl` is gitignored) and
+        # scores via the deterministic heuristic; the API says so rather than
+        # implying a model is running.
+        "model_artifact": _ml_engine.model_status(),
         "learning_loop": {
             "outcomes_recorded": n,
             "outcomes_needed_for_metrics": max(0, MIN_FOR_METRICS - n),

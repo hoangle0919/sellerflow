@@ -1,0 +1,1513 @@
+{
+  "run": "baseline_v1",
+  "date": "2026-08-03",
+  "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03)",
+  "provenance": "SIMULATED \u2014 no observed seller data",
+  "n_paths": 500,
+  "base_seed": 20260803,
+  "terms": {
+    "A": 185000000.0,
+    "r": 0.1,
+    "f": 1.2,
+    "cap": 222000000.0,
+    "j": 0.18,
+    "N_B": 12
+  },
+  "match_benchmark_a": {
+    "term": 12,
+    "payment": 18500000.0,
+    "total": 222000000.0,
+    "apr": 0.4129989841496158
+  },
+  "scenarios": {
+    "stable": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.10208236683130992,
+        "burden_max": 0.12950655369314434,
+        "burden_p90": 0.11905661825258826,
+        "burden_p95": 0.1240695154345213,
+        "n_high_burden": {
+          "0.1": 6.272,
+          "0.15": 0.06,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.0935891066694561,
+        "burden_max": 0.11873159923897705,
+        "burden_p90": 0.10915109916836965,
+        "burden_p95": 0.11374692294916243,
+        "n_high_burden": {
+          "0.1": 3.7,
+          "0.15": 0.008,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09600614179741696,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.888,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.49,
+        "duration_sd": 0.5743692192309752,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9841874227473496,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 110697385.26559004,
+          "12": 110744864.5930057
+        },
+        "apr_mean": 0.41390125892816587
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09600614179741696,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.888,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.49,
+        "duration_sd": 0.5743692192309752,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9841874227473496,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 110697385.26559004,
+          "12": 110744864.5930057
+        },
+        "apr_mean": 0.41390125892816587
+      }
+    },
+    "seasonal": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.10388843672000948,
+        "burden_max": 0.14215194684159707,
+        "burden_p90": 0.12728571397399824,
+        "burden_p95": 0.13441250720857673,
+        "n_high_burden": {
+          "0.1": 6.542,
+          "0.15": 0.288,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.09524491141529742,
+        "burden_max": 0.13032489478044332,
+        "burden_p90": 0.11669553354200515,
+        "burden_p95": 0.12322937707390835,
+        "n_high_burden": {
+          "0.1": 4.542,
+          "0.15": 0.078,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09595856558045503,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.76,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.534,
+        "duration_sd": 0.5448339196489147,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9839994825185461,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 120553051.9079128,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.3865865342750902
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09595895844690129,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.76,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.534,
+        "duration_sd": 0.5448339196489147,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9839994825185461,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 120553051.9079128,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.38658566253818066
+      }
+    },
+    "seasonal_strong": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.10935170610551535,
+        "burden_max": 0.1830896863279247,
+        "burden_p90": 0.14453721332811925,
+        "burden_p95": 0.16266053522729174,
+        "n_high_burden": {
+          "0.1": 6.862,
+          "0.15": 1.32,
+          "0.2": 0.258,
+          "0.25": 0.008
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.1002536364003774,
+        "burden_max": 0.16785661143747918,
+        "burden_p90": 0.13251170692608152,
+        "burden_p95": 0.149127167157616,
+        "n_high_burden": {
+          "0.1": 5.532,
+          "0.15": 0.86,
+          "0.2": 0.094,
+          "0.25": 0.002
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09612736807833924,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.758,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.54,
+        "duration_sd": 0.5553377350765928,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9835764594663595,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 129784941.04756367,
+          "12": 129853641.09907602
+        },
+        "apr_mean": 0.3638740673496471
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09610198239455847,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.756,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.544,
+        "duration_sd": 0.5550351340230635,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9835510440038161,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 129784941.04756367,
+          "12": 129853641.09907602
+        },
+        "apr_mean": 0.36386432754287446
+      }
+    },
+    "growth": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.08966985483071421,
+        "burden_max": 0.1339343759770134,
+        "burden_p90": 0.1164805750508124,
+        "burden_p95": 0.12484232860264984,
+        "n_high_burden": {
+          "0.1": 3.8,
+          "0.15": 0.152,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.08220931654782508,
+        "burden_max": 0.12279102639472864,
+        "burden_p90": 0.10678938294372015,
+        "burden_p95": 0.11445543800688109,
+        "n_high_burden": {
+          "0.1": 2.398,
+          "0.15": 0.032,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09587315712102965,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.72,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 11.056,
+        "duration_sd": 0.35897632233895316,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 112647506.1832154,
+          "12": 112647506.1832154
+        },
+        "apr_mean": 0.42361633213252287
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09583976650145515,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.72,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 11.06,
+        "duration_sd": 0.35832945734337834,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 112647506.1832154,
+          "12": 112647506.1832154
+        },
+        "apr_mean": 0.4236038563204218
+      }
+    },
+    "gradual_decline": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.11876221179736164,
+        "burden_max": 0.1569130142750755,
+        "burden_p90": 0.14209150479636007,
+        "burden_p95": 0.1492104566499296,
+        "n_high_burden": {
+          "0.1": 9.742,
+          "0.15": 0.922,
+          "0.2": 0.018,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.10888118735110242,
+        "burden_max": 0.1438578403563401,
+        "burden_p90": 0.13026948151765766,
+        "burden_p95": 0.1367961360720081,
+        "n_high_burden": {
+          "0.1": 7.85,
+          "0.15": 0.302,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09665130177617912,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.78,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 15.484,
+        "duration_sd": 0.9196434091537872,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.868148371506798,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 102468828.10130905,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.360599693733416
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09665130177617912,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.78,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 15.484,
+        "duration_sd": 0.9196434091537872,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.868148371506798,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 102468828.10130905,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.360599693733416
+      }
+    },
+    "sustained_decline": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.13555756499476132,
+        "burden_max": 0.20033382394921867,
+        "burden_p90": 0.1772219011047078,
+        "burden_p95": 0.18844260870084947,
+        "n_high_burden": {
+          "0.1": 10.314,
+          "0.15": 3.666,
+          "0.2": 0.566,
+          "0.25": 0.016
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.12427916597105464,
+        "burden_max": 0.18366603558542194,
+        "burden_p90": 0.16247702636108122,
+        "burden_p95": 0.17276417028925262,
+        "n_high_burden": {
+          "0.1": 9.076,
+          "0.15": 2.454,
+          "0.2": 0.206,
+          "0.25": 0.004
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09727897102666351,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.1,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 1.098,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 17.264,
+        "duration_sd": 0.8138206190555755,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.7838883535962553,
+          "18": 0.99927530978309,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 83825688.52865036,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.32795517777424976
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09727897102666351,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.1,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 1.098,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 17.264,
+        "duration_sd": 0.8138206190555755,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.7838883535962553,
+          "18": 0.99927530978309,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 83825688.52865036,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.32795517777424976
+      }
+    },
+    "severe_downturn": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.17514550201536977,
+        "burden_max": 0.30026965283655727,
+        "burden_p90": 0.2651391788196899,
+        "burden_p95": 0.2822456921202527,
+        "n_high_burden": {
+          "0.1": 10.35,
+          "0.15": 6.236,
+          "0.2": 4.72,
+          "0.25": 2.192
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.16057338382327105,
+        "burden_max": 0.2752871964201157,
+        "burden_p90": 0.2430795803335268,
+        "burden_p95": 0.25876283051398596,
+        "n_high_burden": {
+          "0.1": 9.244,
+          "0.15": 5.906,
+          "0.2": 3.774,
+          "0.25": 1.302
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09741025954642679,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.1,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 1.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 18.27,
+        "duration_sd": 0.5559676249567055,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.674820118069106,
+          "18": 0.992140550905988,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 57744812.29056164,
+          "12": 120605164.56804596
+        },
+        "apr_mean": 0.29336203774638864
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09741025954642679,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.1,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 1.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 18.27,
+        "duration_sd": 0.5559676249567055,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.674820118069106,
+          "18": 0.992140550905988,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 57744812.29056164,
+          "12": 120605164.56804596
+        },
+        "apr_mean": 0.29336203774638864
+      }
+    },
+    "disruption_1m": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.11311505165193944,
+        "burden_max": 0.22147395945666118,
+        "burden_p90": 0.13984796161282315,
+        "burden_p95": 0.17737201622378812,
+        "n_high_burden": {
+          "0.1": 6.786,
+          "0.15": 1.276,
+          "0.2": 0.758,
+          "0.25": 0.168
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.10370387133037591,
+        "burden_max": 0.20304731031901257,
+        "burden_p90": 0.12821260128614284,
+        "burden_p95": 0.16261465189160518,
+        "n_high_burden": {
+          "0.1": 5.016,
+          "0.15": 1.056,
+          "0.2": 0.526,
+          "0.25": 0.052
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.0963415339036599,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.802,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.938,
+        "duration_sd": 0.5675878786584505,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9587523160294857,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 120056765.89602104,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.3730602180729371
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09634192677010617,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.802,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.938,
+        "duration_sd": 0.5675878786584505,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9587523160294857,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 120056765.89602104,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.3730593886741432
+      }
+    },
+    "platform_outage": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.12541332385660725,
+        "burden_max": 0.3690009727539408,
+        "burden_p90": 0.13989498945568407,
+        "burden_p95": 0.24378791144486772,
+        "n_high_burden": {
+          "0.1": 6.786,
+          "0.15": 1.278,
+          "0.2": 1.002,
+          "0.25": 0.998
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.11497892641520417,
+        "burden_max": 0.3383000656447308,
+        "burden_p90": 0.12825571640914166,
+        "burden_p95": 0.2235047399188998,
+        "n_high_burden": {
+          "0.1": 5.016,
+          "0.15": 1.076,
+          "0.2": 1.002,
+          "0.25": 0.98
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.0965692789259835,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.856,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 13.102,
+        "duration_sd": 0.5929553102890639,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9458341443551119,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 119482456.98545973,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.3676370737447158
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09657018550402206,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.856,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 13.102,
+        "duration_sd": 0.5929553102890639,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9458189991584832,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 119482456.98545973,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.36763546944592823
+      }
+    },
+    "returns_spike": {
+      "FIX-A": {
+        "n_paths": 500,
+        "burden_mean": 0.10388843672000948,
+        "burden_max": 0.14215194684159707,
+        "burden_p90": 0.12728571397399824,
+        "burden_p95": 0.13441250720857673,
+        "n_high_burden": {
+          "0.1": 6.542,
+          "0.15": 0.288,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 111000000.0,
+          "12": 111000000.0
+        },
+        "apr_mean": 0.4129989841496158
+      },
+      "FIX-B": {
+        "n_paths": 500,
+        "burden_mean": 0.09524491141529742,
+        "burden_max": 0.13032489478044332,
+        "burden_p90": 0.11669553354200515,
+        "burden_p95": 0.12322937707390835,
+        "n_high_burden": {
+          "0.1": 4.542,
+          "0.15": 0.078,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 203529584.25182953,
+        "multiple_mean": 1.1001599148747543,
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 101764792.12591474,
+          "12": 101764792.12591474
+        },
+        "apr_mean": 0.19561817146154947
+      },
+      "RBF": {
+        "n_paths": 500,
+        "burden_mean": 0.09595856558045503,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.76,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.534,
+        "duration_sd": 0.5448339196489147,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9839994825185461,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 120553051.9079128,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.3865865342750902
+      },
+      "RBF-G": {
+        "n_paths": 500,
+        "burden_mean": 0.09595895844690129,
+        "burden_max": 0.10000000000000002,
+        "burden_p90": 0.10000000000000002,
+        "burden_p95": 0.10000000000000002,
+        "n_high_burden": {
+          "0.1": 0.76,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "duration_mean": 12.534,
+        "duration_sd": 0.5448339196489147,
+        "duration_censored_rate": 0.0,
+        "total_repaid_mean": 222000000.0,
+        "multiple_mean": 1.2,
+        "recovery_ratio": {
+          "12": 0.9839994825185461,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "incomplete_recovery_rate": 0.0,
+        "post_shock_recovery": {
+          "6": 120553051.9079128,
+          "12": 120608982.84469044
+        },
+        "apr_mean": 0.38658566253818066
+      }
+    }
+  },
+  "underreporting": {
+    "1.0": {
+      "n_paths": 500,
+      "burden_mean": 0.09595856558045503,
+      "burden_max": 0.10000000000000002,
+      "burden_p90": 0.10000000000000002,
+      "burden_p95": 0.10000000000000002,
+      "n_high_burden": {
+        "0.1": 0.76,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "duration_mean": 12.534,
+      "duration_sd": 0.5448339196489147,
+      "duration_censored_rate": 0.0,
+      "total_repaid_mean": 222000000.0,
+      "multiple_mean": 1.2,
+      "recovery_ratio": {
+        "12": 0.9839994825185461,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "incomplete_recovery_rate": 0.0,
+      "post_shock_recovery": {
+        "6": 120553051.9079128,
+        "12": 120608982.84469044
+      },
+      "apr_mean": 0.3865865342750902
+    },
+    "0.95": {
+      "n_paths": 500,
+      "burden_mean": 0.09180419709780532,
+      "burden_max": 0.09500000000000001,
+      "burden_p90": 0.09500000000000001,
+      "burden_p95": 0.09500000000000001,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "duration_mean": 13.08,
+      "duration_sd": 0.6079473661428265,
+      "duration_censored_rate": 0.0,
+      "total_repaid_mean": 222000000.0,
+      "multiple_mean": 1.2,
+      "recovery_ratio": {
+        "12": 0.9491478107495207,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "incomplete_recovery_rate": 0.0,
+      "post_shock_recovery": {
+        "6": 124617744.61452293,
+        "12": 125678533.70245594
+      },
+      "apr_mean": 0.3679192659862176
+    },
+    "0.9": {
+      "n_paths": 500,
+      "burden_mean": 0.08692144998345072,
+      "burden_max": 0.09000000000000001,
+      "burden_p90": 0.09000000000000001,
+      "burden_p95": 0.09000000000000001,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "duration_mean": 13.9,
+      "duration_sd": 0.6618156843109719,
+      "duration_censored_rate": 0.0,
+      "total_repaid_mean": 222000000.0,
+      "multiple_mean": 1.2,
+      "recovery_ratio": {
+        "12": 0.9016928421309048,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "incomplete_recovery_rate": 0.0,
+      "post_shock_recovery": {
+        "6": 124075951.1260402,
+        "12": 130748084.5602214
+      },
+      "apr_mean": 0.34901700119313184
+    },
+    "0.8": {
+      "n_paths": 500,
+      "burden_mean": 0.077407900475981,
+      "burden_max": 0.08000000000000002,
+      "burden_p90": 0.08000000000000002,
+      "burden_p95": 0.08000000000000002,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "duration_mean": 15.866,
+      "duration_sd": 0.6693608892070106,
+      "duration_censored_rate": 0.0,
+      "total_repaid_mean": 222000000.0,
+      "multiple_mean": 1.2,
+      "recovery_ratio": {
+        "12": 0.8016056329473732,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "incomplete_recovery_rate": 0.0,
+      "post_shock_recovery": {
+        "6": 111765835.48337184,
+        "12": 140887186.27575234
+      },
+      "apr_mean": 0.3099111162648491
+    },
+    "0.7": {
+      "n_paths": 500,
+      "burden_mean": 0.06805237658085153,
+      "burden_max": 0.07,
+      "burden_p90": 0.07,
+      "burden_p95": 0.07,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "duration_mean": 18.15,
+      "duration_sd": 0.7010706098532444,
+      "duration_censored_rate": 0.0,
+      "total_repaid_mean": 222000000.0,
+      "multiple_mean": 1.2,
+      "recovery_ratio": {
+        "12": 0.7014049288289514,
+        "18": 0.9939323649516022,
+        "24": 1.0
+      },
+      "incomplete_recovery_rate": 0.0,
+      "post_shock_recovery": {
+        "6": 97795106.04795034,
+        "12": 150986006.44889656
+      },
+      "apr_mean": 0.270017249200924
+    }
+  },
+  "tradeoff": {
+    "stable": {
+      "d_n_hpb_015": {
+        "mean": 0.06,
+        "lo": 0.04,
+        "hi": 0.082,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.015812577252650364,
+        "lo": 0.013853163332447418,
+        "hi": 0.017852845422284904,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "seasonal": {
+      "d_n_hpb_015": {
+        "mean": 0.288,
+        "lo": 0.246,
+        "hi": 0.33,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.016000517481453896,
+        "lo": 0.01401200591020633,
+        "hi": 0.01806077321710715,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "seasonal_strong": {
+      "d_n_hpb_015": {
+        "mean": 1.32,
+        "lo": 1.264,
+        "hi": 1.38,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.01642354053364042,
+        "lo": 0.014382028135310098,
+        "hi": 0.018533821562009944,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "growth": {
+      "d_n_hpb_015": {
+        "mean": 0.152,
+        "lo": 0.12,
+        "hi": 0.184,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "gradual_decline": {
+      "d_n_hpb_015": {
+        "mean": 0.922,
+        "lo": 0.844,
+        "hi": 1.0,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.13185162849320192,
+        "lo": 0.12861987175234096,
+        "hi": 0.1349700944279897,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "sustained_decline": {
+      "d_n_hpb_015": {
+        "mean": 3.666,
+        "lo": 3.568,
+        "hi": 3.764,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.2161116464037446,
+        "lo": 0.2131971987289488,
+        "hi": 0.21898500884163796,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "severe_downturn": {
+      "d_n_hpb_015": {
+        "mean": 6.236,
+        "lo": 6.194,
+        "hi": 6.278,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.32517988193089403,
+        "lo": 0.3225565233683195,
+        "hi": 0.3277820022107876,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "disruption_1m": {
+      "d_n_hpb_015": {
+        "mean": 1.276,
+        "lo": 1.236,
+        "hi": 1.316,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.041247683970514204,
+        "lo": 0.03828861629526451,
+        "hi": 0.04418114136883534,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "platform_outage": {
+      "d_n_hpb_015": {
+        "mean": 1.278,
+        "lo": 1.238,
+        "hi": 1.32,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.054165855644888135,
+        "lo": 0.05094839251434041,
+        "hi": 0.05736232604016212,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    },
+    "returns_spike": {
+      "d_n_hpb_015": {
+        "mean": 0.288,
+        "lo": 0.246,
+        "hi": 0.33,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      },
+      "d_rr12": {
+        "mean": 0.016000517481453896,
+        "lo": 0.01401200591020633,
+        "hi": 0.01806077321710715,
+        "n": 500,
+        "interpretation": "Monte Carlo precision only; not uncertainty about real sellers"
+      }
+    }
+  }
+}

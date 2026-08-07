@@ -1,0 +1,135 @@
+--- a/README.md
++++ b/README.md
+@@ -4,7 +4,8 @@
+ 
+ RBF analyzes ecommerce-merchant revenue, tests repayment scenarios, and surfaces the risks and assumptions behind every financing recommendation. Most Vietnamese sellers have no credit-bureau (CIC) record — but their platform revenue, growth, returns, and fulfillment history is a richer, third-party-verified dataset than any bureau file. RBF turns that data into a structured financing analysis: recommended advance, remittance percentage, repayment cap, downside scenarios, and the categorized risk findings behind the recommendation — through one API call in under a second.
+ 
+-**Live:** https://sellerflow-production.up.railway.app *(hostname predates the RBF rename; see [Retained identifiers](#retained-identifiers) below)*
++> **⚠️ No current public deployment.**
++> The previously-linked Railway host serves a **superseded build** ("SellerFlow", credit-limit/interest-rate framing) that predates the RBF rework and does not reflect this repository. It is **not** representative of this project, and the link has been removed rather than left to mislead. A corrected deployment will be published only once documentation, validated results, and product agree.
+ 
+ RBF analyzes. It does not hold capital or make loans — a lender or financier structures and funds the actual advance.
+ 
+@@ -27,7 +28,7 @@
+ 
+ The risk score (PD) comes from a trained ensemble. Everything downstream of it — the advance amount, remittance percentage, repayment cap, scenario durations, and risk categorization — is **plain deterministic arithmetic in `backend/financing_engine.py`, with no model or AI call anywhere in the path.** That split is deliberate: a language model may explain a number in this product; it never computes one.
+ 
+-- **Risk model:** Random Forest + Logistic Regression ensemble (0.92 AUC on held-out *synthetic* validation data — see [Model status](#model-status) for what that does and doesn't mean).
++- **Risk model:** Random Forest + Logistic Regression ensemble trained on **synthetic labels**. A **secondary demonstration component with no measured predictive validity** — not a validated default predictor. See [Model status](#model-status).
+ - **Financing structure:** advance = 15% of annual revenue (low risk) or 8% (medium risk); repayment cap = advance × 1.15–1.30; remittance = 8–12% of monthly revenue. Because remittance is a percentage of revenue rather than a fixed installment, a revenue decline extends the repayment term instead of triggering a default — that mechanical fact is the actual point of the scenario analysis below, and is stated explicitly rather than left implicit in a chart.
+ - **Scenario analysis:** base case, moderate decline (-20%), severe decline (-40%), and a growth case, each showing the resulting monthly remittance and repayment duration.
+ - **Risk findings:** revenue trend, revenue stability, fulfillment quality, business maturity, operational efficiency, existing obligations, and data completeness — each with a severity, the supporting evidence, why it matters, and (where applicable) what information would resolve it. Every finding is `deterministic: true`; none of it is inferred by a model.
+@@ -41,7 +42,7 @@
+ ## API
+ 
+ ```bash
+-curl -X POST https://sellerflow-production.up.railway.app/api/sellers/submit \
++curl -X POST http://localhost:8000/api/sellers/submit \
+   -H "X-API-Key: sf_live_..." \
+   -H "Content-Type: application/json" \
+   -d '{
+@@ -60,7 +61,7 @@
+   }'
+ ```
+ 
+-The response includes a `financing` object with the full structure, scenarios, and risk findings shown above. Free pilot keys (100 assessments/month) are self-serve from the [pricing page](https://sellerflow-production.up.railway.app/#pricing). Full reference: [/api/docs](https://sellerflow-production.up.railway.app/api/docs).
++The response includes a `financing` object with the full structure, scenarios, and risk findings shown above. Full reference: `/api/docs` on a local instance.
+ 
+ | Endpoint | Auth | Purpose |
+ |---|---|---|
+@@ -87,10 +88,13 @@
+ ## Testing
+ 
+ ```bash
+-cd backend && ./venv/bin/python -m pytest tests/ -v
++cd backend && python -m pytest tests/ -q      # engine + API suite
++python -m pytest research/rbf_sim/tests/ -q  # simulation suite
+ ```
+ 
+-29 tests run with hand-computed expected values (not just "it ran without error"). 18 cover `financing_engine.py`: revenue-metric statistics with and without history, financing-structure math across risk tiers and requested-vs-recommended amounts, scenario-duration ordering under decline and growth, zero/edge-case inputs, risk-finding severity and categorization, and end-to-end completeness scoring. 11 cover `integrity_engine.py`: each check firing on a known-bad profile and staying quiet on a clean one, severity assignment, and resubmission-divergence across submissions. There is no test coverage yet for the FastAPI routes themselves, the ML ensemble's training pipeline, or the frontend — see [Known gaps](#known-gaps).
++Counts are whatever the suites report; no number is hard-coded in this README.
++
++Tests use hand-computed expected values, not just "it ran without error". The `financing_engine.py` suite covers: revenue-metric statistics with and without history, financing-structure math across risk tiers and requested-vs-recommended amounts, scenario-duration ordering under decline and growth, zero/edge-case inputs, risk-finding severity and categorization, and end-to-end completeness scoring. The `integrity_engine.py` suite covers: each check firing on a known-bad profile and staying quiet on a clean one, severity assignment, and resubmission-divergence across submissions. There is no test coverage yet for the FastAPI routes themselves, the ML ensemble's training pipeline, or the frontend — see [Known gaps](#known-gaps).
+ 
+ ## Run locally
+ 
+@@ -100,7 +104,7 @@
+ 
+ - App: http://localhost:8000
+ - API docs: http://localhost:8000/api/docs
+-- Local dashboard password defaults to `demo2025` — set `DASHBOARD_PASSWORD` to override (production always overrides).
++- Set `DASHBOARD_PASSWORD` before running. There is no default value in the repository.
+ 
+ Optional environment variables: `DASHBOARD_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_PAYMENT_LINK`, `RESEND_API_KEY`, `NOTIFY_EMAIL`, `DATABASE_URL`.
+ 
+@@ -114,15 +118,46 @@
+ 
+ ## Model status
+ 
+-The risk ensemble is trained on a **synthetic baseline** calibrated to realistic seller distributions — it has not seen a real merchant's real repayment outcome, and the 0.92 AUC figure describes how well it separates synthetic-good from synthetic-bad, not real-world predictive power. It's designed to be retro-validated against a lender's or financier's historical loan book: score their past decisions, compare the ranking, and recalibrate from there. Until that happens, treat every recommendation as a structured hypothesis, not a proven one.
++**The underwriting ensemble is a structural demonstration component. It is not a validated default predictor and produces no research finding in this project.**
++
++Why the previously-reported 0.92 AUC was withdrawn: `backend/generate_data.py` creates the `defaulted` label by evaluating a hand-written weighted formula over **the same ten features the model later consumes**, adding `N(0, 0.08)` noise, and thresholding it. The model's task was to rediscover a formula written 60 lines away in the same repository.
++
++Measured, and reproducible via `research/analysis/00_audit_evidence.py`:
++
++```
++AUC of the hand-written generating function against its own label : 0.9098
++Previously reported ensemble AUC                                  : 0.9182
++```
++
++The generating function is, up to sampling noise, the Bayes-optimal ranker for this data, and it scores what the model scores. **The figure measured the chosen noise variance, not predictive skill.** It is withdrawn from all headline claims and retained here solely to document the correction.
++
++Two further defects in the same synthetic data, both reproducible:
++
++- All ten features were drawn **independently**, so the accounting identity `revenue = orders × AOV` is violated in **61%** of rows. Reported feature importances therefore describe the generating formula's own weights, not sellers.
++- The project's own integrity screen flags **62.3%** of the rows the credit model was trained on — the two components encode contradictory beliefs about what a seller looks like.
++
++`validate_on_real_data.py` remains valid and reproducible: the same RF+LR ensemble, 5-fold cross-validated on UCI German Credit (1,000 real applicants) and UCI Taiwan credit-card default (30,000 real accounts). It shows the *method* has out-of-sample skill on real consumer-credit data. It does **not** validate the merchant model — different features, different population, no merchant outcomes — and must not be quoted as this project's accuracy.
++
++`real_world_validation` in `GET /api/model/status` remains `null` and stays null until adjudicated merchant outcomes exist.
++
++## Research foundation
++
++The project's quantitative contribution is a **deterministic, reproducible comparison of fixed-payment and revenue-based financing** — not default prediction. It needs no labels and can be verified line by line.
+ 
+-`GET /api/model/status` makes this concrete and honest at runtime. It returns three clearly-separated tiers, never merged into one headline figure:
++- **Analytical backbone:** `research/DERIVATIONS.md` — seven propositions with proofs, holding for **any** revenue path independent of simulation, parameter choice, or distributional assumption. Each is validated against the engine by test. The simulations illustrate proven structural relationships; they do not estimate real-world impact.
++- **Frozen methodology:** `research/METHODOLOGY_SPEC.md` — population, unit of analysis, horizon, revenue-path generation, seasonality and shocks, both fixed benchmarks, matched-comparison rules, metric formulas, seeds, sensitivity ranges, exclusion rules, and binding limits on interpretation. Frozen before any outcome analysis; amendments are logged, not silent.
++- **Simulation package:** `research/rbf_sim/` — accounting identities enforced by test, not by convention.
++- **Decision log:** `research/DECISION_LOG.md` — including the methodological correction above.
++- **Results registry:** `research/RESULTS_REGISTRY.md` — every result carries its scenario, parameters, code, interpretation, limitation, and public-safety classification.
+ 
+-1. **`training_baseline`** — 0.92 AUC on held-out *synthetic* data, disclaimered as synthetic.
+-2. **`methodology_validation`** — the production RF+LR ensemble, cross-validated on **real public credit benchmarks with real default outcomes**: ~0.80 AUC on UCI German Credit (1,000 real applicants) and ~0.77 AUC on UCI Taiwan credit-card default (30,000 real accounts). This validates that the *modeling approach* has genuine out-of-sample skill on real data. It does **not** validate the production merchant model, which uses e-commerce features no public dataset contains. Fully reproducible: `python backend/validate_on_real_data.py` (datasets bundled under `backend/validation_data/`).
+-3. **`real_world_validation`** — stays `null` until enough lender-recorded *merchant* outcomes exist to compute a genuine rank AUC on RBF's actual borrowers.
++### Research-integrity statement
+ 
+-`backend/demo_learning_loop.py` runs the identical validation code path on a *simulated* cohort to show the mechanism end-to-end; its output is labeled "not RBF's accuracy" precisely so the demo can never be mistaken for a real result.
++- Every quantitative result is **simulation output under stated assumptions**. No observed seller revenue, repayment, or default outcome exists in this project.
++- No causal claim is made and no significance test is reported. Intervals are **Monte Carlo intervals over simulated paths**: they measure whether enough paths were run for a number to be stable, not population uncertainty about real sellers.
++- No contract parameter is externally sourced. All are classified illustrative or derived, and are subject to sensitivity analysis rather than claimed calibration.
++- Null and unfavourable results are reported, not dropped — including a guardrail design that provably never activates, and a provider-recovery effect that reverses sign under non-declining revenue (traced to integer rounding in the matching rule, not economics).
++- Corrections to our own analysis are recorded rather than quietly fixed. The decision log carries the withdrawal of a circular accuracy metric, and the correction of a repayment theorem that had conflated *strictly positive revenue* with *revenue bounded away from zero*.
++- The product is a research and decision-support prototype. It is not a lending service, a credit offer, or financial advice.
+ 
+ ## Answering the GXS problem statement — current vs roadmap
+ 
+@@ -142,7 +177,7 @@
+ 
+ | Identifier | Where | Why retained |
+ |---|---|---|
+-| `sellerflow-production.up.railway.app` | Production hostname, GitHub repo name, Railway project name | Already distributed on a resume, LinkedIn, and unsent outreach emails; renaming is a real branding decision, not a code change — left for deliberate action, not silent rename. |
++| `sellerflow-production.up.railway.app` | GitHub repo name, Railway project name | The deployment serving this hostname is superseded and is no longer linked. Renaming the repo is a deliberate branding decision, not a code change. |
+ | `data/sellerflow.db` | `DATABASE_URL` default in `backend/database.py` | The production persistent volume already contains a file at this path. Changing the default would make the app write a new, empty database on next deploy and orphan the existing one. |
+ | `sellers` table, `/api/sellers/*` routes | `backend/database.py`, `backend/main.py` | Internal/API identifiers, not shown in any UI. Renaming is pure churn with no user-facing benefit. |
+ | `sf_live_...` API key prefix | `backend/main.py` | Opaque token prefix, not brand text. Rotating it would invalidate a handful of already-issued test keys for no benefit. |
+@@ -152,7 +187,7 @@
+ 
+ Kept explicit rather than silently absent: no per-user accounts or multi-tenant data isolation (the dashboard is a single shared operator view behind one password); no merchant document upload or AI field extraction; no PDF export (CSV only); no revenue-history time-series input in the current form (see [Data provenance](#data-provenance)); no admin tooling beyond the dashboard; no route-level or end-to-end test coverage (only the financing engine is tested).
+ 
+-Status: pilot. Contact: lehuuhoang1909@gmail.com
++Status: research prototype — not a lending service. Contact: lehuuhoang1909@gmail.com
+ 
+ ---
+ 

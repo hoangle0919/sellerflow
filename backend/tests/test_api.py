@@ -27,8 +27,17 @@ PREVIEW_PARAMS = {
 
 
 def _auth():
-    tok = client.post("/api/auth/login", json={"password": "demo2025"}).json()["token"]
+    pw = os.environ["DASHBOARD_PASSWORD"]      # set by conftest; no default exists
+    tok = client.post("/api/auth/login", json={"password": pw}).json()["token"]
     return {"Authorization": f"Bearer {tok}"}
+
+
+def test_login_rejects_the_withdrawn_default_credential():
+    """Regression guard: `demo2025` was a shipped fallback until 2026-08-06.
+    The README now states no default exists; this asserts the code agrees."""
+    assert main.DASHBOARD_PASSWORD is not None          # conftest configured one
+    r = client.post("/api/auth/login", json={"password": "demo2025"})
+    assert r.status_code == 401
 
 
 # ── Public surfaces ──
@@ -112,6 +121,47 @@ def test_model_status_keeps_tiers_separate():
     assert d["training_baseline"]["data"] == "synthetic"
     assert d["methodology_validation"]["data"] == "real_public_credit_benchmarks"
     assert d["real_world_validation"] is None  # no real merchant outcomes yet
+
+
+# ── The withdrawn synthetic benchmark (P0-2 / D-026) ──
+def test_training_baseline_reports_withdrawn_not_a_number():
+    """The 0.92 AUC was withdrawn as a circular synthetic benchmark. The API
+    must say so explicitly rather than serving the figure."""
+    tb = client.get("/api/model/status", headers=_auth()).json()["training_baseline"]
+    assert tb["auc"] is None                              # null, not a value
+    assert "auc" in tb                                    # key retained for consumers
+    assert tb["validation_status"] == "withdrawn"
+    assert tb["reason"] == "synthetic circular-label benchmark"
+
+
+def test_no_public_surface_promotes_a_synthetic_accuracy_figure():
+    """Regression guard for P0-2. Scans the ENTIRE /api/model/status payload for
+    any numeric value that could be read as the withdrawn benchmark. The only
+    permitted appearance of 0.92 is `withdrawn_value`, which is explicitly
+    labelled as the retracted figure."""
+    d = client.get("/api/model/status", headers=_auth()).json()
+
+    def numbers(node, path=""):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                yield from numbers(v, f"{path}/{k}")
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                yield from numbers(v, f"{path}[{i}]")
+        elif isinstance(node, (int, float)) and not isinstance(node, bool):
+            yield path, node
+
+    offenders = [(p, v) for p, v in numbers(d)
+                 if abs(v - 0.92) < 0.005 and not p.endswith("withdrawn_value")]
+    assert offenders == [], f"withdrawn figure served at: {offenders}"
+
+
+def test_real_data_benchmarks_survive_the_withdrawal():
+    """The withdrawal is scoped. The UCI cross-validation on REAL borrowers with
+    REAL outcomes is a different claim and must not be collateral damage."""
+    mv = client.get("/api/model/status", headers=_auth()).json()["methodology_validation"]
+    assert mv["auc_uci_german_credit"] == 0.80
+    assert mv["auc_uci_taiwan_default"] == 0.77
 
 
 # ── Visit beacon ──

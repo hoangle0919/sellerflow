@@ -12,9 +12,15 @@ if [ ! -f "models/rf_model.pkl" ]; then
     python3 train_model.py
 fi
 
+if [ -z "$DASHBOARD_PASSWORD" ]; then
+    echo "  DASHBOARD_PASSWORD is not set — dashboard login is DISABLED."
+    echo "  The API and health check still work. To enable the dashboard:"
+    echo "      DASHBOARD_PASSWORD='choose-one' ./start.sh"
+    echo ""
+fi
+
 echo "  App:       http://localhost:8000"
 echo "  API docs:  http://localhost:8000/api/docs"
-echo "  Password:  demo2025"
 echo ""
 
 python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
