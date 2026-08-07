@@ -28,6 +28,7 @@ import joblib
 import pandas as pd
 
 from database import _build_reasoning
+from money import to_increment
 
 BASE = os.path.dirname(__file__)
 
@@ -170,7 +171,8 @@ def score(data: dict) -> dict:
         "pd_lr":         round(pd_lr, 4),
         "decision":      decision,
         "risk_tier":     tier,
-        "credit_limit":  round(credit_limit, -3),  # Round to nearest 1000 VND
+        # D-030: contractual money — integer đồng, ROUND_HALF_UP, not banker's.
+        "credit_limit":  to_increment(credit_limit),
         "interest_rate": interest_rate,
         # Must reflect what actually produced the score. Reporting
         # "v1.0-synthetic" while the heuristic ran would be the same class of

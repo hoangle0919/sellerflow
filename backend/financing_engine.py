@@ -18,12 +18,25 @@ would: a decline doesn't default the merchant, it extends the term.
 import math
 from typing import Optional, List
 
+from money import (illustrative_schedule, periodic_payment, recommended_advance,
+                   repayment_cap, to_vnd)
+
 # Risk-tier parameters. These are underwriting policy, not a fitted model —
 # documented here so they're one place to change, not scattered constants.
+#
+# Rates are declared as STRINGS and converted with Decimal (D-030). `0.15` as a
+# binary float is 0.1499999999999999944…; every contractual figure derived from
+# it inherits that error, and at a rounding tie the error decides the merchant's
+# advance. The float forms below are for API/display only and never enter a
+# monetary calculation.
+TIER_RATES = {
+    "Low Risk":    {"advance_pct_of_annual_revenue": "0.15", "remittance_pct": "0.08", "factor_rate": "1.15"},
+    "Medium Risk": {"advance_pct_of_annual_revenue": "0.08", "remittance_pct": "0.12", "factor_rate": "1.30"},
+    "High Risk":   {"advance_pct_of_annual_revenue": "0.00", "remittance_pct": "0.00", "factor_rate": "0.00"},
+}
+
 TIER_PARAMS = {
-    "Low Risk":    {"advance_pct_of_annual_revenue": 0.15, "remittance_pct": 0.08, "factor_rate": 1.15},
-    "Medium Risk": {"advance_pct_of_annual_revenue": 0.08, "remittance_pct": 0.12, "factor_rate": 1.30},
-    "High Risk":   {"advance_pct_of_annual_revenue": 0.00, "remittance_pct": 0.00, "factor_rate": 0.00},
+    tier: {k: float(v) for k, v in rates.items()} for tier, rates in TIER_RATES.items()
 }
 
 MIN_MEANINGFUL_GROWTH = 0.05  # floor used only to keep the "growth case" distinct from base
@@ -39,6 +52,10 @@ def revenue_metrics(monthly_revenue: float, revenue_growth: float, revenue_histo
     data point.
     """
     result = {
+        # D-030 classification: NOT contractual money. This echoes a user-entered
+        # input and the statistics below summarise it; neither is a term the
+        # merchant is offered, so neither goes through the VND settlement policy.
+        # Only advance, cap, remittance and credit limit do.
         "current_monthly_revenue": {"value": round(monthly_revenue, 0), "provenance": "user_entered_fact"},
         "reported_mom_growth": {"value": round(revenue_growth, 4), "provenance": "user_entered_fact"},
         "average_monthly_revenue": None,
@@ -90,35 +107,47 @@ def revenue_metrics(monthly_revenue: float, revenue_growth: float, revenue_histo
 def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount: Optional[float] = None) -> dict:
     """Recommended RBF structure for the given revenue and risk tier.
 
-    Formulas (all deterministic):
-      recommended_amount = monthly_revenue * 12 * advance_pct_of_annual_revenue[tier]
-      repayment_cap       = amount * factor_rate[tier]
-      periodic_remittance = monthly_revenue * remittance_pct[tier]
-      base_case_duration  = ceil(repayment_cap / periodic_remittance)   [months]
+    Formulas — all deterministic, all in integer đồng under ROUND_HALF_UP
+    (D-030; see `money.py` for why the order is fixed):
+      1. raw advance       = monthly_revenue * 12 * advance_pct[tier]   (Decimal)
+      2. recommended_amount= ROUND_HALF_UP to the 1,000 VND increment
+      3. raw cap           = amount * factor_rate[tier]                 (Decimal)
+      4. repayment_cap     = ROUND_HALF_UP to whole VND
+      5. periodic_remittance = ROUND_HALF_UP(monthly_revenue * remittance_pct)
+      6. final payment clipped to the remaining balance
+      7. cumulative never exceeds the cap
+
+    `base_case_duration_months` is `ceil(cap / remittance)` — correct, because
+    the final payment is PARTIAL. `illustrative_schedule` states that
+    explicitly so no reader computes `remittance * duration` and overstates
+    the total (D-029).
     """
+    rates = TIER_RATES.get(risk_tier, TIER_RATES["High Risk"])
     params = TIER_PARAMS.get(risk_tier, TIER_PARAMS["High Risk"])
-    annual_revenue = monthly_revenue * 12
-    recommended_amount = round(annual_revenue * params["advance_pct_of_annual_revenue"], -3)
+    recommended_amount = recommended_advance(monthly_revenue,
+                                             rates["advance_pct_of_annual_revenue"])
 
     if params["remittance_pct"] == 0 or recommended_amount <= 0:
         return {
             "risk_tier": risk_tier,
-            "recommended_amount": 0.0,
+            "recommended_amount": 0,
             "requested_amount": requested_amount,
             "remittance_pct": 0.0,
             "factor_rate": 0.0,
-            "repayment_cap": 0.0,
-            "periodic_remittance": 0.0,
+            "repayment_cap": 0,
+            "periodic_remittance": 0,
             "base_case_duration_months": None,
+            "illustrative_schedule": None,
             "note": "This risk tier does not support a financing recommendation. No structure is proposed.",
         }
 
-    amount = requested_amount if requested_amount and requested_amount > 0 else recommended_amount
+    amount = (to_vnd(requested_amount)
+              if requested_amount and requested_amount > 0 else recommended_amount)
     exceeds_recommendation = bool(requested_amount and requested_amount > recommended_amount)
 
-    repayment_cap = round(amount * params["factor_rate"], 0)
-    periodic_remittance = round(monthly_revenue * params["remittance_pct"], 0)
-    duration_months = math.ceil(repayment_cap / periodic_remittance) if periodic_remittance > 0 else None
+    cap = repayment_cap(amount, rates["factor_rate"])
+    remittance = periodic_payment(monthly_revenue, rates["remittance_pct"])
+    duration_months = math.ceil(cap / remittance) if remittance > 0 else None
 
     return {
         "risk_tier": risk_tier,
@@ -128,9 +157,13 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
         "exceeds_recommendation": exceeds_recommendation,
         "remittance_pct": params["remittance_pct"],
         "factor_rate": params["factor_rate"],
-        "repayment_cap": repayment_cap,
-        "periodic_remittance": periodic_remittance,
+        "repayment_cap": cap,
+        "total_contractual_repayment": cap,
+        "periodic_remittance": remittance,
         "base_case_duration_months": duration_months,
+        "illustrative_schedule": illustrative_schedule(cap, remittance),
+        "monetary_policy": "integer VND, ROUND_HALF_UP; final payment clipped "
+                           "to the remaining balance (D-030)",
     }
 
 
@@ -156,19 +189,29 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
         ("severe_decline", "Severe revenue decline (-40%)", -0.40),
         ("growth", f"Revenue growth (+{growth_case_rate:.0%})", growth_case_rate),
     ]
+    # Use the exact decimal string for the tier, not the float echo, so the
+    # scenario rows are computed under the same policy as the structure.
+    share_rate = TIER_RATES.get(structure.get("risk_tier", ""), {}).get(
+        "remittance_pct", repr(remittance_pct))
     out = []
     for key, label, shift in cases:
-        scenario_revenue = round(monthly_revenue * (1 + shift), 0)
-        periodic_remittance = round(scenario_revenue * remittance_pct, 0)
-        duration_months = math.ceil(repayment_cap / periodic_remittance) if periodic_remittance > 0 else None
+        # D-030: integer đồng under ROUND_HALF_UP, same policy as the structure.
+        scenario_revenue = to_vnd(monthly_revenue * (1 + shift))
+        scenario_remittance = periodic_payment(scenario_revenue, share_rate)
+        duration_months = (math.ceil(repayment_cap / scenario_remittance)
+                           if scenario_remittance > 0 else None)
         out.append({
             "case": key,
             "label": label,
             "assumption": "system_derived_metric" if key == "base" else "assumption",
             "scenario_monthly_revenue": scenario_revenue,
-            "periodic_remittance": periodic_remittance,
+            "periodic_remittance": scenario_remittance,
             "repayment_duration_months": duration_months,
             "merchant_retained_revenue_pct": round(1 - remittance_pct, 4),
+            # D-029 disclosure: the last payment is partial in every scenario
+            # too, so each row states its own schedule rather than inviting
+            # `remittance x duration`.
+            "illustrative_schedule": illustrative_schedule(repayment_cap, scenario_remittance),
         })
     return out
 

@@ -1,6 +1,11 @@
 import sqlite3, os, uuid, random
 from datetime import datetime, timedelta
 
+# D-030: seeded credit limits are contractual money and must follow the same
+# integer-đồng ROUND_HALF_UP policy as the live path. `money` has no backend
+# dependencies, so this import cannot cycle.
+from money import to_increment as _to_increment
+
 DB_PATH = os.environ.get("DATABASE_URL", "data/sellerflow.db")
 
 
@@ -230,7 +235,7 @@ def _seed_sellers(conn):
         conn.execute("""
             INSERT INTO sellers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (sid, shop, plat, owner, phone, rev, grow, orders, aov, ret, rat, days,
-              inv, late, loans, pd_s, pd_rf, pd_lr, dec, round(cl, -3), ir, tier, reasoning, created, 'active', 'seed'))
+              inv, late, loans, pd_s, pd_rf, pd_lr, dec, _to_increment(cl), ir, tier, reasoning, created, 'active', 'seed'))
 
     conn.commit()
 

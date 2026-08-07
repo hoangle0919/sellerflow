@@ -166,9 +166,53 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
-### D-029 — Cap-overshoot diagnostic: no overshoot exists; a rounding-rule divergence does. OPEN
+### D-030 — Product monetary policy corrected: Decimal, integer đồng, ROUND_HALF_UP
 **Date:** 2026-08-07
-**Status:** **DIAGNOSIS ONLY. No financial behaviour changed. Awaiting approval.**
+**Approved by:** Hoang, on the D-029 diagnosis.
+**Status:** **APPLIED.** Closes P0-9, P0-10, P0-11 and discharges D-029's open items.
+
+**What was wrong.** `financing_engine` computed contractual money with binary floats and Python's `round()` — *banker's* rounding, ties to even — while the documented policy (D-023/D-024) is ROUND_HALF_UP on integer đồng. Deterministic divergence at ties; ~1 in 10,000 whole-VND revenues. Separately, the API emitted `(cap, remittance, duration)` with no indication that the final payment is partial.
+
+**The fix.** A product-layer module, `backend/money.py`, with a fixed order:
+
+1. raw advance = `revenue × 12 × advance_pct` — **Decimal, built from strings**
+2. advance = ROUND_HALF_UP to the 1,000 VND increment
+3. raw cap = `advance × factor_rate` — Decimal, from the **rounded** advance
+4. cap = ROUND_HALF_UP to whole đồng
+5. candidate payment = ROUND_HALF_UP to whole đồng
+6. actual payment = `min(candidate, remaining balance)`
+7. cumulative never exceeds the cap
+
+Rounding *before* clipping is what makes step 7 unconditional. Deriving the cap from the **rounded** advance is deliberate: the advance is the amount actually disbursed, so it is the amount a merchant can reconcile the cap against.
+
+**Rates are declared as strings.** `Decimal(0.15)` is 0.1499999999999999944…; `Decimal("0.15")` is exact. `TIER_RATES` now holds decimal strings and `TIER_PARAMS` derives floats for display only. No float enters a monetary calculation.
+
+**Before / after**
+
+| | revenue 2,500 | revenue 100,002,500 |
+|---|---|---|
+| advance before | 4,000 | 180,004,000 |
+| advance after | **5,000** | **180,005,000** |
+| cap before | 4,600 | 207,004,600 |
+| cap after | **5,750** | **207,005,750** |
+| type before | `float` | `float` |
+| type after | **`int`** | **`int`** |
+
+**Disclosure.** Every structure and every scenario row now carries `illustrative_schedule`: full-payment count and amount, the **partial final payment**, completion month, total contractual repayment, and explicit statements that the projection holds revenue constant and is not a guaranteed payment or duration. This is the field whose absence produced the error in D-029 — the gate report computed `remittance × duration` because nothing said the last payment was smaller. The disclosure exists so no reader repeats it.
+
+**No research import into production.** `backend/money.py` re-implements the rule rather than importing `rbf_sim.settlement`; the research package is independent of the backend and must stay so. Seven cross-layer parity fixtures — including ties in both rounding directions — run the same inputs through both layers and require identical results. That is what keeps two implementations of one rule from drifting.
+
+**`round()` audit — every monetary use classified.** Replaced: `financing_engine` advance / cap / remittance / scenario revenue / scenario remittance; `ml_engine.credit_limit`; `database` seeded credit limit. **Deliberately not replaced:** averages and medians of revenue (statistics *of* money, not contractual terms), and all ratios, probabilities, AUC and percentages. Changing those would be churn, and the instruction was to replace contractual money only.
+
+**Research artifacts did not move.** `baseline_v2.json`, `baseline_v2_canonical.json` and `validation_v1.json` are byte-identical (`b09ae1f7…`, `264d319b…`, `a1b439c2…`); the `research/` tree is untouched by this commit; 629 simulation tests pass. `rbf_sim` has no backend dependency, so no registered finding is reachable from this change.
+
+**Consequence:** backend tests 119 + 6 xfailed → **158 passing, 0 xfailed**. All six xfails converted, with before/after values written into the assertions so the correction cannot be silently reverted.
+
+---
+
+### D-029 — Cap-overshoot diagnostic: no overshoot exists; a rounding-rule divergence does
+**Date:** 2026-08-07
+**Status:** **DIAGNOSIS. Superseded by D-030, which applies the correction.** Retained unedited: the wrong claim, its correction, and the evidence are the record.
 
 **Correcting my own earlier report.** The research-foundation gate report claimed `financing_engine.py` over-collects in 100% of structures, worst case 36,000,000 VND / 5.77% of the cap. **That was wrong**, and the error was mine: it computed the total as `duration × periodic_remittance`, which assumes every payment is full-size. The RBF contract clips the final payment to the remaining balance, so the last payment is partial and the total lands exactly on the cap. The figure measured my inference, not the code.
 
