@@ -166,6 +166,30 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-026 — Withdrawn 0.92 benchmark purged from every public surface (P0-2 closed)
+**Date:** 2026-08-07
+**Raised by:** Hoang, reviewing the research-foundation gate report.
+
+**The finding, in his words:** *"`backend/main.py:401` serving `training_baseline.auc = 0.92` is not a leftover — it's the original sin of this project reappearing. The entire Phase 0 finding was that the deployed artifact contradicted the documentation."*
+
+That is the correct reading, and the baseline commit understated it by filing P0-2 as merely "partial". The README withdrew the figure with the circularity arithmetic while `GET /api/model/status` continued to hand it out on request. A reviewer who read the README and then curled the API would have found the two disagreeing — which is precisely the defect PHASE0_AUDIT.md was written about, reproduced by us, after we had documented it.
+
+**Decision.** The withdrawn benchmark is removed from every public surface. `training_baseline.auc` is **`null`**, accompanied by `validation_status: "withdrawn"`, `reason: "synthetic circular-label benchmark"`, and a disclaimer carrying the circularity arithmetic.
+
+**Why `null` rather than deleting the key.** Removing `auc` entirely would break any consumer reading it and, worse, would make the withdrawal *invisible* — an absent field reads as "not implemented yet", not "retracted". A null beside an explicit `validation_status` states the retraction rather than hiding it. `withdrawn_value: 0.92` is retained under a name that cannot be mistaken for a current result, so the record of *what* was withdrawn survives.
+
+**Scope — what was deliberately NOT withdrawn.** The UCI cross-validation (0.80 German Credit, 0.77 Taiwan default) is a different claim on **real borrowers with real adjudicated outcomes**. It validates the method, not the merchant model, and the README already says so. A test asserts it survives, so an over-broad future purge cannot take it as collateral damage.
+
+**Surfaces changed.** `backend/main.py` (`/api/model/status`); `backend/demo_learning_loop.py` (printed "Synthetic train AUC: 0.92 [for reference]" — a withdrawn figure offered as a reference point is still a claim); `frontend/index.html` ("a synthetic baseline today"); `README.md` §Learning loop and the GXS "what must never be claimed" line, both of which still described the figure as extant.
+
+**Enforcement.** Four API-level tests plus a source-level scanner, `backend/tests/test_no_withdrawn_claims.py`, which walks every shipped surface and fails on any unexplained `0.92`. Each permitted occurrence must be entered in an allowlist **with a written reason**. P0-2 was originally missed because the figure lived in three places and no one enumerated them; enumeration is now a test rather than an intention. The scanner also asserts the audit trail *retains* 0.9098 vs 0.9182 — a withdrawal that deletes its own evidence is not auditable.
+
+**Not in this repository.** `docs/GXS-Stage2-Proposal.md` still contains the old framing. It is gitignored and therefore not published through the repo, but it is competition material and must be corrected before submission. Recorded here rather than edited, because `docs/` is outside the tracked tree.
+
+**Consequence:** backlog P0-2 moves from *partial* to **done**. Backend tests 48 → 56.
+
+---
+
 ### D-025 — Shipped default credential removed; dashboard fails closed
 **Date:** 2026-08-06
 **Raised by:** integration review, at the baseline commit.

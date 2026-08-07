@@ -17,7 +17,7 @@ Status: `todo` · `doing` · `done` · `frozen` · `cut`
 | A-04 | Backlog + decision log + results registry | P0 | **done** | This file, `DECISION_LOG.md`, `RESULTS_REGISTRY.md` |
 | A-05 | Confirm Q1–Q5 with Hoang | P0 | todo | Blocks Phase 1 framing |
 | P0-1 | **Redeploy Railway from `bff1477`; verify RBF live** | P0 | todo | Highest credibility/effort ratio in the project |
-| P0-2 | Retire 0.92 AUC from README, `/api/model/status`, UI | P0 | **partial** | RI-1. README done 2026-08-06 (withdrawn with the circularity arithmetic). **Still open:** `backend/main.py:401` serves `training_baseline.auc = 0.92` and `demo_learning_loop.py:81` prints it. Phase 3. |
+| P0-2 | Retire 0.92 AUC from README, `/api/model/status`, UI | P0 | **done** | RI-1. D-026, 2026-08-07: API returns `auc: null` + `validation_status: "withdrawn"`; demo, UI and README purged. Enforced by `test_no_withdrawn_claims.py` (source scan, allowlist with reasons). Open elsewhere: `docs/GXS-Stage2-Proposal.md` (gitignored, competition material). |
 | P0-3 | Remove "12.5% vs 40–80% informal rate" claim | P0 | todo | RI-5 — unsourced impact claim |
 | P0-4 | Drop `owner_name` / `phone` from model, form, DB, CSV | P0 | todo | RI-6 |
 | P0-5 | Un-ignore `docs/`; create versioned `research/` tree | P0 | **partial** | `research/` tree created and committed 2026-08-06 (bundle v5). **Still open:** `docs/` remains gitignored. |

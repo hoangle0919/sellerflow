@@ -398,11 +398,23 @@ def model_status(_: None = Depends(require_auth)):
 
     return {
         "training_baseline": {
-            "auc": 0.92,
+            # WITHDRAWN 2026-08-07. `auc` is null, not omitted: the key stays so
+            # existing consumers read a null instead of raising, and so the
+            # withdrawal is visible rather than silently absent.
+            "auc": None,
             "data": "synthetic",
-            "disclaimer": "Measured on held-out SYNTHETIC validation data. It "
-                          "describes separation of synthetic-good from synthetic-bad, "
-                          "NOT real-world predictive accuracy.",
+            "validation_status": "withdrawn",
+            "reason": "synthetic circular-label benchmark",
+            "withdrawn_value": 0.92,
+            "disclaimer": "This benchmark is WITHDRAWN and carries no predictive "
+                          "claim. generate_data.py built the `defaulted` label by "
+                          "evaluating a hand-written weighted formula over the same "
+                          "ten features the model consumes, so the model was scored "
+                          "on its ability to rediscover that formula. The figure "
+                          "measured the chosen noise variance, not skill. Evidence: "
+                          "the generating function scores 0.9098 against its own "
+                          "label versus the model's 0.9182 — reproduce with "
+                          "research/analysis/00_audit_evidence.py.",
         },
         "methodology_validation": {
             "data": "real_public_credit_benchmarks",
