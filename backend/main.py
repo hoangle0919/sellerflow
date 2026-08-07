@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord, VisitPing
 from database import get_db, init_db
+import lab
 import ml_engine as _ml_engine
 from ml_engine import load_models, score, FEATURES
 from financing_engine import build_financing_analysis
@@ -649,8 +650,53 @@ def preview_assess(
     }
 
 
+# ── Simulation Lab ──
+# Serves registered research artifacts. Every number originates in a committed,
+# checksummed file under research/results/; nothing here computes a finding and
+# nothing is transcribed by hand. Public (no auth): this is the research
+# presentation layer, and the artifacts are already in the public repository.
+
+
+@app.get("/api/lab/manifest")
+def lab_manifest():
+    """Artifact identity — checksums, spec version, claim taxonomy, integrity."""
+    if not lab.artifacts_available():
+        raise HTTPException(status_code=503,
+                            detail="Research artifacts are not present in this deployment.")
+    return lab.manifest()
+
+
+@app.get("/api/lab/scenarios")
+def lab_scenarios():
+    if not lab.artifacts_available():
+        raise HTTPException(status_code=503,
+                            detail="Research artifacts are not present in this deployment.")
+    return {"scenarios": lab.scenarios()}
+
+
+@app.get("/api/lab/comparison/{scenario}")
+def lab_comparison(scenario: str):
+    """Every arm for one scenario, with metric definitions and classified findings."""
+    if not lab.artifacts_available():
+        raise HTTPException(status_code=503,
+                            detail="Research artifacts are not present in this deployment.")
+    data = lab.comparison(scenario)
+    if data is None:
+        raise HTTPException(status_code=404, detail=f"Unknown scenario: {scenario}")
+    return data
+
+
 # ── Serve Frontend ──
 FRONTEND = os.path.join(os.path.dirname(__file__), "..", "frontend")
+
+
+@app.get("/lab")
+def serve_lab():
+    """The Simulation Lab page. Declared before the SPA catch-all so it wins."""
+    page = os.path.join(FRONTEND, "lab.html")
+    if os.path.isfile(page):
+        return FileResponse(page)
+    raise HTTPException(status_code=404, detail="Simulation Lab page not found")
 
 
 @app.get("/")

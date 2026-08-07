@@ -166,6 +166,35 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-031 — Equal-effective-cost baseline registered; Simulation Lab renders from artifacts
+**Date:** 2026-08-07
+**Status:** APPLIED, on `simulation-lab`.
+
+**The gap.** `baseline_v2` prices every scenario at the **illustrative** f = 1.20. The equal-effective-cost factor f\* = 1.0945 existed only as a *pricing* result on the single deterministic reference path (`validation_v1.pricing.equal_cost`). Showing seller burden and provider recovery for an equal-cost arm therefore had no artifact behind it, and charting a reference-path pricing number beside 500-path scenario aggregates would compare two different objects — the exact error this project exists to avoid.
+
+**Decision.** Add `run_equal_cost_baseline.py`, producing `baseline_equalcost_v1_canonical.json` (SHA-256 `6f9c71b1…52da68e7`). Same ten scenarios, same 500 paths, same base seed `20260803`, same generator. **The only difference is the cap factor.** Spec §12 already anticipates swept parameters and D-015 established price as separable from structure, so this is in-scope sensitivity, not a new model.
+
+**`run_baseline.py` was NOT edited.** Its bytes are inside `baseline_v2`'s `generator_fingerprint`; editing it would invalidate a registered checksum. The new script *imports* `SCENARIOS`, `N_PATHS` and `R0` from it rather than retyping them, so the two runs cannot silently diverge. `baseline_v2` verified byte-identical after the change: `264d319b…ac5a7849`.
+
+**The Simulation Lab** (`backend/lab.py`, `frontend/lab.html`, `/lab`, `/api/lab/*`) renders from these artifacts. Enforced by test, not by intention:
+
+- Every displayed metric is asserted equal to the value in the canonical file it names.
+- The page is scanned for research literals; **a first draft failed it**, having written the equal-cost factor into a chart label as a string. It now reads the factor from the API.
+- Narrative findings must quote the same numbers the charts show, so a sentence cannot drift from the bar beside it.
+- The page is scanned for financial arithmetic. It scales a value to a pixel width; it computes no money, cap, duration or APR.
+- Artifact checksums are displayed and asserted to match the files on disk.
+
+**Two corrections the build surfaced:**
+
+1. **FIX-B was being shown the RBF cap.** The amortizing benchmark is an annuity with no cap factor and no repayment cap, but it inherited `terms.f = 1.20` and a 222,000,000 cap from the artifact's contract block — displayed directly beside its own smaller total of 203,529,584. It now reports no cap, with the basis stated.
+2. **Charts were illegible on a phone.** A fixed 760-unit viewBox squeezed into 326 px rendered 12-unit text at **5.15 px**, measured. The viewBox is now sized to the container and the layout switches to labels-above-bars below 560 px; text renders 12–13 px at every width, re-measured across desktop, tablet and mobile.
+
+**Integrity surfaces asserted absent:** the withdrawn AUC (by metric name and by exact value — a naive substring check is wrong, since recovery ratio 12/13 is 0.923076…), RBF-G in any form (D-018), any claim of observed Vietnamese seller outcomes, and the phrase "confidence interval". Asserted present: the by-construction caveat on RBF burden, "incomplete recovery is not a default rate", the fixed arms' unmodelled default risk, that recovery direction is not universal, and that constant-revenue schedules are illustrative projections.
+
+**Consequence:** backend tests 196 → 229. Research artifacts and `rbf_sim` code unchanged.
+
+---
+
 ### D-030 — Product monetary policy corrected: Decimal, integer đồng, ROUND_HALF_UP
 **Date:** 2026-08-07
 **Approved by:** Hoang, on the D-029 diagnosis.

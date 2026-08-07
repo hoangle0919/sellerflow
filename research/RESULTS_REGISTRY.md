@@ -17,6 +17,8 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 | `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **Canonical.** Cite this. |
 | `results/baseline_v2_provenance.json` | *(varies by run — that is its purpose)* | Execution record for the above |
 | `results/baseline_v2.json` | `b09ae1f7ec3a92c6b751222f639cc562ee793d71c453298612a5d30e6da356e0` | **Frozen historical evidence.** Not rewritten. Numerically identical to the canonical artifact (0 differing leaves); differs only by an embedded run date. |
+| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **Canonical.** Equal-effective-cost pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
+| `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the above |
 | `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Not yet canonicalized** — carries the same `_meta.date` problem. Migrate on next regeneration. |
 
 Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v2_canonical.json`
