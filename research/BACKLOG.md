@@ -24,6 +24,9 @@ Status: `todo` · `doing` · `done` · `frozen` · `cut`
 | P0-6 | Fix README test count 29→47 | P2 | **done** | GAP-6. De-hardcoded entirely — README now states counts are whatever the suites report. |
 | P0-7 | Remove `demo2025` default password from 3 files | P1 | **done** | RI-7. D-025: no default; unset ⇒ dashboard login disabled (503), fails closed. Enforced by `test_login_rejects_the_withdrawn_default_credential`. |
 | P0-8 | Move GXS competition section to separate branch/appendix | P2 | todo | RI-8 — wrong audience |
+| P0-9 | **Rounding-rule divergence: `financing_engine` uses banker's `round()`, policy is ROUND_HALF_UP** | P1 | **open** | D-029. ±1,000 VND on advance, ±1,150 on cap; ~1 in 10,000 whole-VND revenues. Changes displayed terms. No cap overshoot exists. Fix belongs in the UI-integration commit. |
+| P0-10 | Product money is `float`, not integer đồng | P1 | open | D-029. Adopt the centralized VND policy at the product boundary. |
+| P0-11 | API does not disclose the partial final payment | P1 | open | D-029. No `final_payment` field; `remittance × duration` overstates the total by up to one remittance. |
 
 ---
 

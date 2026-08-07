@@ -166,6 +166,64 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-029 — Cap-overshoot diagnostic: no overshoot exists; a rounding-rule divergence does. OPEN
+**Date:** 2026-08-07
+**Status:** **DIAGNOSIS ONLY. No financial behaviour changed. Awaiting approval.**
+
+**Correcting my own earlier report.** The research-foundation gate report claimed `financing_engine.py` over-collects in 100% of structures, worst case 36,000,000 VND / 5.77% of the cap. **That was wrong**, and the error was mine: it computed the total as `duration × periodic_remittance`, which assumes every payment is full-size. The RBF contract clips the final payment to the remaining balance, so the last payment is partial and the total lands exactly on the cap. The figure measured my inference, not the code.
+
+**There is no cap overshoot.** Searched systematically — 3,962 realistic whole-VND structures (10M–1B VND, both tiers) plus 2,832 adversarial ones (half-đồng boundaries, advances to 9.9×10¹¹, revenues down to 1 VND, requested amounts of 1/7/333/1.5/2.5 VND, factor rates engineered to land caps on exact halves):
+
+| | Result |
+|---|---|
+| Structures where settled total exceeds the cap | **0 of 6,794** |
+| Structures where product duration disagrees with integer-VND settlement | **0 of 3,962** realistic |
+| Completed schedules landing exactly on the integer-VND cap | all |
+
+The 45 duration disagreements found in the adversarial sweep occur only at revenues **below 500 VND/month** — degenerate inputs, and they resolve to the same rounding-rule cause below.
+
+**What is real — a rounding-rule divergence between the two layers.** `financing_engine` uses Python's `round()`, which is **banker's rounding** (ties to even). The centralized policy in `rbf_sim/settlement.py` documents **ROUND_HALF_UP**. At an exact tie the two disagree.
+
+**Minimal reproducible case**
+
+```
+revenue                       2,500 VND      (smallest whole-VND case)
+advance_pct_of_annual_revenue 0.15
+raw advance = 2,500 × 12 × 0.15 = 4,500.0    exact in binary — no float error
+product   round(4500, -3)     = 4,000        banker's, ties to EVEN
+policy    ROUND_HALF_UP       = 5,000
+divergence                    = 1,000 VND
+```
+
+**At realistic scale**
+
+```
+revenue                       100,002,500 VND
+raw advance                   180,004,500.0  exact in binary
+product recommended_amount    180,004,000
+policy  recommended_amount    180,005,000    divergence  +1,000 VND
+product repayment_cap         207,004,600
+cap under policy advance      207,005,750    divergence  +1,150 VND
+periodic_remittance            8,000,200 VND
+base_case_duration            26 months
+cumulative before final       207,004,600 → final payment partial
+total paid                    = cap exactly,  OVERSHOOT 0 VND
+```
+
+**Classification.** Cause is the **rounding rule**, not binary floating point (the value is exactly representable) and not contract logic (the cap invariant holds). **Deterministic** — 200 identical calls give one result. **Density: ~1 in 10,000** whole-VND revenues (100 in a 1,000,001-wide band). Surface: **API output and UI display** of `recommended_amount` and `repayment_cap`; *not* internal settlement, *not* scenario projections, *not* registered findings — `rbf_sim` is independent of the backend and its results are untouched.
+
+**Two further gaps found by the same diagnostic:**
+- Product money is `float`, not integer đồng (`repayment_cap = 248400000.0`).
+- The API emits `(cap, remittance, duration)` with **no `final_payment` field and no statement that the last payment is partial**. A consumer who multiplies overstates the total by up to one remittance — which is exactly the mistake my earlier report made, so the disclosure gap is demonstrably misleading in practice.
+
+**Why this is not being fixed here.** It is material by the standing rule: **> 1 VND and it changes a displayed financial term.** Financial behaviour is not changed without approval. Six strict-`xfail` tests record each defect precisely; `strict=True` means the suite fails if any is silently fixed without removing the marker, so the record cannot rot in either direction. A committed *red* test was rejected as the alternative — it trains people to ignore failures.
+
+**Recommended sequence when approved** (matches D-024's established order): define the cap under the centralized policy → quantize the candidate with documented ROUND_HALF_UP → compute the exact remaining integer balance → pay `min(quantized, remaining)` → final payment is the exact remainder → cumulative never exceeds the cap. Belongs in the UI-integration commit, since it changes displayed terms and the Simulation Lab renders them.
+
+**Consequence:** backend tests 71 → 119 passing + 6 xfailed. 48 new parity tests pin the cap invariant, monotonicity, non-negativity, exact-cap completion, zero-revenue, decline, growth, over-large final payment, long tiny-payment schedules, and scenario rows.
+
+---
+
 ### D-028 — Backend no longer depends on an untracked model artifact
 **Date:** 2026-08-07
 **Raised by:** Hoang — *"a clean checkout must not claim backend reproduction while relying on a local `.pkl` produced under another scikit-learn version."*

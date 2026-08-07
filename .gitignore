@@ -21,3 +21,8 @@ docs/
 # SHA-256 is recorded in RESEARCH_MANIFEST.md); v4 and earlier are obsolete
 # and deliberately excluded so no one integrates from the wrong one.
 rbf-research-bundle-v4.zip
+
+# Native verification artifacts (SSD-local; never the internal disk)
+.venv/
+.cache/
+NATIVE_VERIFICATION.md
