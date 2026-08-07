@@ -1,0 +1,190 @@
+# Results Registry — RBF Project
+
+Every analysis that produces a number goes here before it is quoted anywhere.
+A result that is not in this registry may not appear in the paper, poster, deck,
+README, app, or resume.
+
+**Columns:** analysis · dataset/version · key assumptions · output location · exploratory vs confirmatory · public-safe?
+
+---
+
+## R-000 — Phase 0 audit evidence
+
+| Field | Value |
+|---|---|
+| **Analysis** | Circularity, population-validity, and engine-consistency checks on the existing synthetic baseline |
+| **Script** | `research/analysis/00_audit_evidence.py` |
+| **Dataset** | `generate_data.generate_seller_data()`, n=3,000, seed=42, repo @ `bff1477` |
+| **Assumptions** | Generating function transcribed verbatim from `generate_data.py`; reconciliation band `[0.55, 1.75]` taken from `integrity_engine.py` rather than chosen by the analyst; integrity screen run on the first 1,000 rows for runtime |
+| **Outputs** | `auc_generating_function = 0.9098` · `auc_reported_model = 0.9182` · `max_abs_pairwise_correlation = 0.0448` · `median_revenue_over_orders_x_aov = 0.9751` · `share_outside_reconciliation_band = 0.6097` · `revenue_reconciliation_flag_rate = 0.6230` |
+| **Type** | **Confirmatory** — tests a specific pre-stated claim about committed code (the label is a function of the features) |
+| **Public-safe** | **Yes.** No participant data. Concerns only the project's own synthetic generator |
+| **Status** | ✅ Reproduced 2026-08-03; runs clean from a fresh clone |
+| **Used in** | `PHASE0_AUDIT.md` §4 (RI-1, RI-2, RI-3) · `DECISION_LOG.md` D-001, D-006 · planned: paper Limitations, Q&A prep |
+
+---
+
+## R-001 — Synthetic-baseline training metrics *(demoted, do not quote)*
+
+| Field | Value |
+|---|---|
+| **Analysis** | RF + LR ensemble trained on synthetic seller data |
+| **Script** | `backend/train_model.py` |
+| **Dataset** | `generate_data.py`, n=3,000, seed=42, 80/20 stratified split |
+| **Outputs** | RF AUC 0.9001 · LR AUC 0.9237 · Ensemble AUC 0.9182 · feature importances |
+| **Type** | **Exploratory** |
+| **Public-safe** | ❌ **NO — DO NOT QUOTE.** Superseded by R-000. The metric measures the generator's noise variance, not predictive skill. Retired from all public surfaces per D-001 |
+| **Status** | Reproduced 2026-08-03 · **demoted** |
+
+---
+
+## R-002 — Methodology validation on public credit benchmarks
+
+| Field | Value |
+|---|---|
+| **Analysis** | Same RF+LR ensemble, 5-fold stratified CV on two real public credit datasets |
+| **Script** | `backend/validate_on_real_data.py` |
+| **Dataset** | UCI Statlog German Credit (n=1,000) · UCI Default of Credit Card Clients, Taiwan (n=30,000) |
+| **Assumptions** | Hyperparameters identical to production; no tuning on these datasets |
+| **Outputs** | ~0.80 and ~0.77 ensemble AUC per README — **not yet independently re-run in this audit** |
+| **Type** | **Confirmatory** (of the method, not of the merchant model) |
+| **Public-safe** | ⚠️ **Conditional.** Quotable only with the population mismatch stated in the same sentence: consumer borrowers, fixed-installment products, Germany 1994 / Taiwan 2005 — no e-commerce seller, no revenue share, no repayment cap |
+| **Status** | ⬜ Re-run pending (Phase 5 V-03) |
+
+---
+
+## R-003 — Spec verification and coherence diagnostic ⚠️ *(exploratory — not quotable)*
+
+| Field | Value |
+|---|---|
+| **Analysis** | Reference implementation of the three arms; checks C1–C5 against `METRIC_DEFINITIONS.md` |
+| **Script** | `research/analysis/01_verify_spec.py` |
+| **Dataset** | None. Deterministic illustrative paths, `R_0 = 185M VND`, `T = 36`, `A = 200M`, `r = 0.10`, `f = 1.20` |
+| **Assumptions** | `m` and `F` **not yet sourced** — swept illustratively. This is the reason the entry is not quotable |
+| **Type** | **Exploratory** — a spec check, not a test of any hypothesis |
+| **Public-safe** | ⚠️ **No — do not quote.** Single path, unsourced parameters, throwaway reference implementation. Supersede with Phase 3 results |
+| **Status** | ✅ All five checks pass, 2026-08-03 |
+
+**Verified:** cost-matching exact to <1 VND at base case (total repaid 240,000,000 both arms, N = D = 13 months, implied fixed APR 37.87%) · PTR constant at `r` pre-cap, confirming the §4.1 degeneracy · under −40% decline RBF pays 39.9% less in month 12 but runs 18 months vs 13 · FIX invariant to `ω`, RBF duration extends 13 → 19 months at `ω = 0.70`.
+
+### ⚠️ Preliminary signal — H2 may fail, and for an interesting reason
+
+Under a −40% sustained decline, distress-month counts (T-0):
+
+| `m` | `F/R_0` | FIX | RBF | |
+|---|---|---|---|---|
+| 0.25 | 0.20 | 36 | 36 | degenerate — see D-011 |
+| 0.25 | 0.10 | **7** | **11** | **RBF worse** |
+| 0.35 | 0.15 | 7 | 0 | RBF better |
+| 0.45 | 0.10 | 0 | 0 | tie |
+
+**Mechanism.** Under cost-matching, RBF's lower monthly payment is purchased with a longer term. In a declining scenario the fixed loan *finishes* — at month 13 its payment drops to zero — while RBF is still remitting at month 18. Per-month relief can therefore be outweighed by the extra months in which any payment is made at all. Whether relief or duration dominates depends on where `m·R_t − F` sits relative to the payment.
+
+**Why this matters now:** H2 is genuinely at risk, and its outcome is likely *conditional* rather than directional. The pre-specified sensitivity grid (§7 S-4, S-5) and the headline-fragility rule already cover this, which is the intended function of pre-registration. **If Phase 3 confirms it, the paper's headline is a conditional result — "RBF reduces distress only when gross margin clears a threshold" — which is more useful and more defensible than a directional claim.**
+
+**Not a finding.** One path, one shock, unsourced margins, reference code. Registered so that the Phase 3 result cannot later be presented as a surprise, and so that no one can claim the sensitivity grid was designed after seeing it.
+
+---
+
+## R-010 — Baseline comparison run `baseline_v1` ✅ *(first reproducible outcome result)*
+
+| Field | Value |
+|---|---|
+| **Exact scenario** | 10 scenarios × 4 contracts: stable · seasonal · seasonal-strong · growth · gradual decline · sustained decline · severe downturn · 1-month disruption · platform outage · returns spike. Plus underreporting sweep `ω ∈ {1.00, 0.95, 0.90, 0.80, 0.70}` |
+| **Parameters** | `R₀ = 185,000,000 VND` · `A = 185,000,000` · `r = 0.10` · `f = 1.20` · `cap = 222,000,000` · `T = 24` · `σ = 0.15` · Benchmark B `j = 18%`, `N_B = 12` · 500 paths/scenario |
+| **Simulation version** | `rbf_sim` v1.0.0 implementing `METHODOLOGY_SPEC.md` v1.0 · base seed 20260803 · bootstrap seed 90210 |
+| **Code producing the result** | `rbf_sim/{generator,contracts,metrics,engine}.py` · `run_baseline.py` → `results/baseline_v1.json` |
+| **Type** | **Confirmatory** — spec frozen before the run; all metrics and thresholds pre-specified |
+| **Public-safe** | ⚠️ **Conditional.** Quotable only with (a) the SIMULATED label, (b) the parameter set inline, and (c) the assumption status of `j`, `N_B`, and seasonality. Not quotable as a claim about Vietnamese sellers |
+| **Status** | ✅ Reproduced 2026-08-03 · 146 tests pass · deterministic on rerun |
+
+### Interpretation
+
+- **F-1 — trade-off quantified.** Severe downturn: RBF removes 6.24 [6.19, 6.28] high-burden months (θ=0.15) at a cost of 32.5pp [32.3, 32.8] lower 12-month recovery and duration 12.0 → 18.3 months. Benefit and cost both scale with shock severity.
+- **F-2 ⚠️ against the product.** Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. RBF at `f = 1.20` costs ~2.3× the interest of a conventional loan. Reported as a headline.
+- **F-3 ⚠️ null.** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000. Provider exposure is **duration risk, not principal loss** — at these parameters.
+- **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue — a genuine structural advantage of FIX.
+- **F-5 ⚠️ null.** RBF-G bit-identical to RBF in all ten scenarios. Default guardrails never bind.
+
+### Limitations
+
+F-3 is partly a horizon artifact (`T = 24` against a 12-month base duration); the recovery-failure region has **not been located** and Phase 3 must search for it (D-013). F-5 means the guardrail arm currently carries no information. `j`, `N_B`, seasonality shapes, `m`, `F` are unsourced assumptions. No observed data of any kind. No causal or predictive claim. Intervals are Monte Carlo precision only.
+
+### Safe for public presentation?
+
+**Yes, with mandatory framing.** F-1, F-2, F-4 are presentable now with the simulated label and parameters stated. **F-3 must not be presented as "RBF is safe for providers"** — it is a horizon-bounded null pending the Phase 3 search. F-5 must be presented as a null result, not omitted.
+
+---
+
+## R-011 — Validation battery ✅ *(convergence, pricing, boundary, breakpoint, revenue definition)*
+
+| Field | Value |
+|---|---|
+| **Exact scenario** | (a) convergence at 500/2,000/5,000/10,000 paths on sustained −40%; (b) cap sweep `f ∈ [1.05, 1.30]` on the stable reference; (c) equal-effective-cost cap solve; (d) 12-probe recovery-boundary search; (e) RBF-G breakpoint scan over 36,000 month-observations; (f) remittance-basis sweep |
+| **Parameters** | `R₀ = 185,000,000` · `A = 185,000,000` · `r = 0.10` · `f = 1.20` · `T = 24` · basis `net_sales` · Benchmark B `j = 18%`, `N_B = 12`. All illustrative or derived — none externally sourced |
+| **Simulation version** | `rbf_sim` v1.0.0 + spec amendments A-1…A-5 · seeds 20260803 / 90210 |
+| **Code** | `run_validation.py`, `conv_step.py` → `results/validation_v1.json`; `run_baseline.py` → `results/baseline_v2.json` |
+| **Type** | **Confirmatory** for convergence, pricing, breakpoint, revenue definition. **Exploratory** for the boundary probes (a search, not a pre-specified test) |
+| **Public-safe** | ⚠️ **Conditional** — simulated label, parameter set, and assumption classification must appear with any quoted figure |
+| **Status** | ✅ 2026-08-03 · 169 simulation tests + 47 backend tests passing |
+
+**Interpretation.** Converged (Δ 0.0027 months, 0.042pp from 5,000→10,000). Equal-effective-cost cap **f\* = 1.0945** at 19.54% APR vs Benchmark B's 19.5618% — price and structure are separable, so the 39.90% APR at `f = 1.20` is a **pricing** result. Incomplete recovery requires zero-revenue months, a binding horizon, or a terminal write-off; a −40%/−60% decline alone over 24 months does not produce it. RBF-G's floor is **provably unreachable** (`p_min_mult 0.25 < hardship 0.50`).
+
+**Limitations.** Three boundary probes returned "cap unreachable on reference" — at `A = 3×R₀` or a 12-month write-off, benchmark A cannot be matched and the comparison is undefined. Reported, not dropped. No default model was introduced; non-recoveries are mechanical (zero revenue, maturity), not modeled borrower default. `platform_fee_rate` is arbitrary-and-awaiting-justification, defaulted to 0.
+
+**Safe for public presentation?** Yes with mandatory framing. **The equal-cost cap must accompany any cost comparison** — quoting 39.90% without `f*` would repeat the error this run corrected.
+
+---
+
+## R-012 ⚠️ — Provider-recovery effect reverses sign *(supersedes part of R-010)*
+
+| Field | Value |
+|---|---|
+| **Analysis** | Paired FIX-A − RBF ΔRR(12) across 10 scenarios, `baseline_v2`, basis `net_sales` |
+| **Code** | `run_baseline.py` → `results/baseline_v2.json` |
+| **Type** | **Confirmatory** — pre-specified metric, pre-specified scenarios |
+| **Public-safe** | ⚠️ **Conditional, and the condition is the point** |
+
+Under stable (−4.3pp), growth (−7.7pp), 1-month disruption (−1.1pp) and strong seasonality (−4.2pp), **RBF recovers capital faster** than the matched fixed loan. Only under decline does the fixed loan lead: gradual +8.1pp, sustained +16.3pp, severe downturn +26.9pp.
+
+**Per the headline-fragility rule (spec §12), any claim that RBF universally slows provider recovery is demoted to a condition-dependent observation, and the reversing condition — non-declining revenue — is named in the abstract.** R-010's provider figures were computed on the `gmv` basis and are superseded by these.
+
+---
+
+## R-013 — Two null results, preserved
+
+| ID | Null result | Status |
+|---|---|---|
+| **N-1** | Incomplete recovery = 0.0% across all ten baseline scenarios | **Preserved.** Explained as a horizon artifact by R-011's boundary search, not deleted. The original null and its explanation both stand. |
+| **N-2** | RBF-G bit-identical to RBF in all ten scenarios | **Preserved.** Cause identified analytically: the payment floor is unreachable by construction. **Parameters were not retuned to make it bind.** |
+
+Both remain in the registry permanently. Neither was removed once explained.
+
+---
+
+## Pending — Phase 3 confirmatory results
+
+Each becomes a registry entry the moment it produces a number. All are blocked on
+the frozen metric definitions (backlog R-02) per decision D-004.
+
+| ID | Analysis | Hypothesis | Type |
+|---|---|---|---|
+| R-010 | Paired fixed-vs-RBF payment burden across revenue paths | H1 | Confirmatory |
+| R-011 | Distress-month counts under seasonal + negative shocks | H2 | Confirmatory |
+| R-012 | Provider recovery, duration variance, incomplete-recovery rate | H3 | Confirmatory |
+| R-013 | Affordability-signal comparison under simulated stress | H4 (reframed) | Exploratory |
+| R-014 | Underreporting / revenue-diversion sensitivity | H5 | Confirmatory |
+| R-015 | Distress-threshold sensitivity sweep | robustness | Confirmatory |
+| R-016 | Bootstrap CIs on all headline metrics | robustness | Confirmatory |
+| R-017 | New generator passes the integrity engine (before/after RI-3) | H5 | Confirmatory |
+
+---
+
+## Registry rules
+
+1. **No number without an entry.** If it appears in public, it has a row here.
+2. **Exploratory results may not be reported as findings.** They generate hypotheses; they do not confirm them.
+3. **Confirmatory requires a pre-registered definition.** The analysis plan commit must predate the first run.
+4. **Null and unfavorable results get entries too.** A result that contradicts a hypothesis is registered and reported, not quietly dropped.
+5. **Public-safe is a deliberate decision, not a default.** Mark ❌ or ⚠️ freely; R-001 is the worked example.
+6. **Re-run before shipping.** Phase 5 V-03 regenerates every ✅ entry from committed code.

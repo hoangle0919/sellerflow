@@ -15,3 +15,9 @@ for _p in (_test_db, _test_db + "-wal", _test_db + "-shm"):
     except OSError:
         pass
 os.environ["DATABASE_URL"] = _test_db
+
+# main.py reads DASHBOARD_PASSWORD at import time and has no default, so the
+# suite must supply its own. Defined here rather than hard-coded in the tests so
+# there is exactly one place a password literal appears.
+TEST_DASHBOARD_PASSWORD = "test-dashboard-password"
+os.environ["DASHBOARD_PASSWORD"] = TEST_DASHBOARD_PASSWORD

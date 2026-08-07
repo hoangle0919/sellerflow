@@ -27,8 +27,17 @@ PREVIEW_PARAMS = {
 
 
 def _auth():
-    tok = client.post("/api/auth/login", json={"password": "demo2025"}).json()["token"]
+    pw = os.environ["DASHBOARD_PASSWORD"]      # set by conftest; no default exists
+    tok = client.post("/api/auth/login", json={"password": pw}).json()["token"]
     return {"Authorization": f"Bearer {tok}"}
+
+
+def test_login_rejects_the_withdrawn_default_credential():
+    """Regression guard: `demo2025` was a shipped fallback until 2026-08-06.
+    The README now states no default exists; this asserts the code agrees."""
+    assert main.DASHBOARD_PASSWORD is not None          # conftest configured one
+    r = client.post("/api/auth/login", json={"password": "demo2025"})
+    assert r.status_code == 401
 
 
 # ── Public surfaces ──

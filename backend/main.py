@@ -55,7 +55,12 @@ def rate_limit(request: Request, bucket: str, limit: int, window_s: int):
 
 
 # ── Auth ──
-DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD", "demo2025")
+# No default. A shipped fallback credential is a published credential, so an
+# unset DASHBOARD_PASSWORD DISABLES dashboard login rather than silently
+# accepting a value that is in the repository's history. The rest of the API
+# and the health check keep working, so a misconfigured deploy fails closed and
+# visibly instead of failing open and quietly.
+DASHBOARD_PASSWORD = os.environ.get("DASHBOARD_PASSWORD") or None
 SESSION_TTL_S = 12 * 3600
 _sessions: dict[str, float] = {}  # token -> expiry epoch
 
@@ -71,6 +76,10 @@ def require_auth(authorization: str = Header(default="")):
 @app.post("/api/auth/login")
 def login(data: LoginRequest, request: Request):
     rate_limit(request, "login", limit=10, window_s=300)
+    if DASHBOARD_PASSWORD is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Dashboard login is not configured. Set DASHBOARD_PASSWORD.")
     if not hmac.compare_digest(data.password.encode(), DASHBOARD_PASSWORD.encode()):
         raise HTTPException(status_code=401, detail="Invalid password")
     now = time.time()
