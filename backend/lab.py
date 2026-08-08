@@ -145,6 +145,7 @@ ARMS = [
     {"id": "FIX-A", "track": "illustrative", "arm": "FIX-A", "palette": "fixed-a",
      "name": "Fixed payment — cost-matched",
      "short": "Fixed payment",
+     "chart_label": "Fixed payment",
      "kind": "fixed",
      "note": "Same principal, same total repayment and same term as the "
              "illustrative revenue-based contract on the reference path. Only "
@@ -153,12 +154,14 @@ ARMS = [
     {"id": "FIX-B", "track": "illustrative", "arm": "FIX-B", "palette": "fixed-b",
      "name": "Amortizing loan — 18% nominal",
      "short": "Amortizing loan",
+     "chart_label": "Amortizing loan",
      "kind": "fixed",
      "note": "A conventional 12-month amortizing loan at 18% nominal annual "
              "rate. Not cost-matched; it is the external price reference."},
     {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
      "name": "Reference-path cost-matched RBF",
      "short": "Revenue-based, cost-matched",
+     "chart_label": "Revenue-based 1.0945×",
      "kind": "rbf",
      "note": "The cap factor was chosen so this contract's cost matches the "
              "amortizing loan ON THE REFERENCE PATH — a flat, shock-free path "
@@ -168,6 +171,7 @@ ARMS = [
     {"id": "RBF-ILL", "track": "illustrative", "arm": "RBF", "palette": "rbf-ill",
      "name": "Illustrative RBF (cap factor 1.20)",
      "short": "Revenue-based, illustrative",
+     "chart_label": "Revenue-based 1.20×",
      "kind": "rbf",
      "note": "An ILLUSTRATIVE cap factor, not a recommended or market price. "
              "Its higher cost is a property of choosing 1.20, not of "
@@ -294,10 +298,25 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
     has_cap = spec["id"] != "FIX-B"
     cap = terms.get("cap") if has_cap else None
 
+    # Both arms have a repayment target; they differ in what defines it. A
+    # revenue-based or cost-matched contract stops at a contractual cap. An
+    # annuity has no cap at all — its target is simply what the schedule sums
+    # to. Rendering the annuity as "no cap" said what it lacks instead of what
+    # it owes, which is not a number a reader can use.
+    target = {
+        "label": "Contractual cap" if has_cap else "Scheduled total repayment",
+        "amount": _fmt_money(cap if has_cap else (total or 0)),
+        "basis": ("Advance × cap factor. Collection stops here."
+                  if has_cap else
+                  "Sum of the 12 scheduled instalments. This loan has no cap; "
+                  "the schedule itself defines the total."),
+    }
+
     return {
         "id": spec["id"],
         "name": spec["name"],
         "short": spec["short"],
+        "chart_label": spec["chart_label"],
         "kind": spec["kind"],
         "palette": spec["palette"],
         "note": spec["note"],
@@ -305,12 +324,13 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
         "source_sha256": _checksum(stem),
         "cap_factor": terms.get("f") if has_cap else None,
         "principal": _fmt_money(terms.get("A", 0)),
+        "repayment_target": target,
         "contractual_cap": _fmt_money(cap) if cap is not None else None,
-        "cap_basis": ("Advance × cap factor" if has_cap
-                      else "No cap — amortizing schedule; the total is the sum of "
-                           "the scheduled instalments."),
+        "cap_basis": target["basis"],
         "total_repaid_mean": _fmt_money(total or 0),
         "effective_apr": a.get("apr_mean"),
+        "apr_undefined_reason": (None if a.get("apr_mean") is not None else
+                                 "repayment incomplete"),
         "apr_basis": "mean across simulated paths for this scenario",
         "burden": {
             "mean": a.get("burden_mean"),

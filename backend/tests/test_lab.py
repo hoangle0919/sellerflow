@@ -555,4 +555,72 @@ def test_uncompleted_duration_is_stated_not_dashed():
     """At closure no path reaches the target, so the mean duration is undefined.
     The page says so rather than printing a bare dash."""
     html = open(LAB_HTML, encoding="utf-8").read()
-    assert "not reached in 24 mo" in html and "not reached" in html
+    assert "Not completed within 24 months" in html
+
+
+# ── closing pass (D-034): label clipping, states copy, annuity wording ─────
+
+def test_chart_labels_are_short_enough_not_to_clip():
+    """The gutter is measured at runtime, but a runaway label would still push
+    it to the clamp. Keep the axis labels compact at source."""
+    for a in client.get("/api/lab/comparison/stable").json()["arms"]:
+        assert a["chart_label"], a["id"]
+        assert len(a["chart_label"]) <= 24, f"{a['id']}: {a['chart_label']!r}"
+
+
+def test_chart_gutter_is_measured_not_hard_coded():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "measureText" in html, "label width must be measured"
+    assert "padL=narrow?0:206" not in html, "fixed gutter reintroduced"
+
+
+def test_footer_reads_correctly_before_the_manifest_loads():
+    """The spec version is injected by renderProvenance(), which never runs when
+    the manifest fails — leaving 'Simulation output under .' on screen."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    foot = html.split('id="foot-spec"', 1)[1].split("</span>", 1)[0]
+    assert foot.strip(">").strip(), "foot-spec has no default text"
+    assert "under <span" not in html.replace('\n', ' ') or "the frozen" in html
+
+
+def test_server_error_text_is_never_rendered_to_the_user():
+    """A detail string may carry stack context, an internal path, or an upstream
+    message. Copy is chosen from the status code; the detail goes to the console."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "ERROR_COPY" in html and "userMessage(" in html
+    assert "console.warn" in html
+    # the error panel must never be handed a server string
+    assert 'show("error",e.message)' in html
+    assert "body.detail" not in html and "(body&&body.detail)" not in html
+
+
+def test_amortizing_loan_reports_its_scheduled_total_not_no_cap():
+    d = client.get("/api/lab/comparison/stable").json()
+    by = {a["id"]: a for a in d["arms"]}
+    b = by["FIX-B"]
+    assert b["repayment_target"]["label"] == "Scheduled total repayment"
+    assert b["repayment_target"]["amount"]["vnd"] == b["total_repaid_mean"]["vnd"]
+    assert "no cap" in b["repayment_target"]["basis"].lower()
+    assert isinstance(b["repayment_target"]["amount"]["vnd"], int)
+
+    a = by["FIX-A"]
+    assert a["repayment_target"]["label"] == "Contractual cap"
+    assert a["repayment_target"]["amount"]["vnd"] == a["contractual_cap"]["vnd"]
+
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert '"no cap"' not in html, "the page still prints a bare 'no cap'"
+
+
+def test_incomplete_closure_contracts_use_the_agreed_wording():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "Undefined — repayment incomplete" in html
+    assert "Not completed within 24 months" in html
+    d = client.get("/api/lab/comparison/closure_m7").json()
+    rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
+    assert rbf["effective_apr"] is None
+    assert rbf["apr_undefined_reason"] == "repayment incomplete"
+
+
+def test_network_failure_has_its_own_message():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "could not be reached" in html.lower()

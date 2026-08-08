@@ -166,6 +166,26 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-034 — Simulation Lab closing fixes; functionality now frozen
+**Date:** 2026-08-08
+**Status:** APPLIED. **Lab functionality is frozen after this entry.** The only remaining Lab work is real Safari/iPhone verification and genuine browser-specific fixes.
+
+Four visible defects, all spotted by Hoang in the delivered screenshots rather than by any test — which is itself the finding: the suite proved the numbers were right and said nothing about whether they were legible.
+
+**1. Clipped axis labels.** A fixed 206 px label gutter silently truncated the longer revenue-based labels, which measured ~244 px. SVG text draws past `x=0` rather than wrapping, so the overflow was invisible in code review and only showed on screen. The right-hand value reserve had the same defect: `10.16 mo` overran a fixed 60 px by 4 px at full-length bars. Both gutters are now **measured at runtime** with a canvas metric against the actual font, and the axis labels were shortened at source. Verified: **0 clipped text nodes across 8 widths × 4 scenarios**, from 360 px to 1440 px.
+
+**2. Malformed footer in non-ready states.** The footer read *"Simulation output under ."* whenever the manifest failed, because the spec version is injected by `renderProvenance()` — which never runs on the error path. `#foot-spec` now ships with sensible default copy that the manifest overwrites when it arrives.
+
+**3. Raw server text rendered to the user.** `getJSON` echoed the response body's `detail` straight into the error panel. A 500 from a real deployment could therefore print an internal path, an upstream driver message, or a connection string. User-facing copy is now selected **from the status code**; the detail is written to the console for a developer and never enters the DOM. Verified with an injected `psycopg2.OperationalError at /srv/app/db.py:88 password=hunter2` — absent from the DOM, present in the console. A network failure now has its own message rather than falling through to a generic one.
+
+**4. Amortizing loan described by what it lacks.** The card read *"Repayment target: no cap"* — true, and useless. It now reports **"Scheduled total repayment: 203,529,584 ₫"** with the basis stated, because that is the number a reader can actually use. Each arm carries a `repayment_target` object naming its own label, amount and basis, so the annuity and the capped contracts are described in their own terms rather than one being rendered as a deficient version of the other.
+
+**Closure wording**, as requested: an incomplete contract now reads **"Undefined — repayment incomplete"** for the rate and **"Not completed within 24 months"** for duration, instead of an em-dash that read as missing data rather than a finding.
+
+**Consequence:** backend tests 263 → 270. No research artifact modified; all four canonical checksums verified byte-identical.
+
+---
+
 ### D-033 — Simulation Lab refinement pass after external design audit
 **Date:** 2026-08-08
 **Trigger:** an independent Dieter Rams audit of the rendered surface scored the Lab **21/30 — REFINE, not redesign**, with principles 8 (thorough) and 10 (as little design as possible) at 1/3.

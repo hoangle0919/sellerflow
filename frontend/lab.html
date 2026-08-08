@@ -396,7 +396,7 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 </main>
 
 <footer><div class="wrap">
-  <p style="margin:0">Simulation output under <span class="mono" id="foot-spec"></span>.
+  <p style="margin:0">Simulation output under <span class="mono" id="foot-spec">the frozen methodology specification</span>.
   Reproduce with <span class="mono">python3 research/run_baseline.py</span>.</p>
   <p style="margin:7px 0 0">The underwriting model elsewhere in this project is a secondary,
   <strong>explicitly unvalidated</strong> component with no measured predictive validity,
@@ -412,7 +412,11 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 var STATE={scenario:null,data:null,manifest:null};
 function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
-function pct(x,dp){return (x==null)?"undefined":(x*100).toFixed(dp==null?1:dp)+"%";}
+function pct(x,dp){return (x==null)?"—":(x*100).toFixed(dp==null?1:dp)+"%";}
+function apr(a){return a.effective_apr==null
+  ? "Undefined — repayment incomplete" : pct(a.effective_apr,2);}
+function dur(a){return a.duration_months_mean==null
+  ? "Not completed within 24 months" : num(a.duration_months_mean,1)+" mo";}
 function num(x,dp){return (x==null)?"—":Number(x).toFixed(dp==null?1:dp);}
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 function armColor(a){return cssVar("--c-"+a.palette)||"#666";}
@@ -429,12 +433,30 @@ function show(which,detail){
 }
 el("retry").addEventListener("click",function(){init();});
 
+/* User-facing copy is chosen from the STATUS CODE, never echoed from the
+   response body. A server detail string may contain stack context, an internal
+   path, or an upstream message that should not reach a browser; it is logged to
+   the console for a developer and dropped from the page. */
+var ERROR_COPY={
+  404:"That scenario is not in the published result set.",
+  429:"Too many requests. Wait a moment and try again.",
+  503:"The research artifacts are not available on this instance.",
+  0:"The server could not be reached. Check your connection and try again."
+};
+function userMessage(status){
+  if(ERROR_COPY[status]) return ERROR_COPY[status];
+  if(status>=500) return "The server could not complete this request.";
+  if(status>=400) return "That request could not be completed.";
+  return "Something went wrong loading this page.";
+}
 async function getJSON(url){
-  var r=await fetch(url,{headers:{"Accept":"application/json"}});
+  var r;
+  try{ r=await fetch(url,{headers:{"Accept":"application/json"}}); }
+  catch(net){ var e0=new Error(userMessage(0)); e0.status=0; throw e0; }
   if(!r.ok){
-    var body=null; try{body=await r.json();}catch(e){}
-    var err=new Error((body&&body.detail)||("HTTP "+r.status));
-    err.status=r.status; throw err;
+    var detail=null; try{ detail=(await r.json()).detail; }catch(e){}
+    if(detail && window.console) console.warn("[lab] "+url+" -> "+r.status+": "+detail);
+    var err=new Error(userMessage(r.status)); err.status=r.status; throw err;
   }
   return r.json();
 }
@@ -497,12 +519,12 @@ function renderArms(arms){
       '<dl style="margin:8px 0 0">'+
         kv("Cap factor", a.cap_factor==null?"none":"×"+num(a.cap_factor,4))+
         kv("Advance", a.principal.display)+
-        kv("Repayment target", a.contractual_cap?a.contractual_cap.display:"no cap")+
-        kv("Mean simulated APR", pct(a.effective_apr,2))+
-        kv("Mean duration", a.duration_months_mean==null?"not reached in 24 mo":num(a.duration_months_mean,1)+" mo")+
+        kv(a.repayment_target.label, a.repayment_target.amount.display)+
+        kv("Mean simulated APR", apr(a))+
+        kv("Mean duration", dur(a))+
       '</dl>'+
       '<details><summary>What this contract is</summary><p>'+esc(a.note)+'</p>'+
-      '<p><b>Repayment target:</b> '+esc(a.cap_basis)+'</p></details></article>';
+      '<p><b>'+esc(a.repayment_target.label)+':</b> '+esc(a.repayment_target.basis)+'</p></details></article>';
   }).join("");
 }
 function kv(k,v){return '<div class="kv"><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>';}
@@ -514,8 +536,19 @@ function renderLegend(arms){
 }
 
 /* ── charts ─────────────────────────────────────────────────── */
-function armShort(a){
-  return a.short + (a.kind==="rbf" && a.cap_factor!=null ? " ("+String(a.cap_factor)+"×)" : "");
+function armShort(a){ return a.chart_label; }
+
+/* Label widths are MEASURED, not assumed. A fixed 206px gutter silently clipped
+   the longer revenue-based labels — they ran to roughly 244px, and the overflow
+   was invisible because SVG text simply draws past x=0 rather than wrapping.
+   The gutter is now sized to the widest label actually present, so it cannot
+   clip whatever the labels later become. */
+var _mc=null;
+function textWidth(str,px,mono){
+  if(!_mc){ _mc=document.createElement("canvas").getContext("2d"); }
+  _mc.font=px+"px "+(mono?"'Spline Sans Mono', ui-monospace, monospace"
+                          :"Archivo, -apple-system, sans-serif");
+  return _mc.measureText(str).width;
 }
 /* viewBox is sized to the container so 1 unit ≈ 1 CSS pixel; a fixed viewBox
    squeezed into a phone rendered label text at 5px. Below 560px the layout
@@ -525,7 +558,17 @@ function groupedBars(svgId, arms, series, fmt, maxOverride){
   var svg=el(svgId), host=svg.parentElement;
   var W=Math.min(Math.max(300,Math.floor((host&&host.clientWidth)||700)),880);
   var narrow=W<560;
-  var padL=narrow?0:206, padR=narrow?0:60, padT=narrow?18:22;
+  var labelPx=12;
+  var widest=0, widestVal=0;
+  arms.forEach(function(a){ widest=Math.max(widest,textWidth(armShort(a),labelPx)); });
+  /* The value sits to the RIGHT of a full-width bar, so padR must fit the
+     longest formatted value too — "10.16 mo" overflowed a fixed 60px reserve by
+     4px at the widest bar. Measured in the mono face the values are drawn in. */
+  series.forEach(function(sr){ arms.forEach(function(a){
+    widestVal=Math.max(widestVal,textWidth(fmt(sr.value(a)),labelPx,true)); }); });
+  var padL=narrow?0:Math.min(Math.max(Math.ceil(widest)+20,120),330);
+  var padR=narrow?0:Math.min(Math.max(Math.ceil(widestVal)+16,44),200);
+  var padT=narrow?18:22;
   var rowH=narrow?33:31, gap=narrow?13:14, barH=narrow?10:18;
   var max=maxOverride!=null?maxOverride:0;
   if(maxOverride==null){series.forEach(function(s){arms.forEach(function(a){
@@ -595,8 +638,8 @@ function drawCharts(){
 function renderDuration(arms){
   var rows=arms.map(function(a){
     return '<tr><th scope="row">'+esc(a.name)+'</th>'+
-      td(a.duration_months_mean==null?"not reached":num(a.duration_months_mean,1)+" mo")+td(a.duration_sd==null?"—":"±"+num(a.duration_sd,2))+
-      td(a.contractual_cap?a.contractual_cap.display:"no cap")+
+      td(dur(a))+td(a.duration_sd==null?"—":"±"+num(a.duration_sd,2))+
+      td(a.repayment_target.amount.display)+
       td(a.total_repaid_mean.display)+td(pct(a.incomplete_recovery_rate,1))+'</tr>';
   }).join("");
   el("dur-table").innerHTML='<table class="data">'+
@@ -666,7 +709,7 @@ async function select(key){
     renderArms(d.arms); renderLegend(d.arms); drawCharts();
     renderDuration(d.arms); renderDefs(d.metric_definitions);
     renderFindings(d.findings); renderPanels(d); drawCharts();
-  }catch(e){ show("error","Scenario “"+key+"” could not be loaded. "+e.message); }
+  }catch(e){ show("error",e.message); }
 }
 
 /* Secondary panels are collapsed on narrow viewports only. Limitations,
