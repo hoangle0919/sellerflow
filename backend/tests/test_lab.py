@@ -74,7 +74,7 @@ def test_served_checksum_matches_the_artifact_on_disk():
 def test_page_renders_the_checksum_and_spec_version():
     html = open(LAB_HTML, encoding="utf-8").read()
     assert "sha256" in html
-    assert "prov-grid" in html and "foot-spec" in html
+    assert "prov-table" in html and "foot-spec" in html
 
 
 # ── values originate in the artifact ────────────────────────────────────────
@@ -102,6 +102,7 @@ def test_findings_quote_the_same_numbers_the_charts_show():
     txt = " ".join(f["text"] for f in d["findings"])
     assert f"{by['FIX-A']['burden']['max']:.1%}" in txt
     assert f"{by['RBF-ILL']['burden']['max']:.1%}" in txt
+    assert "sustained decline" in txt.lower(), "scenario-dependent findings must name the scenario"
 
 
 def test_no_research_number_is_hard_coded_in_the_page():
@@ -137,10 +138,10 @@ def test_equal_cost_and_illustrative_arms_are_distinct_and_labelled():
 
     assert eq["cap_factor"] != ill["cap_factor"]
     assert eq["source_artifact"] != ill["source_artifact"]
-    assert "equal effective cost" in eq["name"].lower()
+    assert "reference-path cost-matched" in eq["name"].lower()
     assert "illustrative" in ill["name"].lower()
     # The illustrative arm must say it is not a market price.
-    assert "not a recommended" in ill["note"].lower() or "illustrative" in ill["note"].lower()
+    assert "illustrative" in ill["note"].lower()
     assert "not of revenue-based" in ill["note"].lower() or "property of choosing" in ill["note"].lower()
 
 
@@ -283,7 +284,8 @@ def test_fixed_arm_default_risk_is_not_implied_away():
 def test_no_universal_claim_about_provider_recovery_direction():
     caveats = " ".join(c["text"].lower()
                        for c in client.get("/api/lab/comparison/stable").json()["caveats"])
-    assert "not universally" in caveats
+    assert "depends on the revenue path" in caveats
+    assert "universal claim" in caveats
 
 
 def test_constant_revenue_projections_are_labelled_illustrative():
@@ -333,4 +335,224 @@ def test_equal_cost_label_does_not_overclaim_on_stochastic_paths():
     note = eq["note"].lower()
     assert "reference path" in note and "differs" in note
     caveats = " ".join(c["text"].lower() for c in d["caveats"])
-    assert "calibrated on the deterministic reference path" in caveats
+    assert "solved on the reference path" in caveats
+
+
+# ── refinement pass (D-033): terminology, scenarios, states, palette ────────
+
+def test_closure_scenarios_are_selectable():
+    """Every scenario previously exposed repays in full. Closure is where
+    incomplete recovery is real; omitting it would flatter the result."""
+    keys = {s["key"] for s in client.get("/api/lab/scenarios").json()["scenarios"]}
+    assert {"closure_m7", "closure_m13", "temp_closure"} <= keys
+
+
+def test_closure_shows_genuine_incomplete_recovery():
+    d = client.get("/api/lab/comparison/closure_m7").json()
+    rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
+    assert rbf["incomplete_recovery_rate"] > 0.5
+    assert rbf["recovery_ratio"]["24"] < 1.0
+
+
+def test_undefined_apr_is_reported_not_substituted():
+    """When revenue stops the payment stream never repays, so no IRR exists.
+    Spec 13 E-3 requires reporting undefined rather than inventing a number."""
+    d = client.get("/api/lab/comparison/closure_m7").json()
+    rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
+    assert rbf["effective_apr"] is None
+    txt = " ".join(f["text"].lower() for f in d["findings"])
+    assert "undefined" in txt
+
+
+def test_every_rate_declares_its_basis():
+    for a in client.get("/api/lab/comparison/stable").json()["arms"]:
+        assert "mean across simulated paths" in a["apr_basis"]
+
+
+def test_recovery_denominator_is_declared_per_arm():
+    d = client.get("/api/lab/comparison/stable").json()
+    by = {a["id"]: a for a in d["arms"]}
+    assert "no cap" in by["FIX-B"]["recovery_denominator"].lower()
+    assert "cap" in by["FIX-A"]["recovery_denominator"].lower()
+    assert "denominator" in d["metric_definitions"]["recovery_ratio"]["caveat"].lower()
+
+
+def test_burden_thresholds_are_marked_illustrative():
+    caveat = client.get("/api/lab/comparison/stable").json()[
+        "metric_definitions"]["high_burden_months"]["caveat"].lower()
+    assert "illustrative" in caveat
+    assert "not validated hardship cutoffs" in caveat
+
+
+def test_burden_is_not_claimed_to_measure_affordability():
+    """'Lower is easier to carry' outran the metric: margins, costs and other
+    debts are outside the model."""
+    d = client.get("/api/lab/comparison/stable").json()
+    assert "affordable" in d["metric_definitions"]["burden"]["caveat"].lower()
+    html = open(LAB_HTML, encoding="utf-8").read().lower()
+    assert "easier to carry" not in html
+
+
+def test_scenario_dependent_findings_name_their_scenario():
+    for key, label in (("growth", "growth"), ("closure_m7", "closure, month 7")):
+        d = client.get(f"/api/lab/comparison/{key}").json()
+        for f in d["findings"]:
+            if f["classification"] == "simulation_result":
+                assert label in f["text"].lower(), f["text"]
+
+
+def test_underreporting_is_offered_but_not_as_a_scenario():
+    u = client.get("/api/lab/underreporting").json()
+    assert len(u["rows"]) >= 4
+    assert "not a revenue path" in u["why_not_a_scenario"].lower()
+    keys = {s["key"] for s in client.get("/api/lab/scenarios").json()["scenarios"]}
+    assert not any("underreport" in k for k in keys)
+
+
+def test_glossary_defines_the_specialist_terms():
+    g = client.get("/api/lab/manifest").json()["glossary"]
+    for term in ("cap factor", "remittance", "effective APR",
+                 "Monte Carlo interval", "canonical artifact", "reference path"):
+        assert term in g and len(g[term]) > 30
+
+
+def test_page_implements_loading_error_and_unavailable_states():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    for sid in ("st-loading", "st-error", "st-unavailable", "retry"):
+        assert f'id="{sid}"' in html, f"missing state element {sid}"
+    assert "aria-live" in html
+
+
+def test_palette_is_categorical_not_valenced():
+    """Red-versus-green read as fixed = bad, revenue-based = good before any
+    copy was read. Colour now identifies a contract, nothing more."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    for tok in ("--c-fixed-a", "--c-fixed-b", "--c-rbf-ref", "--c-rbf-ill"):
+        assert tok in html
+    for banned in ("--decline", "--approve", "#2E6B4F", "#8C3A38"):
+        assert banned not in html, f"old valenced colour {banned} still present"
+    for a in client.get("/api/lab/comparison/stable").json()["arms"]:
+        assert a["palette"] in {"fixed-a", "fixed-b", "rbf-ref", "rbf-ill"}
+        assert "good" not in json.dumps(a).lower().replace("goods", "")
+
+
+def test_one_shared_legend_not_one_per_chart():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert html.count('class="legend"') == 1
+
+
+def test_mobile_table_has_a_scroll_affordance():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "dur-scrollnote" in html and "scrollnote" in html
+    assert "Scroll the table sideways" in html
+
+
+def test_limitations_are_not_collapsed_behind_disclosure():
+    """Anti-pattern guard: favourable findings must not be prominent while
+    limitations hide in collapsed content."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    limits = html.split('id="s-limits"', 1)[1].split("</section>", 1)[0]
+    assert 'id="caveats"' in limits
+    before = limits.split('id="caveats"', 1)[0]
+    # Nesting depth, not mere presence: a sibling card may legitimately use a
+    # disclosure (the glossary does). What matters is whether the caveats list
+    # itself sits inside one that is still open.
+    depth = before.count("<details") - before.count("</details>")
+    assert depth == 0, "limitations list is inside a collapsed element"
+
+
+# ── contrast, weight, and the audit's "keep" regressions ───────────────────
+
+def _luminance(hexs):
+    hexs = hexs.lstrip("#")
+    ch = [int(hexs[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    f = lambda c: c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = (f(c) for c in ch)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _contrast(a, b):
+    la, lb = _luminance(a), _luminance(b)
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+@pytest.mark.parametrize("fg,bg,label", [
+    ("#1A1A1A", "#FAF9F4", "body text"),
+    ("#54544D", "#FFFFFF", "muted text"),
+    ("#6E6E66", "#FFFFFF", "faint text"),
+    ("#005B8F", "#E7F1F8", "fixed-a badge"),
+    ("#15607F", "#E8F4FB", "fixed-b badge"),
+    ("#7A5500", "#FBF2E0", "rbf-ref badge"),
+    ("#8A3F6B", "#F9EDF4", "rbf-ill badge"),
+])
+def test_text_contrast_meets_wcag_aa(fg, bg, label):
+    assert _contrast(fg, bg) >= 4.5, f"{label}: {_contrast(fg, bg):.2f}:1"
+
+
+@pytest.mark.parametrize("fill", ["#0072B2", "#239DE2", "#C68900", "#CC79A7"])
+def test_bar_fills_meet_non_text_contrast(fill):
+    """WCAG 1.4.11: graphical objects carrying meaning need 3:1."""
+    assert _contrast(fill, "#FFFFFF") >= 3.0, f"{fill}: {_contrast(fill, '#FFFFFF'):.2f}:1"
+
+
+def test_page_loads_no_framework_or_third_party_asset():
+    """Principle 9 regression: the page stays a hand-written client."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    for bad in ("cdn.", "unpkg", "jsdelivr", "googleapis", "react", "vue",
+                "jquery", "chart.js", "d3.", "gtag", "analytics"):
+        assert bad not in html.lower(), f"third-party dependency: {bad}"
+    assert html.count("<script") == 1
+    assert "src=" not in html.split("<script")[1].split(">")[0]
+
+
+def test_inline_javascript_stays_small():
+    """Measured, not estimated. A budget that fails loudly if the page grows a
+    framework by accident."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    js = html.split("<script>", 1)[1].rsplit("</script>", 1)[0]
+    assert len(js.encode()) < 40_000, f"inline JS is {len(js.encode()):,} B"
+
+
+# Principle 5 (unobtrusive) — scored 3, must not regress.
+def test_no_modal_autoplay_or_conversion_cta():
+    html = open(LAB_HTML, encoding="utf-8").read().lower()
+    for bad in ("<dialog", "autoplay", "<video", "role=\"dialog\"",
+                "sign up", "get started", "buy now", "subscribe", "book a demo"):
+        assert bad not in html, f"interruptive/promotional element: {bad}"
+
+
+# Principle 7 (long-lasting) — scored 3, must not regress.
+def test_typographic_roles_and_flat_surfaces_preserved():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "Fraunces" in html and "Archivo" in html and "Spline Sans Mono" in html
+    for trend in ("linear-gradient", "radial-gradient", "backdrop-filter",
+                  "@keyframes", "animation:"):
+        assert trend not in html, f"dated visual trend introduced: {trend}"
+
+
+# Principle 2 (useful) — scored 3, must not regress.
+def test_one_scenario_choice_updates_every_registered_section():
+    """A single selection must still drive the whole comparison."""
+    a = client.get("/api/lab/comparison/stable").json()
+    b = client.get("/api/lab/comparison/severe_downturn").json()
+    assert a["scenario"]["key"] != b["scenario"]["key"]
+    for section in ("arms", "findings", "summary"):
+        assert a[section] != b[section], f"{section} did not change with the scenario"
+    assert a["arms"][0]["burden"]["max"] != b["arms"][0]["burden"]["max"]
+
+
+def test_summary_is_derived_from_this_scenarios_own_values():
+    d = client.get("/api/lab/comparison/severe_downturn").json()
+    by = {x["id"]: x for x in d["arms"]}
+    s = d["summary"]
+    assert s["peak_burden_fixed"] == by["FIX-A"]["burden"]["max"]
+    assert s["peak_burden_rbf"] == by["RBF-ILL"]["burden"]["max"]
+    assert f"{by['FIX-A']['burden']['max']:.1%}" in s["sentence"]
+
+
+def test_uncompleted_duration_is_stated_not_dashed():
+    """At closure no path reaches the target, so the mean duration is undefined.
+    The page says so rather than printing a bare dash."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "not reached in 24 mo" in html and "not reached" in html

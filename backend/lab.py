@@ -5,22 +5,24 @@ RULES THIS MODULE ENFORCES, because the UI cannot be trusted to:
   * Every number originates in a committed, checksummed artifact under
     `research/results/`. Nothing here computes a research finding, and nothing
     is transcribed by hand.
-  * Every artifact ships with its checksum and spec version, so a reader can
-    verify what they are looking at.
-  * Every conclusion carries a CLAIM CLASSIFICATION. "RBF's payment burden is
-    constant" and "RBF extends duration in a downturn" are different kinds of
-    statement and must not be displayed as though they were the same kind.
+  * Every artifact ships with its checksum and spec version.
+  * Every conclusion carries a CLAIM CLASSIFICATION. A proof and a simulation
+    output are different kinds of evidence and must not be displayed alike.
+  * Every rate carries its BASIS — reference-path or mean-across-simulated-paths.
+    They are different quantities and the design audit found the page conflating
+    them (D-033).
+  * Every recovery figure carries its DENOMINATOR. The amortizing loan has no
+    contractual cap; its denominator is scheduled total repayment.
   * Contractual money is integer đồng via `money.py`. The frontend receives
     formatted values and performs no financial arithmetic.
-  * RBF-G is absent from every public surface (D-018). It is computed by the
-    engine but is a rejected design: its floor provably never activates.
-  * The illustrative f = 1.20 cap and the equal-effective-cost f* = 1.0945 cap
-    are separate arms with separate labels. Neither is "the" price of RBF.
+  * RBF-G is absent from every public surface (D-018).
+  * Colour is CATEGORICAL, never valenced. The API emits a palette key; it does
+    not emit "good" or "bad".
 
-WHY TWO BASELINES. `baseline_v2` prices every scenario at the illustrative
-f = 1.20. `baseline_equalcost_v1` prices the same scenarios, same seeds, same
-generator at f* = 1.0945 (D-031). Comparing seller burden at one price against
-provider recovery at another would be meaningless, so both exist.
+FOUR ARTIFACTS, TWO PRICE TRACKS. Ten ordinary scenarios and three closure
+scenarios, each priced at the illustrative f = 1.20 and at the reference-path
+cost-matched f* = 1.0945. A scenario is resolved against whichever artifact in
+its track contains it.
 """
 from __future__ import annotations
 
@@ -46,8 +48,10 @@ CLAIM_TAXONOMY = {
     "simulation_result": {
         "label": "Simulation result",
         "meaning": "Measured on simulated revenue paths under the frozen "
-                   "methodology. Describes the model, not observed sellers.",
-        "strength": "conditional on the generative assumptions",
+                   "methodology, FOR THE SELECTED SCENARIO. Describes the model, "
+                   "not observed sellers, and does not generalise to other "
+                   "scenarios.",
+        "strength": "conditional on the scenario and the generative assumptions",
     },
     "sensitivity_result": {
         "label": "Sensitivity result",
@@ -70,67 +74,103 @@ CLAIM_TAXONOMY = {
     },
 }
 
-# ── scenario descriptions (prose, not research numbers) ─────────────────────
+# ── glossary (D-033: specialist labels were unexplained in place) ───────────
+
+GLOSSARY = {
+    "cap factor": "The multiple of the advance that the seller repays in total. "
+                  "A cap factor of 1.20 on a 100M advance means 120M repaid.",
+    "contractual cap": "The total amount repayable — advance × cap factor. "
+                       "Collection stops when it is reached.",
+    "remittance": "The share of each month's revenue that goes to the financier. "
+                  "Fixed as a percentage; the amount moves with revenue.",
+    "effective APR": "The annualised internal rate of return of the payment "
+                     "stream against the advance. It puts a revenue share and a "
+                     "fixed instalment on one axis.",
+    "payment burden": "Payment ÷ revenue in a given month — the share of that "
+                      "month's takings that leaves as a payment.",
+    "90th percentile": "The value exceeded in only 10% of active months. It "
+                       "describes a bad month, not a typical one.",
+    "Monte Carlo interval": "A range showing whether enough simulated paths were "
+                            "run for a number to be stable. It is NOT a "
+                            "confidence interval and says nothing about real "
+                            "sellers.",
+    "canonical artifact": "A committed, checksummed result file. Identical code, "
+                          "configuration and seeds reproduce it byte-for-byte, "
+                          "so any figure here can be traced to a verifiable file.",
+    "reference path": "A flat, shock-free revenue path used once to price the "
+                      "fixed benchmark. Contracts are priced at origination, so "
+                      "a later shock cannot retro-price them.",
+}
+
+# ── scenarios (prose, not research numbers) ─────────────────────────────────
 
 SCENARIOS: Dict[str, dict] = {
-    "stable":            {"label": "Stable revenue",
-                          "family": "baseline",
+    "stable":            {"label": "Stable revenue", "family": "baseline", "order": 1,
                           "description": "Flat seasonality, no growth, no shock. The reference case."},
-    "seasonal":          {"label": "Moderate seasonality",
-                          "family": "baseline",
+    "seasonal":          {"label": "Moderate seasonality", "family": "baseline", "order": 2,
                           "description": "Ordinary seasonal swing around a flat trend."},
-    "seasonal_strong":   {"label": "Strong seasonality",
-                          "family": "baseline",
+    "seasonal_strong":   {"label": "Strong seasonality", "family": "baseline", "order": 3,
                           "description": "Pronounced peaks and troughs — common for fashion and gift categories."},
-    "growth":            {"label": "Growth",
-                          "family": "favourable",
+    "growth":            {"label": "Growth", "family": "favourable", "order": 4,
                           "description": "3% month-on-month growth with moderate seasonality."},
-    "gradual_decline":   {"label": "Gradual decline",
-                          "family": "stress",
+    "gradual_decline":   {"label": "Gradual decline", "family": "stress", "order": 5,
                           "description": "Revenue steps down toward −40% over six months, then holds."},
-    "sustained_decline": {"label": "Sustained decline",
-                          "family": "stress",
+    "sustained_decline": {"label": "Sustained decline", "family": "stress", "order": 6,
                           "description": "An immediate, permanent drop to 60% of prior revenue."},
-    "severe_downturn":   {"label": "Severe downturn",
-                          "family": "stress",
+    "severe_downturn":   {"label": "Severe downturn", "family": "stress", "order": 7,
                           "description": "−60% for six months, then a six-month recovery."},
-    "disruption_1m":     {"label": "One-month disruption",
-                          "family": "stress",
+    "disruption_1m":     {"label": "One-month disruption", "family": "stress", "order": 8,
                           "description": "A single month at half revenue, then full recovery."},
-    "platform_outage":   {"label": "Platform outage",
-                          "family": "stress",
-                          "description": "A single month at 30% of revenue — a marketplace suspension or outage."},
-    "returns_spike":     {"label": "Returns spike",
-                          "family": "stress",
+    "platform_outage":   {"label": "Platform outage", "family": "stress", "order": 9,
+                          "description": "A single month at 30% of revenue — a marketplace suspension."},
+    "returns_spike":     {"label": "Returns spike", "family": "stress", "order": 10,
                           "description": "Elevated returns reduce net sales without reducing gross orders."},
+    "closure_m7":        {"label": "Closure, month 7", "family": "closure", "order": 11,
+                          "description": "The business closes permanently in month 7. Revenue is zero "
+                                         "from then on and never recovers."},
+    "closure_m13":       {"label": "Closure, month 13", "family": "closure", "order": 12,
+                          "description": "Permanent closure in month 13, after most of the term has "
+                                         "already been repaid."},
+    "temp_closure":      {"label": "Temporary closure", "family": "closure", "order": 13,
+                          "description": "Three months at zero revenue, then partial recovery to 50%."},
+}
+
+#: A scenario is looked up in its track, first artifact that has it.
+TRACKS = {
+    "illustrative": ["baseline_v2", "baseline_closure_v1"],
+    "cost_matched": ["baseline_equalcost_v1", "baseline_closure_equalcost_v1"],
 }
 
 ARMS = [
-    {"id": "FIX-A", "source": "baseline_v2", "arm": "FIX-A",
+    {"id": "FIX-A", "track": "illustrative", "arm": "FIX-A", "palette": "fixed-a",
      "name": "Fixed payment — cost-matched",
+     "short": "Fixed payment",
      "kind": "fixed",
      "note": "Same principal, same total repayment and same term as the "
-             "illustrative RBF contract on the reference path. Only the TIMING "
-             "of payments differs, which is what isolates the comparison."},
-    {"id": "FIX-B", "source": "baseline_v2", "arm": "FIX-B",
+             "illustrative revenue-based contract on the reference path. Only "
+             "the TIMING of payments differs, which is what isolates the "
+             "comparison."},
+    {"id": "FIX-B", "track": "illustrative", "arm": "FIX-B", "palette": "fixed-b",
      "name": "Amortizing loan — 18% nominal",
+     "short": "Amortizing loan",
      "kind": "fixed",
      "note": "A conventional 12-month amortizing loan at 18% nominal annual "
              "rate. Not cost-matched; it is the external price reference."},
-    {"id": "RBF-EQ", "source": "baseline_equalcost_v1", "arm": "RBF",
-     "name": "Revenue-based — equal effective cost (f* = 1.0945)",
+    {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
+     "name": "Reference-path cost-matched RBF",
+     "short": "Revenue-based, cost-matched",
      "kind": "rbf",
-     "note": "The cap factor was calibrated so the effective cost matches the "
-             "amortizing loan ON THE DETERMINISTIC REFERENCE PATH. The APR shown "
-             "here is the mean across simulated paths, and it differs: repayment "
-             "duration varies with revenue, and a longer duration lowers the "
-             "annualised rate for the same total. 'Equal cost' names the "
-             "calibration, not a guarantee on every path."},
-    {"id": "RBF-ILL", "source": "baseline_v2", "arm": "RBF",
-     "name": "Revenue-based — illustrative (f = 1.20)",
+     "note": "The cap factor was chosen so this contract's cost matches the "
+             "amortizing loan ON THE REFERENCE PATH — a flat, shock-free path "
+             "used once at pricing time. On simulated paths the realised rate "
+             "differs, because duration moves with revenue. The name describes "
+             "how the price was set, not an outcome guaranteed on any path."},
+    {"id": "RBF-ILL", "track": "illustrative", "arm": "RBF", "palette": "rbf-ill",
+     "name": "Illustrative RBF (cap factor 1.20)",
+     "short": "Revenue-based, illustrative",
      "kind": "rbf",
      "note": "An ILLUSTRATIVE cap factor, not a recommended or market price. "
-             "Its higher effective cost is a property of choosing 1.20, not of "
+             "Its higher cost is a property of choosing 1.20, not of "
              "revenue-based repayment."},
 ]
 
@@ -153,15 +193,28 @@ def _checksum(stem: str) -> Optional[str]:
     return prov.get("canonical_sha256") if prov else None
 
 
+def _resolve(track: str, scenario: str):
+    """First artifact in the track containing this scenario."""
+    for stem in TRACKS[track]:
+        body = _load(f"{stem}_canonical")
+        if body and scenario in body.get("scenarios", {}):
+            return stem, body
+    return None, None
+
+
 def artifacts_available() -> bool:
     return _load("baseline_v2_canonical") is not None
 
 
 def manifest() -> dict:
-    """Artifact identity — what the reader is looking at, and how to verify it."""
+    roles = {
+        "baseline_v2": "Illustrative pricing (cap factor 1.20) — ten scenarios",
+        "baseline_equalcost_v1": "Reference-path cost-matched pricing — ten scenarios",
+        "baseline_closure_v1": "Illustrative pricing — closure / zero-revenue",
+        "baseline_closure_equalcost_v1": "Reference-path cost-matched — closure / zero-revenue",
+    }
     out = []
-    for stem, role in (("baseline_v2", "Illustrative pricing, f = 1.20"),
-                       ("baseline_equalcost_v1", "Equal effective cost, f* = 1.0945")):
+    for stem, role in roles.items():
         body = _load(f"{stem}_canonical")
         if not body:
             continue
@@ -173,10 +226,8 @@ def manifest() -> dict:
             "spec_version": c.get("spec_version"),
             "schema_version": c.get("schema_version"),
             "generator_fingerprint": c.get("generator_fingerprint"),
-            "scenario_config_hash": c.get("scenario_config_hash"),
             "n_paths": body.get("n_paths"),
             "base_seed": body.get("base_seed"),
-            "determinism": c.get("determinism"),
         })
     val = _load("validation_v1")
     return {
@@ -185,16 +236,19 @@ def manifest() -> dict:
             "artifact": "validation_v1.json",
             "equal_cost": (val or {}).get("pricing", {}).get("equal_cost"),
             "benchmark_b_apr": (val or {}).get("pricing", {}).get("benchmark_b_apr"),
+            "note": "The cost-matched cap factor was solved on the reference "
+                    "path so that its effective rate equals the amortizing "
+                    "loan's. Rates realised on simulated paths differ.",
         },
         "claim_taxonomy": CLAIM_TAXONOMY,
+        "glossary": GLOSSARY,
         "integrity": {
             "data_basis": "SIMULATED. No observed seller revenue, repayment or "
                           "default outcome exists in this project.",
             "intervals": "Monte Carlo intervals over simulated paths. They "
                          "measure whether enough paths were run for a number to "
                          "be stable — NOT population uncertainty about real "
-                         "sellers. Running more paths narrows them without "
-                         "adding a single fact about the world.",
+                         "sellers.",
             "parameters": "No contract parameter is externally sourced. All are "
                           "illustrative or derived, with sensitivity analysis "
                           "rather than claimed calibration.",
@@ -210,10 +264,12 @@ def manifest() -> dict:
 
 
 def scenarios() -> List[dict]:
-    body = _load("baseline_v2_canonical")
-    present = set((body or {}).get("scenarios", {}))
-    return [{"key": k, **v, "available": k in present}
-            for k, v in SCENARIOS.items() if k in present]
+    out = []
+    for k, v in SCENARIOS.items():
+        stem, _ = _resolve("illustrative", k)
+        if stem:
+            out.append({"key": k, **v, "available": True})
+    return sorted(out, key=lambda s: s["order"])
 
 
 def _fmt_money(x) -> dict:
@@ -222,31 +278,31 @@ def _fmt_money(x) -> dict:
 
 
 def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
-    body = _load(f"{spec['source']}_canonical")
+    stem, body = _resolve(spec["track"], scenario)
     if not body:
         return None
-    sc = body.get("scenarios", {}).get(scenario)
+    sc = body["scenarios"].get(scenario)
     if not sc or spec["arm"] not in sc:
         return None
     a = sc[spec["arm"]]
     terms = body.get("terms", {})
     total = a.get("total_repaid_mean")
 
-    # FIX-B is a conventional amortizing loan. It has no cap factor and no
-    # repayment cap — its total is whatever the annuity schedule sums to. Showing
-    # it the RBF contract's ×1.20 cap would attribute economics it does not have,
-    # and would sit visibly beside its own smaller total.
+    # The amortizing loan is an annuity: no cap factor, no contractual cap. Its
+    # recovery denominator is the scheduled total, not a cap. Attributing the
+    # RBF contract's cap to it would show a cap larger than its own total.
     has_cap = spec["id"] != "FIX-B"
     cap = terms.get("cap") if has_cap else None
 
-    dur = a.get("duration_mean")
     return {
         "id": spec["id"],
         "name": spec["name"],
+        "short": spec["short"],
         "kind": spec["kind"],
+        "palette": spec["palette"],
         "note": spec["note"],
-        "source_artifact": f"{spec['source']}_canonical.json",
-        "source_sha256": _checksum(spec["source"]),
+        "source_artifact": f"{stem}_canonical.json",
+        "source_sha256": _checksum(stem),
         "cap_factor": terms.get("f") if has_cap else None,
         "principal": _fmt_money(terms.get("A", 0)),
         "contractual_cap": _fmt_money(cap) if cap is not None else None,
@@ -255,6 +311,7 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
                            "the scheduled instalments."),
         "total_repaid_mean": _fmt_money(total or 0),
         "effective_apr": a.get("apr_mean"),
+        "apr_basis": "mean across simulated paths for this scenario",
         "burden": {
             "mean": a.get("burden_mean"),
             "p90": a.get("burden_p90"),
@@ -262,11 +319,13 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
             "max": a.get("burden_max"),
         },
         "high_burden_months": a.get("n_high_burden", {}),
-        "duration_months_mean": dur,
+        "duration_months_mean": a.get("duration_mean"),
         "duration_sd": a.get("duration_sd"),
         "censored_rate": a.get("duration_censored_rate"),
         "incomplete_recovery_rate": a.get("incomplete_recovery_rate"),
         "recovery_ratio": a.get("recovery_ratio", {}),
+        "recovery_denominator": ("Contractual cap (advance × cap factor)" if has_cap
+                                 else "Scheduled total repayment (this loan has no cap)"),
     }
 
 
@@ -283,6 +342,49 @@ def comparison(scenario: str) -> Optional[dict]:
         "findings": _findings(scenario, arms),
         "assumptions": ASSUMPTIONS,
         "caveats": CAVEATS,
+        "summary": _summary(scenario, arms),
+    }
+
+
+def underreporting() -> Optional[dict]:
+    """The omega sweep. Deliberately NOT presented as a scenario.
+
+    It is a sensitivity sweep run on one revenue shape: the provider observes
+    only ω of true revenue. Listing it beside 'severe downturn' would imply it
+    is a revenue path, which it is not.
+    """
+    body = _load("baseline_v2_canonical")
+    if not body or "underreporting" not in body:
+        return None
+    rows = []
+    for omega in sorted(body["underreporting"], key=float):
+        a = body["underreporting"][omega]
+        rows.append({
+            "omega": float(omega),
+            "observed_share": f"{float(omega):.0%}",
+            "duration_months_mean": a.get("duration_mean"),
+            "incomplete_recovery_rate": a.get("incomplete_recovery_rate"),
+            "burden_mean": a.get("burden_mean"),
+            "effective_apr": a.get("apr_mean"),
+            "total_repaid_mean": _fmt_money(a.get("total_repaid_mean") or 0),
+        })
+    return {
+        "rows": rows,
+        "source_artifact": "baseline_v2_canonical.json",
+        "source_sha256": _checksum("baseline_v2"),
+        "why_not_a_scenario": "This is a parameter sweep, not a revenue path. ω "
+                              "is the share of true revenue the provider "
+                              "observes; the underlying revenue shape is held "
+                              "fixed. It is shown separately so it is not read "
+                              "as one of the scenarios.",
+        "finding": {
+            "classification": "mathematical_property",
+            "text": "Under-reporting does not change what is owed. It rescales "
+                    "each payment, so the contract takes proportionally longer "
+                    "to reach the same cap — the total is invariant, the "
+                    "duration is not.",
+            "source": "research/DERIVATIONS.md",
+        },
     }
 
 
@@ -291,47 +393,60 @@ METRIC_DEFINITIONS = {
         "label": "Payment burden",
         "definition": "Payment ÷ revenue in a given month. Computed from revenue "
                       "alone; undefined in months with zero revenue.",
-        "why": "It is what the seller actually feels: the share of this month's "
-               "takings that leaves as a payment.",
+        "why": "It is the share of this month's takings that leaves as a payment.",
+        "caveat": "Burden is measured against REVENUE, not against what the "
+                  "seller has left. Margins, operating costs, reserves and other "
+                  "debts are not modelled, so a lower burden here does not "
+                  "establish that a contract is affordable.",
     },
     "high_burden_months": {
-        "label": "High-payment-burden months",
-        "definition": "Count of months where payment burden exceeds a threshold "
-                      "(10%, 15%, 20%, 25%).",
-        "why": "Averages hide the bad months. This counts them.",
-        "caveat": "For RBF this is constant BY CONSTRUCTION — the payment is a "
-                  "fixed share of revenue, so its burden cannot rise. The "
-                  "informative side is the fixed arm, where burden climbs as "
-                  "revenue falls. This metric does not test whether RBF "
-                  "stabilises burden; that is definitional, not a finding.",
+        "label": "Months above a burden threshold",
+        "definition": "Count of months where payment burden exceeds 10%, 15%, "
+                      "20% or 25%, out of a 24-month window.",
+        "why": "Averages hide bad months. This counts them.",
+        "caveat": "These thresholds are ILLUSTRATIVE reporting bands chosen for "
+                  "this study. They are not validated hardship cutoffs and no "
+                  "claim is made that crossing one causes distress. For a "
+                  "revenue share the count is also constant BY CONSTRUCTION — "
+                  "the payment is a fixed share of revenue, so its burden cannot "
+                  "rise. The informative side is the fixed arm.",
     },
     "duration_months_mean": {
         "label": "Repayment duration",
         "definition": "Mean months until cumulative payments reach the "
                       "contractual cap, across simulated paths.",
-        "why": "The provider's cost of flexibility: revenue-based repayment "
-               "extends the term when revenue falls instead of defaulting.",
+        "why": "Revenue-based repayment extends the term when revenue falls "
+               "instead of defaulting. The extension is the provider's cost.",
     },
     "recovery_ratio": {
         "label": "Provider recovery",
-        "definition": "Share of the contractual cap recovered by month 12, 18 "
-                      "and 24.",
+        "definition": "Share of the arm's own repayment target recovered by "
+                      "month 12, 18 and 24. For the revenue-based and "
+                      "cost-matched fixed arms the denominator is the "
+                      "contractual cap; for the amortizing loan, which has no "
+                      "cap, it is scheduled total repayment.",
         "why": "The other side of the trade-off. Slower recovery is a real cost "
                "to the financier even when the full amount is eventually repaid.",
+        "caveat": "Denominators differ by arm, so read each arm against its own "
+                  "target rather than comparing absolute amounts recovered.",
     },
     "incomplete_recovery_rate": {
         "label": "Incomplete recovery",
-        "definition": "Share of simulated paths that do not reach the cap within "
-                      "the 24-month observation window.",
+        "definition": "Share of simulated paths that do not reach the repayment "
+                      "target within the 24-month observation window.",
         "why": "Censoring, not default.",
-        "caveat": "This is NOT a default rate. No borrower behaviour is modelled "
-                  "and no default is simulated.",
+        "caveat": "This is NOT a default rate. No borrower behaviour and no "
+                  "default is simulated on any arm.",
     },
     "effective_apr": {
         "label": "Effective APR",
         "definition": "Annualised internal rate of return of the payment stream "
-                      "against the principal.",
+                      "against the advance, averaged across simulated paths.",
         "why": "Puts a revenue share and a fixed instalment on one axis.",
+        "caveat": "This is the MEAN ACROSS SIMULATED PATHS for the selected "
+                  "scenario, not the reference-path rate the cost-matched "
+                  "contract was priced on. The two differ because duration "
+                  "moves with revenue.",
     },
 }
 
@@ -341,8 +456,9 @@ ASSUMPTIONS = [
     "The seller draws the advance at month 1 and the observation window is 24 months.",
     "Both fixed arms are modelled as paid in full and on time. No borrower "
     "behaviour, hardship, renegotiation or default is simulated on any arm.",
-    "The cost-matched fixed benchmark is computed once on the deterministic "
-    "reference path and held constant across every path in a scenario.",
+    "The cost-matched fixed benchmark is priced once on a flat, shock-free "
+    "reference path and held constant across every path in a scenario — a "
+    "contract cannot be retro-priced by a shock that happens later.",
 ]
 
 CAVEATS = [
@@ -355,88 +471,143 @@ CAVEATS = [
              "so the fixed arm's recovery here is an upper bound, not a "
              "prediction.",
      "classification": "open_real_world_question"},
-    {"text": "Whether revenue-based repayment helps or harms a given provider "
-             "depends on the revenue path. It is not universally slower or "
-             "faster to recover — the scenarios differ, and both directions "
-             "appear in this library.",
+    {"text": "Whether revenue-based repayment recovers faster or slower depends "
+             "on the revenue path, and both directions appear in this scenario "
+             "library. Nothing here supports a universal claim in either "
+             "direction.",
      "classification": "simulation_result"},
-    {"text": "Intervals reported in the underlying artifacts are Monte Carlo "
-             "intervals over simulated paths. They are not population "
-             "confidence intervals and say nothing about real sellers.",
+    {"text": "Intervals in the underlying artifacts are Monte Carlo intervals "
+             "over simulated paths. They are not population confidence intervals "
+             "and say nothing about real sellers.",
      "classification": "open_real_world_question"},
-    {"text": "The equal-effective-cost cap factor was calibrated on the "
-             "deterministic reference path. Across simulated paths the realised "
-             "APR differs from that calibration, because duration varies with "
-             "revenue and a longer duration lowers the annualised rate for the "
-             "same total repayment. The label describes how the price was "
-             "chosen, not an outcome guaranteed on every path.",
+    {"text": "The cost-matched cap factor was solved on the reference path. "
+             "Across simulated paths the realised rate differs, because duration "
+             "varies with revenue and a longer duration lowers the annualised "
+             "rate for the same total. The label describes how the price was "
+             "chosen, not an outcome guaranteed on any path.",
      "classification": "sensitivity_result"},
+    {"text": "Payment burden is measured against revenue, not against what the "
+             "seller retains. Margins, operating costs, reserves and other debts "
+             "are outside the model, so a lower burden is not by itself evidence "
+             "that a contract is affordable.",
+     "classification": "open_real_world_question"},
 ]
 
 
-def _findings(scenario: str, arms: List[dict]) -> List[dict]:
-    """Conclusions for this scenario, each carrying its claim classification.
+def _summary(scenario: str, arms: List[dict]) -> dict:
+    """A compact headline for the top of the page, derived from this scenario's
+    own values so it cannot drift from the charts below it."""
+    by = {a["id"]: a for a in arms}
+    fa, ill = by.get("FIX-A"), by.get("RBF-ILL")
+    if not (fa and ill):
+        return {}
+    faster = "the fixed arm" if fa["recovery_ratio"].get("12", 0) >= ill["recovery_ratio"].get("12", 0) \
+        else "the revenue-based arm"
+    _ = None
+    return {
+        "scenario_label": SCENARIOS[scenario]["label"],
+        "peak_burden_fixed": fa["burden"]["max"],
+        "peak_burden_rbf": ill["burden"]["max"],
+        "recovery12_fixed": fa["recovery_ratio"].get("12"),
+        "recovery12_rbf": ill["recovery_ratio"].get("12"),
+        "incomplete_rbf": ill["incomplete_recovery_rate"],
+        "faster_by_month_12": faster,
+        "sentence": (f"In this scenario, peak payment burden reaches "
+                     f"{fa['burden']['max']:.1%} under the fixed arm against "
+                     f"{ill['burden']['max']:.1%} under the revenue-based arm, "
+                     f"and {faster} has recovered more by month 12."),
+    }
 
-    Comparative statements are derived from the artifact values just returned —
-    the same numbers the UI displays — so a finding cannot drift from the chart
-    beside it. Nothing here is a hand-typed research number.
+
+def _findings(scenario: str, arms: List[dict]) -> List[dict]:
+    """Conclusions for THIS scenario, each carrying its claim classification.
+
+    Comparative statements are derived from the values just returned — the same
+    numbers the UI displays — so a finding cannot drift from the chart beside it.
+    Every scenario-dependent statement names the scenario.
     """
-    by_id = {a["id"]: a for a in arms}
+    by = {a["id"]: a for a in arms}
+    label = SCENARIOS[scenario]["label"].lower()
     out: List[dict] = [
         {"classification": "mathematical_property",
          "text": "A revenue-share payment is a fixed proportion of revenue, so "
                  "its payment burden cannot rise when revenue falls. This holds "
-                 "for every revenue path, by construction — it is a definition, "
-                 "not a measurement.",
+                 "for every revenue path, by construction — a definition, not a "
+                 "measurement.",
          "source": "research/DERIVATIONS.md"},
         {"classification": "mathematical_property",
          "text": "A fixed instalment does not adjust, so its burden rises "
-                 "exactly in proportion as revenue falls. Repayment is extended "
-                 "under a revenue share instead of missed — the trade is timing, "
+                 "exactly in proportion as revenue falls. Under a revenue share "
+                 "repayment is extended instead of missed — the trade is timing, "
                  "not forgiveness.",
          "source": "research/DERIVATIONS.md"},
     ]
 
-    fa, eq, ill = by_id.get("FIX-A"), by_id.get("RBF-EQ"), by_id.get("RBF-ILL")
+    fa, eq, ill = by.get("FIX-A"), by.get("RBF-EQ"), by.get("RBF-ILL")
 
     if fa and ill:
         out.append({
             "classification": "simulation_result",
-            "text": (f"In this scenario the cost-matched fixed arm reaches a peak "
-                     f"payment burden of {fa['burden']['max']:.1%}, against "
+            "text": (f"In the {label} scenario, the cost-matched fixed arm reaches "
+                     f"a peak payment burden of {fa['burden']['max']:.1%}, against "
                      f"{ill['burden']['max']:.1%} for the revenue-based arm."),
-            "source": "baseline_v2_canonical.json"})
+            "source": fa["source_artifact"]})
+
+        f12, r12 = fa["recovery_ratio"].get("12", 0), ill["recovery_ratio"].get("12", 0)
+        direction = "ahead of" if f12 >= r12 else "behind"
         out.append({
             "classification": "simulation_result",
-            "text": (f"Provider recovery by month 12: {fa['recovery_ratio'].get('12', 0):.1%} "
-                     f"fixed against {ill['recovery_ratio'].get('12', 0):.1%} "
-                     f"revenue-based. Mean duration {fa['duration_months_mean']:.1f} "
-                     f"against {ill['duration_months_mean']:.1f} months."),
-            "source": "baseline_v2_canonical.json"})
+            "text": (f"In the {label} scenario, provider recovery by month 12 is "
+                     f"{f12:.1%} for the fixed arm and {r12:.1%} for the "
+                     f"revenue-based arm — the fixed arm is {direction} the "
+                     f"revenue-based arm here. This ordering is a property of "
+                     f"this scenario and does not hold across all of them."),
+            "source": ill["source_artifact"]})
 
-    if eq and ill:
+        if ill["incomplete_recovery_rate"] > 0:
+            out.append({
+                "classification": "simulation_result",
+                "text": (f"In the {label} scenario "
+                         f"{ill['incomplete_recovery_rate']:.1%} of simulated "
+                         f"paths do not reach the repayment target within the "
+                         f"24-month window. That is censoring under this "
+                         f"scenario's revenue path, not a modelled default."),
+                "source": ill["source_artifact"]})
+
+    if eq and ill and eq["effective_apr"] is not None and ill["effective_apr"] is not None:
         out.append({
             "classification": "sensitivity_result",
             "text": (f"Price and structure are separable. The same revenue-share "
-                     f"structure priced at f* = 1.0945 gives an effective APR of "
-                     f"{eq['effective_apr']:.2%}, against {ill['effective_apr']:.2%} "
-                     f"at the illustrative f = 1.20. The higher figure is a "
+                     f"structure priced at the reference-path cost-matched factor "
+                     f"shows a mean simulated rate of {eq['effective_apr']:.2%} in "
+                     f"the {label} scenario, against {ill['effective_apr']:.2%} at "
+                     f"the illustrative 1.20 factor. The higher figure is a "
                      f"property of the chosen cap factor, not of revenue-based "
                      f"repayment."),
-            "source": "baseline_equalcost_v1_canonical.json + validation_v1.json"})
+            "source": eq["source_artifact"]})
+    elif ill and ill["effective_apr"] is None:
+        out.append({
+            "classification": "mathematical_property",
+            "text": ("Effective rate is UNDEFINED for the revenue-based arm in "
+                     "this scenario. When revenue stops, the payment stream never "
+                     "repays the advance, so no discount rate sets its present "
+                     "value equal to the amount lent. The study reports this as "
+                     "undefined rather than substituting a number "
+                     "(specification §13, exclusion E-3)."),
+            "source": "research/METHODOLOGY_SPEC.md §13"})
 
     out.append({
         "classification": "product_implication",
         "text": "If a financier wants payment burden to stay flat through a "
-                "downturn, a revenue share achieves it — and the price of that "
-                "is a longer, more variable recovery period. Which side of that "
+                "downturn, a revenue share achieves it, and the price is a "
+                "longer and more variable recovery period. Which side of that "
                 "trade is worth taking is a commercial judgement this study does "
                 "not make.",
         "source": "author"})
     out.append({
         "classification": "open_real_world_question",
-        "text": "Whether real Vietnamese sellers would repay on these paths, and "
-                "at what default rate, cannot be answered here. It needs "
-                "observed revenue and adjudicated repayment outcomes.",
+        "text": "Whether real sellers would repay on these paths, and at what "
+                "default rate, cannot be answered here. It needs observed revenue "
+                "and adjudicated repayment outcomes.",
         "source": "research/CORRECTED_CLAIMS.md"})
     return out

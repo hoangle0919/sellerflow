@@ -1,0 +1,11 @@
+{
+  "artifact": "baseline_closure_v1_canonical.json",
+  "canonical_sha256": "0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470",
+  "note": "Execution record only. No number here participates in the analytical result; the canonical artifact is what to cite.",
+  "numpy": "2.2.6",
+  "platform": "Linux-6.8.0-124-generic-aarch64-with-glibc2.35",
+  "python": "3.10.12",
+  "run_utc": "2026-08-08T17:24:50+00:00",
+  "source_commit": "d11035d322a39735cf16ab04e9b06bde6418afca",
+  "source_tree_dirty": true
+}

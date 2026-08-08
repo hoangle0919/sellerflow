@@ -674,6 +674,18 @@ def lab_scenarios():
     return {"scenarios": lab.scenarios()}
 
 
+@app.get("/api/lab/underreporting")
+def lab_underreporting():
+    """The omega sweep — a sensitivity sweep, deliberately not a scenario."""
+    if not lab.artifacts_available():
+        raise HTTPException(status_code=503,
+                            detail="Research artifacts are not present in this deployment.")
+    data = lab.underreporting()
+    if data is None:
+        raise HTTPException(status_code=404, detail="Underreporting sweep not in the artifacts.")
+    return data
+
+
 @app.get("/api/lab/comparison/{scenario}")
 def lab_comparison(scenario: str):
     """Every arm for one scenario, with metric definitions and classified findings."""

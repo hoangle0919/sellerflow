@@ -12,12 +12,22 @@
 @font-face{font-family:'Spline Sans Mono';src:url(/fonts/spline-sans-mono-latin.woff2) format('woff2');font-weight:300 700;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F,U+20AB,U+20AC;}
 
 :root{
-  --paper:#FAF9F4; --surface:#FFFFFF; --ink:#1A1A1A; --hairline:#E8E8E5;
+  --paper:#FAF9F4; --surface:#FFFFFF; --ink:#1A1A1A; --hairline:#E3E3DE;
   --accent:#1F3A2D; --accent-soft:#F2F5F3;
-  --muted:#5F5F58; --faint:#8A8A82;
-  --fixed:#8C3A38; --fixed-soft:#F7F0F0;
-  --rbf:#2E6B4F; --rbf-soft:#F0F5F2;
-  --rbf-ill:#8A6D3B; --rbf-ill-soft:#F7F4EE;
+  --muted:#54544D; --faint:#6E6E66;
+  /* Categorical palette (Okabe–Ito derived). Colour distinguishes CONTRACTS,
+     never good from bad. The previous red-vs-green encoding read as
+     fixed = bad / revenue-based = good before any copy was read (audit §3).
+     Bar fills are darkened where needed to clear the 3:1 non-text contrast
+     threshold (WCAG 1.4.11) against white; text uses further-darkened variants
+     that clear 4.5:1. Hue does the categorical work — blue/orange is the pair
+     most reliably separable under deuteranopia and protanopia — and every bar
+     also carries its value as a printed number, so colour is never the sole
+     channel. */
+  --c-fixed-a:#0072B2;  --t-fixed-a:#005B8F;  --b-fixed-a:#E7F1F8;
+  --c-fixed-b:#239DE2;  --t-fixed-b:#15607F;  --b-fixed-b:#E8F4FB;
+  --c-rbf-ref:#C68900;  --t-rbf-ref:#7A5500;  --b-rbf-ref:#FBF2E0;
+  --c-rbf-ill:#CC79A7;  --t-rbf-ill:#8A3F6B;  --b-rbf-ill:#F9EDF4;
   --serif:'Fraunces',Georgia,serif;
   --sans:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --mono:'Spline Sans Mono',ui-monospace,Menlo,monospace;
@@ -25,129 +35,173 @@
   --radius:10px;
 }
 *{box-sizing:border-box;}
-html{-webkit-text-size-adjust:100%;}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
   font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
 a{color:var(--accent);}
 h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;margin:0 0 .4em;}
-h1{font-size:clamp(1.7rem,4.5vw,2.6rem);letter-spacing:-.01em;}
-h2{font-size:clamp(1.25rem,3vw,1.6rem);margin-top:0;}
-h3{font-size:1.02rem;font-family:var(--sans);font-weight:650;letter-spacing:.01em;}
+h1{font-size:clamp(1.65rem,4.4vw,2.5rem);letter-spacing:-.01em;}
+h2{font-size:clamp(1.2rem,2.8vw,1.5rem);margin-top:0;}
+h3{font-size:1rem;font-family:var(--sans);font-weight:650;letter-spacing:.01em;}
 p{margin:0 0 1em;}
-.wrap{max-width:1140px;margin:0 auto;padding:0 20px;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px;}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
-/* skip link */
 .skip{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;
   padding:10px 16px;z-index:100;border-radius:0 0 var(--radius) 0;}
 .skip:focus{left:0;}
 
-/* banner */
-.banner{background:var(--accent);color:#F4F7F5;padding:9px 0;font-size:.82rem;letter-spacing:.02em;}
+.banner{background:var(--accent);color:#F4F7F5;padding:9px 0;font-size:.82rem;}
 .banner .wrap{display:flex;gap:10px;align-items:flex-start;}
 .banner strong{color:#fff;}
 
-header.hero{background:var(--surface);border-bottom:1px solid var(--hairline);padding:44px 0 34px;}
-.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.13em;color:var(--faint);
-  font-weight:600;margin-bottom:12px;}
-.lede{font-size:clamp(1rem,2.1vw,1.14rem);color:var(--muted);max-width:62ch;}
-.qbox{margin-top:22px;padding:16px 18px;background:var(--accent-soft);
+header.hero{background:var(--surface);border-bottom:1px solid var(--hairline);padding:38px 0 28px;}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.13em;color:var(--faint);
+  font-weight:700;margin-bottom:10px;}
+.lede{font-size:clamp(.98rem,2vw,1.1rem);color:var(--muted);max-width:64ch;}
+.qbox{margin-top:18px;padding:14px 16px;background:var(--accent-soft);
   border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;}
-.qbox p{margin:0;font-family:var(--serif);font-size:1.05rem;}
+.qbox p{margin:0;font-family:var(--serif);font-size:1.02rem;}
 
-/* provenance */
-.prov{border-bottom:1px solid var(--hairline);background:var(--surface);padding:14px 0;}
-.prov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 26px;}
-.prov dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:600;}
-.prov dd{margin:2px 0 0;font-family:var(--mono);font-size:.76rem;word-break:break-all;color:var(--muted);}
+/* summary + jump nav */
+.summary{background:var(--surface);border-bottom:1px solid var(--hairline);
+  padding:16px 0;position:sticky;top:0;z-index:20;}
+.summary-in{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:baseline;justify-content:space-between;}
+#summary-text{margin:0;font-size:.95rem;color:var(--ink);max-width:70ch;}
+#summary-text b{font-weight:650;}
+nav.jump{display:flex;flex-wrap:wrap;gap:4px;}
+nav.jump a{font-size:.76rem;color:var(--muted);text-decoration:none;padding:4px 9px;
+  border:1px solid var(--hairline);border-radius:999px;white-space:nowrap;}
+nav.jump a:hover,nav.jump a:focus-visible{border-color:var(--accent);color:var(--accent);}
 
-main{padding:34px 0 70px;}
-section{margin-bottom:40px;}
+main{padding:28px 0 60px;}
+section{margin-bottom:34px;scroll-margin-top:96px;}
 .card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);
-  padding:22px;box-shadow:var(--shadow);}
+  padding:20px;box-shadow:var(--shadow);}
 
 /* scenario selector */
-.scn{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
-.scn button{font-family:var(--sans);font-size:.85rem;font-weight:550;cursor:pointer;
-  padding:8px 14px;border-radius:999px;border:1px solid var(--hairline);
-  background:var(--surface);color:var(--muted);transition:.15s;}
+.scn-group{margin-bottom:10px;}
+.scn-group h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.11em;color:var(--faint);
+  margin:0 0 6px;font-weight:700;}
+.scn{display:flex;flex-wrap:wrap;gap:7px;}
+.scn button{font-family:var(--sans);font-size:.84rem;font-weight:550;cursor:pointer;
+  padding:7px 13px;border-radius:999px;border:1px solid var(--hairline);
+  background:var(--surface);color:var(--muted);}
 .scn button:hover{border-color:var(--accent);color:var(--accent);}
 .scn button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff;}
 .scn button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-.scn-desc{color:var(--muted);font-size:.92rem;margin:6px 0 0;}
+.scn-desc{color:var(--muted);font-size:.9rem;margin:10px 0 0;}
 
 /* arms */
-.arms{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px;}
+.arms{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:12px;}
 .arm{border:1px solid var(--hairline);border-radius:var(--radius);background:var(--surface);
-  padding:16px;border-top:3px solid var(--faint);}
-.arm.fixed{border-top-color:var(--fixed);}
-.arm.rbf{border-top-color:var(--rbf);}
-.arm.rbf-ill{border-top-color:var(--rbf-ill);}
-.arm h3{margin-bottom:2px;font-size:.95rem;}
-.tag{display:inline-block;font-size:.66rem;text-transform:uppercase;letter-spacing:.09em;
-  font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:8px;}
-.tag.fixed{background:var(--fixed-soft);color:var(--fixed);}
-.tag.rbf{background:var(--rbf-soft);color:var(--rbf);}
-.tag.rbf-ill{background:var(--rbf-ill-soft);color:var(--rbf-ill);}
-.arm .note{font-size:.8rem;color:var(--muted);margin:8px 0 0;line-height:1.45;}
+  padding:15px;border-top:3px solid var(--faint);}
+.arm.fixed-a{border-top-color:var(--c-fixed-a);}
+.arm.fixed-b{border-top-color:var(--c-fixed-b);}
+.arm.rbf-ref{border-top-color:var(--c-rbf-ref);}
+.arm.rbf-ill{border-top-color:var(--c-rbf-ill);}
+.arm h3{margin-bottom:8px;font-size:.93rem;}
+.tag{display:inline-block;font-size:.64rem;text-transform:uppercase;letter-spacing:.09em;
+  font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:7px;}
+.tag.fixed-a{background:var(--b-fixed-a);color:var(--t-fixed-a);}
+.tag.fixed-b{background:var(--b-fixed-b);color:var(--t-fixed-b);}
+.tag.rbf-ref{background:var(--b-rbf-ref);color:var(--t-rbf-ref);}
+.tag.rbf-ill{background:var(--b-rbf-ill);color:var(--t-rbf-ill);}
 .kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;
-  border-bottom:1px dotted var(--hairline);font-size:.85rem;}
+  border-bottom:1px dotted var(--hairline);font-size:.84rem;}
 .kv:last-of-type{border-bottom:none;}
 .kv dt{color:var(--muted);}
 .kv dd{margin:0;font-family:var(--mono);font-weight:600;text-align:right;}
+.arm details{margin-top:9px;}
+.arm details summary{font-size:.76rem;color:var(--accent);cursor:pointer;font-weight:600;}
+.arm details p{font-size:.79rem;color:var(--muted);margin:7px 0 0;line-height:1.45;}
 
-/* charts */
+/* charts + one shared legend */
 .chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-svg.chart{display:block;width:100%;height:auto;min-width:300px;}
-.legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 0;font-size:.78rem;color:var(--muted);}
+svg.chart{display:block;width:100%;height:auto;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.78rem;color:var(--muted);
+  padding:10px 14px;background:var(--surface);border:1px solid var(--hairline);
+  border-radius:var(--radius);margin-bottom:14px;}
 .legend span{display:flex;align-items:center;gap:6px;}
 .sw{width:11px;height:11px;border-radius:3px;flex:none;}
 
-/* definitions */
-details.def{margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px;}
-details.def summary{cursor:pointer;font-size:.82rem;color:var(--accent);font-weight:600;}
+details.fold>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;}
+details.fold>summary::-webkit-details-marker{display:none;}
+details.fold>summary::after{content:"▾";font-size:.8em;color:var(--faint);margin-left:auto;}
+details.fold:not([open])>summary::after{content:"▸";}
+details.fold>summary h2{display:inline;margin:0;}
+details.fold>summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+details.def{margin-top:11px;border-top:1px solid var(--hairline);padding-top:9px;}
+details.def summary{cursor:pointer;font-size:.81rem;color:var(--accent);font-weight:600;}
 details.def summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-details.def p{font-size:.85rem;color:var(--muted);margin:8px 0 0;}
-.warn{background:var(--caution-bg,#F7F4EE);border-left:3px solid var(--rbf-ill);
-  padding:10px 12px;border-radius:0 6px 6px 0;font-size:.85rem;color:#6B5530;margin-top:10px;}
+details.def p{font-size:.84rem;color:var(--muted);margin:8px 0 0;}
+.warn{background:#FBF7EE;border-left:3px solid var(--c-rbf-ref);
+  padding:10px 12px;border-radius:0 6px 6px 0;font-size:.84rem;color:#5C4711;margin-top:10px;}
 
 /* findings */
 .finding{border:1px solid var(--hairline);border-radius:var(--radius);background:var(--surface);
-  padding:14px 16px;margin-bottom:10px;}
-.cls{display:inline-block;font-size:.66rem;text-transform:uppercase;letter-spacing:.09em;
-  font-weight:700;padding:3px 8px;border-radius:4px;margin-bottom:7px;}
-.cls-mathematical_property{background:#EDF1F7;color:#2A4A7A;}
-.cls-simulation_result{background:var(--rbf-soft);color:var(--rbf);}
-.cls-sensitivity_result{background:var(--rbf-ill-soft);color:var(--rbf-ill);}
-.cls-product_implication{background:#F3EFF7;color:#5B4080;}
-.cls-open_real_world_question{background:var(--fixed-soft);color:var(--fixed);}
-.finding p{margin:0;font-size:.92rem;}
-.finding .src{font-family:var(--mono);font-size:.72rem;color:var(--faint);margin-top:7px;}
+  padding:13px 15px;margin-bottom:9px;}
+.cls{display:inline-block;font-size:.64rem;text-transform:uppercase;letter-spacing:.09em;
+  font-weight:700;padding:3px 8px;border-radius:4px;margin-bottom:6px;}
+.cls-mathematical_property{background:#E8EEF6;color:#264A78;}
+.cls-simulation_result{background:var(--b-fixed-a);color:var(--t-fixed-a);}
+.cls-sensitivity_result{background:var(--b-rbf-ref);color:var(--t-rbf-ref);}
+.cls-product_implication{background:#EFEBF6;color:#4E3C7A;}
+.cls-open_real_world_question{background:var(--b-rbf-ill);color:var(--t-rbf-ill);}
+.finding p{margin:0;font-size:.91rem;}
+.finding .src{font-family:var(--mono);font-size:.71rem;color:var(--faint);margin-top:6px;}
 
-ul.plain{margin:0;padding-left:1.15em;}
-ul.plain li{margin-bottom:.5em;font-size:.9rem;color:var(--muted);}
+ul.plain{margin:0;padding-left:1.1em;}
+ul.plain li{margin-bottom:.45em;font-size:.88rem;color:var(--muted);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 
-.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-footer{border-top:1px solid var(--hairline);background:var(--surface);padding:26px 0;
-  font-size:.82rem;color:var(--muted);}
-.err{padding:18px;border:1px solid var(--fixed);background:var(--fixed-soft);
-  color:var(--fixed);border-radius:var(--radius);}
-.loading{color:var(--faint);font-size:.9rem;padding:18px 0;}
+table.data{width:100%;border-collapse:collapse;min-width:660px;}
+table.data th{text-align:right;padding:0 0 8px 10px;font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--faint);font-weight:700;}
+table.data th:first-child{text-align:left;padding-left:0;}
+table.data td{text-align:right;padding:8px 0 8px 10px;border-bottom:1px solid var(--hairline);
+  font-family:var(--mono);font-size:.83rem;}
+table.data th[scope=row]{text-align:left;font-weight:600;padding:8px 10px 8px 0;
+  border-bottom:1px solid var(--hairline);font-size:.86rem;text-transform:none;
+  letter-spacing:0;color:var(--ink);}
+.scrollnote{font-size:.74rem;color:var(--faint);margin:6px 0 0;display:none;}
+.scrollnote.on{display:block;}
 
-@media (max-width:720px){
+dl.gloss{margin:0;}
+dl.gloss dt{font-weight:650;font-size:.85rem;margin-top:10px;}
+dl.gloss dd{margin:2px 0 0;font-size:.84rem;color:var(--muted);}
+
+/* states */
+#status{margin:0 0 20px;}
+.state{padding:16px 18px;border-radius:var(--radius);border:1px solid var(--hairline);
+  background:var(--surface);font-size:.9rem;}
+.state.err{border-color:#B4453F;background:#FCF2F1;color:#7E2F2B;}
+.state h3{margin:0 0 6px;color:inherit;}
+.state button{margin-top:10px;font-family:var(--sans);font-size:.84rem;font-weight:600;
+  cursor:pointer;padding:8px 15px;border-radius:6px;border:1px solid currentColor;
+  background:transparent;color:inherit;}
+.state button:focus-visible{outline:2px solid currentColor;outline-offset:2px;}
+.skel{height:11px;border-radius:3px;background:var(--hairline);margin:9px 0;}
+[hidden]{display:none!important;}
+
+footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22px 0;
+  font-size:.8rem;color:var(--muted);}
+
+@media (max-width:760px){
   body{font-size:15px;}
   .two{grid-template-columns:1fr;}
   .wrap{padding:0 15px;}
-  header.hero{padding:30px 0 24px;}
-  .card{padding:16px;}
-  section{margin-bottom:30px;}
+  header.hero{padding:26px 0 20px;}
+  .card{padding:15px;}
+  section{margin-bottom:26px;}
+  .summary{position:static;}
+  nav.jump{gap:4px;}
 }
-@media print{
-  .scn,.skip{display:none;}
-  body{background:#fff;}
-  .card,.arm,.finding{box-shadow:none;break-inside:avoid;}
-}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+@media print{ .scn,.skip,nav.jump,#status{display:none;} body{background:#fff;}
+  .card,.arm,.finding{box-shadow:none;break-inside:avoid;} details{display:block;}
+  details>summary{display:none;} details>*{display:block!important;} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important;}}
 </style>
 </head>
 <body>
@@ -158,8 +212,8 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:26
     <span aria-hidden="true">▲</span>
     <span><strong>All figures on this page are simulation output</strong> under stated
     modelling assumptions. No observed seller revenue, repayment or default outcome
-    exists in this project. This is a research prototype — not a lending service,
-    a credit offer, or financial advice.</span>
+    exists in this project. A research prototype — not a lending service, a credit
+    offer, or financial advice.</span>
   </div>
 </div>
 
@@ -179,108 +233,145 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:26
   </div>
 </header>
 
-<div class="prov" id="prov" aria-label="Artifact provenance">
-  <div class="wrap"><dl class="prov-grid" id="prov-grid">
-    <div><dt>Artifacts</dt><dd class="loading">Loading…</dd></div>
-  </dl></div>
+<div class="summary" id="summary" hidden>
+  <div class="wrap summary-in">
+    <p id="summary-text" aria-live="polite"></p>
+    <nav class="jump" aria-label="Jump to section">
+      <a href="#s-scn">Scenario</a><a href="#s-arms">Contracts</a>
+      <a href="#s-burden">Burden</a><a href="#s-recovery">Recovery</a>
+      <a href="#s-dur">Settlement</a><a href="#s-under">Under-reporting</a>
+      <a href="#s-find">Findings</a><a href="#s-limits">Limitations</a>
+    </nav>
+  </div>
 </div>
 
 <main id="main">
 <div class="wrap">
 
-  <div id="error" hidden></div>
+  <div id="status" aria-live="polite">
+    <div class="state" id="st-loading">
+      <h3>Loading the research artifacts…</h3>
+      <p style="margin:0;color:var(--muted)">Reading committed, checksummed result files.</p>
+      <div class="skel" style="width:70%"></div><div class="skel" style="width:52%"></div>
+      <div class="skel" style="width:61%"></div>
+    </div>
+    <div class="state err" id="st-error" hidden>
+      <h3 id="err-title">Could not load the research artifacts</h3>
+      <p id="err-detail" style="margin:0"></p>
+      <button type="button" id="retry">Try again</button>
+    </div>
+    <div class="state" id="st-unavailable" hidden>
+      <h3>Research artifacts are not part of this deployment</h3>
+      <p style="margin:0;color:var(--muted)">The Simulation Lab renders committed result
+        files from <span class="mono">research/results/</span>. This instance was started
+        without them, so nothing is shown rather than something invented.</p>
+    </div>
+  </div>
 
-  <section aria-labelledby="h-scn">
+  <div id="content" hidden>
+
+  <section id="s-scn" aria-labelledby="h-scn">
     <h2 id="h-scn">Scenario</h2>
-    <p class="lede" style="font-size:.94rem">Each scenario is a family of 500 simulated
-      revenue paths sharing a shape. Pick one to see how each contract behaves on it.</p>
-    <div class="scn" id="scn" role="group" aria-label="Choose a revenue scenario"></div>
+    <p class="lede" style="font-size:.92rem">Each scenario is a family of 500 simulated
+      revenue paths sharing a shape. Choose one — every panel below updates together.</p>
+    <div id="scn-groups"></div>
     <p class="scn-desc" id="scn-desc"></p>
   </section>
 
-  <section aria-labelledby="h-arms">
-    <h2 id="h-arms">Financing structures compared</h2>
-    <p class="lede" style="font-size:.94rem">Four contracts on the same revenue paths.
-      The two revenue-based arms differ <em>only in price</em> — which is how you can
-      tell a pricing effect from a structural one.</p>
+  <section id="s-arms" aria-labelledby="h-arms">
+    <h2 id="h-arms">Contracts compared</h2>
+    <p class="lede" style="font-size:.92rem">Four contracts on the same revenue paths.
+      The two revenue-based arms differ <em>only in price</em> — which is how a pricing
+      effect can be told from a structural one.</p>
     <div class="arms" id="arms"></div>
   </section>
 
-  <section aria-labelledby="h-burden">
+  <div class="legend" id="legend" aria-label="Contract colours"></div>
+
+  <section id="s-burden" aria-labelledby="h-burden">
     <div class="card">
       <h2 id="h-burden">Seller payment burden</h2>
-      <p style="color:var(--muted);font-size:.92rem">Payment as a share of that month's
-        revenue, summarised across simulated paths. Lower is easier to carry.</p>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px">Payment as a share of
+        that month's revenue, summarised across simulated paths.</p>
       <div class="chart-wrap"><svg class="chart" id="chart-burden" role="img"
         aria-labelledby="burden-title"><title id="burden-title">Payment burden by contract</title></svg></div>
-      <div class="legend" id="legend-burden"></div>
       <div class="warn" id="burden-caveat"></div>
-      <details class="def"><summary>How this is measured</summary>
-        <p id="def-burden"></p></details>
+      <details class="def"><summary>How this is measured</summary><p id="def-burden"></p></details>
     </div>
   </section>
 
-  <section aria-labelledby="h-hpb">
+  <section id="s-hpb" aria-labelledby="h-hpb">
     <div class="card">
-      <h2 id="h-hpb">Months above a burden threshold</h2>
-      <p style="color:var(--muted);font-size:.92rem">Averages hide bad months. This counts
-        them, out of a 24-month window.</p>
-      <div class="chart-wrap"><svg class="chart" id="chart-hpb" role="img"
-        aria-labelledby="hpb-title"><title id="hpb-title">High-burden month counts by contract</title></svg></div>
-      <div class="legend" id="legend-hpb"></div>
-      <details class="def"><summary>How this is measured</summary>
-        <p id="def-hpb"></p></details>
+      <details class="fold" data-fold="narrow">
+        <summary><h2 id="h-hpb">Months above a burden threshold</h2></summary>
+        <p style="color:var(--muted);font-size:.9rem;margin:10px 0 12px">Averages hide bad
+          months; this counts them, out of a 24-month window.</p>
+        <div class="chart-wrap"><svg class="chart" id="chart-hpb" role="img"
+          aria-labelledby="hpb-title"><title id="hpb-title">High-burden month counts by contract</title></svg></div>
+        <div class="warn" id="hpb-caveat"></div>
+        <details class="def"><summary>How this is measured</summary><p id="def-hpb"></p></details>
+      </details>
     </div>
   </section>
 
-  <section aria-labelledby="h-recovery">
+  <section id="s-recovery" aria-labelledby="h-recovery">
     <div class="card">
       <h2 id="h-recovery">Provider recovery — the other side of the trade</h2>
-      <p style="color:var(--muted);font-size:.92rem">Share of the contractual cap recovered
-        by month 12, 18 and 24. Flexibility for the seller is slower recovery for the
-        financier; both are shown so neither is hidden.</p>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px">Share of each
+        contract's own repayment target recovered by month 12, 18 and 24.</p>
       <div class="chart-wrap"><svg class="chart" id="chart-recovery" role="img"
         aria-labelledby="rec-title"><title id="rec-title">Cumulative provider recovery by contract</title></svg></div>
-      <div class="legend" id="legend-recovery"></div>
-      <details class="def"><summary>How this is measured</summary>
-        <p id="def-recovery"></p></details>
+      <div class="warn" id="rec-caveat"></div>
+      <details class="def"><summary>How this is measured</summary><p id="def-recovery"></p></details>
     </div>
   </section>
 
-  <section aria-labelledby="h-dur">
+  <section id="s-dur" aria-labelledby="h-dur">
     <div class="card">
       <h2 id="h-dur">Repayment duration and settlement</h2>
-      <div id="dur-table"></div>
+      <div class="chart-wrap" id="dur-scroll"><div id="dur-table"></div></div>
+      <p class="scrollnote" id="dur-scrollnote">↔ Scroll the table sideways to see every column.</p>
       <div class="warn">
-        <strong>The final payment is partial.</strong> A revenue-share contract collects
-        a fixed share of revenue until the cap is reached, so the last payment is
-        whatever remains — not a full instalment. Multiplying a periodic payment by
-        the duration therefore <em>overstates</em> the total. The total repaid is the
-        contractual cap, exactly.
+        <strong>The final payment is partial.</strong> A revenue-share contract collects a
+        fixed share of revenue until the target is reached, so the last payment is
+        whatever remains — not a full instalment. Multiplying a periodic payment by the
+        duration therefore <em>overstates</em> the total.
       </div>
-      <details class="def"><summary>How duration is measured</summary>
-        <p id="def-dur"></p></details>
+      <details class="def"><summary>How duration is measured</summary><p id="def-dur"></p></details>
     </div>
   </section>
 
-  <section aria-labelledby="h-find">
-    <h2 id="h-find">What this shows — and what kind of claim each statement is</h2>
-    <p class="lede" style="font-size:.94rem">A proof and a simulation output are not the
-      same kind of evidence. Every statement below is labelled with which it is.</p>
-    <div id="findings"></div>
-    <details class="def" style="margin-top:14px"><summary>What the labels mean</summary>
-      <div id="taxonomy"></div></details>
+  <section id="s-under" aria-labelledby="h-under">
+    <div class="card">
+      <details class="fold" data-fold="narrow">
+        <summary><h2 id="h-under">Under-reporting sensitivity</h2></summary>
+        <p style="color:var(--muted);font-size:.9rem;margin-top:10px" id="under-why"></p>
+        <div class="chart-wrap"><div id="under-table"></div></div>
+        <div id="under-finding"></div>
+      </details>
+    </div>
   </section>
 
-  <section class="two">
+  <section id="s-find" aria-labelledby="h-find">
+    <h2 id="h-find">What this shows — and what kind of claim each statement is</h2>
+    <p class="lede" style="font-size:.92rem">A proof and a simulation output are not the
+      same kind of evidence. Every statement is labelled with which it is, and every
+      scenario-dependent statement names its scenario.</p>
+    <div id="findings"></div>
+    <details class="def"><summary>What the labels mean</summary><div id="taxonomy"></div></details>
+  </section>
+
+  <section id="s-limits" class="two">
     <div class="card">
       <h2>Assumptions</h2>
       <ul class="plain" id="assumptions"></ul>
+      <details class="def"><summary>Glossary of terms used on this page</summary>
+        <dl class="gloss" id="glossary"></dl></details>
     </div>
     <div class="card">
       <h2>Limitations &amp; responsible use</h2>
       <ul class="plain" id="caveats"></ul>
-      <p style="font-size:.85rem;margin-top:12px">
+      <p style="font-size:.83rem;margin-top:12px">
         <a href="/#methodology">Methodology</a> ·
         <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/METHODOLOGY_SPEC.md">Frozen specification</a> ·
         <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DERIVATIONS.md">Derivations</a> ·
@@ -289,295 +380,338 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:26
     </div>
   </section>
 
+  <section id="s-prov">
+    <div class="card">
+      <h2 style="font-size:1.1rem">Provenance</h2>
+      <p style="color:var(--muted);font-size:.88rem;margin-bottom:0">Every figure above is
+        read from a committed, checksummed result file. Identical code, configuration and
+        seeds reproduce each byte-for-byte.</p>
+      <details class="def fold" data-fold="narrow"><summary>Artifacts and checksums</summary>
+        <div class="chart-wrap"><div id="prov-table"></div></div></details>
+    </div>
+  </section>
+
+  </div><!-- /content -->
 </div>
 </main>
 
 <footer><div class="wrap">
   <p style="margin:0">Simulation output under <span class="mono" id="foot-spec"></span>.
-  Reproduce with <span class="mono">python3 research/run_baseline.py</span> — identical
-  code, configuration and seeds produce a byte-identical artifact.</p>
-  <p style="margin:8px 0 0">The underwriting model referenced elsewhere in this project is
-  a secondary, <strong>explicitly unvalidated</strong> component with no measured predictive
-  validity, and plays no part in anything on this page.</p>
+  Reproduce with <span class="mono">python3 research/run_baseline.py</span>.</p>
+  <p style="margin:7px 0 0">The underwriting model elsewhere in this project is a secondary,
+  <strong>explicitly unvalidated</strong> component with no measured predictive validity,
+  and plays no part in anything on this page.</p>
 </div></footer>
 
 <script>
 "use strict";
 /* Presentation only. Every research number arrives from the API already computed
-   and, where monetary, already formatted in integer đồng. Nothing here performs a
-   contractual financial calculation — the only arithmetic is mapping a value to a
-   pixel position for a chart axis. */
+   and, where monetary, already formatted in integer đồng. The only arithmetic
+   here maps a value to a pixel position for a chart axis. */
 
-var STATE = {scenario:null, data:null};
-
+var STATE={scenario:null,data:null,manifest:null};
 function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
-function pct(x,dp){return (x==null)?"—":(x*100).toFixed(dp==null?1:dp)+"%";}
+function pct(x,dp){return (x==null)?"undefined":(x*100).toFixed(dp==null?1:dp)+"%";}
 function num(x,dp){return (x==null)?"—":Number(x).toFixed(dp==null?1:dp);}
-function armClass(a){return a.id==="RBF-ILL"?"rbf-ill":(a.kind==="rbf"?"rbf":"fixed");}
-function armColor(a){var c=armClass(a);
-  return c==="rbf"?"#2E6B4F":c==="rbf-ill"?"#8A6D3B":"#8C3A38";}
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function armColor(a){return cssVar("--c-"+a.palette)||"#666";}
 
-function fail(msg){
-  var e=el("error"); e.hidden=false;
-  e.innerHTML='<div class="err"><strong>Could not load the research artifacts.</strong><br>'+esc(msg)+'</div>';
+/* ── states ─────────────────────────────────────────────────── */
+function show(which,detail){
+  el("st-loading").hidden = which!=="loading";
+  el("st-error").hidden   = which!=="error";
+  el("st-unavailable").hidden = which!=="unavailable";
+  el("status").hidden = (which==="ready");
+  el("content").hidden = (which!=="ready");
+  el("summary").hidden = (which!=="ready");
+  if(which==="error"){ el("err-detail").textContent = detail||"Unknown error."; }
 }
+el("retry").addEventListener("click",function(){init();});
 
 async function getJSON(url){
-  var r=await fetch(url);
-  if(!r.ok){var t=await r.text().catch(function(){return r.statusText;});
-    throw new Error("HTTP "+r.status+" — "+t.slice(0,180));}
+  var r=await fetch(url,{headers:{"Accept":"application/json"}});
+  if(!r.ok){
+    var body=null; try{body=await r.json();}catch(e){}
+    var err=new Error((body&&body.detail)||("HTTP "+r.status));
+    err.status=r.status; throw err;
+  }
   return r.json();
 }
 
-/* ── provenance ─────────────────────────────────────────────── */
+/* ── provenance (one block, at the end) ─────────────────────── */
 function renderProvenance(m){
-  var rows="";
-  m.artifacts.forEach(function(a){
-    rows+='<div><dt>'+esc(a.role)+'</dt><dd>'+esc(a.artifact)+'<br>sha256 '+esc(a.sha256||"—")+
-          '<br>'+esc(a.n_paths)+' paths · seed '+esc(a.base_seed)+'</dd></div>';
-  });
+  var rows=m.artifacts.map(function(a){
+    return '<tr><th scope="row">'+esc(a.role)+'</th>'+
+      '<td style="font-size:.76rem">'+esc(a.artifact)+'</td>'+
+      '<td style="font-size:.72rem;word-break:break-all">'+esc(a.sha256||"—")+'</td>'+
+      '<td>'+esc(a.n_paths)+'</td><td>'+esc(a.base_seed)+'</td></tr>';
+  }).join("");
+  el("prov-table").innerHTML='<table class="data" style="min-width:600px">'+
+    '<thead><tr><th>Role</th><th style="text-align:left">File</th>'+
+    '<th style="text-align:left">SHA-256</th><th>Paths</th><th>Seed</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>';
   var spec=(m.artifacts[0]||{}).spec_version||"";
-  rows+='<div><dt>Specification</dt><dd>'+esc(spec)+'</dd></div>';
-  el("prov-grid").innerHTML=rows;
   el("foot-spec").textContent=spec;
+  el("glossary").innerHTML=Object.keys(m.glossary).map(function(k){
+    return '<dt>'+esc(k)+'</dt><dd>'+esc(m.glossary[k])+'</dd>';
+  }).join("");
+  el("taxonomy").innerHTML=Object.keys(m.claim_taxonomy).map(function(k){
+    return '<p style="font-size:.84rem;color:var(--muted);margin:10px 0 0">'+
+      '<span class="cls cls-'+esc(k)+'">'+esc(m.claim_taxonomy[k].label)+'</span><br>'+
+      esc(m.claim_taxonomy[k].meaning)+'</p>';
+  }).join("");
 }
 
-/* ── scenario selector ──────────────────────────────────────── */
+/* ── scenario selector, grouped ─────────────────────────────── */
+var FAMILY={baseline:"Ordinary trading",favourable:"Favourable",
+            stress:"Stress",closure:"Closure / zero revenue"};
 function renderScenarios(list){
-  el("scn").innerHTML=list.map(function(s){
-    return '<button type="button" role="button" aria-pressed="false" data-k="'+esc(s.key)+'">'+esc(s.label)+'</button>';
-  }).join("");
-  Array.prototype.forEach.call(el("scn").querySelectorAll("button"),function(b){
+  var byFam={};
+  list.forEach(function(s){(byFam[s.family]=byFam[s.family]||[]).push(s);});
+  el("scn-groups").innerHTML=Object.keys(FAMILY).filter(function(f){return byFam[f];})
+    .map(function(f){
+      return '<div class="scn-group"><h3>'+esc(FAMILY[f])+'</h3><div class="scn" role="group" '+
+        'aria-label="'+esc(FAMILY[f])+' scenarios">'+
+        byFam[f].map(function(s){
+          return '<button type="button" aria-pressed="false" data-k="'+esc(s.key)+'">'+
+            esc(s.label)+'</button>';}).join("")+'</div></div>';
+    }).join("");
+  Array.prototype.forEach.call(document.querySelectorAll("#scn-groups button"),function(b){
     b.addEventListener("click",function(){select(b.dataset.k);});
   });
 }
 function markSelected(key){
-  Array.prototype.forEach.call(el("scn").querySelectorAll("button"),function(b){
-    b.setAttribute("aria-pressed", b.dataset.k===key ? "true":"false");
-  });
+  Array.prototype.forEach.call(document.querySelectorAll("#scn-groups button"),function(b){
+    b.setAttribute("aria-pressed", b.dataset.k===key?"true":"false");});
 }
 
 /* ── arms ───────────────────────────────────────────────────── */
 function renderArms(arms){
   el("arms").innerHTML=arms.map(function(a){
-    var c=armClass(a);
-    var label=c==="rbf"?"Revenue-based":c==="rbf-ill"?"Revenue-based · illustrative":"Fixed payment";
-    return '<article class="arm '+c+'">'+
-      '<span class="tag '+c+'">'+esc(label)+'</span>'+
+    var p=a.palette;
+    var badge=a.kind==="rbf"?"Revenue-based":"Fixed payment";
+    return '<article class="arm '+p+'">'+
+      '<span class="tag '+p+'">'+esc(badge)+'</span>'+
       '<h3>'+esc(a.name)+'</h3>'+
-      '<dl style="margin:10px 0 0">'+
+      '<dl style="margin:8px 0 0">'+
         kv("Cap factor", a.cap_factor==null?"none":"×"+num(a.cap_factor,4))+
         kv("Advance", a.principal.display)+
-        kv("Contractual cap", a.contractual_cap?a.contractual_cap.display:"no cap")+
-        kv("Effective APR", pct(a.effective_apr,2))+
-        kv("Mean duration", num(a.duration_months_mean,1)+" mo")+
+        kv("Repayment target", a.contractual_cap?a.contractual_cap.display:"no cap")+
+        kv("Mean simulated APR", pct(a.effective_apr,2))+
+        kv("Mean duration", a.duration_months_mean==null?"not reached in 24 mo":num(a.duration_months_mean,1)+" mo")+
       '</dl>'+
-      '<p class="note">'+esc(a.note)+'</p></article>';
+      '<details><summary>What this contract is</summary><p>'+esc(a.note)+'</p>'+
+      '<p><b>Repayment target:</b> '+esc(a.cap_basis)+'</p></details></article>';
   }).join("");
 }
 function kv(k,v){return '<div class="kv"><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>';}
 
-/* ── charts: SVG built from API values ──────────────────────── */
-/* The cap factor in the label is read from the API, never typed here. An
-   earlier draft wrote the equal-cost factor into this function as a string
-   literal — a research number transcribed into the page, which is exactly what
-   this project forbids. A test scans for that and would fail again. */
-function armShort(a){
-  var base=a.name.split(" — ")[0];
-  return a.kind==="rbf" && a.cap_factor!=null
-    ? base+" ("+String(a.cap_factor)+"×)"
-    : base;
+function renderLegend(arms){
+  el("legend").innerHTML=arms.map(function(a){
+    return '<span><i class="sw" style="background:'+armColor(a)+'"></i>'+esc(a.name)+'</span>';
+  }).join("");
 }
 
-/* The viewBox is sized to the container so 1 SVG unit ≈ 1 CSS pixel. Without
-   this a fixed 760-unit viewBox squeezed into a 326px phone rendered 12-unit
-   text at 5px — measured, and unreadable. Below 560px the layout also switches
-   from "label beside bar" to "label above bar", because a 190px label gutter
-   leaves no room for the bar itself on a phone. */
-function groupedBars(svgId, legendId, arms, series, fmt, maxOverride){
-  var svg=el(svgId);
-  var host=svg.parentElement;
-  var avail=Math.max(300, Math.floor((host && host.clientWidth) || 700));
-  var W=Math.min(avail, 900);
+/* ── charts ─────────────────────────────────────────────────── */
+function armShort(a){
+  return a.short + (a.kind==="rbf" && a.cap_factor!=null ? " ("+String(a.cap_factor)+"×)" : "");
+}
+/* viewBox is sized to the container so 1 unit ≈ 1 CSS pixel; a fixed viewBox
+   squeezed into a phone rendered label text at 5px. Below 560px the layout
+   switches to labels above bars, because a 200px label gutter leaves no room
+   for the bar itself. */
+function groupedBars(svgId, arms, series, fmt, maxOverride){
+  var svg=el(svgId), host=svg.parentElement;
+  var W=Math.min(Math.max(300,Math.floor((host&&host.clientWidth)||700)),880);
   var narrow=W<560;
-
-  var padL=narrow?0:200, padR=narrow?0:58, padT=narrow?20:24;
-  var rowH=narrow?40:32, gap=narrow?16:14, barH=narrow?11:19;
-  var fSeries=narrow?13:13, fLabel=narrow?12:12, fVal=narrow?12:12;
-
+  var padL=narrow?0:206, padR=narrow?0:60, padT=narrow?18:22;
+  var rowH=narrow?33:31, gap=narrow?13:14, barH=narrow?10:18;
   var max=maxOverride!=null?maxOverride:0;
-  if(maxOverride==null){
-    series.forEach(function(s){arms.forEach(function(a){
-      var v=s.value(a); if(v!=null && v>max) max=v;});});
-  }
-  if(!(max>0)) max=1;
-
-  var track=W-padL-padR;
-  var body="", y=padT;
-
+  if(maxOverride==null){series.forEach(function(s){arms.forEach(function(a){
+    var v=s.value(a); if(v!=null&&v>max)max=v;});});}
+  if(!(max>0))max=1;
+  var track=W-padL-padR, body="", y=padT;
   series.forEach(function(s,si){
-    if(si) y+=gap;
-    body+='<text x="0" y="'+y+'" font-size="'+fSeries+'" font-weight="700" fill="#3A3A34" '+
+    if(si)y+=gap;
+    body+='<text x="0" y="'+y+'" font-size="13" font-weight="700" fill="#3A3A34" '+
           'font-family="Archivo,sans-serif">'+esc(s.label)+'</text>';
-    y+=narrow?10:12;
+    y+=narrow?9:12;
     arms.forEach(function(a){
-      var v=s.value(a);
-      var w=(v==null?0:Math.max(0,Math.min(1,v/max)))*track;
-      var col=armColor(a);
+      var v=s.value(a), w=(v==null?0:Math.max(0,Math.min(1,v/max)))*track, col=armColor(a);
+      var txt=fmt(v);
       if(narrow){
-        body+='<text x="0" y="'+(y+11)+'" font-size="'+fLabel+'" fill="#5F5F58" '+
+        body+='<text x="0" y="'+(y+11)+'" font-size="12" fill="#54544D" '+
               'font-family="Archivo,sans-serif">'+esc(armShort(a))+'</text>';
-        body+='<text x="'+(W-2)+'" y="'+(y+11)+'" text-anchor="end" font-size="'+fVal+'" '+
-              'font-family="Spline Sans Mono,monospace" fill="#1A1A1A">'+esc(fmt(v))+'</text>';
-        body+='<rect x="0" y="'+(y+17)+'" width="'+W+'" height="'+barH+'" rx="3" fill="#EFEFEA"/>';
-        body+='<rect x="0" y="'+(y+17)+'" width="'+Math.max(w,2)+'" height="'+barH+
-              '" rx="3" fill="'+col+'"/>';
+        body+='<text x="'+(W-2)+'" y="'+(y+11)+'" text-anchor="end" font-size="12" '+
+              'font-family="Spline Sans Mono,monospace" fill="#1A1A1A">'+esc(txt)+'</text>';
+        body+='<rect x="0" y="'+(y+15)+'" width="'+W+'" height="'+barH+'" rx="3" fill="#EDEDE7"/>';
+        body+='<rect x="0" y="'+(y+15)+'" width="'+Math.max(w,2)+'" height="'+barH+'" rx="3" fill="'+col+'"/>';
       }else{
-        body+='<text x="'+(padL-12)+'" y="'+(y+barH/2+4)+'" text-anchor="end" font-size="'+fLabel+
-              '" fill="#5F5F58" font-family="Archivo,sans-serif">'+esc(armShort(a))+'</text>';
-        body+='<rect x="'+padL+'" y="'+y+'" width="'+track+'" height="'+barH+'" rx="3" fill="#EFEFEA"/>';
-        body+='<rect x="'+padL+'" y="'+y+'" width="'+Math.max(w,2)+'" height="'+barH+
-              '" rx="3" fill="'+col+'"/>';
-        body+='<text x="'+(padL+track+8)+'" y="'+(y+barH/2+4)+'" font-size="'+fVal+
-              '" font-family="Spline Sans Mono,monospace" fill="#1A1A1A">'+esc(fmt(v))+'</text>';
+        body+='<text x="'+(padL-12)+'" y="'+(y+barH/2+4)+'" text-anchor="end" font-size="12" '+
+              'fill="#54544D" font-family="Archivo,sans-serif">'+esc(armShort(a))+'</text>';
+        body+='<rect x="'+padL+'" y="'+y+'" width="'+track+'" height="'+barH+'" rx="3" fill="#EDEDE7"/>';
+        body+='<rect x="'+padL+'" y="'+y+'" width="'+Math.max(w,2)+'" height="'+barH+'" rx="3" fill="'+col+'"/>';
+        body+='<text x="'+(padL+track+8)+'" y="'+(y+barH/2+4)+'" font-size="12" '+
+              'font-family="Spline Sans Mono,monospace" fill="#1A1A1A">'+esc(txt)+'</text>';
       }
       y+=rowH;
     });
   });
-
   var H=y+6;
   svg.setAttribute("viewBox","0 0 "+W+" "+H);
   svg.setAttribute("preserveAspectRatio","xMinYMin meet");
+  /* Explicit width/height as well as the viewBox. Safari/WebKit does not
+     always derive an intrinsic height for an SVG sized `width:100%;
+     height:auto` from the viewBox alone, and collapses it to zero. Setting the
+     attributes costs nothing and removes that failure mode. */
+  svg.setAttribute("width",W);
+  svg.setAttribute("height",H);
   svg.style.maxWidth=W+"px";
-  var title=svg.querySelector("title");
-  svg.innerHTML=(title?title.outerHTML:"")+body;
-  if(legendId){
-    el(legendId).innerHTML=arms.map(function(a){
-      return '<span><i class="sw" style="background:'+armColor(a)+'"></i>'+esc(a.name)+'</span>';
-    }).join("");
-  }
+  var t=svg.querySelector("title");
+  svg.innerHTML=(t?t.outerHTML:"")+body;
 }
 
-function renderBurden(arms){
-  groupedBars("chart-burden","legend-burden",arms,[
-    {label:"Mean burden",         value:function(a){return a.burden.mean;}},
-    {label:"90th percentile",     value:function(a){return a.burden.p90;}},
-    {label:"Peak (worst month)",  value:function(a){return a.burden.max;}}
-  ], function(v){return pct(v,1);});
-}
-
-function renderHpb(arms){
-  var ths=["0.1","0.15","0.2","0.25"];
-  groupedBars("chart-hpb","legend-hpb",arms, ths.map(function(t){
+function drawCharts(){
+  if(!STATE.data)return;
+  var arms=STATE.data.arms;
+  groupedBars("chart-burden",arms,[
+    {label:"Mean burden",        value:function(a){return a.burden.mean;}},
+    {label:"90th percentile",    value:function(a){return a.burden.p90;}},
+    {label:"Peak (worst month)", value:function(a){return a.burden.max;}}
+  ],function(v){return pct(v,1);});
+  groupedBars("chart-hpb",arms,["0.1","0.15","0.2","0.25"].map(function(t){
     return {label:"Months above "+(parseFloat(t)*100).toFixed(0)+"% burden",
             value:function(a){return a.high_burden_months[t];}};
-  }), function(v){return num(v,2)+" mo";});
+  }),function(v){return num(v,2)+" mo";});
+  groupedBars("chart-recovery",arms,[
+    {label:"Recovered by month 12",value:function(a){return a.recovery_ratio["12"];}},
+    {label:"Recovered by month 18",value:function(a){return a.recovery_ratio["18"];}},
+    {label:"Recovered by month 24",value:function(a){return a.recovery_ratio["24"];}}
+  ],function(v){return pct(v,1);},1);
 }
 
-function renderRecovery(arms){
-  groupedBars("chart-recovery","legend-recovery",arms,[
-    {label:"Recovered by month 12", value:function(a){return a.recovery_ratio["12"];}},
-    {label:"Recovered by month 18", value:function(a){return a.recovery_ratio["18"];}},
-    {label:"Recovered by month 24", value:function(a){return a.recovery_ratio["24"];}}
-  ], function(v){return pct(v,1);}, 1);
-}
-
-/* ── duration table ─────────────────────────────────────────── */
+/* ── tables ─────────────────────────────────────────────────── */
 function renderDuration(arms){
   var rows=arms.map(function(a){
-    return '<tr><th scope="row" style="text-align:left;font-weight:600;padding:8px 10px 8px 0;'+
-      'border-bottom:1px solid #E8E8E5;font-size:.88rem">'+esc(a.name)+'</th>'+
-      td(num(a.duration_months_mean,1)+" mo")+
-      td("±"+num(a.duration_sd,2))+
+    return '<tr><th scope="row">'+esc(a.name)+'</th>'+
+      td(a.duration_months_mean==null?"not reached":num(a.duration_months_mean,1)+" mo")+td(a.duration_sd==null?"—":"±"+num(a.duration_sd,2))+
       td(a.contractual_cap?a.contractual_cap.display:"no cap")+
-      td(a.total_repaid_mean.display)+
-      td(pct(a.incomplete_recovery_rate,1))+'</tr>';
+      td(a.total_repaid_mean.display)+td(pct(a.incomplete_recovery_rate,1))+'</tr>';
   }).join("");
-  el("dur-table").innerHTML=
-    '<div class="chart-wrap"><table style="width:100%;border-collapse:collapse;min-width:640px">'+
-    '<caption class="sr-only" style="position:absolute;left:-9999px">Duration and settlement by contract</caption>'+
-    '<thead><tr>'+
-      '<th scope="col" style="text-align:left;padding:0 10px 8px 0;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#8A8A82">Contract</th>'+
-      th("Mean duration")+th("SD")+th("Contractual cap")+th("Mean total repaid")+th("Incomplete recovery")+
-    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  el("dur-table").innerHTML='<table class="data">'+
+    '<thead><tr><th>Contract</th><th>Mean duration</th><th>SD</th>'+
+    '<th>Repayment target</th><th>Mean total repaid</th><th>Incomplete recovery</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table>';
+  var sc=el("dur-scroll");
+  el("dur-scrollnote").className="scrollnote"+(sc.scrollWidth>sc.clientWidth+1?" on":"");
 }
-function th(t){return '<th scope="col" style="text-align:right;padding:0 0 8px 10px;font-size:.72rem;'+
-  'text-transform:uppercase;letter-spacing:.08em;color:#8A8A82">'+esc(t)+'</th>';}
-function td(t){return '<td style="text-align:right;padding:8px 0 8px 10px;border-bottom:1px solid #E8E8E5;'+
-  'font-family:Spline Sans Mono,monospace;font-size:.84rem">'+esc(t)+'</td>';}
+function td(t){return '<td>'+esc(t)+'</td>';}
 
-/* ── findings, definitions, panels ──────────────────────────── */
+function renderUnderreporting(u){
+  if(!u){el("s-under").hidden=true;return;}
+  el("s-under").hidden=false;
+  el("under-why").textContent=u.why_not_a_scenario;
+  el("under-table").innerHTML='<table class="data" style="min-width:560px">'+
+    '<thead><tr><th>Revenue the provider observes</th><th>Mean duration</th>'+
+    '<th>Mean simulated APR</th><th>Mean total repaid</th><th>Incomplete recovery</th>'+
+    '</tr></thead><tbody>'+u.rows.map(function(r){
+      return '<tr><th scope="row">'+esc(r.observed_share)+' of true revenue</th>'+
+        td(num(r.duration_months_mean,1)+" mo")+td(pct(r.effective_apr,2))+
+        td(r.total_repaid_mean.display)+td(pct(r.incomplete_recovery_rate,1))+'</tr>';
+    }).join("")+'</tbody></table>';
+  el("under-finding").innerHTML='<article class="finding" style="margin-top:12px">'+
+    '<span class="cls cls-'+esc(u.finding.classification)+'">'+
+    esc(u.finding.classification.replace(/_/g," "))+'</span><p>'+esc(u.finding.text)+'</p>'+
+    '<p class="src">source: '+esc(u.finding.source)+'</p></article>';
+}
+
+/* ── findings + panels ──────────────────────────────────────── */
 function renderFindings(list){
   el("findings").innerHTML=list.map(function(f){
     return '<article class="finding"><span class="cls cls-'+esc(f.classification)+'">'+
-      esc((f.classification||"").replace(/_/g," "))+'</span>'+
-      '<p>'+esc(f.text)+'</p>'+
+      esc((f.classification||"").replace(/_/g," "))+'</span><p>'+esc(f.text)+'</p>'+
       '<p class="src">source: '+esc(f.source)+'</p></article>';
   }).join("");
 }
-function renderTaxonomy(tax){
-  el("taxonomy").innerHTML=Object.keys(tax).map(function(k){
-    return '<p style="font-size:.85rem;color:#5F5F58;margin:10px 0 0">'+
-      '<span class="cls cls-'+esc(k)+'">'+esc(tax[k].label)+'</span><br>'+esc(tax[k].meaning)+'</p>';
-  }).join("");
-}
-function renderDefs(defs){
-  el("def-burden").textContent=defs.burden.definition+" "+defs.burden.why;
-  el("def-hpb").textContent=defs.high_burden_months.definition+" "+defs.high_burden_months.why;
-  el("def-recovery").textContent=defs.recovery_ratio.definition+" "+defs.recovery_ratio.why;
-  el("def-dur").textContent=defs.duration_months_mean.definition+" "+defs.duration_months_mean.why+
-    " " + defs.incomplete_recovery_rate.caveat;
-  el("burden-caveat").innerHTML="<strong>Read this before the chart.</strong> "+
-    esc(defs.high_burden_months.caveat);
+function renderDefs(d){
+  el("def-burden").textContent=d.burden.definition+" "+d.burden.why;
+  el("burden-caveat").innerHTML="<strong>Read this with the chart.</strong> "+esc(d.burden.caveat);
+  el("def-hpb").textContent=d.high_burden_months.definition+" "+d.high_burden_months.why;
+  el("hpb-caveat").innerHTML="<strong>Thresholds are illustrative.</strong> "+
+    esc(d.high_burden_months.caveat);
+  el("def-recovery").textContent=d.recovery_ratio.definition+" "+d.recovery_ratio.why;
+  el("rec-caveat").innerHTML="<strong>Denominators differ by contract.</strong> "+
+    esc(d.recovery_ratio.caveat);
+  el("def-dur").textContent=d.duration_months_mean.definition+" "+
+    d.duration_months_mean.why+" "+d.incomplete_recovery_rate.caveat;
 }
 function renderPanels(d){
   el("assumptions").innerHTML=d.assumptions.map(function(a){return '<li>'+esc(a)+'</li>';}).join("");
   el("caveats").innerHTML=d.caveats.map(function(c){return '<li>'+esc(c.text)+'</li>';}).join("");
 }
-
-/* ── orchestration ──────────────────────────────────────────── */
-function drawCharts(){
-  if(!STATE.data) return;
-  renderBurden(STATE.data.arms);
-  renderHpb(STATE.data.arms);
-  renderRecovery(STATE.data.arms);
+function renderSummary(s,label){
+  if(!s||!s.sentence){el("summary-text").textContent="";return;}
+  el("summary-text").innerHTML='<b>'+esc(label)+'.</b> '+esc(s.sentence);
 }
 
+/* ── orchestration ──────────────────────────────────────────── */
 async function select(key){
   STATE.scenario=key; markSelected(key);
   try{
     var d=await getJSON("/api/lab/comparison/"+encodeURIComponent(key));
     STATE.data=d;
     el("scn-desc").textContent=d.scenario.description;
-    renderArms(d.arms);
-    drawCharts();
-    renderDuration(d.arms);
-    renderDefs(d.metric_definitions);
-    renderFindings(d.findings);
-    renderPanels(d);
-  }catch(e){fail(e.message);}
+    renderSummary(d.summary,d.scenario.label);
+    renderArms(d.arms); renderLegend(d.arms); drawCharts();
+    renderDuration(d.arms); renderDefs(d.metric_definitions);
+    renderFindings(d.findings); renderPanels(d); drawCharts();
+  }catch(e){ show("error","Scenario “"+key+"” could not be loaded. "+e.message); }
 }
 
-/* Charts size their viewBox to the container, so they must be rebuilt when the
-   container changes — otherwise rotating a phone leaves the desktop layout
-   squeezed into a narrow column. */
-var _rt=null;
-window.addEventListener("resize", function(){
-  clearTimeout(_rt); _rt=setTimeout(drawCharts, 150);
-});
+/* Secondary panels are collapsed on narrow viewports only. Limitations,
+   assumptions and every caveat stay expanded at all widths — hiding those while
+   promoting favourable findings is exactly the anti-pattern to avoid. */
+function applyFolds(){
+  /* Markup ships these CLOSED, so a phone — and a browser where this script
+     fails — gets the compact page by default. Wide viewports open them once, at
+     startup only; after that the reader's own toggles are never overridden. */
+  if(window.matchMedia("(max-width:760px)").matches) return;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-fold="narrow"]'),function(d){
+    d.open = true;
+  });
+}
+/* A chart inside a closed <details> has zero width, so it must be drawn when
+   the panel opens, not before. */
+document.addEventListener("toggle",function(e){
+  var d=e.target;
+  if(d.open && d.matches && d.matches('[data-fold="narrow"]')) drawCharts();
+},true);
 
-(async function init(){
+var _rt=null;
+window.addEventListener("resize",function(){clearTimeout(_rt);_rt=setTimeout(function(){
+  drawCharts(); if(STATE.data) renderDuration(STATE.data.arms);},150);});
+
+async function init(){
+  show("loading");
   try{
     var m=await getJSON("/api/lab/manifest");
-    renderProvenance(m); renderTaxonomy(m.claim_taxonomy);
+    STATE.manifest=m; renderProvenance(m);
     var s=await getJSON("/api/lab/scenarios");
-    if(!s.scenarios.length){fail("No scenarios present in the artifacts.");return;}
+    if(!s.scenarios.length){show("unavailable");return;}
     renderScenarios(s.scenarios);
-    await select("sustained_decline" in s.scenarios.reduce(function(o,x){o[x.key]=1;return o;},{})
-      ? "sustained_decline" : s.scenarios[0].key);
-  }catch(e){fail(e.message);}
-})();
+    var u=null; try{u=await getJSON("/api/lab/underreporting");}catch(e){}
+    renderUnderreporting(u);
+    var keys={}; s.scenarios.forEach(function(x){keys[x.key]=1;});
+    show("ready");
+    applyFolds();
+    await select(keys["sustained_decline"]?"sustained_decline":s.scenarios[0].key);
+  }catch(e){
+    if(e.status===503){show("unavailable");}
+    else{show("error",e.message);}
+  }
+}
+init();
 </script>
 </body>
 </html>

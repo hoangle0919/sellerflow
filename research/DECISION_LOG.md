@@ -166,6 +166,62 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-033 — Simulation Lab refinement pass after external design audit
+**Date:** 2026-08-08
+**Trigger:** an independent Dieter Rams audit of the rendered surface scored the Lab **21/30 — REFINE, not redesign**, with principles 8 (thorough) and 10 (as little design as possible) at 1/3.
+**Status:** APPLIED on `simulation-lab`. Pre-refinement checkpoint preserved at `d11035d`.
+
+**Terminology and honesty (audit principles 4 and 6, the highest-priority finding).**
+
+| Was | Now | Why |
+|---|---|---|
+| "Revenue-based — equal effective cost" | **"Reference-path cost-matched RBF"** | The displayed APRs were *not* equal. The factor was solved on the reference path; realised rates differ because duration moves with revenue. The title claimed a result the numbers beneath it contradicted. |
+| "Effective APR" | **"Mean simulated APR"**, with `apr_basis` on every arm | Reference-path and mean-simulated rates are different quantities; the page showed one and named the other. |
+| "Contractual cap" for all arms | **"Repayment target"**, per-arm denominator declared | The amortizing loan has no cap. It was being shown the RBF contract's ×1.20 cap while displaying its own smaller total. |
+| "Flexibility for the seller is slower recovery" | Conditional on the selected scenario, with the direction computed per scenario | The universal phrasing contradicted the project's own caveat that direction depends on the revenue path. |
+| Burden thresholds unqualified | Marked **illustrative reporting bands, not validated hardship cutoffs** | No evidence exists that crossing 15% causes distress. |
+| "Lower is easier to carry" | Removed; replaced with an explicit statement that burden is measured against revenue, not against what the seller retains | Margins, operating costs, reserves and other debts are outside the model. The phrase claimed affordability the metric cannot support. |
+
+A **glossary** now defines cap factor, remittance, effective APR, 90th percentile, Monte Carlo interval, canonical artifact and reference path in place.
+
+**Closure exposed (audit principle 2).** Every scenario previously selectable repaid in full, so a reader could reasonably infer that revenue-based financing always recovers. It does not. `run_closure_baseline.py` registers three closure/zero-revenue scenarios at both price tracks (D-032 artifacts). At month-7 closure the revenue-based arm shows **100% incomplete recovery** and **undefined** effective rate — when revenue stops, no discount rate equates the payment stream to the advance, and the study reports that rather than substituting a number (spec §13, E-3). This cross-validates `validation_v1`'s independent boundary probe exactly.
+
+**Under-reporting surfaced — but deliberately NOT as a scenario.** The audit asked for it "as a selectable registered scenario". It is an ω sweep on a fixed revenue shape, not a revenue path; listing it beside "severe downturn" would mislabel it. It has its own panel, which states why it is not a scenario.
+
+**Compression (audit principle 10).** The audited mobile page was ~9,862 px. This pass **added** three scenarios, an under-reporting panel, a glossary and a provenance table, and the mobile page is now **8,868 px** — 10% shorter with materially more content. Achieved by a sticky summary with jump navigation, three provenance blocks consolidated to one, three identical legends consolidated to one, secondary panels folded on narrow viewports only, and tightened mobile chart metrics. **Limitations, assumptions and every caveat remain expanded at all widths** — collapsing those while promoting favourable findings is the anti-pattern the brief names, and a test asserts the caveat list is not nested inside a closed disclosure.
+
+The fold defaults are **closed in markup and opened by script on wide viewports**, so the compact layout is what a phone — or a browser where the script fails — gets by default.
+
+**States (audit principle 8, scored 1/3).** Loading, API-error with working retry, and artifacts-unavailable are implemented, screenshotted and asserted. Keyboard traversal verified: skip link → 8 jump links → 13 scenario buttons, focus visible at every stop, Enter activates and updates the summary. The settlement table shows a scroll affordance only when it actually overflows.
+
+**Palette (audit principle 3).** Red-versus-green read as *fixed = bad, revenue-based = good* before any copy. Replaced with an Okabe–Ito-derived **categorical** palette. Measured: all 13 text pairs pass WCAG AA (5.14:1 to 17.40:1); two bar fills initially failed the 3:1 non-text threshold and were darkened until all four pass. Every bar also carries its printed value, so colour is never the sole channel.
+
+**Weight, measured rather than estimated (audit principle 9).** `lab.html` 37,165 B (11,575 B gzipped); inline JS 15,893 B (5,337 B gzipped); **zero** third-party bytes. Cold load: 8 requests, 197,975 B — of which 138,856 B is three self-hosted fonts. API payloads: manifest 5,327 B, scenarios 2,277 B, comparison 12,525 B, under-reporting 1,825 B. Localhost headless Chromium: DOM interactive 38 ms, FCP 52 ms, load 45 ms.
+
+**Not done, and why.** Real Safari/iOS remains **unverified**. Playwright's WebKit needs GTK4 and 13 other system libraries that cannot be installed in the verification sandbox (no root; the package mirror is proxy-blocked). One real WebKit risk was fixed blind: SVGs now carry explicit `width`/`height` attributes as well as a `viewBox`, because WebKit does not always derive an intrinsic height from the viewBox alone and collapses the element. **This still needs one pass on real Safari and a real iPhone.**
+
+**Regression checks on the three principles that scored 3** are now tests: one scenario choice still updates every section; no modal, autoplay, or conversion CTA; serif/sans/mono roles preserved with no gradients, backdrop filters or keyframe animation.
+
+**Consequence:** backend tests 245 → 263. No research artifact modified; `baseline_v2` and `baseline_equalcost_v1` verified byte-identical.
+
+---
+
+### D-032 — Closure / zero-revenue baselines registered
+**Date:** 2026-08-08
+
+Three scenarios — permanent closure at month 7 and month 13, and a three-month temporary closure — run at both registered cap factors, using the unmodified generator, same 500 paths and same base seed. `run_baseline.py` and `run_equal_cost_baseline.py` are untouched; their bytes sit inside their own artifacts' generator fingerprints, so shared constants are imported rather than retyped.
+
+The fixed benchmark is unaffected by the shock because `reference_base_path` is flat, shock-free R0 by construction (spec §7.1). A contract is priced at origination; a closure in month 7 cannot retro-price it. That is what keeps the paired comparison valid rather than circular.
+
+| Artifact | SHA-256 |
+|---|---|
+| `baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` |
+| `baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` |
+
+At month-7 closure the revenue-based arm reaches 44.3% recovery by month 24 at the illustrative factor and 48.6% at the cost-matched factor, with 100% incomplete recovery in both. `DERIVATIONS.md` P7a already established closure as absorbing; this is the matching empirical panel.
+
+---
+
 ### D-031 — Equal-effective-cost baseline registered; Simulation Lab renders from artifacts
 **Date:** 2026-08-07
 **Status:** APPLIED, on `simulation-lab`.
