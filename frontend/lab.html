@@ -433,10 +433,14 @@ function show(which,detail){
 }
 el("retry").addEventListener("click",function(){init();});
 
-/* User-facing copy is chosen from the STATUS CODE, never echoed from the
-   response body. A server detail string may contain stack context, an internal
-   path, or an upstream message that should not reach a browser; it is logged to
-   the console for a developer and dropped from the page. */
+/* The error response body is NEVER read — not rendered, not logged, not
+   inspected. An earlier version parsed `detail` and printed it with
+   console.warn; that is moved leakage, not sanitization, because console output
+   is readable by anyone with devtools open and is captured verbatim by
+   error-reporting SDKs. User copy is chosen from the STATUS CODE. Diagnostics
+   carry the route, the status, and a request id if the server chose to expose
+   one in a header — never response content. Exception detail belongs in the
+   server log. */
 var ERROR_COPY={
   404:"That scenario is not in the published result set.",
   429:"Too many requests. Wait a moment and try again.",
@@ -454,8 +458,9 @@ async function getJSON(url){
   try{ r=await fetch(url,{headers:{"Accept":"application/json"}}); }
   catch(net){ var e0=new Error(userMessage(0)); e0.status=0; throw e0; }
   if(!r.ok){
-    var detail=null; try{ detail=(await r.json()).detail; }catch(e){}
-    if(detail && window.console) console.warn("[lab] "+url+" -> "+r.status+": "+detail);
+    var rid=""; try{ rid=r.headers.get("x-request-id")||""; }catch(e){}
+    if(window.console) console.warn("[lab] request failed",
+      {route:url, status:r.status, requestId:rid||null});
     var err=new Error(userMessage(r.status)); err.status=r.status; throw err;
   }
   return r.json();
@@ -473,8 +478,10 @@ function renderProvenance(m){
     '<thead><tr><th>Role</th><th style="text-align:left">File</th>'+
     '<th style="text-align:left">SHA-256</th><th>Paths</th><th>Seed</th></tr></thead>'+
     '<tbody>'+rows+'</tbody></table>';
-  var spec=(m.artifacts[0]||{}).spec_version||"";
-  el("foot-spec").textContent=spec;
+  /* Only overwrite the default when there is something real to say. A blank or
+     malformed spec_version previously produced "Simulation output under ." */
+  var spec=(m.artifacts[0]||{}).spec_version;
+  if(typeof spec==="string" && spec.trim()) el("foot-spec").textContent=spec.trim();
   el("glossary").innerHTML=Object.keys(m.glossary).map(function(k){
     return '<dt>'+esc(k)+'</dt><dd>'+esc(m.glossary[k])+'</dd>';
   }).join("");
@@ -520,8 +527,8 @@ function renderArms(arms){
         kv("Cap factor", a.cap_factor==null?"none":"×"+num(a.cap_factor,4))+
         kv("Advance", a.principal.display)+
         kv(a.repayment_target.label, a.repayment_target.amount.display)+
-        kv("Mean simulated APR", apr(a))+
-        kv("Mean duration", dur(a))+
+        kv(a.apr_label, apr(a))+
+        kv(a.duration_label, dur(a))+
       '</dl>'+
       '<details><summary>What this contract is</summary><p>'+esc(a.note)+'</p>'+
       '<p><b>'+esc(a.repayment_target.label)+':</b> '+esc(a.repayment_target.basis)+'</p></details></article>';
@@ -699,17 +706,46 @@ function renderSummary(s,label){
 }
 
 /* ── orchestration ──────────────────────────────────────────── */
+/* Scenario selection is ATOMIC. Every request carries a monotonically
+   increasing token; a response whose token is no longer current is discarded
+   before it touches a single DOM node. Nothing — pill, description, summary,
+   cards, charts, findings, tables — is written until the response that owns the
+   page arrives. The pill therefore stays on the currently rendered scenario
+   until the new one commits, so stale figures can never appear beneath a new
+   label. Previously `markSelected` ran first and responses were accepted in
+   arrival order, so a slow A landing after a fast B left B's pill above A's
+   numbers. */
+var REQ = 0;
+
+function setBusy(on){
+  ["scn-groups", "summary-text"].forEach(function(id){
+    var n = el(id);
+    if (n) n.setAttribute("aria-busy", on ? "true" : "false");
+  });
+}
+
 async function select(key){
-  STATE.scenario=key; markSelected(key);
+  var token = ++REQ;
+  setBusy(true);
   try{
-    var d=await getJSON("/api/lab/comparison/"+encodeURIComponent(key));
-    STATE.data=d;
-    el("scn-desc").textContent=d.scenario.description;
-    renderSummary(d.summary,d.scenario.label);
-    renderArms(d.arms); renderLegend(d.arms); drawCharts();
+    var d = await getJSON("/api/lab/comparison/"+encodeURIComponent(key));
+    if(token !== REQ) return false;           // superseded — touch nothing
+    STATE.scenario = key; STATE.data = d;
+    markSelected(key);                        // the pill moves WITH the data
+    el("scn-desc").textContent = d.scenario.description;
+    renderSummary(d.summary, d.scenario.label);
+    renderArms(d.arms); renderLegend(d.arms);
     renderDuration(d.arms); renderDefs(d.metric_definitions);
-    renderFindings(d.findings); renderPanels(d); drawCharts();
-  }catch(e){ show("error",e.message); }
+    renderFindings(d.findings); renderPanels(d);
+    drawCharts();
+    setBusy(false);
+    return true;
+  }catch(e){
+    if(token !== REQ) return false;           // a newer request owns the page
+    setBusy(false);
+    show(e.status === 503 ? "unavailable" : "error", e.message);
+    return false;
+  }
 }
 
 /* Secondary panels are collapsed on narrow viewports only. Limitations,
@@ -746,9 +782,15 @@ async function init(){
     var u=null; try{u=await getJSON("/api/lab/underreporting");}catch(e){}
     renderUnderreporting(u);
     var keys={}; s.scenarios.forEach(function(x){keys[x.key]=1;});
+    /* The page becomes "ready" only after the first comparison has loaded AND
+       rendered. Flipping to ready first exposed an empty research view for the
+       duration of that request — a blank page presented as a result. */
+    var first = keys["sustained_decline"] ? "sustained_decline" : s.scenarios[0].key;
+    var ok = await select(first);
+    if(!ok) return;                 // select() has already shown error/unavailable
     show("ready");
     applyFolds();
-    await select(keys["sustained_decline"]?"sustained_decline":s.scenarios[0].key);
+    drawCharts();                   // charts need a laid-out, visible container
   }catch(e){
     if(e.status===503){show("unavailable");}
     else{show("error",e.message);}

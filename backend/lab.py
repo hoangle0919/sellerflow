@@ -281,6 +281,52 @@ def _fmt_money(x) -> dict:
     return {"vnd": v, "display": f"{v:,} ₫"}
 
 
+def _censoring(a: dict) -> dict:
+    """Duration and rate are SURVIVOR STATISTICS. Say so when it matters.
+
+    `engine.run_scenario` averages duration over `[r.duration for r in rs if
+    r.duration is not None]` and the rate over paths where an IRR exists — both
+    exclude paths that never reached the repayment target. Where every path
+    completes, the distinction is empty. Where some do not, presenting these as
+    unconditional means describes the survivors and silently drops the failures,
+    which is the same error class as the withdrawn AUC: a number labelled as
+    something it is not.
+
+    At `closure_m13` the illustrative arm shows ~12 months and ~30% — computed
+    over the 24% of paths that finished, while 76% never did.
+    """
+    incomplete = a.get("incomplete_recovery_rate") or 0.0
+    partial = 0.0 < incomplete < 1.0
+    completed = max(0.0, 1.0 - incomplete)
+    if partial:
+        note = (f"Averaged over the {completed:.1%} of simulated paths that "
+                f"reached the repayment target within 24 months. The remaining "
+                f"{incomplete:.1%} never did and are excluded from this figure, "
+                f"not counted as long or expensive.")
+        return {
+            "censored": True,
+            "completed_share": completed,
+            "apr_label": "Mean APR among completed paths",
+            "duration_label": "Mean duration among completed paths",
+            "apr_basis": note,
+            "duration_basis": note,
+        }
+    return {
+        "censored": False,
+        "completed_share": completed,
+        "apr_label": "Mean simulated APR",
+        "duration_label": "Mean duration",
+        "apr_basis": "Mean across simulated paths for this scenario. Every path "
+                     "reached the repayment target, so no path is excluded."
+                     if incomplete == 0.0 else
+                     "No path reached the repayment target, so no rate is defined.",
+        "duration_basis": "Mean across simulated paths for this scenario. Every "
+                          "path reached the repayment target."
+                          if incomplete == 0.0 else
+                          "No path reached the repayment target within 24 months.",
+    }
+
+
 def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
     stem, body = _resolve(spec["track"], scenario)
     if not body:
@@ -331,7 +377,7 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
         "effective_apr": a.get("apr_mean"),
         "apr_undefined_reason": (None if a.get("apr_mean") is not None else
                                  "repayment incomplete"),
-        "apr_basis": "mean across simulated paths for this scenario",
+        **_censoring(a),
         "burden": {
             "mean": a.get("burden_mean"),
             "p90": a.get("burden_p90"),
@@ -434,9 +480,17 @@ METRIC_DEFINITIONS = {
     "duration_months_mean": {
         "label": "Repayment duration",
         "definition": "Mean months until cumulative payments reach the "
-                      "contractual cap, across simulated paths.",
+                      "repayment target — computed ONLY over paths that reached "
+                      "it within the 24-month window. Paths that did not are "
+                      "excluded from this mean and reported separately as "
+                      "incomplete recovery.",
         "why": "Revenue-based repayment extends the term when revenue falls "
                "instead of defaulting. The extension is the provider's cost.",
+        "caveat": "Where any path fails to complete, this is a SURVIVOR "
+                  "statistic. It describes the contracts that finished, not the "
+                  "portfolio. A scenario with a short mean duration and a high "
+                  "incomplete-recovery rate is not a fast contract — it is one "
+                  "where the slow paths were dropped rather than counted.",
     },
     "recovery_ratio": {
         "label": "Provider recovery",
@@ -461,12 +515,17 @@ METRIC_DEFINITIONS = {
     "effective_apr": {
         "label": "Effective APR",
         "definition": "Annualised internal rate of return of the payment stream "
-                      "against the advance, averaged across simulated paths.",
+                      "against the advance, averaged ONLY over paths where a "
+                      "rate exists. A path that never repays has no internal "
+                      "rate of return and is excluded.",
         "why": "Puts a revenue share and a fixed instalment on one axis.",
-        "caveat": "This is the MEAN ACROSS SIMULATED PATHS for the selected "
-                  "scenario, not the reference-path rate the cost-matched "
-                  "contract was priced on. The two differ because duration "
-                  "moves with revenue.",
+        "caveat": "Two conditions apply. This is the MEAN ACROSS SIMULATED "
+                  "PATHS for the selected scenario, not the reference-path rate "
+                  "the cost-matched contract was priced on. And where any path "
+                  "fails to complete it is a SURVIVOR statistic — the "
+                  "unprofitable paths are absent from it, so it understates the "
+                  "cost of the scenario to the provider rather than summarising "
+                  "it.",
     },
 }
 
@@ -506,6 +565,11 @@ CAVEATS = [
              "rate for the same total. The label describes how the price was "
              "chosen, not an outcome guaranteed on any path.",
      "classification": "sensitivity_result"},
+    {"text": "Mean duration and mean rate are computed only over paths that "
+             "reached the repayment target. Where recovery is incomplete they "
+             "describe the contracts that finished and exclude those that did "
+             "not, so they must not be read as portfolio averages.",
+     "classification": "simulation_result"},
     {"text": "Payment burden is measured against revenue, not against what the "
              "seller retains. Margins, operating costs, reserves and other debts "
              "are outside the model, so a lower burden is not by itself evidence "

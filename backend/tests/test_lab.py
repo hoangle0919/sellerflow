@@ -365,8 +365,12 @@ def test_undefined_apr_is_reported_not_substituted():
 
 
 def test_every_rate_declares_its_basis():
+    """Basis wording now varies with censoring, so match case-insensitively and
+    require the conditioning to be stated either way."""
     for a in client.get("/api/lab/comparison/stable").json()["arms"]:
-        assert "mean across simulated paths" in a["apr_basis"]
+        b = a["apr_basis"].lower()
+        assert "across simulated paths" in b
+        assert "excluded" in b or "every path reached" in b
 
 
 def test_recovery_denominator_is_declared_per_arm():
@@ -624,3 +628,120 @@ def test_incomplete_closure_contracts_use_the_agreed_wording():
 def test_network_failure_has_its_own_message():
     html = open(LAB_HTML, encoding="utf-8").read()
     assert "could not be reached" in html.lower()
+
+
+# ── final gate (D-035): leakage, atomicity, ready-order, censored means ────
+
+def test_error_response_body_is_never_read():
+    """Not rendered, not logged, not inspected. Parsing `detail` and printing it
+    with console.warn is moved leakage: console output is readable with devtools
+    open and is captured verbatim by error-reporting SDKs."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    js = html.split("<script>", 1)[1].rsplit("</script>", 1)[0]
+    for banned in ("detail", "await r.json()).detail", "body.detail"):
+        if banned == "detail":
+            # `detail` may appear in prose, never in the error path
+            err_fn = js.split("async function getJSON", 1)[1].split("\n}", 1)[0]
+            assert "detail" not in err_fn, "getJSON still touches the response body"
+        else:
+            assert banned not in js, banned
+    assert "console.warn" in js               # diagnostics still exist
+    diag = js.split('console.warn("[lab] request failed"', 1)[1].split(");", 1)[0]
+    for allowed_only in ("route", "status", "requestId"):
+        assert allowed_only in diag
+    assert "detail" not in diag and "body" not in diag
+
+
+def test_console_diagnostics_carry_no_response_content():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "r.headers.get" in html            # request id read from a HEADER
+    assert "(await r.json())" not in html
+
+
+def test_scenario_selection_is_token_guarded():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    assert "var REQ = 0;" in js
+    assert "var token = ++REQ;" in js
+    assert js.count("if(token !== REQ) return false;") == 2, \
+        "both the success and the failure path must drop stale responses"
+    sel = js.split("async function select(key)", 1)[1].split("\n}", 1)[0]
+    # the pill must not move before the response commits
+    assert sel.index("if(token !== REQ)") < sel.index("markSelected(key)")
+
+
+def test_ready_state_waits_for_the_first_comparison():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    init = js.split("async function init()", 1)[1].split("\ninit();", 1)[0]
+    assert init.index("await select(first)") < init.index('show("ready")'), \
+        "show('ready') must not precede the first comparison"
+    assert "if(!ok) return;" in init
+
+
+def test_footer_default_is_not_overwritten_by_an_empty_spec():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    assert 'if(typeof spec==="string" && spec.trim())' in js
+
+
+# ── censored means ─────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("scenario,arm", [
+    ("closure_m13", "RBF-ILL"),      # 76.2% incomplete — the pinned case
+    ("closure_m13", "RBF-EQ"),       # partially censored cost-matched arm
+    ("temp_closure", "RBF-ILL"),     # lightly censored
+])
+def test_partially_censored_arms_are_labelled_as_completed_path_only(scenario, arm):
+    a = next(x for x in client.get(f"/api/lab/comparison/{scenario}").json()["arms"]
+             if x["id"] == arm)
+    assert 0.0 < a["incomplete_recovery_rate"] < 1.0, "fixture is not partially censored"
+    assert a["censored"] is True
+    assert a["apr_label"] == "Mean APR among completed paths"
+    assert a["duration_label"] == "Mean duration among completed paths"
+    assert "excluded" in a["apr_basis"] and "excluded" in a["duration_basis"]
+    assert 0.0 < a["completed_share"] < 1.0
+
+
+def test_closure_m13_illustrative_is_pinned():
+    """The specific case the audit found: ~12 months and ~30% computed over the
+    24% that finished, while 76% never did."""
+    a = next(x for x in client.get("/api/lab/comparison/closure_m13").json()["arms"]
+             if x["id"] == "RBF-ILL")
+    assert round(a["incomplete_recovery_rate"], 3) == 0.762
+    assert a["censored"] is True
+    assert 11.0 < a["duration_months_mean"] < 13.0
+    assert 0.28 < a["effective_apr"] < 0.32
+    assert "completed paths" in a["apr_label"]
+
+
+def test_uncensored_arms_are_not_mislabelled_as_conditional():
+    for a in client.get("/api/lab/comparison/stable").json()["arms"]:
+        assert a["incomplete_recovery_rate"] == 0.0
+        assert a["censored"] is False
+        assert a["apr_label"] == "Mean simulated APR"
+        assert "no path is excluded" in a["apr_basis"]
+
+
+def test_fully_incomplete_arms_keep_the_undefined_wording():
+    for a in client.get("/api/lab/comparison/closure_m7").json()["arms"]:
+        if a["incomplete_recovery_rate"] == 1.0:
+            assert a["censored"] is False       # nothing survived to condition on
+            assert a["effective_apr"] is None
+            assert a["duration_months_mean"] is None
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "Undefined — repayment incomplete" in html
+    assert "Not completed within 24 months" in html
+
+
+def test_the_page_renders_the_api_supplied_labels_not_fixed_ones():
+    html = open(LAB_HTML, encoding="utf-8").read()
+    assert "kv(a.apr_label," in html and "kv(a.duration_label," in html
+    assert 'kv("Mean simulated APR"' not in html
+
+
+def test_metric_definitions_disclose_the_survivor_conditioning():
+    d = client.get("/api/lab/comparison/closure_m13").json()["metric_definitions"]
+    assert "excluded" in d["duration_months_mean"]["definition"].lower()
+    assert "survivor" in d["duration_months_mean"]["caveat"].lower()
+    assert "survivor" in d["effective_apr"]["caveat"].lower()
+    caveats = " ".join(c["text"].lower()
+                       for c in client.get("/api/lab/comparison/stable").json()["caveats"])
+    assert "only over paths that reached the repayment target" in caveats

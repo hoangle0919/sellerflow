@@ -166,6 +166,33 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-035 — Final-gate corrections: leakage, atomicity, and a survivor-statistic mislabel
+**Date:** 2026-08-09
+**Raised by:** an independent final-gate audit that reproduced 270 backend tests, 629 simulation tests and all four canonical checksums from a clean checkout, then found four issues the suite could not.
+**Status:** APPLIED. Lab functionality remains frozen.
+
+**1. Error sanitization was incomplete — the leak had been moved, not removed.** D-034 stopped rendering the server's `detail` string but still parsed it and printed it verbatim with `console.warn`. Console output is readable by anyone with devtools open and is captured wholesale by error-reporting SDKs, so an internal path or credential in an exception message still reached the browser. The response body is now **never read** on the error path. Diagnostics carry the route, the HTTP status, and a request id taken from a response *header* if the server chose to expose one — never response content. Verified by injecting `password=hunter2 /srv/app/db.py` and asserting it appears in neither the DOM nor captured console output.
+
+**2. Scenario selection was not atomic.** `select()` called `markSelected()` before its request resolved and accepted responses in arrival order, so a slow request for A landing after a fast one for B left B's pill above A's figures. Every request now carries a monotonically increasing token and a superseded response is discarded before touching a single DOM node; the pill moves *with* the data rather than ahead of it. A browser test holds request A, lets B resolve, then releases A, and asserts the page is entirely B.
+
+**3. The page became "ready" before it had anything to show.** `show("ready")` ran before the first comparison request, briefly presenting an empty research view as a result. Ready is now reached only after the first comparison has loaded **and** rendered; a failed initial comparison shows the sanitized error or unavailable state instead of a blank page.
+
+**4. Duration and rate were survivor statistics presented as unconditional means.** This is the serious one. `engine.run_scenario` averages duration over `[r.duration for r in rs if r.duration is not None]` and the rate over paths where an IRR exists — both silently exclude paths that never reached the repayment target.
+
+At `closure_m13` the illustrative arm displayed **11.99 months and 30.33% APR** while **76.2% of paths never completed**. Those figures describe the surviving 23.8%. Presenting them unqualified is the same error class as the withdrawn AUC: a number labelled as something it is not — and it appeared in precisely the scenario added to show honest failure.
+
+Wherever `0 < incomplete_recovery_rate < 1`, the fields are now labelled **"Mean APR among completed paths"** and **"Mean duration among completed paths"**, with a basis naming the share included and stating that the excluded paths are dropped rather than counted as long or expensive. The metric definitions carry the conditioning; a caveat states it in the limitations panel. Where every path completes, the plain labels remain and the basis says no path is excluded. Where none completes, "Undefined — repayment incomplete" and "Not completed within 24 months" stand. Pinned by test at `closure_m13` for both revenue-based arms and at `temp_closure`.
+
+**5. The footer fallback could be overwritten with nothing.** `renderProvenance()` assigned `spec_version || ""`, so a blank or malformed value replaced good default copy with an empty string and reproduced *"Simulation output under ."* It now only overwrites when the value is a non-empty string.
+
+**What the existing tests could not catch, and why.** The suite asserted that served values matched the artifact — which they did. It never asked what the artifact's values *mean*, so a correctly-transcribed survivor statistic passed every check. Two of these four were timing- or console-dependent and invisible to static inspection; `backend/tests/test_lab_browser.py` now covers them with a real event loop.
+
+**Open, deliberately not changed here.** The conditioning is a property of the registered artifacts, not of the Lab — `duration_mean` and `apr_mean` are survivor statistics in **every** artifact including `baseline_v2`, and any duration or rate quoted from a scenario with incomplete recovery carries it. Whether the artifacts should additionally report an unconditional or censoring-aware duration is a research question for the paper. Changing a registered result to improve a display would be the wrong order.
+
+**Consequence:** backend tests 270 → 283, plus 5 browser tests. No research artifact modified; all four canonical checksums byte-identical.
+
+---
+
 ### D-034 — Simulation Lab closing fixes; functionality now frozen
 **Date:** 2026-08-08
 **Status:** APPLIED. **Lab functionality is frozen after this entry.** The only remaining Lab work is real Safari/iPhone verification and genuine browser-specific fixes.
