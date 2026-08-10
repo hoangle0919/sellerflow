@@ -66,7 +66,9 @@
 | `baseline_v2_provenance.json` | Execution record for the above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
 | `baseline_v1.json` | Superseded (`gmv` basis). Audit trail. |
-| `validation_v1.json` | Convergence, pricing, equal-cost cap, recovery boundary, RBF-G breakpoint, revenue definition. |
+| `validation_v1_canonical.json` | **Cite this for validation figures.** Checksummed canonical form (D-038), `f89fd2ba…`. Numerically identical to `validation_v1.json` — all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `validation_v1_provenance.json` | Execution record for the above, including `original_run_date` (2026-08-04), the one non-deterministic field in the source. |
+| `validation_v1.json` | Convergence, pricing, reference-path cost-matched cap (JSON key `pricing.equal_cost`), recovery boundary, RBF-G breakpoint, revenue definition. Retained unmodified as the pre-canonicalization source. |
 | `baseline_v2_log.txt` | Full console output of the baseline run. |
 
 ### `patches/`

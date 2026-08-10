@@ -1,0 +1,285 @@
+{
+  "canonical": {
+    "determinism": "Identical code, configuration and seeds produce a byte-identical file. Wall-clock time, git commit and environment are recorded in the provenance sidecar.",
+    "generator_fingerprint": "e4d79fa85ba471f1c12d445c88067e3cdb0162aef6fd36da898d25c94d8950d2",
+    "scenario_config_hash": "04bfa4f8460f8159b529cc1f78978a0e88675d3cfe82986be2a5f5d98b449578",
+    "schema_version": "1.0",
+    "spec_version": "METHODOLOGY_SPEC.md v1.0 + amendments A-1..A-3"
+  },
+  "config": {
+    "R0": 185000000.0,
+    "base_terms": {
+      "A": 185000000.0,
+      "N_B": 12,
+      "f": 1.2,
+      "j": 0.18,
+      "r": 0.1
+    }
+  },
+  "convergence": {
+    "10000": {
+      "d_n_hpb": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 3.1357049999999997,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 3.0909,
+        "mean": 3.1135,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 10000
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.16534058298810922,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.1639885438640537,
+        "mean": 0.16465537602974017,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 10000
+      }
+    },
+    "2000": {
+      "d_n_hpb": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 3.1535,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 3.0515,
+        "mean": 3.103,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 2000
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.16546087493385228,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.16258339637639008,
+        "mean": 0.16399847763852787,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 2000
+      }
+    },
+    "500": {
+      "d_n_hpb": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 3.19805,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 3.0,
+        "mean": 3.1,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.16556472381621568,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.15981782576192125,
+        "mean": 0.16270522008855529,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "5000": {
+      "d_n_hpb": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 3.1414,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 3.0795950000000003,
+        "mean": 3.1108,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 5000
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.16514699917495482,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.1633586920121589,
+        "mean": 0.16423718129741796,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 5000
+      }
+    }
+  },
+  "pricing": {
+    "benchmark_b_apr": 0.19561817146154947,
+    "equal_cost": {
+      "apr": 0.1953765648184853,
+      "cap": 202482500.0,
+      "duration": 12,
+      "f_star": 1.0945,
+      "total": 202482500.0
+    },
+    "sweep": {
+      "1.05": {
+        "apr": 0.10472410708412538,
+        "cap": 194250000.0,
+        "duration": 11,
+        "total": 194250000.0
+      },
+      "1.08": {
+        "apr": 0.1662145733792355,
+        "cap": 199800000.0,
+        "duration": 12,
+        "total": 199800000.0
+      },
+      "1.1": {
+        "apr": 0.20637200387896626,
+        "cap": 203500000.00000003,
+        "duration": 12,
+        "total": 203500000.00000003
+      },
+      "1.12": {
+        "apr": 0.24606612347787316,
+        "cap": 207200000.00000003,
+        "duration": 12,
+        "total": 207200000.00000003
+      },
+      "1.15": {
+        "apr": 0.304817038664402,
+        "cap": 212749999.99999997,
+        "duration": 12,
+        "total": 212749999.99999997
+      },
+      "1.2": {
+        "apr": 0.39898665069997685,
+        "cap": 222000000.0,
+        "duration": 13,
+        "total": 222000000.0
+      },
+      "1.25": {
+        "apr": 0.48968921784907615,
+        "cap": 231250000.0,
+        "duration": 13,
+        "total": 231250000.0
+      },
+      "1.3": {
+        "apr": 0.5754373127038208,
+        "cap": 240500000.0,
+        "duration": 14,
+        "total": 240500000.0
+      }
+    }
+  },
+  "provenance": "SIMULATED - no observed data",
+  "purpose": "Validation battery: Monte Carlo convergence, pricing sensitivity and the reference-path cost-matched cap f*, incomplete-recovery boundary search, RBF-G guardrail breakpoint, and revenue-definition sensitivity.",
+  "rbf_g_breakpoint": {
+    "pmin0.25_hard0.2": {
+      "ceiling_months": 6009,
+      "floor_months": 0,
+      "reachable": true,
+      "total": 36000
+    },
+    "pmin0.25_hard0.5": {
+      "ceiling_months": 6009,
+      "floor_months": 0,
+      "reachable": false,
+      "total": 36000
+    },
+    "pmin0.6_hard0.5": {
+      "ceiling_months": 6009,
+      "floor_months": 772,
+      "reachable": true,
+      "total": 36000
+    },
+    "pmin0.8_hard0.5": {
+      "ceiling_months": 6009,
+      "floor_months": 3844,
+      "reachable": true,
+      "total": 36000
+    },
+    "pmin1.0_hard0.5": {
+      "ceiling_months": 6009,
+      "floor_months": 9564,
+      "reachable": true,
+      "total": 36000
+    }
+  },
+  "recovery_boundary": {
+    "closure @ m13": {
+      "A_mult": 1.0,
+      "T": 24,
+      "dur": 11.98611111111111,
+      "incomplete": 0.76,
+      "rr24": 0.9649665335036631,
+      "terminal": 0
+    },
+    "closure @ m7": {
+      "A_mult": 1.0,
+      "T": 24,
+      "dur": null,
+      "incomplete": 1.0,
+      "rr24": 0.4427229088126887,
+      "terminal": 0
+    },
+    "extended downturn -60%": {
+      "A_mult": 1.0,
+      "T": 24,
+      "dur": 21.841666666666665,
+      "incomplete": 0.0,
+      "rr24": 1.0,
+      "terminal": 0
+    },
+    "extended downturn -80%": {
+      "A_mult": 1.0,
+      "T": 24,
+      "dur": 23.99665551839465,
+      "incomplete": 0.5016666666666667,
+      "rr24": 0.9864543816705125,
+      "terminal": 0
+    },
+    "sustained -40%, T=18": {
+      "A_mult": 1.0,
+      "T": 18,
+      "dur": 17.565022421524663,
+      "incomplete": 0.25666666666666665,
+      "rr24": 0.9945101088112492,
+      "terminal": 0
+    },
+    "sustained -60%, T=18": {
+      "A_mult": 1.0,
+      "T": 18,
+      "dur": null,
+      "incomplete": 1.0,
+      "rr24": 0.830569971908269,
+      "terminal": 0
+    },
+    "temp closure 3m + -50%": {
+      "A_mult": 1.0,
+      "T": 24,
+      "dur": 23.01192504258944,
+      "incomplete": 0.021666666666666667,
+      "rr24": 0.9997892309464149,
+      "terminal": 0
+    },
+    "write-off @ 18m, sust -40%": {
+      "A_mult": 1.0,
+      "T": 24,
+      "dur": 17.565022421524663,
+      "incomplete": 0.25666666666666665,
+      "rr24": 0.9945101088112492,
+      "terminal": 18
+    }
+  },
+  "revenue_definition": {
+    "cash_receipts_fee0.0": {
+      "duration": 12.8675,
+      "rr12": 0.9657852439592496,
+      "total": 222000000.0
+    },
+    "cash_receipts_fee0.1": {
+      "duration": 14.415,
+      "rr12": 0.8746161312663936,
+      "total": 222000000.0
+    },
+    "gmv_fee0.0": {
+      "duration": 12.5175,
+      "rr12": 0.9841987367426603,
+      "total": 222000000.0
+    },
+    "net_sales_fee0.0": {
+      "duration": 12.8675,
+      "rr12": 0.9657852439592496,
+      "total": 222000000.0
+    }
+  },
+  "run": "validation_v1",
+  "spec": "METHODOLOGY_SPEC.md v1.0 + amendments A-1..A-3"
+}

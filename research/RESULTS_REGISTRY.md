@@ -120,8 +120,8 @@ Under a −40% sustained decline, distress-month counts (T-0):
 ### Interpretation
 
 - **F-1 — trade-off quantified.** Severe downturn: RBF removes 6.24 [6.19, 6.28] high-burden months (θ=0.15) at a cost of 32.5pp [32.3, 32.8] lower 12-month recovery and duration 12.0 → 18.3 months. Benefit and cost both scale with shock severity.
-- **F-2 ⚠️ against the product.** Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. RBF at `f = 1.20` costs ~2.3× the interest of a conventional loan. Reported as a headline.
-- **F-3 ⚠️ null.** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000. Provider exposure is **duration risk, not principal loss** — at these parameters.
+- **F-2 ⚠️ against the product — ~~"costs ~2.3× the interest of a conventional loan"~~ SUPERSEDED (D-015, `CORRECTED_CLAIMS.md` #2, `DERIVATIONS.md` P6).** The arithmetic stands: Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. The *interpretation* does not. P6 shows total cost is proportional to `f` and that APR is jointly determined by `f` and the revenue path, so a ratio computed at the illustrative `f = 1.20` is a **pricing** result, not a property of revenue-based repayment. Correct framing: at the illustrative 1.20× cap the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at the reference-path cost-matched `f* = 1.0945` it is not. **Do not quote the 2.3× ratio.**
+- **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
 - **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue — a genuine structural advantage of FIX.
 - **F-5 ⚠️ null.** RBF-G bit-identical to RBF in all ten scenarios. Default guardrails never bind.
 
@@ -131,7 +131,7 @@ F-3 is partly a horizon artifact (`T = 24` against a 12-month base duration); th
 
 ### Safe for public presentation?
 
-**Yes, with mandatory framing.** F-1, F-2, F-4 are presentable now with the simulated label and parameters stated. **F-3 must not be presented as "RBF is safe for providers"** — it is a horizon-bounded null pending the Phase 3 search. F-5 must be presented as a null result, not omitted.
+**Conditionally, with mandatory framing — and F-2 is no longer presentable as written.** F-1 and F-4 are presentable with the simulated label and parameters stated. **F-2's 2.3× ratio is retracted** (see above); only the underlying arithmetic, framed as a pricing result at the illustrative cap and paired with `f*`, may be shown. **F-3 must not be presented as "RBF is safe for providers"** — the Phase 3 search is now complete and found the failure region (D-032); present F-3 only alongside the closure results. F-5 must be presented as a null result, not omitted.
 
 ---
 
@@ -151,7 +151,7 @@ F-3 is partly a horizon artifact (`T = 24` against a 12-month base duration); th
 
 **Limitations.** Three boundary probes returned "cap unreachable on reference" — at `A = 3×R₀` or a 12-month write-off, benchmark A cannot be matched and the comparison is undefined. Reported, not dropped. No default model was introduced; non-recoveries are mechanical (zero revenue, maturity), not modeled borrower default. `platform_fee_rate` is arbitrary-and-awaiting-justification, defaulted to 0.
 
-**Safe for public presentation?** Yes with mandatory framing. **The equal-cost cap must accompany any cost comparison** — quoting 39.90% without `f*` would repeat the error this run corrected.
+**Safe for public presentation?** Yes with mandatory framing. **The reference-path cost-matched cap `f*` must accompany any cost comparison** — quoting 39.90% without `f*` would repeat the error this run corrected. Say "reference-path cost-matched", not "equal cost": the cap factor was solved on a single flat, shock-free reference path, and on simulated paths the realised rate differs because duration moves with revenue.
 
 ---
 

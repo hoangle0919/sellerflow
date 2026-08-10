@@ -166,6 +166,49 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-038 — `validation_v1` canonicalized additively; zero numeric change
+**Date:** 2026-08-10
+**Raised by:** the Phase A publication audit, asking which quotable numbers lacked a checksum.
+**Status:** APPLIED on `publication-package`.
+
+**Trigger:** `validation_v1.json` was the only registered result with no canonical form — and it holds the two figures most likely to reach a slide: the reference-path cost-matched cap `f* = 1.0945` and Benchmark B's 19.5618% APR. The most quotable numbers were the least verifiable.
+
+**Alternatives considered:**
+1. Leave it and forbid citing validation-only numbers in the paper. Rejected — `f*` is load-bearing for the price/structure separation (D-015); a paper that cannot cite it cannot make its own central argument.
+2. Rewrite `run_validation.py` to emit a canonical pair. Rejected — that file's bytes are part of what produced the artifact. Changing the generating source without changing the numbers is the confusion the fingerprint exists to prevent.
+3. Widen `NON_DETERMINISTIC_KEYS` to strip nested keys. Rejected — that constant governs the writer that produced four already-registered baselines. Not worth the blast radius for one nested field.
+4. **Chosen:** a separate `canonicalize_validation.py` that reads the committed artifact and re-expresses it, never recomputing.
+
+**Reason:** Re-running the entire battery from a clean tree (`conv_step.py` at N = 500/2000/5000/10000, then sections 2/4/5/6) reproduced the committed file with **exactly one** difference — `/_meta/date` — and **zero** numeric drift across all 174 scalars. Both `run_scenario` (base_seed 20260803) and `bootstrap_ci` (seed 90210) already carried deterministic defaults, so the battery was reproducible all along; it simply had no artifact to prove it with. The date is a *when-it-ran* fact and belongs in provenance.
+
+**Consequence:** `validation_v1_canonical.json` = `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4`. `validation_v1.json` is untouched. The original run date is preserved as `original_run_date` in the provenance record — an earlier draft of the script *dropped* it while printing that it had moved it, which would have made the script lie about its own behaviour. All four baseline checksums re-verified unchanged, and the script re-verifies them on every write. Bound by `test_validation_artifact.py`.
+
+---
+
+### D-037 — Copy reconciled against the artifacts; a claim ledger now governs public wording
+**Date:** 2026-08-10
+**Raised by:** the Phase A publication audit.
+**Status:** APPLIED on `publication-package`.
+
+**Trigger:** Four live surfaces asserted more than the artifacts support, and the results registry still authorized a claim the derivations had formally retracted.
+
+**What was wrong, and why each is not cosmetic:**
+
+1. **`lab.py`: "extends the term when revenue falls *instead of defaulting*."** Asserts default-prevention. `closure_m7` is **100.0%** incomplete at *both* registered cap factors — the contract does not extend, it never completes. This was the most misleading sentence in the product.
+2. **`lab.py`: "takes *proportionally* longer… the total is invariant."** Both unconditional. Invariance holds only when the cap is reached inside the horizon; and 12.862 → 18.690 months against ω 1.00 → 0.70 is not exact proportionality (integrality and clipping). Now derived from the artifact at request time rather than typed, so it cannot go stale.
+3. **`lab.py`: "A *conventional* 12-month amortizing loan at 18%."** Implies a sourced market rate. The 18% is an assumed input; no market survey backs it.
+4. **`RESULTS_REGISTRY.md` R-010** restated "RBF costs ~2.3× the interest of a conventional loan" *and* listed F-2 as publicly presentable — while `DERIVATIONS.md` P6 says that claim "was wrong on two counts" and `CORRECTED_CLAIMS.md` #2 records the correction. A retracted claim was live on the document that decides what may be quoted. F-3's null was likewise unmarked despite D-032 having located the failure region.
+
+**Also corrected:** the ω finding carried a `mathematical_property` label over text that mixed a proof with a measurement; it is now two findings under their own classes, because promoting a simulation result to a theorem is the same error at smaller scale.
+
+**Not touched, deliberately:** `METHODOLOGY_SPEC.md` (frozen; its "Vietnam-calibrated" phrasing is a *limiting* disclaimer, the honest direction) and `DERIVATIONS.md` P1–P7 (load-bearing proofs; "Equal-cost pricing" there names an exact mathematical operation). `BASELINE_FINDINGS.md` retains F-2 as written — it is audit trail and carries a banner naming F-2 as superseded.
+
+**Consequence:** `research/CLAIM_LEDGER.md` now lists every public claim with its class, artifact, JSON path, checksum, required qualifier and superseded predecessor. Enforced by `test_public_copy.py` and `test_claim_ledger.py`.
+
+**A note on the enforcement test, because it failed in an instructive way.** Its first version used a 240-character symmetric negation window including the bare word "not". In dense technical prose that disowns essentially every match: the scanner passed the entire repository while both `lab.py` violations were still in it. A scanner that cannot fail on the text that motivated it is worse than none, because it certifies. The window is now directional and tight, and the test suite includes the verbatim retracted sentences as fixtures — so the scanner must prove it catches the copy this project actually shipped.
+
+---
+
 ### D-036 — Closing two partially-implemented acceptance criteria
 **Date:** 2026-08-09
 **Raised by:** the final-gate audit, re-verifying D-035.

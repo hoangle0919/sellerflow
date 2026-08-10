@@ -156,8 +156,10 @@ ARMS = [
      "short": "Amortizing loan",
      "chart_label": "Amortizing loan",
      "kind": "fixed",
-     "note": "A conventional 12-month amortizing loan at 18% nominal annual "
-             "rate. Not cost-matched; it is the external price reference."},
+     "note": "An illustrative 12-month amortizing loan at 18% nominal annual "
+             "rate. The 18% is an assumed input chosen for this study, not a "
+             "sourced or observed market rate. Not cost-matched; it is the "
+             "external price reference."},
     {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
      "name": "Reference-path cost-matched RBF",
      "short": "Revenue-based, cost-matched",
@@ -434,6 +436,25 @@ def underreporting() -> Optional[dict]:
             "effective_apr": a.get("apr_mean"),
             "total_repaid_mean": _fmt_money(a.get("total_repaid_mean") or 0),
         })
+    # Derived from `rows`, never typed. A hard-coded "12.9 → 18.7" would go
+    # stale silently the day the artifact changes — the exact failure mode the
+    # literal scanner exists to catch on the HTML side.
+    full, least = rows[-1], rows[0]        # rows ascend by ω: [0]=lowest
+    all_complete = all(not (r["incomplete_recovery_rate"] or 0) for r in rows)
+    if all_complete:
+        observed = (
+            f"In this sweep every path still reached the cap inside the "
+            f"24-month window, so the total stayed at the cap and only the "
+            f"duration moved: {full['duration_months_mean']:.1f} → "
+            f"{least['duration_months_mean']:.1f} months as ω falls "
+            f"{full['omega']:.0%} → {least['omega']:.0%}. That is this "
+            f"sweep's result, not a general guarantee.")
+    else:
+        observed = (
+            "In this sweep some paths did NOT reach the cap inside the "
+            "24-month window, so the total is not invariant across all of "
+            "them — read the incomplete-recovery column.")
+
     return {
         "rows": rows,
         "source_artifact": "baseline_v2_canonical.json",
@@ -443,14 +464,27 @@ def underreporting() -> Optional[dict]:
                               "observes; the underlying revenue shape is held "
                               "fixed. It is shown separately so it is not read "
                               "as one of the scenarios.",
-        "finding": {
-            "classification": "mathematical_property",
-            "text": "Under-reporting does not change what is owed. It rescales "
-                    "each payment, so the contract takes proportionally longer "
-                    "to reach the same cap — the total is invariant, the "
-                    "duration is not.",
-            "source": "research/DERIVATIONS.md",
-        },
+        # A list, and split by claim class on purpose. The invariance argument
+        # is a property of the contract; the duration numbers are an output of
+        # one sweep. Carrying both under a single "mathematical_property" label
+        # would promote a simulation result to a theorem.
+        "findings": [
+            {
+                "classification": "mathematical_property",
+                "text": "Under-reporting does not change what is owed. It "
+                        "rescales each payment, so the contract takes longer "
+                        "to reach the same cap. Invariance of the total is "
+                        "conditional on the cap being reached: under-reporting "
+                        "severe enough to push the contract past the horizon "
+                        "leaves the cap unreached and the total short.",
+                "source": "research/DERIVATIONS.md",
+            },
+            {
+                "classification": "simulation_result",
+                "text": observed,
+                "source": "research/results/baseline_v2_canonical.json",
+            },
+        ],
     }
 
 
@@ -484,8 +518,12 @@ METRIC_DEFINITIONS = {
                       "it within the 24-month window. Paths that did not are "
                       "excluded from this mean and reported separately as "
                       "incomplete recovery.",
-        "why": "Revenue-based repayment extends the term when revenue falls "
-               "instead of defaulting. The extension is the provider's cost.",
+        "why": "Revenue-based repayment extends the term when revenue falls, "
+               "rather than holding the payment fixed. The extension is the "
+               "provider's cost. Extension is NOT the same as preventing "
+               "default: where revenue reaches zero the cap may never be "
+               "reached at all, which is exactly what the closure scenarios "
+               "show. Read this beside the incomplete-recovery rate.",
         "caveat": "Where any path fails to complete, this is a SURVIVOR "
                   "statistic. It describes the contracts that finished, not the "
                   "portfolio. A scenario with a short mean duration and a high "
