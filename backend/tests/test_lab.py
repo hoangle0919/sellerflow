@@ -593,8 +593,9 @@ def test_server_error_text_is_never_rendered_to_the_user():
     html = open(LAB_HTML, encoding="utf-8").read()
     assert "ERROR_COPY" in html and "userMessage(" in html
     assert "console.warn" in html
-    # the error panel must never be handed a server string
-    assert 'show("error",e.message)' in html
+    # Superseded by D-036: the panel is no longer handed ANY exception message,
+    # safe or otherwise. Every path is routed through publicMessage().
+    assert 'show("error", publicMessage(e))' in html
     assert "body.detail" not in html and "(body&&body.detail)" not in html
 
 
@@ -745,3 +746,115 @@ def test_metric_definitions_disclose_the_survivor_conditioning():
     caveats = " ".join(c["text"].lower()
                        for c in client.get("/api/lab/comparison/stable").json()["caveats"])
     assert "only over paths that reached the repayment target" in caveats
+
+
+# ── closing gate (D-036): exception paths and survivor presentation ────────
+
+def test_no_catch_path_passes_a_raw_exception_message_to_the_dom():
+    """Source regression. Only errors we construct carry `publicSafe`; a
+    TypeError from a render path or a SyntaxError from JSON.parse quotes text we
+    did not write, so it must never reach show()."""
+    html = open(LAB_HTML, encoding="utf-8").read()
+    js = html.split("<script>", 1)[1].rsplit("</script>", 1)[0]
+    for bad in ('show("error", e.message)', 'show("error",e.message)',
+                'show("error", err.message)', '"error", e.message'):
+        assert bad not in js, f"raw exception message reaches the DOM: {bad!r}"
+    # every show("error", ...) call must be routed through publicMessage()
+    import re
+    for call in re.findall(r'show\(\s*"error"\s*,\s*([^)]+)\)', js):
+        assert "publicMessage" in call, f'show("error", {call.strip()}) is unguarded'
+    assert "PUBLIC_FALLBACK" in js
+    assert "The page could not display this research result." in js
+
+
+def test_json_parsing_is_guarded():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    assert "try{ return await r.json(); }" in js
+    assert "parse_error" in js
+    assert "The research data could not be read." in js
+
+
+def test_console_diagnostics_are_identifier_only():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    diag = js.split("function diag(", 1)[1].split("\n}", 1)[0]
+    for allowed in ("route", "status", "code", "requestId"):
+        assert allowed in diag
+    for banned in ("message", "detail", "body", "text"):
+        assert banned not in diag, f"diag() may leak {banned!r}"
+
+
+def test_public_safe_is_a_whitelist_not_a_blacklist():
+    """A new throw site is safe by default: publicMessage falls back unless the
+    error was explicitly marked."""
+    js = open(LAB_HTML, encoding="utf-8").read()
+    fn = js.split("function publicMessage(e)", 1)[1].split("\n}", 1)[0]
+    assert "publicSafe === true" in fn
+    assert "PUBLIC_FALLBACK" in fn
+
+
+# ── survivor presentation reaches the reader ───────────────────────────────
+
+def test_completion_share_is_a_visible_card_row():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    assert 'kv("Paths completing within 24 months", pct(a.completed_share,1))' in js
+    assert "a.incomplete_recovery_rate>0" in js
+
+
+def test_settlement_table_qualifies_the_duration_cell_per_row():
+    """A single unconditional column header cannot be right for a table whose
+    rows are conditioned differently."""
+    js = open(LAB_HTML, encoding="utf-8").read()
+    assert "completed paths only" in js
+    assert "tdRaw(durCell)" in js
+    assert "a.censored" in js.split("function renderDuration", 1)[1].split("\n}", 1)[0]
+    assert "Completed in 24 mo" in js       # explicit completion column
+
+
+def test_arm_disclosure_carries_the_api_supplied_basis():
+    js = open(LAB_HTML, encoding="utf-8").read()
+    assert "a.duration_basis" in js
+    assert "How these averages are computed" in js
+
+
+@pytest.mark.parametrize("scenario", ["closure_m13", "temp_closure"])
+def test_censored_scenarios_do_not_claim_a_pure_pricing_effect(scenario):
+    d = client.get(f"/api/lab/comparison/{scenario}").json()
+    by = {a["id"]: a for a in d["arms"]}
+    if not (by["RBF-EQ"]["censored"] or by["RBF-ILL"]["censored"]):
+        pytest.skip("fixture is not censored")
+    txt = " ".join(f["text"] for f in d["findings"])
+    assert "cannot be compared on rate alone" in txt
+    assert "not a like-for-like price comparison" in txt
+    assert "property of the chosen cap factor" not in txt, \
+        "pricing claim made across differently-selected subsets"
+
+
+def test_closure_m13_discloses_both_completion_shares_in_the_finding():
+    """Pinned: cost-matched completes 92.4%, illustrative 23.8%. The page must
+    not compare their survivor rates without saying so."""
+    d = client.get("/api/lab/comparison/closure_m13").json()
+    by = {a["id"]: a for a in d["arms"]}
+    assert round(by["RBF-EQ"]["completed_share"], 3) == 0.924
+    assert round(by["RBF-ILL"]["completed_share"], 3) == 0.238
+    txt = " ".join(f["text"] for f in d["findings"])
+    assert "92.4%" in txt and "23.8%" in txt
+    assert f"{by['RBF-EQ']['effective_apr']:.2%}" in txt
+    assert f"{by['RBF-ILL']['effective_apr']:.2%}" in txt
+
+
+def test_uncensored_scenarios_keep_the_pricing_finding():
+    d = client.get("/api/lab/comparison/stable").json()
+    txt = " ".join(f["text"] for f in d["findings"])
+    assert "property of the chosen cap factor" in txt
+    assert "Every path completed under both" in txt
+    assert "cannot be compared on rate alone" not in txt
+
+
+def test_fully_incomplete_scenario_keeps_its_wording():
+    d = client.get("/api/lab/comparison/closure_m7").json()
+    for a in d["arms"]:
+        if a["incomplete_recovery_rate"] == 1.0:
+            assert a["effective_apr"] is None and a["duration_months_mean"] is None
+    txt = " ".join(f["text"] for f in d["findings"])
+    assert "cannot be compared on rate alone" not in txt
+    assert "undefined" in txt.lower()

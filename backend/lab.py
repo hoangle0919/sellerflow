@@ -659,16 +659,39 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                 "source": ill["source_artifact"]})
 
     if eq and ill and eq["effective_apr"] is not None and ill["effective_apr"] is not None:
-        out.append({
-            "classification": "sensitivity_result",
-            "text": (f"Price and structure are separable. The same revenue-share "
-                     f"structure priced at the reference-path cost-matched factor "
-                     f"shows a mean simulated rate of {eq['effective_apr']:.2%} in "
-                     f"the {label} scenario, against {ill['effective_apr']:.2%} at "
-                     f"the illustrative 1.20 factor. The higher figure is a "
-                     f"property of the chosen cap factor, not of revenue-based "
-                     f"repayment."),
-            "source": eq["source_artifact"]})
+        if eq["censored"] or ill["censored"]:
+            # The two rates are averaged over DIFFERENTLY SELECTED subsets of
+            # paths. At closure_m13 the cost-matched arm completes 92.4% and the
+            # illustrative arm 23.8%, so the gap between their survivor rates
+            # mixes the cap factor with selection. Calling that a pricing effect
+            # would be the survivorship error stated as a finding.
+            out.append({
+                "classification": "simulation_result",
+                "text": (f"In the {label} scenario these two revenue-based arms "
+                         f"cannot be compared on rate alone. The cost-matched arm "
+                         f"shows {eq['effective_apr']:.2%}, averaged over the "
+                         f"{eq['completed_share']:.1%} of its paths that reached "
+                         f"the repayment target; the illustrative arm shows "
+                         f"{ill['effective_apr']:.2%} over the "
+                         f"{ill['completed_share']:.1%} of its paths that did. "
+                         f"Those are different subsets, so the difference between "
+                         f"them combines the cap factor with differing selection "
+                         f"and is not a like-for-like price comparison. The "
+                         f"pricing claim holds only where both arms complete."),
+                "source": eq["source_artifact"]})
+        else:
+            out.append({
+                "classification": "sensitivity_result",
+                "text": (f"Price and structure are separable. The same "
+                         f"revenue-share structure priced at the reference-path "
+                         f"cost-matched factor shows a mean simulated rate of "
+                         f"{eq['effective_apr']:.2%} in the {label} scenario, "
+                         f"against {ill['effective_apr']:.2%} at the illustrative "
+                         f"1.20 factor. Every path completed under both, so this "
+                         f"is a like-for-like comparison: the higher figure is a "
+                         f"property of the chosen cap factor, not of "
+                         f"revenue-based repayment."),
+                "source": eq["source_artifact"]})
     elif ill and ill["effective_apr"] is None:
         out.append({
             "classification": "mathematical_property",

@@ -187,3 +187,96 @@ def test_footer_survives_a_missing_spec_version(server, browser):
     assert "under ." not in foot, "empty spec_version blanked the footer"
     assert "the frozen methodology specification" in foot
     pg.close()
+
+
+def test_malformed_200_response_leaks_nothing(server, browser):
+    """A 200 can still carry unparseable bytes. JSON.parse's SyntaxError message
+    quotes those bytes verbatim, so it must never surface."""
+    pg = browser.new_page(viewport={"width": 1280, "height": 900})
+    logs = []
+    pg.on("console", lambda m: logs.append(f"{m.type}:{m.text}"))
+    pg.on("pageerror", lambda e: logs.append(f"pageerror:{e}"))
+    pg.route("**/api/lab/manifest", lambda r: r.fulfill(
+        status=200, content_type="application/json",
+        body="{ not json at all " + SECRET + " }"))
+    pg.goto(f"{server}/lab", wait_until="networkidle")
+    pg.wait_for_timeout(800)
+
+    dom = pg.content()
+    joined = " ".join(logs)
+    for token in ("hunter2", "db.py", "/srv/app", "not json at all"):
+        assert token not in dom, f"{token!r} leaked into the DOM"
+        assert token not in joined, f"{token!r} leaked into the console"
+
+    assert pg.locator("#st-error").is_visible()
+    shown = pg.inner_text("#err-detail")
+    assert shown in ("The research data could not be read.",
+                     "The page could not display this research result."), shown
+    pg.close()
+
+
+def test_render_exception_leaks_nothing(server, browser):
+    """A thrown Error from a render path carries a message we did not write.
+    Forced here by making a render helper throw with the secret in it."""
+    pg = browser.new_page(viewport={"width": 1280, "height": 900})
+    logs = []
+    pg.on("console", lambda m: logs.append(f"{m.type}:{m.text}"))
+    pg.on("pageerror", lambda e: logs.append(f"pageerror:{e}"))
+    pg.add_init_script(
+        "window.addEventListener('DOMContentLoaded',function(){"
+        "  var t=setInterval(function(){"
+        "    if(typeof renderArms==='function'){clearInterval(t);"
+        "      window.renderArms=function(){throw new Error('render blew up " + SECRET + "');};}"
+        "  },10);});")
+    pg.goto(f"{server}/lab", wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+
+    dom = pg.content()
+    # pageerror/console may legitimately record an uncaught throw; what must not
+    # happen is the message reaching the rendered page.
+    for token in ("hunter2", "db.py", "/srv/app", "render blew up"):
+        assert token not in dom, f"{token!r} leaked into the DOM"
+
+    if pg.locator("#st-error").is_visible():
+        assert pg.inner_text("#err-detail") == \
+            "The page could not display this research result."
+    pg.close()
+
+
+def test_censored_arm_shows_completion_share_and_qualifier(server, browser):
+    """closure_m13: cost-matched completes 92.4%, illustrative 23.8%. Both the
+    card row and the per-row table qualifier must be visible."""
+    pg = browser.new_page(viewport={"width": 1440, "height": 1000})
+    pg.goto(f"{server}/lab", wait_until="networkidle")
+    pg.wait_for_timeout(700)
+    pg.evaluate("document.querySelector('#scn-groups button[data-k=closure_m13]').click()")
+    pg.wait_for_timeout(900)
+
+    arms_text = pg.inner_text("#arms")
+    assert "Paths completing within 24 months" in arms_text
+    assert "92.4%" in arms_text and "23.8%" in arms_text
+    assert "Mean APR among completed paths" in arms_text
+    assert "Mean duration among completed paths" in arms_text
+
+    table = pg.inner_text("#dur-table")
+    assert "completed paths only" in table
+    # the header is CSS-uppercased, so compare case-insensitively
+    assert "completed in 24 mo" in table.lower()
+
+    findings = pg.inner_text("#findings")
+    assert "cannot be compared on rate alone" in findings
+    assert "92.4%" in findings and "23.8%" in findings
+    pg.close()
+
+
+def test_uncensored_arm_shows_no_spurious_qualifier(server, browser):
+    pg = browser.new_page(viewport={"width": 1440, "height": 1000})
+    pg.goto(f"{server}/lab", wait_until="networkidle")
+    pg.wait_for_timeout(700)
+    pg.evaluate("document.querySelector('#scn-groups button[data-k=stable]').click()")
+    pg.wait_for_timeout(800)
+    arms_text = pg.inner_text("#arms")
+    assert "among completed paths" not in arms_text
+    assert "Paths completing within 24 months" not in arms_text
+    assert "completed paths only" not in pg.inner_text("#dur-table")
+    pg.close()

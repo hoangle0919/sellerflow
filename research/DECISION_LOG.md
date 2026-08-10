@@ -166,6 +166,27 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-036 — Closing two partially-implemented acceptance criteria
+**Date:** 2026-08-09
+**Raised by:** the final-gate audit, re-verifying D-035.
+**Status:** APPLIED. Lab functionality frozen. Remaining Lab work is real Safari/iPhone verification only.
+
+**1. Raw exception text could still reach the page.** D-035 closed the non-2xx body leak but two paths remained: a **200 carrying malformed JSON** — whose `SyntaxError` message quotes the offending bytes — and any **render-time exception**, both of which fell through to `show("error", e.message)`.
+
+Errors are now split by provenance. Only errors this code constructs carry `publicSafe: true`; everything else is replaced with fixed copy, *"The page could not display this research result."* The flag is a **whitelist**, so a future `throw` is safe by default rather than safe only if someone remembers. `r.json()` is guarded and parse failures become their own fixed message. Console diagnostics carry route, status, a sanitized code, and a request id from a response *header* — never response content, never an exception message. A source test asserts every `show("error", …)` call routes through `publicMessage()`; browser tests inject `password=hunter2 /srv/app/db.py` through a malformed 200 and through a forced render exception and assert it reaches neither the DOM nor captured console output.
+
+**2. Survivor conditioning was in the API but not in front of the reader.** The card labels changed in D-035; the settlement table still carried one unconditional "Mean duration" header across rows conditioned differently, and the pricing finding still described the rate gap as a cap-factor effect.
+
+At `closure_m13` the cost-matched arm completes **92.4%** of paths and the illustrative arm **23.8%**. Their survivor rates are averages over differently selected subsets, so the difference between them mixes price with selection. Describing it as a pricing effect would be the survivorship error restated as a finding — in the scenario added to demonstrate honest failure.
+
+Now: each partially censored card shows **"Paths completing within 24 months: X%"**; the settlement table qualifies the duration cell **per row** with *"completed paths only"* and adds an explicit completion column; the arm disclosure carries the API's basis text. The pricing finding branches — where both arms complete it stands and says so explicitly; where either is censored it is replaced by a statement reporting **both** survivor rates with **both** completion shares and noting that differently selected subsets prevent a like-for-like comparison. `temp_closure` is pinned as the lightly censored case; `closure_m7` keeps "Undefined — repayment incomplete".
+
+**Consequence:** backend 283 → 295, browser tests 5 → 9 with no skips. No file under `research/results/` changed; all four canonical checksums byte-identical.
+
+**Still open:** Safari and iPhone remain unverified — no claim is made. The survivor conditioning is a property of the registered artifacts (`duration_mean` and `apr_mean` exclude non-completing paths in **every** artifact, `baseline_v2` included); whether to publish a censoring-aware duration is a methods decision for the paper, not a display change.
+
+---
+
 ### D-035 — Final-gate corrections: leakage, atomicity, and a survivor-statistic mislabel
 **Date:** 2026-08-09
 **Raised by:** an independent final-gate audit that reproduced 270 backend tests, 629 simulation tests and all four canonical checksums from a clean checkout, then found four issues the suite could not.
