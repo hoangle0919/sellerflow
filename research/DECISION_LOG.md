@@ -166,6 +166,159 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-036 — Closing two partially-implemented acceptance criteria
+**Date:** 2026-08-09
+**Raised by:** the final-gate audit, re-verifying D-035.
+**Status:** APPLIED. Lab functionality frozen. Remaining Lab work is real Safari/iPhone verification only.
+
+**1. Raw exception text could still reach the page.** D-035 closed the non-2xx body leak but two paths remained: a **200 carrying malformed JSON** — whose `SyntaxError` message quotes the offending bytes — and any **render-time exception**, both of which fell through to `show("error", e.message)`.
+
+Errors are now split by provenance. Only errors this code constructs carry `publicSafe: true`; everything else is replaced with fixed copy, *"The page could not display this research result."* The flag is a **whitelist**, so a future `throw` is safe by default rather than safe only if someone remembers. `r.json()` is guarded and parse failures become their own fixed message. Console diagnostics carry route, status, a sanitized code, and a request id from a response *header* — never response content, never an exception message. A source test asserts every `show("error", …)` call routes through `publicMessage()`; browser tests inject `password=hunter2 /srv/app/db.py` through a malformed 200 and through a forced render exception and assert it reaches neither the DOM nor captured console output.
+
+**2. Survivor conditioning was in the API but not in front of the reader.** The card labels changed in D-035; the settlement table still carried one unconditional "Mean duration" header across rows conditioned differently, and the pricing finding still described the rate gap as a cap-factor effect.
+
+At `closure_m13` the cost-matched arm completes **92.4%** of paths and the illustrative arm **23.8%**. Their survivor rates are averages over differently selected subsets, so the difference between them mixes price with selection. Describing it as a pricing effect would be the survivorship error restated as a finding — in the scenario added to demonstrate honest failure.
+
+Now: each partially censored card shows **"Paths completing within 24 months: X%"**; the settlement table qualifies the duration cell **per row** with *"completed paths only"* and adds an explicit completion column; the arm disclosure carries the API's basis text. The pricing finding branches — where both arms complete it stands and says so explicitly; where either is censored it is replaced by a statement reporting **both** survivor rates with **both** completion shares and noting that differently selected subsets prevent a like-for-like comparison. `temp_closure` is pinned as the lightly censored case; `closure_m7` keeps "Undefined — repayment incomplete".
+
+**Consequence:** backend 283 → 295, browser tests 5 → 9 with no skips. No file under `research/results/` changed; all four canonical checksums byte-identical.
+
+**Still open:** Safari and iPhone remain unverified — no claim is made. The survivor conditioning is a property of the registered artifacts (`duration_mean` and `apr_mean` exclude non-completing paths in **every** artifact, `baseline_v2` included); whether to publish a censoring-aware duration is a methods decision for the paper, not a display change.
+
+---
+
+### D-035 — Final-gate corrections: leakage, atomicity, and a survivor-statistic mislabel
+**Date:** 2026-08-09
+**Raised by:** an independent final-gate audit that reproduced 270 backend tests, 629 simulation tests and all four canonical checksums from a clean checkout, then found four issues the suite could not.
+**Status:** APPLIED. Lab functionality remains frozen.
+
+**1. Error sanitization was incomplete — the leak had been moved, not removed.** D-034 stopped rendering the server's `detail` string but still parsed it and printed it verbatim with `console.warn`. Console output is readable by anyone with devtools open and is captured wholesale by error-reporting SDKs, so an internal path or credential in an exception message still reached the browser. The response body is now **never read** on the error path. Diagnostics carry the route, the HTTP status, and a request id taken from a response *header* if the server chose to expose one — never response content. Verified by injecting `password=hunter2 /srv/app/db.py` and asserting it appears in neither the DOM nor captured console output.
+
+**2. Scenario selection was not atomic.** `select()` called `markSelected()` before its request resolved and accepted responses in arrival order, so a slow request for A landing after a fast one for B left B's pill above A's figures. Every request now carries a monotonically increasing token and a superseded response is discarded before touching a single DOM node; the pill moves *with* the data rather than ahead of it. A browser test holds request A, lets B resolve, then releases A, and asserts the page is entirely B.
+
+**3. The page became "ready" before it had anything to show.** `show("ready")` ran before the first comparison request, briefly presenting an empty research view as a result. Ready is now reached only after the first comparison has loaded **and** rendered; a failed initial comparison shows the sanitized error or unavailable state instead of a blank page.
+
+**4. Duration and rate were survivor statistics presented as unconditional means.** This is the serious one. `engine.run_scenario` averages duration over `[r.duration for r in rs if r.duration is not None]` and the rate over paths where an IRR exists — both silently exclude paths that never reached the repayment target.
+
+At `closure_m13` the illustrative arm displayed **11.99 months and 30.33% APR** while **76.2% of paths never completed**. Those figures describe the surviving 23.8%. Presenting them unqualified is the same error class as the withdrawn AUC: a number labelled as something it is not — and it appeared in precisely the scenario added to show honest failure.
+
+Wherever `0 < incomplete_recovery_rate < 1`, the fields are now labelled **"Mean APR among completed paths"** and **"Mean duration among completed paths"**, with a basis naming the share included and stating that the excluded paths are dropped rather than counted as long or expensive. The metric definitions carry the conditioning; a caveat states it in the limitations panel. Where every path completes, the plain labels remain and the basis says no path is excluded. Where none completes, "Undefined — repayment incomplete" and "Not completed within 24 months" stand. Pinned by test at `closure_m13` for both revenue-based arms and at `temp_closure`.
+
+**5. The footer fallback could be overwritten with nothing.** `renderProvenance()` assigned `spec_version || ""`, so a blank or malformed value replaced good default copy with an empty string and reproduced *"Simulation output under ."* It now only overwrites when the value is a non-empty string.
+
+**What the existing tests could not catch, and why.** The suite asserted that served values matched the artifact — which they did. It never asked what the artifact's values *mean*, so a correctly-transcribed survivor statistic passed every check. Two of these four were timing- or console-dependent and invisible to static inspection; `backend/tests/test_lab_browser.py` now covers them with a real event loop.
+
+**Open, deliberately not changed here.** The conditioning is a property of the registered artifacts, not of the Lab — `duration_mean` and `apr_mean` are survivor statistics in **every** artifact including `baseline_v2`, and any duration or rate quoted from a scenario with incomplete recovery carries it. Whether the artifacts should additionally report an unconditional or censoring-aware duration is a research question for the paper. Changing a registered result to improve a display would be the wrong order.
+
+**Consequence:** backend tests 270 → 283, plus 5 browser tests. No research artifact modified; all four canonical checksums byte-identical.
+
+---
+
+### D-034 — Simulation Lab closing fixes; functionality now frozen
+**Date:** 2026-08-08
+**Status:** APPLIED. **Lab functionality is frozen after this entry.** The only remaining Lab work is real Safari/iPhone verification and genuine browser-specific fixes.
+
+Four visible defects, all spotted by Hoang in the delivered screenshots rather than by any test — which is itself the finding: the suite proved the numbers were right and said nothing about whether they were legible.
+
+**1. Clipped axis labels.** A fixed 206 px label gutter silently truncated the longer revenue-based labels, which measured ~244 px. SVG text draws past `x=0` rather than wrapping, so the overflow was invisible in code review and only showed on screen. The right-hand value reserve had the same defect: `10.16 mo` overran a fixed 60 px by 4 px at full-length bars. Both gutters are now **measured at runtime** with a canvas metric against the actual font, and the axis labels were shortened at source. Verified: **0 clipped text nodes across 8 widths × 4 scenarios**, from 360 px to 1440 px.
+
+**2. Malformed footer in non-ready states.** The footer read *"Simulation output under ."* whenever the manifest failed, because the spec version is injected by `renderProvenance()` — which never runs on the error path. `#foot-spec` now ships with sensible default copy that the manifest overwrites when it arrives.
+
+**3. Raw server text rendered to the user.** `getJSON` echoed the response body's `detail` straight into the error panel. A 500 from a real deployment could therefore print an internal path, an upstream driver message, or a connection string. User-facing copy is now selected **from the status code**; the detail is written to the console for a developer and never enters the DOM. Verified with an injected `psycopg2.OperationalError at /srv/app/db.py:88 password=hunter2` — absent from the DOM, present in the console. A network failure now has its own message rather than falling through to a generic one.
+
+**4. Amortizing loan described by what it lacks.** The card read *"Repayment target: no cap"* — true, and useless. It now reports **"Scheduled total repayment: 203,529,584 ₫"** with the basis stated, because that is the number a reader can actually use. Each arm carries a `repayment_target` object naming its own label, amount and basis, so the annuity and the capped contracts are described in their own terms rather than one being rendered as a deficient version of the other.
+
+**Closure wording**, as requested: an incomplete contract now reads **"Undefined — repayment incomplete"** for the rate and **"Not completed within 24 months"** for duration, instead of an em-dash that read as missing data rather than a finding.
+
+**Consequence:** backend tests 263 → 270. No research artifact modified; all four canonical checksums verified byte-identical.
+
+---
+
+### D-033 — Simulation Lab refinement pass after external design audit
+**Date:** 2026-08-08
+**Trigger:** an independent Dieter Rams audit of the rendered surface scored the Lab **21/30 — REFINE, not redesign**, with principles 8 (thorough) and 10 (as little design as possible) at 1/3.
+**Status:** APPLIED on `simulation-lab`. Pre-refinement checkpoint preserved at `d11035d`.
+
+**Terminology and honesty (audit principles 4 and 6, the highest-priority finding).**
+
+| Was | Now | Why |
+|---|---|---|
+| "Revenue-based — equal effective cost" | **"Reference-path cost-matched RBF"** | The displayed APRs were *not* equal. The factor was solved on the reference path; realised rates differ because duration moves with revenue. The title claimed a result the numbers beneath it contradicted. |
+| "Effective APR" | **"Mean simulated APR"**, with `apr_basis` on every arm | Reference-path and mean-simulated rates are different quantities; the page showed one and named the other. |
+| "Contractual cap" for all arms | **"Repayment target"**, per-arm denominator declared | The amortizing loan has no cap. It was being shown the RBF contract's ×1.20 cap while displaying its own smaller total. |
+| "Flexibility for the seller is slower recovery" | Conditional on the selected scenario, with the direction computed per scenario | The universal phrasing contradicted the project's own caveat that direction depends on the revenue path. |
+| Burden thresholds unqualified | Marked **illustrative reporting bands, not validated hardship cutoffs** | No evidence exists that crossing 15% causes distress. |
+| "Lower is easier to carry" | Removed; replaced with an explicit statement that burden is measured against revenue, not against what the seller retains | Margins, operating costs, reserves and other debts are outside the model. The phrase claimed affordability the metric cannot support. |
+
+A **glossary** now defines cap factor, remittance, effective APR, 90th percentile, Monte Carlo interval, canonical artifact and reference path in place.
+
+**Closure exposed (audit principle 2).** Every scenario previously selectable repaid in full, so a reader could reasonably infer that revenue-based financing always recovers. It does not. `run_closure_baseline.py` registers three closure/zero-revenue scenarios at both price tracks (D-032 artifacts). At month-7 closure the revenue-based arm shows **100% incomplete recovery** and **undefined** effective rate — when revenue stops, no discount rate equates the payment stream to the advance, and the study reports that rather than substituting a number (spec §13, E-3). This cross-validates `validation_v1`'s independent boundary probe exactly.
+
+**Under-reporting surfaced — but deliberately NOT as a scenario.** The audit asked for it "as a selectable registered scenario". It is an ω sweep on a fixed revenue shape, not a revenue path; listing it beside "severe downturn" would mislabel it. It has its own panel, which states why it is not a scenario.
+
+**Compression (audit principle 10).** The audited mobile page was ~9,862 px. This pass **added** three scenarios, an under-reporting panel, a glossary and a provenance table, and the mobile page is now **8,868 px** — 10% shorter with materially more content. Achieved by a sticky summary with jump navigation, three provenance blocks consolidated to one, three identical legends consolidated to one, secondary panels folded on narrow viewports only, and tightened mobile chart metrics. **Limitations, assumptions and every caveat remain expanded at all widths** — collapsing those while promoting favourable findings is the anti-pattern the brief names, and a test asserts the caveat list is not nested inside a closed disclosure.
+
+The fold defaults are **closed in markup and opened by script on wide viewports**, so the compact layout is what a phone — or a browser where the script fails — gets by default.
+
+**States (audit principle 8, scored 1/3).** Loading, API-error with working retry, and artifacts-unavailable are implemented, screenshotted and asserted. Keyboard traversal verified: skip link → 8 jump links → 13 scenario buttons, focus visible at every stop, Enter activates and updates the summary. The settlement table shows a scroll affordance only when it actually overflows.
+
+**Palette (audit principle 3).** Red-versus-green read as *fixed = bad, revenue-based = good* before any copy. Replaced with an Okabe–Ito-derived **categorical** palette. Measured: all 13 text pairs pass WCAG AA (5.14:1 to 17.40:1); two bar fills initially failed the 3:1 non-text threshold and were darkened until all four pass. Every bar also carries its printed value, so colour is never the sole channel.
+
+**Weight, measured rather than estimated (audit principle 9).** `lab.html` 37,165 B (11,575 B gzipped); inline JS 15,893 B (5,337 B gzipped); **zero** third-party bytes. Cold load: 8 requests, 197,975 B — of which 138,856 B is three self-hosted fonts. API payloads: manifest 5,327 B, scenarios 2,277 B, comparison 12,525 B, under-reporting 1,825 B. Localhost headless Chromium: DOM interactive 38 ms, FCP 52 ms, load 45 ms.
+
+**Not done, and why.** Real Safari/iOS remains **unverified**. Playwright's WebKit needs GTK4 and 13 other system libraries that cannot be installed in the verification sandbox (no root; the package mirror is proxy-blocked). One real WebKit risk was fixed blind: SVGs now carry explicit `width`/`height` attributes as well as a `viewBox`, because WebKit does not always derive an intrinsic height from the viewBox alone and collapses the element. **This still needs one pass on real Safari and a real iPhone.**
+
+**Regression checks on the three principles that scored 3** are now tests: one scenario choice still updates every section; no modal, autoplay, or conversion CTA; serif/sans/mono roles preserved with no gradients, backdrop filters or keyframe animation.
+
+**Consequence:** backend tests 245 → 263. No research artifact modified; `baseline_v2` and `baseline_equalcost_v1` verified byte-identical.
+
+---
+
+### D-032 — Closure / zero-revenue baselines registered
+**Date:** 2026-08-08
+
+Three scenarios — permanent closure at month 7 and month 13, and a three-month temporary closure — run at both registered cap factors, using the unmodified generator, same 500 paths and same base seed. `run_baseline.py` and `run_equal_cost_baseline.py` are untouched; their bytes sit inside their own artifacts' generator fingerprints, so shared constants are imported rather than retyped.
+
+The fixed benchmark is unaffected by the shock because `reference_base_path` is flat, shock-free R0 by construction (spec §7.1). A contract is priced at origination; a closure in month 7 cannot retro-price it. That is what keeps the paired comparison valid rather than circular.
+
+| Artifact | SHA-256 |
+|---|---|
+| `baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` |
+| `baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` |
+
+At month-7 closure the revenue-based arm reaches 44.3% recovery by month 24 at the illustrative factor and 48.6% at the cost-matched factor, with 100% incomplete recovery in both. `DERIVATIONS.md` P7a already established closure as absorbing; this is the matching empirical panel.
+
+---
+
+### D-031 — Equal-effective-cost baseline registered; Simulation Lab renders from artifacts
+**Date:** 2026-08-07
+**Status:** APPLIED, on `simulation-lab`.
+
+**The gap.** `baseline_v2` prices every scenario at the **illustrative** f = 1.20. The equal-effective-cost factor f\* = 1.0945 existed only as a *pricing* result on the single deterministic reference path (`validation_v1.pricing.equal_cost`). Showing seller burden and provider recovery for an equal-cost arm therefore had no artifact behind it, and charting a reference-path pricing number beside 500-path scenario aggregates would compare two different objects — the exact error this project exists to avoid.
+
+**Decision.** Add `run_equal_cost_baseline.py`, producing `baseline_equalcost_v1_canonical.json` (SHA-256 `6f9c71b1…52da68e7`). Same ten scenarios, same 500 paths, same base seed `20260803`, same generator. **The only difference is the cap factor.** Spec §12 already anticipates swept parameters and D-015 established price as separable from structure, so this is in-scope sensitivity, not a new model.
+
+**`run_baseline.py` was NOT edited.** Its bytes are inside `baseline_v2`'s `generator_fingerprint`; editing it would invalidate a registered checksum. The new script *imports* `SCENARIOS`, `N_PATHS` and `R0` from it rather than retyping them, so the two runs cannot silently diverge. `baseline_v2` verified byte-identical after the change: `264d319b…ac5a7849`.
+
+**The Simulation Lab** (`backend/lab.py`, `frontend/lab.html`, `/lab`, `/api/lab/*`) renders from these artifacts. Enforced by test, not by intention:
+
+- Every displayed metric is asserted equal to the value in the canonical file it names.
+- The page is scanned for research literals; **a first draft failed it**, having written the equal-cost factor into a chart label as a string. It now reads the factor from the API.
+- Narrative findings must quote the same numbers the charts show, so a sentence cannot drift from the bar beside it.
+- The page is scanned for financial arithmetic. It scales a value to a pixel width; it computes no money, cap, duration or APR.
+- Artifact checksums are displayed and asserted to match the files on disk.
+
+**Two corrections the build surfaced:**
+
+1. **FIX-B was being shown the RBF cap.** The amortizing benchmark is an annuity with no cap factor and no repayment cap, but it inherited `terms.f = 1.20` and a 222,000,000 cap from the artifact's contract block — displayed directly beside its own smaller total of 203,529,584. It now reports no cap, with the basis stated.
+2. **Charts were illegible on a phone.** A fixed 760-unit viewBox squeezed into 326 px rendered 12-unit text at **5.15 px**, measured. The viewBox is now sized to the container and the layout switches to labels-above-bars below 560 px; text renders 12–13 px at every width, re-measured across desktop, tablet and mobile.
+
+**Integrity surfaces asserted absent:** the withdrawn AUC (by metric name and by exact value — a naive substring check is wrong, since recovery ratio 12/13 is 0.923076…), RBF-G in any form (D-018), any claim of observed Vietnamese seller outcomes, and the phrase "confidence interval". Asserted present: the by-construction caveat on RBF burden, "incomplete recovery is not a default rate", the fixed arms' unmodelled default risk, that recovery direction is not universal, and that constant-revenue schedules are illustrative projections.
+
+**Consequence:** backend tests 196 → 229. Research artifacts and `rbf_sim` code unchanged.
+
+---
+
 ### D-030 — Product monetary policy corrected: Decimal, integer đồng, ROUND_HALF_UP
 **Date:** 2026-08-07
 **Approved by:** Hoang, on the D-029 diagnosis.
