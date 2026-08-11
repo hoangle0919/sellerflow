@@ -147,7 +147,7 @@ Breakpoint scan, 36,000 month-observations under strong seasonality + 3%/month g
 | 0.80 | 0.50 | reachable | 3,844 | 6,009 |
 | 1.00 | 0.50 | reachable | 9,564 | 6,009 |
 
-**Decision: demote RBF-G from a headline arm to a documented design-flaw finding.** It is retained in the code and the registry as a null result, and is **not** retuned to make it bind — that would be tuning after seeing results. The floor requires `p_min_mult > hardship` to be reachable at all, which is a coherence condition the original design violated.
+**Decision: demote RBF-G from a headline arm to a documented design-flaw finding.** It is retained in the code and the registry as a **floor-only null / design flaw** — the hardship floor is dead, the ceiling is live — and is **not** retuned to make it bind — that would be tuning after seeing results. The floor requires `p_min_mult > hardship` to be reachable at all, which is a coherence condition the original design violated.
 
 **Product implication.** ~~As specified, the guardrail feature is decoration.~~ → **corrected (D-044): only the hardship FLOOR is dead.** The floor never activates on any path (0 of 36,000 month-observations). The **ceiling** `p_max = 2·r·R₀` is live — it binds 6,009 of 36,000 in the breakpoint scan and changes results in **6 of 10** baseline scenarios (mean APR in 6, mean burden in 6, recovery ratio in 3, mean duration in 1), below display precision but present. Calling the whole guardrail design decoration overstates a real finding about one of its two rules. If it ships, the floor multiplier must exceed the hardship threshold, and the two parameters must be validated jointly.
 

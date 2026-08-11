@@ -521,10 +521,12 @@ METRIC_DEFINITIONS = {
         "caveat": "These thresholds are ILLUSTRATIVE reporting bands chosen for "
                   "this study. They are not validated hardship cutoffs and no "
                   "claim is made that crossing one causes distress. For a "
-                  "revenue share the count is also constant BY CONSTRUCTION in "
-                  "these scenarios — the remittance is a fixed share of net "
-                  "sales, and the burden shown (payment ÷ GMV) moves only with "
-                  "the return rate. The informative side is the fixed arm.",
+                  "revenue share the count is constant in these scenarios, but "
+                  "NOT by construction: the remittance is a fixed share of net "
+                  "sales while this count is measured against payment ÷ GMV, so "
+                  "it can move when the return rate moves. It is constant only "
+                  "while the net-sales/GMV ratio holds fixed. The informative "
+                  "side is the fixed arm.",
     },
     "duration_months_mean": {
         "label": "Repayment duration",
@@ -771,11 +773,15 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
 
     out.append({
         "classification": "product_implication",
-        "text": "If a financier wants payment burden to stay flat through a "
-                "downturn, a revenue share achieves it, and the price is a "
-                "longer and more variable recovery period. Which side of that "
-                "trade is worth taking is a commercial judgement this study does "
-                "not make.",
+        "text": "A revenue share makes the CONTRACTUAL remittance a fixed share "
+                "of net sales, so the contractual burden does not rise when "
+                "revenue falls. The burden displayed here uses a different "
+                "denominator — payment ÷ GMV — so it is constant only while the "
+                "net-sales/GMV ratio is fixed, and it varies when returns vary. "
+                "The price of the revenue-contingent structure is a longer and "
+                "more variable recovery period. Which side of that trade is "
+                "worth taking is a commercial judgement this study does not "
+                "make.",
         "source": "author"})
     out.append({
         "classification": "open_real_world_question",

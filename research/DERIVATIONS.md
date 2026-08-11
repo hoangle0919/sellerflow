@@ -178,7 +178,7 @@ This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan
 
 **Proof.** Immediate from P3 applied at `H`, together with monotonicity of `S_k`. ∎
 
-**This is the complete characterisation.** Everything below is a special case of it.
+**This is the complete characterisation, in its binding form:** completion ⇔ ∃ finite `t ≤ H` with `S_t ≥ Θ`. For a **finite** `H` it reduces to `S_H ≥ Θ`; for an unbounded lifetime it does not (D-045). Everything below is a special case of it.
 
 ### Distinct causes of incomplete recovery — examples, not an exhaustive list
 
@@ -255,7 +255,7 @@ Monotonically decreasing, never zero.
 
 ### Two completion concepts — both legitimate, and distinct
 
-The 1-VND-scale tolerance in the engine does **not** make the boundary a bug. It creates a second, separately meaningful notion of completion. The research states both.
+A 1-VND-scale settlement tolerance does **not** make the boundary a bug. It creates a second, separately meaningful notion of completion, and the research states both. **This is a hypothetical declared-policy parameter, not current engine behaviour (D-045):** since A-7/D-024 the operational layer settles in integer đồng with `ε = 0` by construction. `FLOAT_GUARD_VND = 1e-6` is analytical representation-error protection, not a settlement tolerance, and must never be quoted as one.
 
 | Concept | Definition | At `ρ = ρ*` |
 |---|---|---|
@@ -267,7 +267,7 @@ Operational completion month at `ρ = ρ*`, by tolerance:
 | `ε` (VND) | First month reported complete |
 |---|---|
 | 1.00 | 213 |
-| 0.50 *(engine default)* | **221** |
+| 0.50 *(hypothetical policy)* | **221** |
 | 0.01 | 266 |
 | 1e-6 | 373 |
 | 0 (exact) | never |
@@ -278,7 +278,7 @@ A lender settling to the nearest đồng would genuinely regard the balance as d
 >
 > **⚠️ In this codebase it is currently an accident.** See D-023: the tolerance is `0.5` in `metrics.py`/`contracts.py` but `1.0` in the test module, appears nowhere in the frozen specification, and is ~8.4 × 10⁶ times larger than the floating-point error it guards against (measured worst-case deviation from exact rational arithmetic: **5.96 × 10⁻⁸ VND**). It is therefore classified as a floating-point workaround, and an integer-VND correction is **proposed but not applied** — changing financial behaviour requires approval, and D-023 records that it changes **zero** registered results.
 
-**Reported values must name their concept.** "Completion at month 221" without qualification is ambiguous; the paper writes "operational completion (ε = 0.5 VND) at month 221" or "no mathematical completion."
+**Reported values must name their concept.** "Completion at month 221" without qualification is ambiguous. Where a *hypothetical* tolerance is being illustrated, the write-up must say so — e.g. "under a declared settlement tolerance of ε = 0.5 VND, operational completion at month 221". **It must not be reported as the current engine's operational completion**, which uses integer đồng with `ε = 0` (D-045). The original wording follows: the paper writes "operational completion (ε = 0.5 VND) at month 221" or "no mathematical completion."
 
 ### Corrected logical status
 
@@ -286,7 +286,8 @@ A lender settling to the nearest đồng would genuinely regard the balance as d
 "revenue bounded away from zero"   →  SUFFICIENT for eventual completion, NOT necessary
 "revenue strictly positive"        →  NOT SUFFICIENT   ← the corrected error
 "Σ B_t diverges"                   →  SUFFICIENT for eventual completion (unbounded horizon)
-"S_H ≥ f·A/r"                      →  NECESSARY AND SUFFICIENT   ← the general criterion
+"∃ finite t ≤ H with S_t ≥ Θ"      →  NECESSARY AND SUFFICIENT   ← the binding criterion
+"S_H ≥ Θ"                          →  equivalent ONLY for finite H  (S_k non-decreasing)
 ```
 
 `Σ B_t = ∞` is strictly weaker than `B_t ≥ B_min > 0` — the harmonic path satisfies the former and violates the latter — so the divergence criterion properly generalises the old corollary.

@@ -1,4 +1,29 @@
-"""Verify METRIC_DEFINITIONS.md is implementable and internally consistent.
+"""RETIRED — HISTORICAL ONLY. Do not run as current verification (D-045).
+
+WHY IT IS RETIRED. Three reasons, all structural rather than fixable:
+
+  1. It verifies `METRIC_DEFINITIONS.md` v0.1, which `METHODOLOGY_SPEC.md` v1.0
+     superseded. It checks a document that is no longer authoritative.
+  2. `duration()` below defaults to `tol=0.5` — the **pre-A-7 floating-point
+     tolerance**. Since D-024 the operational layer settles in integer đồng
+     with `ε = 0` by construction, and the analytical layer uses a centralized
+     `FLOAT_GUARD_VND = 1e-6` which is representation-error protection, NOT a
+     settlement tolerance. Leaving `0.5` here as if it were current would
+     misrepresent settlement behaviour.
+  3. It is, by its own original description below, "a throwaway reference
+     implementation -- it is not the engine". `rbf_sim/` is the engine, and
+     `rbf_sim/tests/` verifies it.
+
+`RESULTS_REGISTRY.md` R-003 already classifies its output as **exploratory,
+not quotable**. It is removed from the current reproduction instructions in
+`RESEARCH_MANIFEST.md` and retained here only so the coherence constraint it
+produced (§3.4) has a traceable origin.
+
+Original docstring follows.
+
+---
+
+Verify METRIC_DEFINITIONS.md is implementable and internally consistent.
 
 Place at:  sellerflow/research/analysis/01_verify_spec.py
 Run:       python3 01_verify_spec.py          (no dependencies beyond stdlib)
@@ -52,7 +77,7 @@ def fix_payments(payment, term, horizon):
     return [payment if t < term else 0.0 for t in range(horizon)]
 
 
-def duration(payments, cap, tol=0.5):
+def duration(payments, cap, tol=0.5):   # tol=0.5 is PRE-A-7 and retired; see module docstring
     """Spec 4.7 — first month cumulative payments reach the cap."""
     total = 0.0
     for t, p in enumerate(payments):

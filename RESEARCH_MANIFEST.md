@@ -48,7 +48,7 @@
 | File | Purpose |
 |---|---|
 | `00_audit_evidence.py` | Reproduces the three audit findings: circular AUC, impossible population, engine self-contradiction. |
-| `01_verify_spec.py` | Five checks that the frozen spec is implementable. Produced coherence constraint §3.4. |
+| `01_verify_spec.py` | **RETIRED — historical only (D-045).** Five checks that `METRIC_DEFINITIONS.md` v0.1 was implementable; produced coherence constraint §3.4. Superseded by `METHODOLOGY_SPEC.md` v1.0 and by `rbf_sim/tests/`, and carries the pre-A-7 `tol=0.5`. Not part of current verification. |
 
 ### `research/` — run scripts
 
@@ -116,8 +116,10 @@ python3 conv_step.py 10000
 cd ../backend
 python3 ../research/analysis/00_audit_evidence.py
 
-# 6. Spec verification (standalone, no dependencies)
-cd ../research && python3 analysis/01_verify_spec.py
+# 6. (RETIRED) analysis/01_verify_spec.py is HISTORICAL and is no longer part of
+#    current verification (D-045): it checks the superseded METRIC_DEFINITIONS.md
+#    v0.1 and carries the pre-A-7 tol=0.5. R-003 already marks its output
+#    exploratory and not quotable. Use rbf_sim/tests/ instead.
 ```
 
 **Determinism.** Base seed `20260803`, bootstrap seed `90210`.
@@ -142,7 +144,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | 71 (47 inherited + 1 credential guard D-025 + 8 withdrawn-claim guards D-026 + 15 model-artifact guards D-028) | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Backend tests passing | **379 passed, 9 skipped** (the 9 are the Playwright browser tests, which skip unless a chromium build is present and are **not** counted as passes). Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |

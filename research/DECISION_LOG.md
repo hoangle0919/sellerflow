@@ -166,6 +166,29 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-045 — Final line edits: restatements, retired verification script, RBF-G scope, burden denominator
+**Date:** 2026-08-10
+**Raised by:** the final read-only audit of `b1cef86`. **Artifact/reproducibility gate PASSED; Gate A narrowly failed on a dozen sentences.**
+**Status:** APPLIED on `publication-package`. No new framework, scanner, artifact, simulation or broad rewrite. No financial change.
+
+**1. `S_H ≥ Θ` restated without limiting `H`.** Two places still called it the general or complete criterion: the §"complete characterisation" line and the logical-status block. Both now state the binding rule — `completion ⇔ ∃ finite t ≤ H with S_t ≥ Θ` — and note that the reduction to `S_H ≥ Θ` holds **only for finite `H`**, because `S_k` is non-decreasing. The lifetime case is where it fails and is why the rule is written this way.
+
+**2. Current-engine language in the tolerance section.** "The 1-VND-scale tolerance **in the engine**", `0.50 *(engine default)*`, and an instruction telling the paper to report operational completion at `ε = 0.5` all described pre-A-7 behaviour. Since D-024 the operational layer settles in **integer đồng with `ε = 0` by construction**; `FLOAT_GUARD_VND = 1e-6` is analytical representation-error protection and **is not a settlement tolerance**. The `ε` table is retained, relabelled as **hypothetical declared-policy** values, and the reporting instruction now requires any such figure to be marked hypothetical.
+
+**`research/analysis/01_verify_spec.py` retired rather than patched.** It still defaulted to `tol=0.5`. Updating the constant would have been the smaller edit and the wrong one: the script verifies `METRIC_DEFINITIONS.md` **v0.1**, which `METHODOLOGY_SPEC.md` v1.0 superseded, and describes itself as "a throwaway reference implementation — it is not the engine". R-003 already marks its output exploratory and not quotable. It is now banner-marked historical, removed from the reproduction instructions in `RESEARCH_MANIFEST.md`, and retained only so coherence constraint §3.4 has a traceable origin.
+
+**3. RBF-G scope, in the two places that still generalised it.** `CORRECTED_CLAIMS.md` "retained as a null result" → **floor-only null / design flaw**. `RESULTS_REGISTRY.md` "F-5 must be presented as a null result" → **N-2′ is the hardship-floor null, and the live ceiling result must accompany it** (6,009 of 36,000; 6 of 10 scenarios). Also closed an unmatched strikethrough I left in the registry's limitations paragraph, where a D-040 insertion had opened `~~` without closing it and swallowed the following sentence into a struck region.
+
+**4. R-011's incomplete-recovery list** said recovery failure "requires zero revenue, a binding horizon, or a terminal write-off". That is a closed list stated as a requirement. Replaced with the exact criterion plus the same examples marked explicitly non-exhaustive.
+
+**5. The burden denominator, in the two places the D-044 pass missed.** `high_burden_months` still said the count is constant **"BY CONSTRUCTION"**, and a product implication said a revenue share "achieves" flat burden through a downturn. Both overstate: the contractual remittance is a fixed share of **net sales**, while the displayed count and burden use **GMV**, so they equal `r·(1 − return rate)` and move when returns move. Constant only while the net-sales/GMV ratio is fixed.
+
+**6. Remaining live copy.** `index.html`: "if revenue stops, the cap is never reached" → permanent cessation **before completion while a balance remains**; "holds funding for verification" → marks the demonstration assessment for manual review; "verify revenue before disbursing" → verify submitted revenue before relying on the assessment. `README.md`: "gates the credit decision" → marks the demonstration assessment for review. `RESEARCH_MANIFEST.md`: the backend count said **71** in the verification table while saying 379/9 in the reproduction block — the 71 is now labelled as the historical D-028 composition and the current figure is stated.
+
+**Suites:** 379 backend passed / 9 skipped, 629 simulation passed.
+
+---
+
 ### D-044 — Final editorial consistency pass: active claims that survived three correction rounds
 **Date:** 2026-08-10
 **Raised by:** the final read-only Gate A audit of `ff470b4` — **FAIL, narrowly.**
