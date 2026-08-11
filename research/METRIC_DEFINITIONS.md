@@ -83,7 +83,7 @@ Therefore `P = C / N`.
 A = Σ_{t=1..N} P / (1 + i)^t         →  APR = (1 + i)^12 − 1
 ```
 
-**Secondary matching — market-APR-matched (sensitivity).** A second FIX arm priced at an externally cited market APR, where total cost differs from `C`. Reported separately and never mixed into the primary comparison.
+**Secondary matching — APR-matched (sensitivity).** A second FIX arm priced at an assumed nominal APR (`j = 18%`, `N_B = 12`), where total cost differs from `C`. Reported separately and never mixed into the primary comparison. The 18% is an assumption chosen for this study — **not a market rate**, and not observed or externally sourced anywhere in this project. See `CLAIM_LEDGER.md` Q-5.
 
 **Stated limitation (goes in the paper, not only here).** An APR loan and a factor-rate cap are not natively commensurable: one prices time, the other prices a multiple regardless of time. Cost-matching at base case makes them comparable *at a single point* — the base path — and the equivalence degrades as realized revenue departs from it. Every reported comparison names its matching basis. **We do not claim the two products are economically equivalent; we claim they are matched at the base case and then diverge, and we measure that divergence.**
 

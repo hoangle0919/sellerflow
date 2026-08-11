@@ -82,6 +82,39 @@ def test_closure_falsifies_the_default_prevention_claim():
         assert rate == 1.0, f"{stem}: closure_m7 incomplete rate is {rate}, expected 1.0"
 
 
+def test_rbf_g_floor_never_binds_but_the_ceiling_does():
+    """S-6. The first draft of the ledger said RBF-G was 'bit-identical to RBF
+    in all ten scenarios' and credited the floor. The artifact it cited says
+    otherwise, and no test checked it — so the false claim shipped."""
+    bp = _artifact("validation_v1")["rbf_g_breakpoint"]["pmin0.25_hard0.5"]
+    assert bp["floor_months"] == 0, "the floor is claimed never to bind"
+    assert bp["reachable"] is False, "the registered setting is claimed unreachable"
+    assert bp["ceiling_months"] == 6009, (
+        f"ledger S-6 cites 6,009 ceiling months, artifact says {bp['ceiling_months']}")
+
+    scen = _artifact("baseline_v2")["scenarios"]
+    differing = [s for s, arms in scen.items()
+                 if "RBF-G" in arms and arms["RBF-G"] != arms["RBF"]]
+    assert len(differing) == 6, (
+        f"ledger S-6 says 6 of 10 scenarios differ; artifact says {len(differing)}: "
+        f"{sorted(differing)}")
+
+    txt = _text()
+    assert "bit-identical" not in txt.split("Supersedes")[0] or "~~" in txt, \
+        "the retracted 'bit-identical' wording must be struck, not restated"
+
+
+def test_rho_star_is_never_quoted_without_its_cap_factor():
+    """M-6. rho* depends on f — 11/12 at f=1.20, 0.9086 at f*=1.0945. Quoting
+    11/12 as *the* threshold is the price/structure conflation M-3 warns about."""
+    txt = _text()
+    if "11/12" in txt:
+        window = txt[max(0, txt.index("11/12") - 400): txt.index("11/12") + 400]
+        assert "1.20" in window, "11/12 quoted without naming the cap factor f = 1.20"
+        assert "0.9086" in window or "1.0945" in window, \
+            "11/12 quoted without the contrasting value at f*"
+
+
 def test_withdrawn_section_names_every_retracted_claim():
     txt = _text().lower()
     for fragment in ("0.92 auc", "2.3×", "confidence interval",

@@ -64,6 +64,10 @@ HISTORICAL = (
     "research/PHASE0_AUDIT.md",
     "research/DECISION_LOG.md",
     "research/RESULTS_REGISTRY.md",
+    # The ledger quotes every retracted phrase in its §6 in order to forbid
+    # them. Scanning it as live would fail on its own withdrawal list.
+    "research/CLAIM_LEDGER.md",
+    "research/BACKLOG.md",
 )
 
 #: Frozen inputs. Editing these would desynchronise the spec version string
@@ -85,50 +89,99 @@ FROZEN = (
 #: English disavowals put the negation immediately BEFORE the term ("this is
 #: NOT a confidence interval") or a correction marker immediately AFTER
 #: ("...conventional loan" — SUPERSEDED"). So: short windows, both sides.
+#: A bare "not " is NOT in this list, deliberately. An audit measured the
+#: damage: with bare "not " at a 90-char window, 24.6% of README insertion
+#: points already sat inside a pre-disowned zone, and every one of nine
+#: assertive sentences slipped through simply by being preceded by an ordinary
+#: unrelated clause — e.g. "Fees are not modelled. Benchmark B is a
+#: conventional loan priced at 18% nominal." A negation that is not ABOUT the
+#: matched phrase is not a disavowal of it, it is a coincidence.
+#:
+#: So every cue here must bind the negation to the term itself, and the window
+#: is short enough that it has to sit adjacent.
 NEGATION_BEFORE = (
-    "not ", "not a", "n't ", "never ", "no longer", "rather than", "must not",
-    "cannot ", "isn't", "aren't", "~~", "do not quote", "stop saying",
-    "previously", "earlier claim", "was wrong", "the error", "avoid ",
-    # Comparative disavowal: "...a stronger signal than any confidence
-    # interval would be" argues against using the thing it names.
-    "than any", "than a ", "instead of a ", "unlike ",
+    "not a ", "not an ", "not the ", "not population ", "not quotable",
+    "n't a ", "never a ", "no longer a ", "rather than a ", "must not ",
+    "~~", "do not quote", "stop saying", "avoid saying", "instead of a ",
+    "not \"", "not '", "not *", "not **",
+    # Comparative disavowal: "a stronger signal than any confidence interval
+    # would be" argues against using the thing it names.
+    "than any ", "than a ", "unlike a ", "unlike the ",
 )
 NEGATION_AFTER = (
     "supersede", "retract", "withdraw", "corrected", "was wrong", "is wrong",
-    "demote", "circular", "do not quote", "no longer", "~~", "not a claim",
+    "demote", "circular", "do not quote", "no longer", "~~",
+    "— retracted", "- retracted", "my own error", "was my error",
 )
-WINDOW_BEFORE = 90
+#: 20, not 48 and certainly not 240. At 48 the sentence "This is a simulation,
+#: not a forecast, and the structure is proven safe for providers" still
+#: passed: "not a " sat 38 characters from "proven safe", negating *forecast*
+#: and disowning a different claim entirely. A disavowal has to be adjacent to
+#: the thing it disowns — "NOT a confidence interval" puts the cue at distance
+#: zero. If a qualifier is further away than this, the sentence should be
+#: rewritten so the reader gets the qualifier too.
+WINDOW_BEFORE = 20
 WINDOW_AFTER = 60
 
 #: (regex, why it is banned). Case-insensitive.
+#: Patterns are written to catch the FAMILY, not the one sentence that
+#: motivated them. An audit of the first version found the two most relevant
+#: regexes could not match the wording actually in the repo: the literal
+#: `instead of defaulting` missed "instead of triggering a default" on both the
+#: README and the landing page, and `equal effective cost` (spaces) missed
+#: "equal-effective-cost" (hyphens), which is the only spelling this project
+#: uses. Both live violations survived a passing scan. Hence: plurals, tenses,
+#: passive voice and hyphen variants below.
 FORBIDDEN = (
-    (r"instead of defaulting",
+    (r"instead of (?:defaulting|triggering a default|a default|default\b)|"
+     r"rather than (?:defaulting|triggering a default)|"
+     r"\bwithout (?:triggering a )?defaulting?\b",
      "asserts revenue-contingency prevents default; closure_m7 is 100% incomplete"),
-    (r"\bprevents? default|\bavoids? default|\bnever defaults?|\bcannot default",
+    (r"\bprevents? default|\bavoids? default|\bnever defaults?|\bcannot default|"
+     r"\beliminates? default|\bdefault (?:is|becomes) impossible|"
+     r"\bprotects? (?:sellers?|the seller) from default|\bno default risk|"
+     r"\bnever fall(?:s)? into arrears|\bcan never default|\bno principal loss",
      "no default model exists in this study; non-recovery is mechanical"),
-    (r"\bconventional loan\b|\bconventional 12-month\b",
+    (r"\bconventional loans?\b|\bconventional \d+-month\b|"
+     r"\b(?:standard|typical|normal|ordinary) (?:\d+-month )?"
+     r"(?:bank )?(?:amortizing )?loan\b",
      "the 18% benchmark is an assumed input, not a sourced market rate"),
-    (r"\bmarket[- ]rate\b|\brealistic (?:18|loan|rate|alternative)",
+    (r"\bmarket[- ]rates?\b|\bmarket APR\b|\bprevailing rate|"
+     r"\brealistic (?:18|loan|rate|alternative)|\bexternally cited market",
      "implies an externally sourced rate; none was sourced"),
-    (r"confidence interval",
+    (r"confidence intervals?\b|\bbootstrap CIs?\b|\b95% CIs?\b",
      "intervals are Monte Carlo over simulated paths, not population CIs"),
-    (r"\bequal[- ]cost\b|\bequal effective cost\b",
+    (r"\bequal[- ]cost\b|\bequal[- ]effective[- ]cost\b|\bequal effective cost\b",
      "say 'reference-path cost-matched'; f* was solved on one flat path"),
-    (r"2\.3\s*[x×]\s*(?:the\s*)?interest",
+    (r"2\.3\s*(?:[x×]|times)\s*(?:the\s*)?interest",
      "retracted by D-015 / DERIVATIONS P6 as a price-structure conflation"),
     (r"0\.92\s*AUC|AUC\s*(?:of\s*)?0\.92",
      "circular metric; label generated by a formula over the same features"),
-    # Scoped to OUTCOME guarantees. `money.settle` legitimately guarantees a
-    # code invariant (`sum(settle(...)) <= cap_vnd`) that is proven by test and
-    # survived mutation testing; banning that sense would punish a true
-    # statement and teach the next reader to weaken it.
-    (r"\bguarantees?d?\b(?=[^.]{0,90}(?:repay|recover|return|profit|outcome|"
+    # Scoped to OUTCOME guarantees, and BIDIRECTIONAL. `money.settle`
+    # legitimately guarantees a code invariant (`sum(settle(...)) <= cap_vnd`),
+    # proven by test and mutation-tested; banning that sense would punish a
+    # true statement. But a forward-only lookahead let passive voice through —
+    # "Recovery of the full cap is guaranteed on every path" — so the outcome
+    # word is now accepted on either side.
+    # Python lookbehind must be fixed-width, so passive voice is caught by a
+    # plain pattern instead: "Recovery of the full cap IS GUARANTEED on every
+    # path" defeated the forward-only lookahead. `money.settle` says
+    # "Guarantees `sum(...)`", never "is guaranteed", so the true code
+    # invariant is untouched by this alternative.
+    (r"\b(?:is|are|was|were) guaranteed\b|"
+     r"\bguarantees?d?\b(?=[^.]{0,90}(?:repay|recover|return|profit|outcome|"
      r"default|safe|cheap|afford))",
      "no seller- or provider-outcome is guaranteed on any path"),
-    (r"\balways repays?\b|\brepays? in full\b(?! (?:only|when|where))",
+    (r"\balways repays?\b|\brepaid in full\b|\brecovers? in full\b|"
+     r"\brepays? in full\b(?! (?:only|when|where))",
      "full repayment is scenario- and horizon-conditional"),
-    (r"\bproven safe\b|\bsafe for (?:providers|sellers)\b",
+    (r"\bproven safe\b|\bsafe for (?:providers|sellers)\b|"
+     r"\bduration risk, not principal loss\b",
      "no safety claim is supported by simulated mechanics"),
+    (r"\bimmune to under[- ]?reporting\b|\bimmune to revenue\b",
+     "invariance is contractual; the value judgement does not follow (CORRECTED_CLAIMS #3)"),
+    (r"\b5\.77%\s*(?:cap[- ])?overshoot|\bcap overshoot of 5\.77",
+     "my own retracted error; 0 breaches in 6,794 structures (D-029)"),
 )
 
 
@@ -137,12 +190,43 @@ def _read(rel):
         return fh.read()
 
 
+def _join(s):
+    """Undo Python adjacent-string-literal splitting, then collapse whitespace.
+
+    `"...NOT a "\n    "confidence interval..."` is one string to the reader and
+    to the API; only the source file has the quotes and indentation in between.
+    """
+    s = re.sub(r"['\"]\s*\+?\s*['\"]", "", s)   # "..." "..."  and  "..." + "..."
+    return re.sub(r"\s+", " ", s)
+
+
+def _plain(s):
+    """Drop markdown emphasis so `not ** a claim` reads as `not a claim`.
+
+    Without this, bolding a negation silently disables it — the cue would be
+    looking for "not a " in text that says "not** a ".
+    """
+    return re.sub(r"[*_`~]+", "", s).replace("  ", " ").lower()
+
+
 def _disowned(text, start, end):
     """True when a disavowal cue sits tight against the match, on either side."""
-    before = text[max(0, start - WINDOW_BEFORE):start].lower()
-    after = text[end:end + WINDOW_AFTER].lower()
-    return (any(c in before for c in NEGATION_BEFORE)
-            or any(c in after for c in NEGATION_AFTER))
+    # Take a generous raw window, remove Python string-concatenation joins and
+    # collapse whitespace, THEN clip to the tight window. Scanning .py source
+    # means an adjacent qualifier can be separated from its term by `" \n
+    # <28 spaces> "` — the reader sees "NOT a confidence interval", the scanner
+    # saw 30 characters of quotes and indentation and called it undisowned.
+    raw_before = _join(text[max(0, start - WINDOW_BEFORE * 6):start])[-WINDOW_BEFORE:]
+    raw_after = _join(text[end:end + WINDOW_AFTER * 6])[:WINDOW_AFTER]
+    # Strikethrough is checked on the RAW text: `_plain` strips `~`, so asking
+    # for "~~" in the plain form could never match.
+    if "~~" in raw_before or "~~" in raw_after:
+        return True
+    before, after = _plain(raw_before), _plain(raw_after)
+    word_cues_before = [c for c in NEGATION_BEFORE if c != "~~"]
+    word_cues_after = [c for c in NEGATION_AFTER if c != "~~"]
+    return (any(_plain(c) in before for c in word_cues_before)
+            or any(_plain(c) in after for c in word_cues_after))
 
 
 @pytest.mark.parametrize("rel", LIVE_SURFACES)
@@ -229,6 +313,47 @@ def test_scanner_catches_the_copy_this_project_actually_retracted(text, origin):
     assert hits, (
         f"scanner does NOT catch retracted copy from {origin} — it would have "
         f"certified this text as safe:\n  {text}")
+
+
+#: Sentences that DEFEATED an earlier version of this scanner. Each pairs an
+#: overreaching claim with an ordinary unrelated negation in the preceding
+#: clause — which is all it took, when a bare "not " counted as a disavowal.
+#: Plus the hyphen/plural/tense/voice variants the patterns originally missed.
+EVASIONS = (
+    "Fees are not modelled. Benchmark B is a conventional loan priced at 18% nominal.",
+    "We do not report medians here. The reported band is a 95% confidence interval.",
+    "Growth is not compounded. At the equal cost cap the two products are priced identically.",
+    "The generator cannot produce negative revenue, and the settlement rule "
+    "guarantees full repayment to the provider.",
+    "This is a simulation, not a forecast, and the structure is proven safe for providers.",
+    "A slow month extends the term instead of triggering a default.",
+    "At the equal-effective-cost factor the products match on price.",
+    "The model reflects prevailing market rates for Vietnamese sellers.",
+    "Every contract repaid in full.",
+    "The provider recovers in full in every scenario.",
+    "Recovery of the full cap is guaranteed on every path.",
+    "RBF costs 2.3 times the interest of the benchmark.",
+    "Fixed payments are immune to underreporting.",
+    "Providers face no principal loss.",
+    "The structure eliminates default risk for the seller.",
+)
+
+
+@pytest.mark.parametrize("sentence", EVASIONS)
+def test_scanner_catches_known_evasions(sentence):
+    """Each of these passed a previous version of this file. None may again."""
+    hit = any(mm and not _disowned(sentence, mm.start(), mm.end())
+              for p, _ in FORBIDDEN
+              for mm in [re.search(p, sentence, re.IGNORECASE)])
+    assert hit, f"evasion slipped through the scanner:\n  {sentence}"
+
+
+def test_a_bare_negation_in_an_unrelated_clause_does_not_disown():
+    """The specific defect: a negation must be ABOUT the phrase, not merely near it."""
+    s = "Fees are not modelled. Benchmark B is a conventional loan priced at 18%."
+    m = re.search(r"\bconventional loans?\b", s, re.IGNORECASE)
+    assert m and not _disowned(s, m.start(), m.end()), (
+        "an unrelated 'not' in a preceding clause is disowning the match again")
 
 
 def test_negation_cues_do_not_disown_an_undisowned_sentence():

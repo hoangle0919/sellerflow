@@ -55,8 +55,8 @@ evidence about Vietnamese sellers, or about any seller.
 | **M-2** | mathematical_property | Under-reporting rescales each payment. It does not change what is owed; it lengthens the time to reach the cap. | `DERIVATIONS.md` P3 | **Invariance of the total is conditional on the cap being reached.** Under-reporting severe enough to push the contract past the horizon leaves the cap unreached and the total short | all |
 | **M-3** | mathematical_property | Total contract cost is `A·f` — proportional to the cap factor and independent of the revenue path. | `DERIVATIONS.md` P6a | Must appear wherever a cost comparison appears; it is why a cost ratio quoted at one `f` is a pricing result, not a structural one | all |
 | **M-4** | mathematical_property | Effective APR is *not* a well-defined property of a revenue-share contract. Two sellers on identical terms `(A, r, f)` face different APRs purely because revenue arrives at different speeds. | `DERIVATIONS.md` P6b | Never quote "the APR of RBF" unqualified; always name the path or the arm | all |
-| **M-5** | mathematical_property | Permanent closure is absorbing: once revenue is zero and stays zero, no further payment occurs and the cap is never reached. | `DERIVATIONS.md` P7a | — | all |
-| **M-6** | mathematical_property | Geometric revenue decline completes the contract only above the threshold ρ\* = 11/12. | `DERIVATIONS.md` P7 | State the threshold is exact under the geometric model, not an empirical rate | paper, appendix |
+| **M-5** | mathematical_property | Permanent closure is absorbing: once revenue is zero and stays zero, no further payment occurs and the cap is never reached. | `DERIVATIONS.md` § "P7 — Exact conditions for incomplete recovery" | — | all |
+| **M-6** | mathematical_property | Under geometric decline the contract completes only if ρ > ρ\* = 1 − r·B₀/(F·A), **strictly**. At the illustrative `f = 1.20` that is 11/12 ≈ 0.9167; at the cost-matched `f* = 1.0945` it is 0.9086. | `DERIVATIONS.md` P7, D-022 | Exact **under the geometric-decline model**, not an empirical rate. **Always name the cap factor**: ρ\* depends on `f`, so quoting 11/12 as *the* threshold is the same price/structure conflation M-3 warns about. The inequality is strict — at ρ = ρ\* repayment approaches the cap asymptotically and never reaches it | paper, appendix |
 
 ---
 
@@ -69,7 +69,7 @@ evidence about Vietnamese sellers, or about any seller.
 | **S-3** | simulation_result | Where revenue reaches zero, recovery genuinely fails. At the illustrative cap `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` is **76.2%**. | `baseline_closure_v1` → `/scenarios/{closure_m7,closure_m13}/RBF/incomplete_recovery_rate` | `0fe503d7…` | This is the counterexample to "revenue-contingency prevents default". It must appear wherever S-2 appears | the absence of any closure panel before D-032 |
 | **S-4** | simulation_result | The same closure scenarios at the cost-matched cap `f* = 1.0945` give **100.0%** and **7.6%** incomplete. The `closure_m13` figure moves by a factor of ten with price alone. | `baseline_closure_equalcost_v1` → same paths | `49b6f8ef…` | Read beside S-3: the structure is identical, only the price differs. This is M-3 made visible | — |
 | **S-5** | simulation_result | In the ω sweep every path still reached the cap inside 24 months; mean duration moves **12.862 → 18.690** months as ω falls 1.00 → 0.70, with total repaid unchanged. | `baseline_v2` → `/underreporting/{1.0,0.7}/duration_mean` | `264d319b…` | "In this sweep" — not a general guarantee. The invariance is M-2's conditional form. The Lab renders these to one decimal (12.9 → 18.7); quote either, but do not mix precisions in one sentence | "Fixed payments are immune to underreporting — a structural advantage" (`CORRECTED_CLAIMS.md` #3) |
-| **S-6** | simulation_result | RBF-G is bit-identical to RBF in all ten scenarios; the guardrail floor never binds. | `baseline_v2` → `/scenarios/*/RBF-G`; `validation_v1` → `/rbf_g_breakpoint` | `264d319b…`, `f89fd2ba…` | Present as a **null result**, not omitted. The floor is provably unreachable because `p_min_mult 0.25 < hardship 0.50` | — |
+| **S-6** | simulation_result | RBF-G's hardship **floor** never binds: `floor_months` is **0** of 36,000 month-observations at the registered setting, and the setting is marked unreachable — `p_min_mult 0.25 < hardship 0.50`. Its payment **ceiling** does bind, in **6,009** of 36,000. | `validation_v1` → `/rbf_g_breakpoint/pmin0.25_hard0.5`; `baseline_v2` → `/scenarios/*/RBF-G` | `f89fd2ba…`, `264d319b…` | Present as a **null result about the floor**, not omitted. Do **not** say RBF-G is identical to RBF: because the ceiling binds, **6 of 10** scenarios differ in `apr_mean`/`burden_mean`/`recovery_ratio` (and `growth` in `duration_mean`). The differences fall below the Lab's display precision, which is why they are invisible on screen — that is a rendering fact, not an equality | ~~"RBF-G is bit-identical to RBF in all ten scenarios"~~ — my own error in the first draft of this ledger, falsified by the artifact it cited (D-039) |
 
 ---
 
@@ -123,11 +123,15 @@ evidence about Vietnamese sellers, or about any seller.
 
 ## 7. Enforcement
 
-Three tests keep this ledger from becoming decoration:
+Four tests keep this ledger from becoming decoration:
 
 - `backend/tests/test_no_withdrawn_claims.py` — the withdrawn model metrics cannot reappear on any surface.
-- `backend/tests/test_public_copy.py` — scans live surfaces for the phrasings in §6, with a directional negation window so a disavowal stays legal and an assertion fails. It is itself tested against the verbatim sentences this project retracted.
+- `backend/tests/test_public_copy.py` — scans the nine live surfaces for every §6 phrasing, with a tight directional negation window so a disavowal stays legal and an assertion fails. It carries the verbatim retracted sentences *and* fifteen evasions that defeated earlier versions of itself.
+- `backend/tests/test_claim_ledger.py` — every checksum in §0 matches the file on disk; the headline figures still derive from the artifacts they cite; S-6's floor/ceiling asymmetry is asserted against the artifact.
 - `backend/tests/test_validation_artifact.py` — the `validation_v1` canonical form is numerically identical to its source, and the four registered baselines are unchanged.
 
-A claim added to a draft but not to this table is caught by review, not by CI.
-That is a known gap and the reason Gate C exists.
+**Known gaps, stated rather than papered over.**
+
+1. A claim added to a draft but not to this table is caught by review, not by CI. That is the reason Gate C exists.
+2. The scanner matches *phrasings*, not meanings. A sufficiently novel wording of a retracted claim will pass. The evasion fixtures exist because the first version of that scanner passed the whole repository while two violations were live in `lab.py`, and the second still let "instead of triggering a default" through on the README and the landing page — both caught by adversarial review, not by the test.
+3. `RESULTS_REGISTRY.md` is allow-listed as historical, yet it is also the document that decides what may be quoted. That is an uncomfortable classification and it is why R-010's F-2 and F-3 now carry explicit supersession markers inline.

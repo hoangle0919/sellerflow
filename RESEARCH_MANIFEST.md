@@ -21,8 +21,8 @@
 | `METHODOLOGY_SPEC.md` | **The frozen specification.** Population, unit of analysis, horizon, revenue-path generation, seasonality and shocks, both fixed benchmarks, matched-comparison rules, metric formulas, seeds, sensitivity ranges, exclusion rules, interpretation limits. §16 logs all amendments. Frozen before any outcome analysis. |
 | `DECISION_LOG.md` | Every decision with date, alternatives, reason, consequence. Includes the methodological correction (D-001) and all supersessions. Append-only. |
 | `RESULTS_REGISTRY.md` | Every result with scenario, parameters, code, interpretation, limitation, and public-safety classification. Includes both preserved null results (R-013). |
-| `CORRECTED_CLAIMS.md` | **Current claim set.** Corrected interpretation layer, pricing sensitivity, equal-effective-cost cap, convergence, recovery boundary, RBF-G decision, revenue definition, parameter classification. |
-| `DERIVATIONS.md` | **Analytical backbone.** Seven propositions with proofs, holding for any revenue path independent of simulation or parameters. Includes the five-class claim taxonomy and the rejected RBF-G design. |
+| `CORRECTED_CLAIMS.md` | **Current claim set.** Corrected interpretation layer, pricing sensitivity, reference-path cost-matched cap, convergence, recovery boundary, RBF-G decision, revenue definition, parameter classification. |
+| `DERIVATIONS.md` | **Analytical backbone.** Seven propositions with proofs, established analytically rather than by simulation. P1–P6 hold for any revenue path; P7's completion threshold is exact under the geometric-decline model and depends on the cap factor (ρ\* = 11/12 at `f = 1.20`, 0.9086 at `f* = 1.0945`). Includes the five-class claim taxonomy and the rejected RBF-G design. |
 | `PHASE0_AUDIT.md` | Original audit: 8 integrity risks, 6 gaps, evidence appendix. |
 | `BASELINE_FINDINGS.md` | `baseline_v1` results. **Partly superseded** — banner at top explains what and why. Retained for audit trail. |
 | `METRIC_DEFINITIONS.md` | v0.1, **superseded** by `METHODOLOGY_SPEC.md`. Retained for audit trail. |
@@ -95,7 +95,7 @@ python3 -m pytest rbf_sim/tests/ -q
 python3 run_baseline.py
 
 # 3. Validation battery
-python3 run_validation.py 2                 # pricing + equal-effective-cost cap
+python3 run_validation.py 2                 # pricing + reference-path cost-matched cap
 python3 run_validation.py 4                 # incomplete-recovery boundary
 python3 run_validation.py 5                 # RBF-G breakpoint
 python3 run_validation.py 6                 # revenue-definition sensitivity
@@ -139,7 +139,7 @@ Spot-check any reproduction against these:
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |
 | Benchmark B effective APR | 19.5618% | `validation_v1` |
-| **Equal-effective-cost cap `f*`** | **1.0945** (19.5377% APR) | `validation_v1` |
+| **Reference-path cost-matched cap `f*`** | **1.0945** (19.5377% APR) | `validation_v1_canonical` |
 | Convergence Δ 5,000→10,000 | 0.0027 months, 0.042pp | `validation_v1` |
 | Accounting-identity violations | 0 of ~2,400 rows | `test_cohort_wide_identity_holds_for_every_row` |
 | Circular-AUC evidence | 0.9098 generating fn vs 0.9182 model | `00_audit_evidence.py` |

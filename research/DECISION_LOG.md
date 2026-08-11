@@ -166,6 +166,27 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-039 — Adversarial review of D-037: a false ledger claim, and the retracted sentence still live
+**Date:** 2026-08-10
+**Raised by:** an independent adversarial verification of the D-037/D-038 commit, run before Gate A.
+**Status:** APPLIED on `publication-package`.
+
+**Why this entry exists.** D-037 and D-038 were committed, self-verified, and reported as done. A separate adversarial pass then found that two of the three things that commit claimed to do, it had not done. Both failures shared a shape: **the check was built from the examples that motivated it, so it could only catch those examples.**
+
+**Finding 1 — the worst sentence in the project was still on the two most-read pages.** D-037 called "extends the term… instead of defaulting" the most misleading sentence in the product, removed it from `lab.py`, and listed it in the ledger under "do not restate in any form". It was left standing, one word away, on `README.md:32` ("extends the repayment term **instead of triggering a default** — that **mechanical fact**…") and `frontend/index.html:714` ("a slow month extends the term instead of triggering a default"). The README version was worse than the one removed, because it labelled the claim a mechanical fact. Both scanned clean: the regex was the literal string `instead of defaulting`.
+
+**Finding 2 — the ledger contained a claim its own cited artifact falsifies.** S-6 said RBF-G is "bit-identical to RBF in all ten scenarios" and credited the hardship floor. Diffing the cited JSON path: **6 of 10 scenarios differ**. The floor genuinely never binds (`floor_months: 0`, `reachable: false`), but the **ceiling** `p = min(p, 2.00·r·R0)` binds **6,009 of 36,000** month-observations — a number recorded in the ledger's *other* cited artifact. The differences sit below the Lab's display precision, which is why nobody had noticed. `test_claim_ledger.py` did not test S-6.
+
+**Also corrected:** "equal-effective-cost" (hyphenated) survived in six places across `RESEARCH_MANIFEST.md` and `RESULTS_REGISTRY.md` because the regex checked the spaced form, which this project never uses — including a headline results table. `METRIC_DEFINITIONS.md:86` described FIX-B as priced at "an externally cited market APR", contradicting `lab.py` and ledger Q-5. `README.md:147` and `RESEARCH_MANIFEST.md:25` claimed all seven propositions hold "independent of parameter choice"; P7's threshold is ρ\* = 1 − r·B₀/(F·A), which is 11/12 at `f = 1.20` and **0.9086** at `f* = 1.0945` — quoting 11/12 as *the* threshold is the price/structure conflation D-015 exists to prevent. Ledger M-5 cited `DERIVATIONS.md` "P7a", a label that does not exist in that file.
+
+**Scanner defects found by constructing evasions rather than by inspection.** A bare `"not "` cue at a 90-character window meant **24.6% of README insertion points** already sat inside a pre-disowned zone; nine assertive sentences passed simply by following an unrelated negation ("Fees are not modelled. Benchmark B is a conventional loan priced at 18% nominal."). At a 48-character window "This is a simulation, not a forecast, and the structure is proven safe for providers" still passed — the negation was about *forecast*. The window is now 20 characters, cues must bind to the term, and Python adjacent-string-literal joins are collapsed first so that a qualifier split across source lines still counts.
+
+**Consequence:** window 240 → 48 → **20**; bare `"not "` removed; patterns extended to plurals, tenses, passive voice and hyphen variants; fifteen evasion sentences added as fixtures; `CLAIM_LEDGER.md` and `BACKLOG.md` added to the scanned set; S-6 rewritten and bound by test; §7 of the ledger now states its three known gaps instead of implying full coverage. Suites: 975 → see final count in the Gate A report.
+
+**The lesson, recorded because it will recur.** A verification written by the same author who wrote the thing being verified inherits that author's blind spots. Both failures here were invisible to me and obvious to a reviewer told to attack. Gate B and Gate C should be adversarial by default, not confirmatory.
+
+---
+
 ### D-038 — `validation_v1` canonicalized additively; zero numeric change
 **Date:** 2026-08-10
 **Raised by:** the Phase A publication audit, asking which quotable numbers lacked a checksum.
@@ -190,7 +211,9 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 **Raised by:** the Phase A publication audit.
 **Status:** APPLIED on `publication-package`.
 
-**Trigger:** Four live surfaces asserted more than the artifacts support, and the results registry still authorized a claim the derivations had formally retracted.
+**Trigger:** Public copy asserted more than the artifacts support, and the results registry still authorized a claim the derivations had formally retracted.
+
+> **Correction, same day (see D-039).** This entry originally opened "Four live surfaces asserted…". That was wrong on both halves: three of the four items below are in a single file (`backend/lab.py`), and the fourth (`RESULTS_REGISTRY.md`) is classified as *historical*, not live, by the very scanner this entry introduces. It also omitted the `RESEARCH_MANIFEST.md` change it made. A decision log that miscounts its own scope is the same failure as a ledger that miscounts its artifacts.
 
 **What was wrong, and why each is not cosmetic:**
 

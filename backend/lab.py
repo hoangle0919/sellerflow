@@ -157,9 +157,10 @@ ARMS = [
      "chart_label": "Amortizing loan",
      "kind": "fixed",
      "note": "An illustrative 12-month amortizing loan at 18% nominal annual "
-             "rate. The 18% is an assumed input chosen for this study, not a "
-             "sourced or observed market rate. Not cost-matched; it is the "
-             "external price reference."},
+             "rate. The 18% is an assumption chosen for this study — not a "
+             "market rate, and not observed or externally sourced anywhere in "
+             "this project. Not cost-matched; it is the external price "
+             "reference."},
     {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
      "name": "Reference-path cost-matched RBF",
      "short": "Revenue-based, cost-matched",
@@ -439,6 +440,8 @@ def underreporting() -> Optional[dict]:
     # Derived from `rows`, never typed. A hard-coded "12.9 → 18.7" would go
     # stale silently the day the artifact changes — the exact failure mode the
     # literal scanner exists to catch on the HTML side.
+    if not rows:                           # artifact present but sweep empty
+        return None
     full, least = rows[-1], rows[0]        # rows ascend by ω: [0]=lowest
     all_complete = all(not (r["incomplete_recovery_rate"] or 0) for r in rows)
     if all_complete:

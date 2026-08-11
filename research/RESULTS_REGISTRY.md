@@ -17,11 +17,13 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 | `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **Canonical.** Cite this. |
 | `results/baseline_v2_provenance.json` | *(varies by run — that is its purpose)* | Execution record for the above |
 | `results/baseline_v2.json` | `b09ae1f7ec3a92c6b751222f639cc562ee793d71c453298612a5d30e6da356e0` | **Frozen historical evidence.** Not rewritten. Numerically identical to the canonical artifact (0 differing leaves); differs only by an embedded run date. |
-| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **Canonical.** Equal-effective-cost pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
+| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **Canonical.** Reference-path cost-matched pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
 | `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the above |
 | `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **Canonical.** Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
 | `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **Canonical.** Closure / zero-revenue at f* = 1.0945 (D-032). |
-| `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Not yet canonicalized** — carries the same `_meta.date` problem. Migrate on next regeneration. |
+| `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **Canonical.** Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `results/validation_v1_provenance.json` | *(varies by run)* | Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
+| `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Frozen historical evidence.** The pre-canonicalization source, retained unmodified. Re-running the whole battery reproduces it with exactly one difference — `_meta.date` — and zero numeric drift. |
 
 Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v2_canonical.json`
 
@@ -139,7 +141,7 @@ F-3 is partly a horizon artifact (`T = 24` against a 12-month base duration); th
 
 | Field | Value |
 |---|---|
-| **Exact scenario** | (a) convergence at 500/2,000/5,000/10,000 paths on sustained −40%; (b) cap sweep `f ∈ [1.05, 1.30]` on the stable reference; (c) equal-effective-cost cap solve; (d) 12-probe recovery-boundary search; (e) RBF-G breakpoint scan over 36,000 month-observations; (f) remittance-basis sweep |
+| **Exact scenario** | (a) convergence at 500/2,000/5,000/10,000 paths on sustained −40%; (b) cap sweep `f ∈ [1.05, 1.30]` on the stable reference; (c) reference-path cost-matched cap solve (JSON key `pricing.equal_cost`); (d) 12-probe recovery-boundary search; (e) RBF-G breakpoint scan over 36,000 month-observations; (f) remittance-basis sweep |
 | **Parameters** | `R₀ = 185,000,000` · `A = 185,000,000` · `r = 0.10` · `f = 1.20` · `T = 24` · basis `net_sales` · Benchmark B `j = 18%`, `N_B = 12`. All illustrative or derived — none externally sourced |
 | **Simulation version** | `rbf_sim` v1.0.0 + spec amendments A-1…A-5 · seeds 20260803 / 90210 |
 | **Code** | `run_validation.py`, `conv_step.py` → `results/validation_v1.json`; `run_baseline.py` → `results/baseline_v2.json` |
@@ -147,7 +149,7 @@ F-3 is partly a horizon artifact (`T = 24` against a 12-month base duration); th
 | **Public-safe** | ⚠️ **Conditional** — simulated label, parameter set, and assumption classification must appear with any quoted figure |
 | **Status** | ✅ 2026-08-03 · 169 simulation tests + 47 backend tests passing |
 
-**Interpretation.** Converged (Δ 0.0027 months, 0.042pp from 5,000→10,000). Equal-effective-cost cap **f\* = 1.0945** at 19.54% APR vs Benchmark B's 19.5618% — price and structure are separable, so the 39.90% APR at `f = 1.20` is a **pricing** result. Incomplete recovery requires zero-revenue months, a binding horizon, or a terminal write-off; a −40%/−60% decline alone over 24 months does not produce it. RBF-G's floor is **provably unreachable** (`p_min_mult 0.25 < hardship 0.50`).
+**Interpretation.** Converged (Δ 0.0027 months, 0.042pp from 5,000→10,000). Reference-path cost-matched cap **f\* = 1.0945** at 19.54% APR vs Benchmark B's 19.5618% — price and structure are separable, so the 39.90% APR at `f = 1.20` is a **pricing** result. Incomplete recovery requires zero-revenue months, a binding horizon, or a terminal write-off; a −40%/−60% decline alone over 24 months does not produce it. RBF-G's floor is **provably unreachable** (`p_min_mult 0.25 < hardship 0.50`).
 
 **Limitations.** Three boundary probes returned "cap unreachable on reference" — at `A = 3×R₀` or a 12-month write-off, benchmark A cannot be matched and the comparison is undefined. Reported, not dropped. No default model was introduced; non-recoveries are mechanical (zero revenue, maturity), not modeled borrower default. `platform_fee_rate` is arbitrary-and-awaiting-justification, defaulted to 0.
 
