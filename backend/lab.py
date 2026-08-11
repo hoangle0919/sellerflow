@@ -677,10 +677,10 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                  "contractual burden is constant by construction. The burden "
                  "shown here uses a different denominator — payment ÷ GMV — "
                  "so it equals r·(1 − return rate) and MOVES when the return "
-                 "rate moves. It is constant only where the net-sales/GMV "
-                 "ratio is fixed, which holds in these scenarios but is not a "
-                 "property of every path: the returns-spike scenario is the "
-                 "case where the two denominators come apart.",
+                 "rate moves. It is constant only in scenarios where the "
+                 "net-sales/GMV ratio is fixed. Most registered scenarios hold "
+                 "that ratio fixed; `returns_spike` is the explicit exception "
+                 "where the displayed burden moves.",
          "source": "research/DERIVATIONS.md"},
         {"classification": "mathematical_property",
          "text": "A fixed instalment does not adjust, so its burden rises in "

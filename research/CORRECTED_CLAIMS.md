@@ -102,7 +102,7 @@ Baseline v1 reported 0.0% everywhere, which was a horizon artifact. Searching ha
 | Advance 3×R₀ (any) | 24 | — | 3.0 | cap unreachable on reference — benchmark A undefined | | |
 | Write-off @ 12m | 24 | 12 | 1.0–2.0 | cap unreachable on reference — benchmark A undefined | | |
 
-**Boundary characterised — CORRECTED 2026-08-04; refined D-043.** The general criterion is `r · Σ_{t≤H} B_t ≥ f·A` (lowercase `f` — uppercase `F` is fixed operating cost). Completion is a **finite-time** property: `S_∞ > Θ = f·A/r` **strictly** implies it, `S_∞ < Θ` precludes it, and at `S_∞ = Θ` it holds only if a finite partial sum *attains* `Θ` — which a strictly positive infinite series never does. Routes to incomplete recovery **include, but are not limited to** (the ~~"four distinct causes"~~ exhaustiveness claim is withdrawn):
+**Boundary characterised — CORRECTED 2026-08-04; refined D-043.** The general criterion is that **some finite `t ≤ H` satisfies `r · Σ_{s≤t} B_s ≥ f·A`** (lowercase `f` — uppercase `F` is fixed operating cost). For finite `H` only, this is equivalent to `r · Σ_{t≤H} B_t ≥ f·A`. Completion is a **finite-time** property: `S_∞ > Θ = f·A/r` **strictly** implies it, `S_∞ < Θ` precludes it, and at `S_∞ = Θ` it holds only if a finite partial sum *attains* `Θ` — which a strictly positive infinite series never does. Routes to incomplete recovery **include, but are not limited to** (the ~~"four distinct causes"~~ exhaustiveness claim is withdrawn):
 
 1. **Zero-revenue months** (business closure) — absorbing. Closure at month 7 → 100% incomplete.
 2. **A binding maturity or write-off rule** — write-off at month 18 turns a −40% decline from 0% into 25.7%.

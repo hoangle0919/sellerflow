@@ -182,7 +182,7 @@ This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan
 
 ### Distinct causes of incomplete recovery — examples, not an exhaustive list
 
-> **⚠️ Corrected (D-043).** This section was headed "Four distinct causes" and the §A summary said "**exactly four** mechanisms". **The exhaustiveness claim is withdrawn.** The complete characterisation is the single inequality `S_H < f·A/r`; the rows below are illustrative routes to it, not a partition of the ways it can occur, and nothing here proves no fifth route exists. Enumerating examples is useful; claiming the enumeration is closed is a stronger statement than anything proved above.
+> **⚠️ Corrected (D-043).** This section was headed "Four distinct causes" and the §A summary said "**exactly four** mechanisms". **The exhaustiveness claim is withdrawn.** The complete characterization is failure of the finite-time condition: **no finite `t ≤ H` satisfies `S_t ≥ Θ`.** For finite `H` only, this is equivalent to `S_H < Θ`. The examples below are non-exhaustive routes to that failure — not a partition of the ways it can occur, and nothing here proves no fifth route exists. Enumerating examples is useful; claiming the enumeration is closed is a stronger statement than anything proved above.
 
 | # | Cause | Mechanism |
 |---|---|---|
