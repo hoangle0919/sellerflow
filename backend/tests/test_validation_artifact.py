@@ -89,9 +89,13 @@ def test_the_run_date_moved_to_provenance_rather_than_vanishing():
 
 def test_no_public_surface_renders_the_superseded_determinism_field():
     """`canonical.determinism` still says "produce a byte-identical file" inside
-    all five artifacts — the claim D-041 withdrew. It is NOT corrected in place,
-    because that would change five registered checksums to fix a sentence. The
-    containment is that no surface shows it; this test is that containment."""
+    all five artifacts — the claim D-041 withdrew.
+
+    D-044 settled this: the artifacts are NOT regenerated. Their checksums and
+    historical metadata stand; the sentence is superseded in the registry, and
+    the containment is that no surface renders it. This test IS that
+    containment, so it is the thing standing between a superseded claim and a
+    reader."""
     surfaces = []
     for root, _dirs, files in os.walk(os.path.join(REPO, "backend")):
         if "__pycache__" in root or "/tests" in root:

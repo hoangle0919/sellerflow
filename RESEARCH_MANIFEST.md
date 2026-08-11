@@ -88,7 +88,7 @@ pip install pytest numpy          # only dependencies
 
 # 1. Simulation suite  (expect: 629 passed)
 python3 -m pytest rbf_sim/tests/ -q
-#    Backend suite (expect: 366 passed, 9 skipped). The 9 skips are the
+#    Backend suite (expect: 379 passed, 9 skipped). The 9 skips are the
 #    Playwright browser tests; they skip unless a chromium build is present
 #    and are NOT counted as passes.
 python3 -m pytest ../backend/tests -q

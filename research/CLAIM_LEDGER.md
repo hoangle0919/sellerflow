@@ -56,10 +56,22 @@ error. `validation_v1`'s canonicalization was separately verified by re-running
 the whole battery and diffing: the only difference across the entire document
 was the run-date stamp, with **zero** numeric drift (D-038).
 
-**Universal qualifier — applies to every row below.** Every figure is simulation
-output under `METHODOLOGY_SPEC.md` v1.0 + A-1..A-8. No observed seller revenue,
-repayment or default outcome exists anywhere in this project. Nothing here is
-evidence about Vietnamese sellers, or about any seller.
+**Universal qualifier — and what it does and does not cover (D-044).**
+
+No observed seller revenue, repayment or default outcome exists anywhere in this
+project. **Nothing in this ledger is evidence about Vietnamese sellers, or about
+any seller.** That applies without exception.
+
+The rest of the qualifier is *class-dependent*, and flattening it would misstate
+§1 in the opposite direction from the usual error:
+
+- **§1 rows (M-\*) are not simulation output.** They are theorems, proved in `DERIVATIONS.md` and asserted against the engine by `test_derivations.py`. They hold for any revenue path, independent of the simulation, the parameter choices and any distributional assumption. Calling them "simulation output under stated assumptions" would under-claim them and mislabel their warrant. Their limitation is different: they describe the **contract**, and a contract is not a market.
+- **§2–§3 rows (S-\*, P-\*) are simulation output** under `METHODOLOGY_SPEC.md` v1.0 + A-1..A-8, for the stated scenarios, seeds and parameters. These are the rows the simulated-output disclaimer is about.
+- **§4 rows (I-\*) are judgements** the author draws from the two above. Not measurements.
+
+Where a row mixes classes, it is split rather than labelled with the stronger of
+the two — see the ω finding in `backend/lab.py`, which is served as two findings
+for exactly this reason.
 
 ---
 
@@ -82,11 +94,11 @@ evidence about Vietnamese sellers, or about any seller.
 | ID | Class | Claim | Source (artifact → JSON path) | Checksum | Required qualifier | Supersedes |
 |---|---|---|---|---|---|---|
 | **S-1** | simulation_result | In the severe-downturn scenario the revenue-based arm runs **18.718** months mean duration against the amortizing loan's 12, and recovers **65.4576%** (→ 65.46%) by month 12 against FIX-B's 100%. | `baseline_v2` → `/scenarios/severe_downturn/RBF/{duration_mean,recovery_ratio/12}` | `264d319b…` | Name the scenario. Mean duration is a **survivor statistic** — here `incomplete_recovery_rate` is 0.0, so all 500 paths completed and the mean is unconditional | — |
-| **S-2** | simulation_result | Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid is identical at the cap. | `baseline_v2` → `/scenarios/*/RBF/incomplete_recovery_rate` | `264d319b…` | **Horizon- and scenario-bounded.** None of those ten reaches zero revenue, and `T = 24`. Must be presented adjacent to S-3, never alone | R-010 F-3 as originally worded ("provider exposure is duration risk, not principal loss") |
+| **S-2** | simulation_result | Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid is identical at the cap. | `baseline_v2` → `/scenarios/*/RBF/incomplete_recovery_rate` **and** `/scenarios/*/RBF/total_repaid_mean` (the second field carries the "total repaid identical at the cap" half; the first alone does not) | `264d319b…` | **Horizon- and scenario-bounded.** None of those ten reaches zero revenue, and `T = 24`. Must be presented adjacent to S-3, never alone | R-010 F-3 as originally worded ("provider exposure is duration risk, not principal loss") |
 | **S-3** | simulation_result | **Permanent closure occurring before completion** leaves a contractual balance unrecovered. In the `closure_m7` scenario — permanent closure from month 7, before the **13-month** matched base-case term at `f = 1.20` — **100.0%** of paths end incomplete; in `closure_m13`, **76.2%**. | `baseline_closure_v1` → `/scenarios/{closure_m7,closure_m13}/RBF/incomplete_recovery_rate` | `0fe503d7…` | Say **permanent closure before completion**, not "where revenue reaches zero": a temporary zero-revenue spell does not necessarily prevent completion — `temp_closure` is only 2.0% incomplete at `f = 1.20` and 0.0% at `f*`. This is the counterexample to "revenue-contingency prevents default" and must appear wherever S-2 appears | the absence of any closure panel before D-032 |
 | **S-4** | simulation_result | The same closure scenarios at the cost-matched cap `f* = 1.0945` give **100.0%** and **7.6%** incomplete. The `closure_m13` figure moves by a factor of ten with price alone. | `baseline_closure_equalcost_v1` → same paths | `49b6f8ef…` | Read beside S-3: the structure is identical, only the price differs. This is M-3 made visible | — |
-| **S-5** | simulation_result | In the ω sweep every path still reached the cap inside 24 months; mean duration moves **12.862 → 18.690** months as ω falls 1.00 → 0.70, with total repaid unchanged. | `baseline_v2` → `/underreporting/{1.0,0.7}/duration_mean` | `264d319b…` | "In this sweep" — not a general guarantee. The invariance is M-2's conditional form. The Lab renders these to one decimal (12.9 → 18.7); quote either, but do not mix precisions in one sentence | "Fixed payments are immune to underreporting — a structural advantage" (`CORRECTED_CLAIMS.md` #3) |
-| **S-6** | simulation_result | RBF-G's hardship **floor** never binds: `floor_months` is **0** of 36,000 month-observations at the registered setting, and the setting is marked unreachable — `p_min_mult 0.25 < hardship 0.50`. Its payment **ceiling** does bind, in **6,009** of 36,000. | `validation_v1` → `/rbf_g_breakpoint/pmin0.25_hard0.5`; `baseline_v2` → `/scenarios/*/RBF-G` | `f89fd2ba…`, `264d319b…` | Present as a **null result about the floor**, not omitted. Do **not** say RBF-G is identical to RBF: because the ceiling binds, **6 of 10** scenarios differ in `apr_mean`/`burden_mean`/`recovery_ratio` (and `growth` in `duration_mean`). The differences fall below the Lab's display precision, which is why they are invisible on screen — that is a rendering fact, not an equality | ~~"RBF-G is bit-identical to RBF in all ten scenarios"~~ — my own error in the first draft of this ledger, falsified by the artifact it cited (D-039) |
+| **S-5** | simulation_result | In the ω sweep every path still reached the cap inside 24 months; mean duration moves **12.862 → 18.690** months as ω falls 1.00 → 0.70, with total repaid unchanged. | `baseline_v2` → `/underreporting/{1.0,0.7}/duration_mean` for the durations, `/underreporting/*/incomplete_recovery_rate` for "every path reached the cap", and `/underreporting/*/total_repaid_mean` for "total repaid unchanged" — three fields, because the claim makes three assertions | `264d319b…` | "In this sweep" — not a general guarantee. The invariance is M-2's conditional form. The Lab renders these to one decimal (12.9 → 18.7); quote either, but do not mix precisions in one sentence | "Fixed payments are immune to underreporting — a structural advantage" (`CORRECTED_CLAIMS.md` #3) |
+| **S-6** | simulation_result | RBF-G's hardship **floor** never binds: `floor_months` is **0** of 36,000 month-observations at the registered setting, and the setting is marked unreachable — `p_min_mult 0.25 < hardship 0.50`. Its payment **ceiling** does bind, in **6,009** of 36,000. | `validation_v1` → `/rbf_g_breakpoint/pmin0.25_hard0.5`; `baseline_v2` → `/scenarios/*/RBF-G` | `f89fd2ba…`, `264d319b…` | Present as a **null result about the floor**, not omitted. Do **not** say RBF-G is identical to RBF: because the ceiling binds, **6 of 10** scenarios differ. By field: `apr_mean` in **6**, `burden_mean` in **6**, `recovery_ratio` in **3**, `duration_mean` in **1** (`growth`, 11.284 vs 11.286). The differences fall below the Lab's display precision, which is why they are invisible on screen — that is a rendering fact, not an equality | ~~"RBF-G is bit-identical to RBF in all ten scenarios"~~ — my own error in the first draft of this ledger, falsified by the artifact it cited (D-039) |
 
 ---
 

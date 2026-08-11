@@ -933,9 +933,9 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       <aside class="dash-side">
         <div class="ds-group">Portfolio</div>
         <div class="ds-item active" data-filter="all" onclick="setFilter('all')"><span>All merchants</span><span class="cnt" id="c-all">0</span></div>
-        <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span>Approved</span><span class="cnt" id="c-approved">0</span></div>
-        <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span>Conditional</span><span class="cnt" id="c-conditional">0</span></div>
-        <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span>Declined</span><span class="cnt" id="c-rejected">0</span></div>
+        <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span>Low-risk tier</span><span class="cnt" id="c-approved">0</span></div>
+        <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span>Medium-risk tier</span><span class="cnt" id="c-conditional">0</span></div>
+        <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span>High-risk tier</span><span class="cnt" id="c-rejected">0</span></div>
         <div class="ds-group">Live activity</div>
         <div class="ds-item" data-filter="live" onclick="setFilter('live')"><span>Real submissions</span><span class="cnt" id="c-live">0</span></div>
         <div class="ds-group">Actions</div>
@@ -969,7 +969,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <span class="label">Privacy</span>
     <h2 style="margin:10px 0 24px">How we handle your data</h2>
     <h3>What we collect</h3>
-    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the credit decision our model produces. When you join the access list, we store your email address.</p>
+    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the resulting illustrative risk tier and the assessment record — this is a demonstration, not a credit decision our model produces. When you join the access list, we store your email address.</p>
     <h3>How it is used</h3>
     <p>Submitted metrics are used solely to generate your credit assessment and to display it to authenticated lenders in the portfolio dashboard. Waitlist emails are used only to contact you about access. We do not sell data, and we do not share it with third parties beyond the hosting infrastructure the service runs on.</p>
     <h3>Retention and deletion</h3>
@@ -1202,8 +1202,11 @@ async function submitApplication(){
   if(!data){ toast('Could not reach the scoring service. Please try again.'); return; }
   renderResult({...applyData,...data}); go('result');
 }
-const VERDICT={APPROVED:'Approved',CONDITIONAL:'Conditional',REJECTED:'Not approved'};
-const EXPLAIN={APPROVED:'This profile falls in the illustrative low-risk tier. The demo advance is sized to annual revenue and structured at the low-risk remittance and repayment cap. No underwriting standard has been validated — the tier is a demonstration of the rule, not an approval.',CONDITIONAL:'The merchant has enough signal to support a reduced advance, but monitoring is recommended before increasing exposure.',REJECTED:'The merchant exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
+/* Backend enum values are unchanged for compatibility. Only the DISPLAY
+   changes: these are illustrative risk tiers from a demonstration rule, not
+   lending decisions. Nothing here approves, conditions or declines anything. */
+const VERDICT={APPROVED:'Illustrative low-risk tier',CONDITIONAL:'Illustrative medium-risk tier',REJECTED:'Illustrative high-risk tier'};
+const EXPLAIN={APPROVED:'This profile falls in the illustrative low-risk tier. The demo advance is sized to annual revenue and structured at the low-risk remittance and repayment cap. No underwriting standard has been validated — the tier is a demonstration of the rule, not an approval.',CONDITIONAL:'This profile falls in the illustrative medium-risk tier, where the demonstration rule sizes a reduced advance. The tier reflects the rule, not a validated assessment of the merchant.',REJECTED:'This profile falls in the illustrative high-risk tier under the demonstration rule. Returns, shipping reliability, ratings and operating history are the inputs that move it. No risk threshold here has been validated against outcomes.'};
 const FLAG_CLASS={green:'pass',amber:'warn',red:'fail'}, SIGNAL_LABEL={return_rate:'Return rate',late_ship_rate:'Late shipments',revenue_growth:'Revenue growth',rating:'Store rating',days_active:'Days active',inventory_turnover:'Inventory turnover'};
 function computeSignals(s){
   const f=(v,lo,hi)=>v<=lo?'green':v<=hi?'amber':'red';
@@ -1268,10 +1271,10 @@ function renderIntegrity(intg){
   if(banner){
     if(intg.level==='high'){
       banner.style.display=''; banner.className='gate-banner high';
-      banner.textContent=`Assessment flagged for review — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The credit decision below assumes reported figures are accurate; verify revenue before disbursing.`;
+      banner.textContent=`Assessment flagged for review — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The demonstration assessment below is marked for manual review; it assumes reported figures are accurate; verify revenue before disbursing.`;
     } else if(intg.level==='review'){
       banner.style.display=''; banner.className='gate-banner review';
-      banner.textContent='Manual review suggested — the integrity screen flagged items to confirm before disbursing. The credit decision below is provisional.';
+      banner.textContent='The integrity screen flagged items to confirm. This demonstration assessment is marked for manual review.';
     } else { banner.style.display='none'; }
   }
   document.getElementById('integrity-checks').innerHTML=(intg.checks||[]).map(c=>{

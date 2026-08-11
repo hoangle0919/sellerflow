@@ -150,7 +150,7 @@ Total repayment `N_B · P_B ≠ C` in general. **B is never used for cost-matche
 
 Defaults: `j = 0.18`, `N_B = 12`, both provisional pending Phase 2 sourcing and swept in §12.
 
-> **Commensurability limit — stated wherever A and B appear together.** An APR loan prices time; a factor-rate cap prices a multiple regardless of time. A is matched at the base path and diverges as revenue departs from it. B is not matched at all. We claim neither product is economically equivalent to RBF — only that A isolates timing and B represents a realistic alternative.
+> **Commensurability limit — stated wherever A and B appear together.** An APR loan prices time; a factor-rate cap prices a multiple regardless of time. A is matched at the base path and diverges as revenue departs from it. B is not matched at all. We claim neither product is economically equivalent to RBF — only that A isolates timing and B is an ~~realistic alternative~~ → **illustrative reference (A-8)**: an 18%/12-month amortizing schedule at an assumed rate. No claim is made that such a product is available to this population, or on these terms.
 
 ---
 
@@ -330,7 +330,7 @@ m·R_0 − F − P_A > 0
 ```
 Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the current product recommends, distress returns 100% of months for *both* arms — the metric fails by degeneracy rather than by evidence.
 
-**Handling.** Incoherent sets are excluded from §10.3 only (E-4), never from primary metrics, and the incoherent region is **reported as a result**: it bounds the parameter space in which no financing structure of this size is affordable.
+**Handling.** Incoherent sets are excluded from §10.3 only (E-4), never from primary metrics, and the incoherent region is **reported as a result**: it bounds the parameter space in which a financing structure of this size ~~is affordable~~ → **fails the study's illustrative burden/coherence rule (A-8)**. That is a statement about the stated rule, not about affordability, which this project cannot assess. Original wording follows for the audit trail: in which no financing structure of this size is affordable.
 
 **Related product observation — provisional, not quotable until Phase 2 sources `m` and `F`.** `financing_engine.py` sizes the advance as a percentage of annual revenue and never reads margin or fixed costs, so repayment capacity is never tested. Under illustrative parameters the recommended advance is roughly double an indicative serviceable bound.
 

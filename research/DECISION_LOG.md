@@ -166,6 +166,33 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-044 — Final editorial consistency pass: active claims that survived three correction rounds
+**Date:** 2026-08-10
+**Raised by:** the final read-only Gate A audit of `ff470b4` — **FAIL, narrowly.**
+**Status:** APPLIED on `publication-package`. **No financial change, no simulation run, no artifact regeneration.**
+
+**The shape of this round.** D-043 corrected the completion theorem, the RBF-G null, the underwriting language and the verifier — and in several places corrected the *summary* while the *active* statement survived elsewhere in the same file. The verifier repair itself passed natively (3/5 byte-identical, 5/5 numerically equal, exit 0, cleanup confirmed). What remained was editorial.
+
+**P7's proposition itself, not just its summary.** The proposition read `completion ⇔ S_H ≥ f·A/r` for any `H` "including the business lifetime". For a **finite** `H` that is right, and the reduction is sound because `S_k` is non-decreasing. For an unbounded lifetime it is **not**: the limit is not a partial sum. The proposition now states the finite-time criterion — `∃ finite t ≤ H with S_t ≥ Θ` — notes the finite-`H` equivalence explicitly, and marks the unconditional form superseded. D-043 fixed the criterion *below* the proposition and left the proposition itself saying the older thing.
+
+**"For any target cost there exists an `f` attaining it."** True of the **contractual repayment target** `A·f`, which is continuous and monotone. False of **effective APR on the reference path**, which moves in steps because duration is integer-valued — so a target APR generally has *no* exactly-attaining `f`. The two statements are now separated, with the 0.02416pp residual attached to the second.
+
+**Stale ε paragraphs.** `DERIVATIONS.md` still described `ε = 0.5` as the engine default and the integer-VND correction as "not applied" — stale since A-7 applied it. Superseded in place; the `ε` table is retained as **declared-policy sensitivity examples**, which is what it always was.
+
+**Remaining actives.** `CORRECTED_CLAIMS.md`: one uppercase `F·A` in the ρ\* formula, and "the guardrail feature is decoration" — only the **floor** is dead. `METHODOLOGY_SPEC.md`: Benchmark B "represents a realistic alternative", and the incoherent region described as where "no financing structure is affordable" (now: fails the study's illustrative burden/coherence rule).
+
+**Precision the registry lacked.** RBF-G differences are now stated by field — `apr_mean` **6** scenarios, `burden_mean` **6**, `recovery_ratio` **3**, `duration_mean` **1** — rather than as a bare "6 of 10". The P4 reversing condition is stated exactly (realized mean eligible base against `B* = P/r`, plus the integer-rounding qualification that makes `B* < B̄`) instead of the "non-declining revenue" label, which is not the condition.
+
+**The ledger's universal disclaimer was flattening §1.** "Every figure is simulation output" is right for §2–§3 and **wrong for the theorem rows**, which are proved and hold for any path. Applying the simulated-output caveat to them under-claims them and mislabels their warrant; their real limitation is that a contract is not a market. The disclaimer is now class-dependent, with the one unconditional part — no observed seller data, no evidence about any seller — stated first. Source paths for S-2 and S-5 now list every field the claim asserts, rather than the one field that happened to be cited.
+
+**The burden denominator was misstated, and this one is subtle.** `lab.py` said a revenue-share payment's burden "cannot rise when revenue falls… by construction". The contractual remittance is a fixed share of **net sales** — but the burden the Lab *displays* uses **GMV**, so it equals `r·(1 − return rate)` and **moves when returns move**. It is constant only where the net-sales/GMV ratio is fixed. The returns-spike scenario is precisely where the two denominators come apart, and the page was asserting universality over a quantity that is not universal. `DERIVATIONS.md` P1's implementation note had this right all along; the product copy did not.
+
+**Live copy.** README: closure conditioned on permanent zero revenue *before completion while a balance remains*, with the three closure scenarios distinguished (100.0% / 76.2% / 2.0%) rather than a blanket "runs to 100%"; the guardrail split into dead floor and binding ceiling; the exact P4 threshold; and — the honest one — **the README claimed the withdrawn 0.92 "is not reported by the API"**, which is false. It is returned as `withdrawn_value`, deliberately, as audit metadata. The README is corrected rather than the API. "RBF answers the credit-underwriting half today" is removed: it is an unvalidated demonstration. `index.html` keeps the backend enum values for compatibility but displays **illustrative low/medium/high-risk tiers** instead of Approved/Conditional/Not approved, in the verdict map, the dashboard counts and the explanations; "enough signal", "exceeds the risk threshold", "credit decision" and "before disbursing" are gone, and an integrity flag now marks the **demonstration assessment for manual review**.
+
+**Canonical metadata — decision recorded, not deferred.** Approved: **do not regenerate the five registered artifacts.** Checksums and embedded historical metadata stand. The embedded determinism sentence is superseded by D-041/D-043, the corrected reproduction claim is the only one permitted on any surface, and the regression test proving the raw field is never publicly rendered stays. `RESULTS_REGISTRY.md` no longer says "awaiting a call".
+
+---
+
 ### D-043 — Completion-theorem edge case, remaining document contradictions, underwriting language, and a verifier that could not report its own finding
 **Date:** 2026-08-10
 **Raised by:** the third Codex claim audit. **Gate A round 2 failed at `f2b84f9`.**

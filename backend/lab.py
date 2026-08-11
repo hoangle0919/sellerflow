@@ -86,8 +86,10 @@ GLOSSARY = {
     "effective APR": "The annualised internal rate of return of the payment "
                      "stream against the advance. It puts a revenue share and a "
                      "fixed instalment on one axis.",
-    "payment burden": "Payment ÷ revenue in a given month — the share of that "
-                      "month's takings that leaves as a payment.",
+    "payment burden": "Payment ÷ GMV in a given month — the share of that "
+                      "month's gross takings that leaves as a payment. The "
+                      "contract charges its share on NET sales, so this equals "
+                      "r·(1 − return rate) and varies when returns vary.",
     "90th percentile": "The value exceeded in only 10% of active months. It "
                        "describes a bad month, not a typical one.",
     "Monte Carlo interval": "A range showing whether enough simulated paths were "
@@ -501,7 +503,9 @@ def underreporting() -> Optional[dict]:
 METRIC_DEFINITIONS = {
     "burden": {
         "label": "Payment burden",
-        "definition": "Payment ÷ revenue in a given month. Computed from revenue "
+        "definition": "Payment ÷ GMV in a given month — note the denominator is "
+                      "GMV while remittance is charged on net sales, so this "
+                      "is r·(1 − return rate), not r. Computed from revenue "
                       "alone; undefined in months with zero revenue.",
         "why": "It is the share of this month's takings that leaves as a payment.",
         "caveat": "Burden is measured against REVENUE, not against what the "
@@ -517,9 +521,10 @@ METRIC_DEFINITIONS = {
         "caveat": "These thresholds are ILLUSTRATIVE reporting bands chosen for "
                   "this study. They are not validated hardship cutoffs and no "
                   "claim is made that crossing one causes distress. For a "
-                  "revenue share the count is also constant BY CONSTRUCTION — "
-                  "the payment is a fixed share of revenue, so its burden cannot "
-                  "rise. The informative side is the fixed arm.",
+                  "revenue share the count is also constant BY CONSTRUCTION in "
+                  "these scenarios — the remittance is a fixed share of net "
+                  "sales, and the burden shown (payment ÷ GMV) moves only with "
+                  "the return rate. The informative side is the fixed arm.",
     },
     "duration_months_mean": {
         "label": "Repayment duration",
@@ -666,10 +671,14 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
     label = SCENARIOS[scenario]["label"].lower()
     out: List[dict] = [
         {"classification": "mathematical_property",
-         "text": "A revenue-share payment is a fixed proportion of revenue, so "
-                 "its payment burden cannot rise when revenue falls. This holds "
-                 "for every revenue path, by construction — a definition, not a "
-                 "measurement.",
+         "text": "Contractual remittance is a fixed share of NET SALES, so the "
+                 "contractual burden is constant by construction. The burden "
+                 "shown here uses a different denominator — payment ÷ GMV — "
+                 "so it equals r·(1 − return rate) and MOVES when the return "
+                 "rate moves. It is constant only where the net-sales/GMV "
+                 "ratio is fixed, which holds in these scenarios but is not a "
+                 "property of every path: the returns-spike scenario is the "
+                 "case where the two denominators come apart.",
          "source": "research/DERIVATIONS.md"},
         {"classification": "mathematical_property",
          "text": "A fixed instalment does not adjust, so its burden rises in "

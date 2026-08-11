@@ -149,7 +149,12 @@ IRR(p)  >  IRR(p′)
 
 This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan" was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic (P6a shows cost is proportional to `f`), and it quoted a single APR as though it were a contract property (P6b shows APR is jointly determined by `f` and the path).
 
-**Nearest-grid-match pricing.** Since the contractual target is `A·f` and is monotone increasing in `f`, for any target cost there exists an `f` attaining it — subject to the integrality of duration. ~~"Equal-cost pricing"~~ **superseded (D-043): the search returns the nearest point on the swept grid, not an exact solution.** Against the illustrative 18% amortizing reference the nearest grid point is `f* ≈ 1.0945`. **Price and structure are separable, and P6 is why.**
+**Nearest-grid-match pricing — two different statements, kept apart (D-044).**
+
+1. **Contractual repayment target.** `A·f` is monotone increasing in `f`, so for any target *total* there is an `f` attaining it exactly. This is arithmetic about the target.
+2. **Effective APR on the reference path.** This does **not** follow. APR depends on `f` *and* on the integer duration, which moves in steps, so the achievable APRs form a discrete set and a given target APR generally has **no** `f` attaining it exactly. `f*` is the nearest point on the swept grid: 19.537656% against 19.561817%, residual ≈**0.02416pp**.
+
+~~"for any target cost there exists an `f` attaining it"~~ read as covering the APR match, which is false. Against the illustrative 18% amortizing reference the nearest grid point is subject to the integrality of duration. ~~"Equal-cost pricing"~~ **superseded (D-043): the search returns the nearest point on the swept grid, not an exact solution.** Against the illustrative 18% amortizing reference the nearest grid point is `f* ≈ 1.0945`. **Price and structure are separable, and P6 is why.**
 
 ---
 
@@ -159,13 +164,17 @@ This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan
 
 ### P7 (general form)
 
-**Proposition.** The RBF contract completes repayment over an applicable horizon `H` (a finite evaluation horizon, a contractual maturity, or the business lifetime, whichever binds first) **if and only if**
+**Proposition (finite-time form — this is the criterion, D-044).** Write the target `Θ = f·A / r`. The RBF contract completes over an applicable horizon `H` **if and only if**
 
 ```
-r · Σ_{t ≤ H} B_t  ≥  f · A          equivalently        S_H  ≥  f·A / r
+∃ finite t ≤ H   with   S_t  ≥  Θ            ( equivalently  r·S_t ≥ f·A )
 ```
 
-Incomplete recovery is exactly the complement: `S_H < f·A/r`.
+**For a finite `H`** this reduces to `S_H ≥ Θ`, because `S_k` is non-decreasing: if any partial sum reaches `Θ` then so does the last one, and conversely. Incomplete recovery over a finite horizon is exactly the complement, `S_H < Θ`.
+
+**For an unbounded lifetime the reduction fails, and that is the whole point.** `S_∞ ≥ Θ` is *not* sufficient: the limit is not a partial sum. Completion requires a **finite** partial sum to attain `Θ`, so `S_∞ = Θ` completes only where the series has finitely many non-zero terms. Strictly positive revenue forever approaches the cap and never reaches it.
+
+> ~~`S_H ≥ f·A/r` stated as the criterion for any `H` including the lifetime~~ — **superseded (D-044).** The equivalence holds for finite `H` only, and stating it unconditionally is what let the equality case through.
 
 **Proof.** Immediate from P3 applied at `H`, together with monotonicity of `S_k`. ∎
 
@@ -265,6 +274,8 @@ Operational completion month at `ρ = ρ*`, by tolerance:
 
 A lender settling to the nearest đồng would genuinely regard the balance as discharged long before month 221. That is a real commercial concept, not an artifact — provided `ε` is a **declared policy** rather than an accident.
 
+> **⚠️ SUPERSEDED BY A-7 / D-024 (D-044).** The paragraph below described the state of the code *before* the integer-VND correction was approved and applied. **It is stale.** Current behaviour: `rbf_sim/settlement.py` settles in integer đồng under an explicit ROUND_HALF_UP rule, then clips to the remaining cap, so `ε = 0` **by construction** and cap comparison is integer equality. The `0.5` and `1.0` tolerances are gone, replaced by one centralized `FLOAT_GUARD_VND = 1e-6` in the analytical layer. The `ε` values in the table above are retained as **declared-policy sensitivity examples** — what a lender who chose a non-zero settlement tolerance would see — not as engine defaults. The original text follows for the audit trail.
+>
 > **⚠️ In this codebase it is currently an accident.** See D-023: the tolerance is `0.5` in `metrics.py`/`contracts.py` but `1.0` in the test module, appears nowhere in the frozen specification, and is ~8.4 × 10⁶ times larger than the floating-point error it guards against (measured worst-case deviation from exact rational arithmetic: **5.96 × 10⁻⁸ VND**). It is therefore classified as a floating-point workaround, and an integer-VND correction is **proposed but not applied** — changing financial behaviour requires approval, and D-023 records that it changes **zero** registered results.
 
 **Reported values must name their concept.** "Completion at month 221" without qualification is ambiguous; the paper writes "operational completion (ε = 0.5 VND) at month 221" or "no mathematical completion."
@@ -363,7 +374,7 @@ and cumulatively, RBF-G can only ever lag plain RBF, never lead it.
 > | `returns_spike` | 1 / 12,000 | 1 / 500 |
 > | `stable`, `gradual_decline`, `sustained_decline`, `severe_downturn` | 0 | 0 |
 >
-> **The correspondence is exact:** RBF-G differs numerically from RBF in precisely those **six** scenarios and is identical in precisely the four where the ceiling never binds. So the observation "RBF-G ≡ RBF in all ten scenarios" is **false as stated**. What is true: the *floor* is universally dead, and the *ceiling* is what makes the two arms coincide in four scenarios and diverge in six. The divergences are small — e.g. `disruption_1m` mean APR 0.36222857 vs 0.36222809 — and vanish at the Lab's display precision, which is why they went unnoticed. **Invisible at display precision is not identical.**
+> **The correspondence is exact:** RBF-G differs numerically from RBF in precisely those **six** scenarios and is identical in precisely the four where the ceiling never binds. By field, across those six: `apr_mean` differs in **6**, `burden_mean` in **6**, `recovery_ratio` in **3**, and `duration_mean`/`duration_sd` in **1** (`growth`). So the observation "RBF-G ≡ RBF in all ten scenarios" is **false as stated**. What is true: the *floor* is universally dead, and the *ceiling* is what makes the two arms coincide in four scenarios and diverge in six. The divergences are small — e.g. `disruption_1m` mean APR 0.36222857 vs 0.36222809 — and vanish at the Lab's display precision, which is why they went unnoticed. **Invisible at display precision is not identical.**
 >
 > The `platform_outage` and `returns_spike` scenarios were previously offered as cases where the ceiling could not bind. Both in fact bind on one month-observation each.
 

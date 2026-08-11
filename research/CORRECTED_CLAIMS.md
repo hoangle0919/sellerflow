@@ -1,7 +1,7 @@
 # Corrected Claims & Validation Results
 
 **Date:** 2026-08-03 · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-3
-**Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests:** 169 passing
+**Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests at the time of this document:** 169 passing *(historical; the suites now stand at 629 simulation + 379 backend, 9 skipped — see `RESEARCH_MANIFEST.md`)*
 
 > All figures are **reproducible simulation output under modeled assumptions**. No observed seller revenue, repayment, or default outcome exists in this study.
 
@@ -107,7 +107,7 @@ Baseline v1 reported 0.0% everywhere, which was a horizon artifact. Searching ha
 1. **Zero-revenue months** (business closure) — absorbing. Closure at month 7 → 100% incomplete.
 2. **A binding maturity or write-off rule** — write-off at month 18 turns a −40% decline from 0% into 25.7%.
 3. **A finite evaluation horizon** — `T = 18` → 25.7%. A measurement artifact, not an economic loss.
-4. **Strictly positive but sufficiently fast-decaying revenue** — a path whose *lifetime cumulative* sales are inadequate. Geometric decay completes in finite time **only if `ρ > ρ* = 1 − r·B₀/(F·A)`** (strict). At `ρ = ρ*` the lifetime sum equals the cap exactly but every finite partial sum is strictly below it — an asymptotic boundary case that never completes. Below `ρ*`, lifetime cumulative revenue is simply insufficient. In all these cases revenue is positive in every period forever.
+4. **Strictly positive but sufficiently fast-decaying revenue** — a path whose *lifetime cumulative* sales are inadequate. Geometric decay completes in finite time **only if `ρ > ρ* = 1 − r·B₀/(f·A)`** (strict). At `ρ = ρ*` the lifetime sum equals the cap exactly but every finite partial sum is strictly below it — an asymptotic boundary case that never completes. Below `ρ*`, lifetime cumulative revenue is simply insufficient. In all these cases revenue is positive in every period forever.
 
 ⚠️ **Cause 4 was missing from the previous version of this document,** which asserted that decline alone cannot cause incomplete recovery. That was too broad: it equated *strictly positive revenue* with *revenue bounded away from zero*. See D-020 and `DERIVATIONS.md` §P7.
 
@@ -149,7 +149,7 @@ Breakpoint scan, 36,000 month-observations under strong seasonality + 3%/month g
 
 **Decision: demote RBF-G from a headline arm to a documented design-flaw finding.** It is retained in the code and the registry as a null result, and is **not** retuned to make it bind — that would be tuning after seeing results. The floor requires `p_min_mult > hardship` to be reachable at all, which is a coherence condition the original design violated.
 
-**Product implication.** As specified, the guardrail feature is decoration. If it ships, the floor multiplier must exceed the hardship threshold, and the two parameters must be validated jointly.
+**Product implication.** ~~As specified, the guardrail feature is decoration.~~ → **corrected (D-044): only the hardship FLOOR is dead.** The floor never activates on any path (0 of 36,000 month-observations). The **ceiling** `p_max = 2·r·R₀` is live — it binds 6,009 of 36,000 in the breakpoint scan and changes results in **6 of 10** baseline scenarios (mean APR in 6, mean burden in 6, recovery ratio in 3, mean duration in 1), below display precision but present. Calling the whole guardrail design decoration overstates a real finding about one of its two rules. If it ships, the floor multiplier must exceed the hardship threshold, and the two parameters must be validated jointly.
 
 ---
 
