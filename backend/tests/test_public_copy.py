@@ -1,4 +1,19 @@
-"""Public copy may not overclaim — a scanner for the phrases we got wrong before.
+"""NAMED-REGRESSION TRIPWIRE for public copy. NOT a proof that the copy is safe.
+
+READ THIS BEFORE TRUSTING A PASS. This file catches *specific phrasings this
+project has already got wrong*. It does not understand English, it does not
+evaluate whether a sentence is supported by an artifact, and it will not catch a
+novel overclaim. Two Gate A audits proved that empirically: the first version
+passed the whole repository while two violations sat in `lab.py`, and the second
+passed while the retracted default-prevention claim was live on both the README
+and the landing page in a paraphrase.
+
+**The real gate is human review against `research/CLAIM_LEDGER.md`.** This file
+is a tripwire that stops known-bad strings from coming back. Treat a pass as
+"no *named* regression", never as "the copy is accurate".
+
+Scanner work is deliberately time-boxed. Do not grow this into a natural-language
+verification system; that is the ledger review's job.
 
 Every pattern here corresponds to a specific claim this project made and had to
 retract. The test is not stylistic. Each phrase, in the absence of a qualifier,
@@ -35,6 +50,7 @@ The historical allow-list is deliberately narrow and is itself tested: an audit
 document earns its exemption only by carrying a supersession banner. Otherwise
 "it's historical" becomes the loophole that lets a retracted claim stay live.
 """
+import glob
 import os
 import re
 
@@ -43,21 +59,41 @@ import pytest
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 #: Surfaces a reader or reviewer encounters as current claims.
-LIVE_SURFACES = (
-    "README.md",
-    "RESEARCH_MANIFEST.md",
-    "frontend/lab.html",
-    "frontend/index.html",
-    "backend/lab.py",
-    "backend/money.py",
-    "backend/financing_engine.py",
-    "research/rbf_sim/README.md",
-    "research/METRIC_DEFINITIONS.md",
-)
+#:
+#: `frontend/*.html` is GLOBBED, not listed. A static list silently excludes any
+#: page added later — and a new public page is exactly where an unreviewed claim
+#: would land.
+def _live_surfaces():
+    fixed = [
+        "README.md",
+        "RESEARCH_MANIFEST.md",
+        "backend/lab.py",
+        "backend/main.py",            # public API strings reach users too
+        "backend/money.py",
+        "backend/financing_engine.py",
+        "research/rbf_sim/README.md",
+        "research/METRIC_DEFINITIONS.md",
+    ]
+    pages = sorted(
+        os.path.relpath(p, REPO)
+        for p in glob.glob(os.path.join(REPO, "frontend", "**", "*.html"),
+                           recursive=True))
+    return tuple(fixed + pages)
+
+
+LIVE_SURFACES = _live_surfaces()
 
 #: Audit-trail documents. Exempt ONLY because they record what was believed and
 #: why it changed. Each must carry a supersession/correction banner — asserted
 #: by test_historical_documents_carry_a_supersession_banner below.
+#: Exempt from the LIVE scan, but NOT unexamined — see
+#: test_allow_listed_documents_do_not_hide_an_unmarked_claim, which requires
+#: every forbidden phrase in these files to sit beside a supersession marker.
+#:
+#: `RESULTS_REGISTRY.md` and `BACKLOG.md` were previously blanket-exempted as
+#: "historical". That was too generous: the registry is also the document that
+#: decides what may be quoted, so a stale authorization there is a live defect.
+#: They are now exempt only from the phrase scan, never from the marker check.
 HISTORICAL = (
     "research/BASELINE_FINDINGS.md",
     "research/CORRECTED_CLAIMS.md",
@@ -182,6 +218,60 @@ FORBIDDEN = (
      "invariance is contractual; the value judgement does not follow (CORRECTED_CLAIMS #3)"),
     (r"\b5\.77%\s*(?:cap[- ])?overshoot|\bcap overshoot of 5\.77",
      "my own retracted error; 0 breaches in 6,794 structures (D-029)"),
+    # ── Gate A round 2 (D-040 / D-041) ──────────────────────────────────────
+    (r"\bno CIC (?:record|file)\b|\bmost vietnamese sellers have no\b|"
+     r"\bCIC (?:coverage|prevalence)\b",
+     "no CIC prevalence data exists in this project"),
+    (r"\bricher(?:,| )?(?:[a-z -]{0,30})?dataset than any bureau|"
+     r"\bricher behavioral dataset\b|\bbetter than (?:a |any )?bureau\b|"
+     r"\bbest credit data\b",
+     "no comparison against bureau data was performed"),
+    (r"\bthird[- ]party verified\b|\bupdated daily\b",
+     "platform verification cadence was never audited by this project"),
+    (r"\bin under a second\b|\bone API call in under\b|\bsub[- ]second\b",
+     "no latency benchmark exists"),
+    (r"common (?:for|in) [a-z, ]{0,40}categor|typical (?:for|of) [a-z, ]{0,40}"
+     r"categor|\bfashion and gift\b",
+     "scenario shapes are specified inputs, not observed category patterns"),
+    (r"\bdefault probability\b(?![^.]{0,60}(?:synthetic|demo|not validated))",
+     "the model score is circular and is not a validated PD"),
+    (r"\bbit[- ]identical to RBF\b|\bRBF-G (?:is |was )?identical to RBF\b|"
+     r"\bguardrails never bind\b",
+     "false: the ceiling binds in 6 of 10 scenarios (D-040)"),
+    # The exclusion list here originally contained the bare word "platform",
+    # which meant the sentence "reproduce byte-for-byte on every platform" —
+    # the exact overclaim — disabled its own pattern. Exclusions must be
+    # narrower than the thing they exempt.
+    # Intervening words allowed: "reproduce IT byte-for-byte" and "reproduce
+    # EACH byte-for-byte" both slipped a version that demanded adjacency, and
+    # both were live in `lab.py` and `lab.html`.
+    (r"reproduces?\s+(?:\w+\s+){0,3}byte[- ]for[- ]byte(?![^.]{0,140}"
+     r"(?:on linux|within a|within the|in the tested|three of five|"
+     r"fixed runtime|same runtime))|"
+     r"byte[- ]identical (?:on|across) (?:every|all|any)\b|"
+     r"byte[- ]for[- ]byte on (?:every|all|any)\b|"
+     # `bit-for-bit` is the same claim in different words, and was live in
+     # `rbf_sim/README.md` and the spec while the scanner watched only for
+     # `byte`. A tripwire that misses a synonym is a tripwire with a gap.
+     r"\bbit[- ]for[- ]bit\b(?![^.]{0,140}"
+     r"(?:withdrawn|too strong|within a|fixed runtime|D-041))",
+     "byte equality is platform-dependent; 9 and 2 last-bit diffs on macOS (D-041)"),
+    (r"burden rises (?:exactly )?in proportion\b",
+     "fixed burden rises in INVERSE proportion to revenue"),
+    (r"\bextended instead of missed\b|\bextended rather than missed\b",
+     "asserts the contract is always ultimately repaid"),
+    (r"Vietnam[- ]calibrated\b|calibrated to Vietnam",
+     "no parameter was estimated from Vietnamese data (A-8)"),
+    (r"would (?:a seller )?realistically be offered\b|"
+     r"what a seller would be offered\b",
+     "the offer set facing this population was never surveyed (A-8)"),
+    (r"platforms settle after returns\b(?![^.]{0,80}(?:pending|unverified))",
+     "no platform settlement documentation was obtained (A-8)"),
+    (r"real RBF contracts commonly\b|commonly carry a maturity date\b",
+     "no market survey of RBF terms was conducted (A-8)"),
+    (r"\bestimates are converged\b|\bthe study is converged\b|"
+     r"\bconverged\b(?=[^.]{0,40}(?:across the study|everywhere))",
+     "convergence was checked for two estimators on one scenario only"),
 )
 
 
@@ -245,6 +335,65 @@ def test_live_surfaces_do_not_overclaim(rel):
             violations.append(f"{rel}:{line}  {m.group(0)!r} — {why}\n      …{snippet}…")
     assert not violations, (
         "unqualified claim(s) on a public surface:\n  " + "\n  ".join(violations))
+
+
+#: Allow-listed documents that nevertheless carry CURRENT authority, and so get
+#: the per-phrase marker check rather than only the document-level banner.
+#:
+#: The registry decides what may be quoted; the backlog decides what gets built.
+#: A stale claim in either is live, whatever the file's classification says. The
+#: pure audit-trail documents (`CORRECTED_CLAIMS`, `DECISION_LOG`,
+#: `PHASE0_AUDIT`, `BASELINE_FINDINGS`) exist precisely to restate wrong claims
+#: at length, so per-phrase marking there produces noise, not signal — they are
+#: covered by the banner test below.
+#: `CLAIM_LEDGER.md` is here despite quoting every retracted phrase in its §6:
+#: it is the document that governs what may be said, so an unmarked claim in it
+#: is maximally live. Its §6 quotations sit beside "withdrawn"/"retracted"
+#: markers and pass; an unmarked assertion — as P-4's settlement premise was —
+#: does not.
+AUTHORITATIVE = ("research/RESULTS_REGISTRY.md", "research/BACKLOG.md",
+                 "research/CLAIM_LEDGER.md")
+
+
+@pytest.mark.parametrize("rel", AUTHORITATIVE)
+def test_allow_listed_documents_do_not_hide_an_unmarked_claim(rel):
+    """Exemption from the LIVE scan is not exemption from scrutiny.
+
+    A forbidden phrase in a document that still governs what may be quoted is
+    acceptable only where it is visibly marked as superseded or retracted.
+    Without this, the allow-list is just a place to hide a claim — which is how
+    the registry came to carry a retracted authorization through two audits.
+    """
+    path = os.path.join(REPO, rel)
+    if not os.path.exists(path):
+        pytest.skip(f"{rel} absent")
+    text = _read(rel)
+    unmarked = []
+    for pattern, why in FORBIDDEN:
+        for m in re.finditer(pattern, text, re.IGNORECASE):
+            if _disowned(text, m.start(), m.end()):
+                continue
+            # Wider window here: these documents mark supersession at the row
+            # or paragraph level rather than inline.
+            ctx = _plain(_join(text[max(0, m.start() - 500):m.end() + 500]))
+            # The ledger's idiom for forbidding a phrase is to quote it and say
+            # "never", "do not", or "counterexample to" — not to strike it. And
+            # a correctly *conditional* use ("repaid in full only if the cap is
+            # reached") is the thing this project spent Gate A adding, so
+            # conditional markers count as marking.
+            if any(c in ctx for c in ("supersede", "retract", "withdraw",
+                                      "corrected", "do not quote", "demote",
+                                      "was wrong", "no longer", "historical",
+                                      "audit trail", "false", "counterexample",
+                                      "never ", "do not ", "must not",
+                                      "only if", "only where", "only matters",
+                                      "conditional", "not a claim")):
+                continue
+            line = text.count("\n", 0, m.start()) + 1
+            unmarked.append(f"{rel}:{line}  {m.group(0)!r} — {why}")
+    assert not unmarked, (
+        "forbidden phrase in an allow-listed document with NO supersession "
+        "marker anywhere near it:\n  " + "\n  ".join(unmarked))
 
 
 @pytest.mark.parametrize("rel", HISTORICAL)
@@ -336,6 +485,23 @@ EVASIONS = (
     "Fixed payments are immune to underreporting.",
     "Providers face no principal loss.",
     "The structure eliminates default risk for the seller.",
+    # Gate A round 2: the exact live claims corrected at D-040/D-041.
+    "Most Vietnamese sellers have no CIC record.",
+    "Platform data is a richer behavioral dataset than any bureau provides.",
+    "Platform revenue is timestamped, third-party verified, and updated daily.",
+    "The whole analysis returns through one API call in under a second.",
+    "Pronounced peaks and troughs — common for fashion and gift categories.",
+    "Default probability 2.4% for this seller.",
+    "RBF-G is bit-identical to RBF in all ten scenarios.",
+    "All five artifacts reproduce byte-for-byte on every platform.",
+    "A fixed instalment's burden rises exactly in proportion as revenue falls.",
+    "Under a revenue share repayment is extended instead of missed.",
+    "Findings hold in a Vietnam-calibrated parameter range.",
+    "Benchmark B answers what a seller would realistically be offered instead.",
+    "Platforms settle after returns, so GMV overcharges.",
+    "Real RBF contracts commonly carry a maturity date.",
+    "The equal-effective-cost cap is f* = 1.0945.",
+    "Estimates are converged across the study.",
 )
 
 

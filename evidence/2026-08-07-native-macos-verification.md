@@ -57,16 +57,48 @@ present on disk.
 
 ## Canonical artifact
 
+> ## ⚠️ THIS SECTION WAS WRONG AND IS WITHDRAWN (D-041)
+>
+> **The step labelled "recomputed" below did not recompute anything.** It read
+> the committed `baseline_v2_canonical.json` and hashed it. Hashing a file
+> against its own recorded checksum tests that the file has not been corrupted
+> on disk. It does not test reproducibility, and it cannot fail for any reason
+> connected to determinism. The conclusion drawn from it — "reproduces
+> byte-for-byte on macOS/arm64… determinism is therefore not an artifact of one
+> platform" — **was not supported by the evidence presented, and is false.**
+>
+> **What an actual regeneration on macOS / CPython 3.11.5 found:**
+>
+> | Artifact | Bytes | Numeric leaves |
+> |---|---|---|
+> | `baseline_v2_canonical.json` | **9 last-bit float differences** | equal at published precision |
+> | `baseline_equalcost_v1_canonical.json` | **2 last-bit float differences** | equal at published precision |
+> | `baseline_closure_v1_canonical.json` | byte-identical | equal |
+> | `baseline_closure_equalcost_v1_canonical.json` | byte-identical | equal |
+> | `validation_v1_canonical.json` | byte-identical | equal |
+>
+> The correct claim is therefore: **all five artifacts reproduce numerically at
+> published precision; three of five reproduce byte-for-byte in the tested
+> macOS environment, and all five do on Linux/aarch64 CPython 3.10.12.** Byte
+> equality across platforms is **not** established and must not be claimed.
+>
+> The artifacts were **not** regenerated to force matching hashes. Doing so
+> would overwrite the evidence instead of verifying it. Use
+> `research/verify_reproduction.py`, which regenerates into a scratch tree and
+> reports byte equality and numeric-leaf equality as separate columns.
+
+The original text is preserved below for the audit trail.
+
 ```
 recomputed  264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849
 provenance  264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849
 expected    264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849
 ```
 
-`research/results/baseline_v2_canonical.json` reproduces **byte-for-byte** on
+~~`research/results/baseline_v2_canonical.json` reproduces **byte-for-byte** on
 macOS/arm64, matching the checksum recorded in `RESULTS_REGISTRY.md` and in the
 artifact's own provenance sidecar. Determinism is therefore not an artifact of
-one platform.
+one platform.~~
 
 ## Production startup
 

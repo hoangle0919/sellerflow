@@ -72,7 +72,7 @@ Status: `todo` · `doing` · `done` · `frozen` · `cut`
 | C-04 | Paired runner — same revenue path, all three arms | P1 | todo | |
 | C-05 | Seller-side metrics module | P1 | todo | Per frozen R-02 definitions |
 | C-06 | Provider-side metrics module | P1 | todo | Recovery, duration variance, incomplete-recovery rate |
-| C-07 | Bootstrap CIs | P1 | todo | |
+| C-07 | Monte Carlo intervals (bootstrap over simulated paths; **not** population CIs — D-014) | P1 | todo | |
 | C-08 | Sensitivity: distress threshold, share %, cap, shock size | P1 | todo | |
 | C-09 | Underreporting / diversion analysis | P1 | todo | H5, SQ4 |
 | C-10 | Figures + tables, regenerated from code | P1 | todo | No hand-made numbers anywhere |

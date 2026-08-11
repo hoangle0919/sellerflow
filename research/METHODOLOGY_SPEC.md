@@ -24,7 +24,7 @@
 | Currency | VND throughout; no FX |
 | Credit-bureau coverage | Motivates the problem only; not a model input |
 
-**Generalization limit (binding on all outputs).** Findings are statements about contract mechanics under stated assumptions, in a Vietnam-calibrated parameter range. They do not generalize to other markets, to sellers outside the modelled range, or to observed behaviour anywhere.
+**Generalization limit (binding on all outputs).** ~~in a Vietnam-calibrated parameter range~~ → **superseded by A-8: "Vietnam-*motivated* and illustratively parameterized."** No parameter in this spec was estimated from Vietnamese data; the market motivates the study and does not calibrate it. Findings are statements about contract mechanics under stated assumptions, in a Vietnam-motivated and illustratively parameterized range. They do not generalize to other markets, to sellers outside the modelled range, or to observed behaviour anywhere.
 
 ---
 
@@ -114,7 +114,7 @@ Four contracts per path. All originate at `t = 1` with identical principal `A`.
 | ID | Contract |
 |---|---|
 | **FIX-A** | Fixed payment, matched principal **and** matched total repayment (§7.1) |
-| **FIX-B** | Conventional amortizing loan at a documented APR (§7.2) |
+| **FIX-B** | ~~Conventional~~ → **Illustrative 18%/12-month amortizing reference** at an assumed APR (§7.2, A-8) |
 | **RBF** | Baseline revenue-based financing (§8.1) |
 | **RBF-G** | Guardrailed revenue-based financing (§8.2) |
 
@@ -137,7 +137,8 @@ Implied APR is **solved and reported**, never assumed:
 A = Σ_{t=1..N} P_A / (1+i)^t      →     APR = (1+i)^12 − 1
 ```
 
-### 7.2 Benchmark B — conventional amortizing loan *(practical comparison)*
+### 7.2 Benchmark B — illustrative 18%/12-month amortizing reference *(practical comparison)*
+> ~~"conventional amortizing loan"~~ superseded by A-8. "Conventional" implies a prevailing market product; `j = 18%` and `N_B = 12` are assumed inputs, neither sourced nor observed.
 
 Standard annuity at documented nominal annual rate `j`, monthly `i = j/12`, term `N_B`:
 
@@ -145,7 +146,7 @@ Standard annuity at documented nominal annual rate `j`, monthly `i = j/12`, term
 P_B = A · i / (1 − (1+i)^{−N_B})
 ```
 
-Total repayment `N_B · P_B ≠ C` in general. **B is never used for cost-matched claims.** It answers "what would a seller realistically be offered instead?" and is reported in a separate column with `j` and `N_B` stated inline.
+Total repayment `N_B · P_B ≠ C` in general. **B is never used for cost-matched claims.** ~~It answers "what would a seller realistically be offered instead?"~~ → **superseded by A-8.** It answers "how does this contract compare against an illustrative 18%/12-month amortizing reference?" No claim is made that such a product is available to this population, or on these terms. It is reported in a separate column with `j` and `N_B` stated inline.
 
 Defaults: `j = 0.18`, `N_B = 12`, both provisional pending Phase 2 sourcing and swept in §12.
 
@@ -251,8 +252,8 @@ FIX-A and FIX-B are invariant to `ω` by construction — reported plainly as an
 ### 10.11 Completion concepts *(added 2026-08-04, amendment A-6)*
 
 ```
-Mathematical completion:  exists finite T with  r · S_T  >=  F · A     (exact arithmetic)
-Operational completion:   F·A − r·S_T  <=  eps                          (settlement tolerance)
+Mathematical completion:  exists finite T with  r · S_T  >=  f · A     (exact arithmetic)
+Operational completion:   f·A − r·S_T  <=  eps                          (settlement tolerance)
 ```
 
 `eps` is a **declared settlement policy**, not a numerical convenience. Every reported completion month names which concept and, if operational, the value of `eps`.
@@ -278,7 +279,7 @@ Reported as a paired table and a scatter of `Δn_HPB` against `ΔRR(12)`.
 | Bootstrap resampling | `BOOTSTRAP_SEED = 90210`, independent stream |
 | Parameter sweeps | Seeds held **fixed** across arms and parameter values, so differences are structural, not sampling artifacts |
 
-Every recorded result stores its seeds. Reruns with identical seeds must reproduce bit-for-bit.
+Every recorded result stores its seeds. Reruns with identical seeds must reproduce **numerically at published precision**, and byte-identically **within a fixed runtime** (A-8 / D-041). ~~bit-for-bit~~ was too strong: on macOS CPython 3.11.5 two artifacts differ in 9 and 2 last-bit floating-point values. Check with `research/verify_reproduction.py`.
 
 ---
 
@@ -350,8 +351,28 @@ Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the 
 
 ## 16. Amendments after first outcome run
 
+### A-8 — Terminology and unsupported factual premises corrected · 2026-08-10
+**Visible at the time:** every registered result. **This amendment changes no parameter, no formula, no seed, no scenario and no result.** It corrects wording that claimed more external grounding than this project has, and one notation collision. Recorded here rather than silently edited, per the amendment rule in §0.
+
+| Was | Now | Why |
+|---|---|---|
+| "Vietnam-calibrated parameter range" (§2) | "Vietnam-**motivated** and illustratively parameterized" | No parameter was estimated from Vietnamese data. The market motivates the study; it does not calibrate it. |
+| "Conventional amortizing loan" (§7, §7.2) | "Illustrative 18%/12-month amortizing reference" | "Conventional" implies a prevailing market product. `j = 18%`, `N_B = 12` are assumed inputs, neither sourced nor observed. |
+| "what would a seller realistically be offered instead?" (§7.2) | "how does this contract compare against an illustrative 18%/12-month amortizing reference?" | The original asserts knowledge of the offer set facing this population. None was gathered. |
+| "platforms settle after returns" (A-1 rationale) | **Pending external support.** The *definitional* argument is retained; the factual premise is marked unverified. | No platform settlement documentation was obtained or cited. |
+| "Real RBF contracts commonly carry a maturity date" (A-4 rationale) | **Pending external support.** The mechanical rationale is retained. | No market survey of RBF terms was conducted, so "commonly" is unsupported. |
+| `F·A` in the completion condition | `f·A` | **Notation collision.** `F` denotes fixed operating cost in `METRIC_DEFINITIONS.md`; the factor rate is lowercase `f` in this spec's own notation table. |
+
+**Affordability.** Wherever an arm was described as "affordable", the supportable statement is only whether it clears **the illustrative burden bands chosen for this study** (10/15/20/25% of revenue). Those bands are reporting thresholds, not validated hardship cutoffs, and burden is measured against revenue rather than against what the seller retains. No affordability claim is made or supported.
+
+**Fixed-payment "advantage".** The supportable statement is **contractual schedule invariance** — `q_t = P` contains no revenue term, so the schedule does not respond to reported revenue. This is not a collection claim: the model assumes fixed payments are made in full and on time, and therefore represents an **optimistic scheduled-recovery benchmark**.
+
+**Rationale.** Raised by an external claim audit at Gate A. Every item above was a statement the project could not support from its own artifacts or any cited source. Correcting them changes no number; leaving them would have put unsupported factual assertions into a paper.
+
+---
+
 ### A-7 — Integer-VND settlement applied; scattered tolerances removed · 2026-08-06
-**Change.** D-023's proposed correction is **approved and applied**. A single module, `rbf_sim/settlement.py`, now holds the monetary rule. The operational layer represents money as integer đồng: payments are quantized under an explicit ROUND_HALF_UP rule, then clipped to the remaining contractual cap, in that order — so rounding can never breach the cap and the final payment is an exact remainder. Cap comparison is integer equality, so the settlement `eps` is **0 by construction**. The analytical layer keeps the exact definition `r·S_T ≥ F·A` with **no epsilon**; the `tol = 0.5` defaults in `metrics.duration`, `metrics.incomplete_recovery` and `contracts.rbf_duration`, and `CAP_TOL = 1.0` in the derivation tests, are replaced by one centralized `FLOAT_GUARD_VND = 1e-6`.
+**Change.** D-023's proposed correction is **approved and applied**. A single module, `rbf_sim/settlement.py`, now holds the monetary rule. The operational layer represents money as integer đồng: payments are quantized under an explicit ROUND_HALF_UP rule, then clipped to the remaining contractual cap, in that order — so rounding can never breach the cap and the final payment is an exact remainder. Cap comparison is integer equality, so the settlement `eps` is **0 by construction**. The analytical layer keeps the exact definition `r·S_T ≥ f·A` with **no epsilon**; the `tol = 0.5` defaults in `metrics.duration`, `metrics.incomplete_recovery` and `contracts.rbf_duration`, and `CAP_TOL = 1.0` in the derivation tests, are replaced by one centralized `FLOAT_GUARD_VND = 1e-6`.
 **Rationale.** D-023 established that the 0.5 was a floating-point workaround, not a settlement rule: inconsistent across modules, absent from this specification, over-provisioned by ~5×10⁶, and not shaped like a whole-đồng rule. Re-measured in this repository over 3,000 paths × 10 baseline scenarios against exact `fractions.Fraction` arithmetic, worst-case per-payment deviation is **9.2387×10⁻⁸ VND** and no path fails to reach an exactly-reached cap at `tol = 0`.
 **Impact on registered results: zero.** `baseline_v2.json` and `validation_v1.json` were regenerated after the change and compared leaf-by-leaf against the registered artifacts: **1 differing leaf, the embedded run date.** Every quantity is unchanged, including `f* = 1.0945`, the matched 13-month / 17,076,923 VND benchmark, and the 37.87% implied APR. The registered result files are therefore **retained unmodified** — nothing changed, so nothing is replaced.
 **Not changed.** No proposition in `DERIVATIONS.md` (byte-identical, verified). The `ε` sensitivity table at `ρ*` (213 / 221 / 266 for `ε` = 1.0 / 0.5 / 0.01) is retained and reclassified from "engine behaviour" to **declared-policy sensitivity**, which is what it always described.
@@ -359,7 +380,7 @@ Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the 
 ### A-1 — Revenue definition and remittance basis · 2026-08-03
 **Visible at the time:** `baseline_v1` results (§F-1…F-5 of `BASELINE_FINDINGS.md`).
 **Change.** §4 now specifies the full revenue chain. `gmv = orders × AOV` is the **only exact identity**; returns, platform fees, and taxes are **deductions from** GMV, not components of it. Added `net_sales`, `cash_receipts`, `platform_fee_rate`, and a contractual `remittance_basis` parameter. **Decision: remittance basis = `net_sales`.** `revenue` remains an alias for `gmv` as the burden denominator.
-**Rationale.** Requested as a definitional clarification, independent of any result: platforms settle after returns, so remitting on GMV charges a share of money the seller never receives. Not result-driven — the change was specified before its effect was computed.
+**Rationale.** Requested as a definitional clarification, independent of any result. ~~platforms settle after returns~~ → **superseded by A-8: pending external support.** No platform settlement documentation was obtained or cited by this project, so the factual premise is unverified. The *definitional* argument stands on its own and is what the amendment rests on: if remittance were computed on GMV, it would charge a share of money the seller never receives. Not result-driven — the change was specified before its effect was computed.
 **Consequence.** Materially changes results. Baseline re-run as **`baseline_v2`**; `baseline_v1` superseded and retained only for audit trail. Matched benchmark moves 12 → 13 months, `P = 17,076,923`, implied APR 37.87%. Added sweep **S-16** over `{gmv, net_sales, cash_receipts}` and **S-15** over `platform_fee_rate ∈ {0, 0.05, 0.10}`.
 
 ### A-2 — Closure and zero-revenue scenarios · 2026-08-03
@@ -369,7 +390,7 @@ Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the 
 
 ### A-3 — Terminal maturity / write-off rule · 2026-08-03
 **Change.** `ContractTerms.terminal_maturity` (0 = none). After that month the contract matures and any unrecovered balance is written off.
-**Rationale.** Real RBF contracts commonly carry a maturity date. Its absence was why incomplete recovery could not bind.
+**Rationale.** ~~Real RBF contracts commonly carry a maturity date.~~ → **superseded by A-8: pending external support.** No market survey of RBF contract terms was conducted, so "commonly" is unsupported. The amendment rests on the mechanical reason alone: without a maturity date, incomplete recovery could not bind at any horizon, so the model could not represent the failure case it exists to study.
 **Consequence.** Write-off at month 18 turns a −40% sustained decline from 0% to 25.7% incomplete recovery.
 
 ### A-4 — Interpretation-layer corrections · 2026-08-03
@@ -378,7 +399,7 @@ Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the 
 **Consequence.** §15 rules 4 and 9 strengthened. No numeric result changed.
 
 ### A-6 — Completion concepts and settlement tolerance · 2026-08-04
-**Change.** §10.11 added, distinguishing **mathematical completion** (exact `r·S_T ≥ F·A` at finite `T`) from **operational completion** (`F·A − r·S_T ≤ ε`). Every reported completion month must name its concept and, if operational, its `ε`.
+**Change.** §10.11 added, distinguishing **mathematical completion** (exact `r·S_T ≥ f·A` at finite `T`) from **operational completion** (`f·A − r·S_T ≤ ε`). Every reported completion month must name its concept and, if operational, its `ε`.
 **Rationale.** At the geometric boundary `ρ = ρ*` the two diverge permanently: mathematical completion never occurs; operational completion occurs at month 213 / 221 / 266 for `ε` = 1.0 / 0.5 / 0.01. Reporting a single unqualified "completion month" would be ambiguous.
 **Not changed.** The engine's `ε = 0.5` default is retained. D-023 classifies it as a floating-point workaround and proposes an integer-VND correction, which is **not applied** — financial behaviour is not changed without approval, and the measured impact on registered results is zero.
 

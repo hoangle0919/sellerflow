@@ -4,7 +4,7 @@
 
 > ✅ **This repository is the source of truth.** The research lives at `research/` in the `sellerflow` repository (`https://github.com/hoangle0919/sellerflow.git`), integrated from bundle v5 on 2026-08-06. The earlier bundle copies — including the one that sat inside an unrelated Excel research folder because it was the only writable location at the time — are **historical backups only**. They are not authoritative and must not be edited, read from, or depended upon. Nothing in this project depends on, reads, or relates to any Excel file.
 
-**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-7
+**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8
 
 > Everything needed to reproduce every number in the project is in this repository.
 >
@@ -62,7 +62,7 @@
 
 | File | Purpose |
 |---|---|
-| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds produce byte-identical output. SHA-256 `264d319b…ac5a7849`. |
+| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
 | `baseline_v2_provenance.json` | Execution record for the above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
 | `baseline_v1.json` | Superseded (`gmv` basis). Audit trail. |
@@ -86,8 +86,14 @@
 cd research                       # from the repository root
 pip install pytest numpy          # only dependencies
 
-# 1. Test suite  (expect: 629 passed)
+# 1. Simulation suite  (expect: 629 passed)
 python3 -m pytest rbf_sim/tests/ -q
+#    Backend suite (expect: 366 passed, 9 skipped). The 9 skips are the
+#    Playwright browser tests; they skip unless a chromium build is present
+#    and are NOT counted as passes.
+python3 -m pytest ../backend/tests -q
+#    Reproducibility (byte vs numeric equality, reported separately — D-041)
+python3 verify_reproduction.py
 
 # 2. Baseline — 10 scenarios x 4 contracts x 500 paths
 #    -> results/baseline_v2_canonical.json   (deterministic; checksum it)
@@ -114,7 +120,9 @@ python3 ../research/analysis/00_audit_evidence.py
 cd ../research && python3 analysis/01_verify_spec.py
 ```
 
-**Determinism.** Base seed `20260803`, bootstrap seed `90210`. Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.
+**Determinism.** Base seed `20260803`, bootstrap seed `90210`.
+
+> ~~Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.~~ **Corrected (D-041).** Identical seeds reproduce **numerically at published precision on every platform tested**. **Byte** equality holds within a fixed runtime, not across runtimes: on Linux/aarch64 CPython 3.10.12 all five canonical artifacts are byte-identical; on macOS CPython 3.11.5, `baseline_v2` differs in **9** last-bit floating-point values and `baseline_equalcost_v1` in **2**. That is IEEE-754 serialization, not variance in the model — but it is not bit-for-bit, and the stronger word was withdrawn rather than defended. Check with `python3 research/verify_reproduction.py`, which reports byte equality and numeric-leaf equality separately and fails only on numeric drift.
 
 ### Applying the README patch
 
@@ -157,8 +165,10 @@ Spot-check any reproduction against these:
 
 **Complete:** Phase 0 audit · frozen methodology · corrected generator · simulation package · baseline · validation battery · corrected claims · README patch · **analytical backbone (7 propositions, test-validated)** · **repository integration and centralized VND settlement policy (D-024)**.
 
-**Not started:** product integration · paper · poster · deck · deployment.
+**Also complete since this line was last accurate:** product integration — the Simulation Lab (`frontend/lab.html` + `backend/lab.py`) renders every figure from the canonical artifacts and merged to `main` in PR #2; the centralized monetary policy (`backend/money.py`, D-030); the closure baselines (D-032); `validation_v1` canonicalization (D-038); and the claim ledger with its enforcement tests (D-037…D-041).
 
-**Gate:** product integration begins only after the baseline commit is approved.
+**Not started:** paper · poster · deck · deployment.
+
+**Gate:** the publication phase is gated on the Gate A claim audit, not on the baseline commit.
 
 **Not in this project:** Excel. Removed entirely per instruction 2026-08-03 — no dependency, assumption, deliverable, blocker, or reconciliation task remains.

@@ -95,8 +95,10 @@ GLOSSARY = {
                             "confidence interval and says nothing about real "
                             "sellers.",
     "canonical artifact": "A committed, checksummed result file. Identical code, "
-                          "configuration and seeds reproduce it byte-for-byte, "
-                          "so any figure here can be traced to a verifiable file.",
+                          "configuration and seeds reproduce it byte-for-byte "
+                          "within a fixed runtime, and numerically at published "
+                          "precision on every platform tested — so any figure "
+                          "here can be traced to a verifiable file.",
     "reference path": "A flat, shock-free revenue path used once to price the "
                       "fixed benchmark. Contracts are priced at origination, so "
                       "a later shock cannot retro-price them.",
@@ -110,7 +112,9 @@ SCENARIOS: Dict[str, dict] = {
     "seasonal":          {"label": "Moderate seasonality", "family": "baseline", "order": 2,
                           "description": "Ordinary seasonal swing around a flat trend."},
     "seasonal_strong":   {"label": "Strong seasonality", "family": "baseline", "order": 3,
-                          "description": "Pronounced peaks and troughs — common for fashion and gift categories."},
+                          "description": "Pronounced peaks and troughs. The shape is a "
+                                         "specified input, not an observed category "
+                                         "pattern; no category data informs it."},
     "growth":            {"label": "Growth", "family": "favourable", "order": 4,
                           "description": "3% month-on-month growth with moderate seasonality."},
     "gradual_decline":   {"label": "Gradual decline", "family": "stress", "order": 5,
@@ -661,10 +665,15 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                  "measurement.",
          "source": "research/DERIVATIONS.md"},
         {"classification": "mathematical_property",
-         "text": "A fixed instalment does not adjust, so its burden rises "
-                 "exactly in proportion as revenue falls. Under a revenue share "
-                 "repayment is extended instead of missed — the trade is timing, "
-                 "not forgiveness.",
+         "text": "A fixed instalment does not adjust, so its burden rises in "
+                 "INVERSE proportion to revenue: halve revenue and the burden "
+                 "doubles. (It does not rise 'in proportion' — that would mean "
+                 "falling with revenue, which is what the revenue share does.) "
+                 "Under a revenue share the expected repayment period lengthens "
+                 "instead. That is a statement about the payment rule, not about "
+                 "whether the contract is ultimately repaid: where revenue stops "
+                 "before the cap is reached, a balance goes unrecovered. The "
+                 "trade is timing, not forgiveness — and not immunity.",
          "source": "research/DERIVATIONS.md"},
     ]
 

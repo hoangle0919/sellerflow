@@ -677,7 +677,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
               <span class="hd-tier" id="hd-tier">Low Risk</span>
             </div>
             <div class="decision-word" id="hd-word">Approved</div>
-            <div class="hd-pdline" id="hd-pdline">Default probability 2.4%</div>
+            <div class="hd-pdline" id="hd-pdline">Demo score 2.4% — synthetic, not a validated default probability</div>
             <div class="hd-advance">
               <span class="hd-advance-label">Recommended advance</span>
               <div class="hd-amount mono" id="hd-limit">333,000,000₫</div>
@@ -698,16 +698,16 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="wrap argument">
       <div>
         <span class="label">Why this exists</span>
-        <h2>The best credit data isn't in a bureau file.</h2>
+        <h2>A different data source, not a proven better one.</h2>
       </div>
       <div>
         <div class="arg-entry">
           <span class="arg-num">01</span>
-          <div><h3>No history ≠ no signal</h3><p>Most Vietnamese sellers have no CIC record. But 680 days of order data, customer ratings, and delivery performance is a richer behavioral dataset than any bureau provides.</p></div>
+          <div><h3>A thin bureau file is not no signal</h3><p>Where a seller's bureau history is thin, order data, customer ratings and delivery performance still accumulate continuously. Whether those predict repayment is not a claim this project tests — it has no seller outcomes to test against, and no comparison against bureau data was performed.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">02</span>
-          <div><h3>Revenue you can verify</h3><p>Platform revenue is timestamped, third-party verified, and updated daily. A payslip is a photocopy.</p></div>
+          <div><h3>Revenue that is recorded, not self-reported</h3><p>Platform revenue arrives timestamped from the platform rather than from the applicant. Verification frequency and integrity depend on each platform's own settlement process, which this project has not audited.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">03</span>
@@ -1180,7 +1180,7 @@ function renderPreview(){
   const rows=[['Shop',applyData.shop_name],['Platform',applyData.platform],['Monthly revenue',fmtVND(applyData.monthly_revenue)],['Revenue growth',signed(applyData.revenue_growth)],['Return rate',pct(applyData.return_rate)],['Late shipments',pct(applyData.late_ship_rate)],['Rating',applyData.rating+' / 5.0'],['Days active',applyData.days_active+' days']];
   document.getElementById('preview-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
 }
-const DECISION_STEPS=['Reading merchant profile','Normalizing platform metrics','Checking revenue stability','Estimating default probability','Structuring the financing','Simulating repayment scenarios','Decision ready'];
+const DECISION_STEPS=['Reading merchant profile','Normalizing platform metrics','Checking revenue stability','Computing the demo risk score','Structuring the financing','Simulating repayment scenarios','Decision ready'];
 async function runDecisionSequence(){
   const fill=document.getElementById('seq-fill'), text=document.getElementById('seq-text');
   for(let i=0;i<DECISION_STEPS.length;i++){
@@ -1505,7 +1505,11 @@ function heroRenderDecision(d, ms){
   word.className='decision-word'+(cls?' '+cls:'');
   word.textContent=VERDICT[d.decision]||d.decision;
   document.getElementById('hd-tier').textContent=d.risk_tier||'—';
-  document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Default probability '+pct(d.pd_score,1)):'';
+  /* Labelled as a synthetic demo score, not a validated PD: the model is
+     trained on generated data whose label is a formula over the same features
+     (D-001). Labelling it a PD would assert predictive validity that this
+     project has withdrawn. */
+  document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Demo score '+pct(d.pd_score,1)+' — synthetic, not a validated default probability'):'';
   document.getElementById('hd-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
   document.getElementById('hd-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
   document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);

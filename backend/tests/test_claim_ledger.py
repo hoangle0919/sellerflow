@@ -59,8 +59,10 @@ def test_headline_figures_still_match_their_artifacts():
 
     cases = [
         ("1.0945", v["pricing"]["equal_cost"]["f_star"], 1.0945),
-        ("19.5377", v["pricing"]["equal_cost"]["apr"] * 100, 19.5377),
-        ("19.5618", v["pricing"]["benchmark_b_apr"] * 100, 19.5618),
+        # Six decimals, because P-1 must show the residual against the
+        # reference rather than imply an exact cost match (Gate A round 2).
+        ("19.537656", v["pricing"]["equal_cost"]["apr"] * 100, 19.537656),
+        ("19.561817", v["pricing"]["benchmark_b_apr"] * 100, 19.561817),
         ("18.718", b["scenarios"]["severe_downturn"]["RBF"]["duration_mean"], 18.718),
         ("76.2", c["scenarios"]["closure_m13"]["RBF"]["incomplete_recovery_rate"] * 100, 76.2),
         ("7.6", ce["scenarios"]["closure_m13"]["RBF"]["incomplete_recovery_rate"] * 100, 7.6),
@@ -80,6 +82,20 @@ def test_closure_falsifies_the_default_prevention_claim():
     for stem in ("baseline_closure_v1", "baseline_closure_equalcost_v1"):
         rate = _artifact(stem)["scenarios"]["closure_m7"]["RBF"]["incomplete_recovery_rate"]
         assert rate == 1.0, f"{stem}: closure_m7 incomplete rate is {rate}, expected 1.0"
+
+
+def test_f_star_is_presented_as_a_grid_match_with_its_residual():
+    """P-1. `f*` is the nearest point on the swept cap-factor grid, not an
+    exact cost match. Stating it without the residual implies equality."""
+    v = _artifact("validation_v1")
+    residual = abs(v["pricing"]["equal_cost"]["apr"]
+                   - v["pricing"]["benchmark_b_apr"]) * 100
+    assert round(residual, 5) == pytest.approx(0.02416, abs=5e-5), \
+        f"residual drifted to {residual:.6f}pp"
+    txt = _text()
+    assert "0.02416" in txt, "P-1 must state the residual in percentage points"
+    assert "nearest grid match" in txt or "grid match" in txt, \
+        "P-1 must not imply an exact cost match"
 
 
 def test_rbf_g_floor_never_binds_but_the_ceiling_does():

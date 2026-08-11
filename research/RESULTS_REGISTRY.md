@@ -10,7 +10,9 @@ README, app, or resume.
 
 ## Canonical artifacts *(added 2026-08-07, D-027)*
 
-Results are cited by **checksum**, from the canonical artifact. Canonical files contain only quantities and deterministic identity metadata; wall-clock time, git commit and environment live in the provenance sidecar. Identical code, configuration and seeds produce a byte-identical canonical file.
+Results are cited by **checksum**, from the canonical artifact. Canonical files contain only quantities and deterministic identity metadata; wall-clock time, git commit and environment live in the provenance sidecar.
+
+> **⚠️ Determinism claim corrected (D-041).** This paragraph previously ended "Identical code, configuration and seeds produce a byte-identical canonical file." **That is true within a platform and false across platforms, and is withdrawn as stated.** Measured: on Linux/aarch64 CPython 3.10.12 all five artifacts regenerate byte-identically; on macOS CPython 3.11.5, `baseline_v2` shows **9** last-bit floating-point differences and `baseline_equalcost_v1` shows **2**, while the other three are byte-identical. **All five are numerically equal at published precision in both environments.** The correct claim is therefore *numeric* reproducibility everywhere and *byte* reproducibility within a fixed runtime. Verify with `python3 research/verify_reproduction.py`, which reports the two separately. Artifacts were not regenerated to force matching hashes.
 
 | Artifact | SHA-256 | Status |
 |---|---|---|
@@ -125,7 +127,7 @@ Under a −40% sustained decline, distress-month counts (T-0):
 - **F-2 ⚠️ against the product — ~~"costs ~2.3× the interest of a conventional loan"~~ SUPERSEDED (D-015, `CORRECTED_CLAIMS.md` #2, `DERIVATIONS.md` P6).** The arithmetic stands: Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. The *interpretation* does not. P6 shows total cost is proportional to `f` and that APR is jointly determined by `f` and the revenue path, so a ratio computed at the illustrative `f = 1.20` is a **pricing** result, not a property of revenue-based repayment. Correct framing: at the illustrative 1.20× cap the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at the reference-path cost-matched `f* = 1.0945` it is not. **Do not quote the 2.3× ratio.**
 - **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
 - **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue — a genuine structural advantage of FIX.
-- **F-5 ⚠️ null.** RBF-G bit-identical to RBF in all ten scenarios. Default guardrails never bind.
+- **F-5 ⚠️ null — ~~"bit-identical to RBF in all ten scenarios"~~ SUPERSEDED (D-040).** The **floor** never binds — 0 of 36,000 month-observations, provably unreachable since `μ = 0.25 < h = 0.50`. The **ceiling** does bind, in 6 of 10 scenarios, and those are exactly the 6 where RBF-G differs numerically from RBF. Present the surviving null as *"the hardship floor never activates by construction"*, never as *"the guardrails never bind"*.
 
 ### Limitations
 
@@ -177,7 +179,7 @@ Under stable (−4.3pp), growth (−7.7pp), 1-month disruption (−1.1pp) and st
 | ID | Null result | Status |
 |---|---|---|
 | **N-1** | Incomplete recovery = 0.0% across all ten baseline scenarios | **Preserved.** Explained as a horizon artifact by R-011's boundary search, not deleted. The original null and its explanation both stand. |
-| **N-2** | RBF-G bit-identical to RBF in all ten scenarios | **Preserved.** Cause identified analytically: the payment floor is unreachable by construction. **Parameters were not retuned to make it bind.** |
+| **N-2** | ~~RBF-G bit-identical to RBF in all ten scenarios~~ | ❌ **SUPERSEDED — the null result as stated is false (D-040).** RBF-G differs numerically from RBF in **6 of 10** scenarios. The *floor* is indeed unreachable by construction and binds 0 of 36,000 month-observations; the *ceiling* `p_max = 2·r·R₀` binds in six scenarios (1,400 of 12,000 observations in `growth`; 11 in `seasonal_strong`; 1 each in `seasonal`, `disruption_1m`, `platform_outage`, `returns_spike`) and the six binding scenarios are exactly the six that differ. The differences fall below display precision, which is why the null survived review. **Parameters were still not retuned.** The surviving null is narrower: **N-2′ — the RBF-G hardship floor never activates on any path, by construction.** |
 
 Both remain in the registry permanently. Neither was removed once explained.
 
@@ -196,7 +198,7 @@ the frozen metric definitions (backlog R-02) per decision D-004.
 | R-013 | Affordability-signal comparison under simulated stress | H4 (reframed) | Exploratory |
 | R-014 | Underreporting / revenue-diversion sensitivity | H5 | Confirmatory |
 | R-015 | Distress-threshold sensitivity sweep | robustness | Confirmatory |
-| R-016 | Bootstrap CIs on all headline metrics | robustness | Confirmatory |
+| R-016 | Monte Carlo intervals on all headline metrics (bootstrap resampling over simulated paths — **not** population CIs, D-014) | robustness | Confirmatory |
 | R-017 | New generator passes the integrity engine (before/after RI-3) | H5 | Confirmatory |
 
 ---

@@ -2,7 +2,7 @@
 
 **Revenue-Based Financing** — evaluate revenue-based financing with evidence, not guesswork.
 
-RBF analyzes ecommerce-merchant revenue, tests repayment scenarios, and surfaces the risks and assumptions behind every financing recommendation. Most Vietnamese sellers have no credit-bureau (CIC) record — but their platform revenue, growth, returns, and fulfillment history is a richer, third-party-verified dataset than any bureau file. RBF turns that data into a structured financing analysis: recommended advance, remittance percentage, repayment cap, downside scenarios, and the categorized risk findings behind the recommendation — through one API call in under a second.
+RBF analyzes ecommerce-merchant revenue, tests repayment scenarios, and surfaces the risks and assumptions behind every financing recommendation. The motivating premise is that many small Vietnamese e-commerce sellers have limited or no credit-bureau (CIC) file, while their platform activity — revenue, growth, returns, fulfilment history — is recorded continuously. **No prevalence figure is claimed** — this project holds no such data — and the comparison to a bureau file is a motivation for the design, **not a measured finding**. RBF turns platform data into a structured financing analysis: recommended advance, remittance percentage, repayment cap, downside scenarios, and the categorized risk findings behind the recommendation.
 
 > **⚠️ No current public deployment.**
 > The previously-linked Railway host serves a **superseded build** ("SellerFlow", credit-limit/interest-rate framing) that predates the RBF rework and does not reflect this repository. It is **not** representative of this project, and the link has been removed rather than left to mislead. A corrected deployment will be published only once documentation, validated results, and product agree.
@@ -133,10 +133,10 @@ The generating function is, up to sampling noise, the Bayes-optimal ranker for t
 
 Two further defects in the same synthetic data, both reproducible:
 
-- All ten features were drawn **independently**, so the accounting identity `revenue = orders × AOV` is violated in **61%** of rows. Reported feature importances therefore describe the generating formula's own weights, not sellers.
+- All ten features were drawn **independently**, so `revenue`, `orders` and `AOV` are mutually inconsistent. What was actually measured: the median ratio `revenue / (orders × AOV)` is **0.9751**, and **60.97%** of rows fall outside the project's own reconciliation band `[0.55, 1.75]`, which its integrity engine flags at **62.30%**. (An earlier README rounded this to "the identity is violated in 61% of rows"; the identity is violated in essentially *every* row, since the draws are independent — 61% is the share falling outside the tolerance band, which is a different statement.) Reported feature importances therefore describe the generating formula's own weights, not sellers.
 - The project's own integrity screen flags **62.3%** of the rows the credit model was trained on — the two components encode contradictory beliefs about what a seller looks like.
 
-`validate_on_real_data.py` remains valid and reproducible: the same RF+LR ensemble, 5-fold cross-validated on UCI German Credit (1,000 real applicants) and UCI Taiwan credit-card default (30,000 real accounts). It shows the *method* has out-of-sample skill on real consumer-credit data. It does **not** validate the merchant model — different features, different population, no merchant outcomes — and must not be quoted as this project's accuracy.
+`validate_on_real_data.py` is reproducible in principle: the same RF+LR ensemble, 5-fold cross-validated on UCI German Credit (1,000 real applicants) and UCI Taiwan credit-card default (30,000 real accounts). **The ~0.80 / ~0.77 figures have not been independently re-run in the current audit** — `RESULTS_REGISTRY.md` R-002 carries them as *re-run pending* (Phase 5 V-03), and they should be quoted as such. Taken at face value they would indicate the *method* has out-of-sample skill on real consumer-credit data. It does **not** validate the merchant model — different features, different population, no merchant outcomes — and must not be quoted as this project's accuracy.
 
 `real_world_validation` in `GET /api/model/status` remains `null` and stays null until adjudicated merchant outcomes exist.
 
@@ -165,7 +165,7 @@ GXS's brief asks for *"an adaptive risk modelling system that unifies credit and
 
 | GXS pillar | Shipped today | Roadmap |
 |---|---|---|
-| **Credit assessment** | RF+LR PD estimate → deterministic financing structure, scenarios, and categorized risk findings, in one API call. This is the half RBF genuinely owns. | Retro-validation and recalibration on a partner's real loan book. |
+| **Credit assessment** | RF+LR score → deterministic financing structure, scenarios, and categorized risk findings, exposed as a single endpoint. Response time is not benchmarked and no latency claim is made. The score is **not a validated probability of default** — it is trained on synthetic data with a circular label. | Retro-validation and recalibration on a partner's real loan book. |
 | **Unify credit + fraud** | One assessment returns both a credit view and a rule-based **integrity screen** (5 misrepresentation/consistency checks); an elevated integrity level **gates** the credit decision into a single coherent outcome. | Supervised fraud/AML model on device, behavioral, and network signals — not just self-reported fields. |
 | **Continuously learning** | Learning loop is **built**: outcome-recording endpoint + real-world validation that computes genuine AUC once outcomes accumulate, with a retrain-on-holdout-lift policy. | Live retraining cadence and champion/challenger promotion, once a real outcome stream exists. |
 

@@ -127,7 +127,13 @@ floor APPLIES when  obs ≥ hardship·R₀            →   obs ≥  0.50·R₀
 0.25 < 0.50  →  conditions are mutually exclusive
 ```
 
-**The payment floor can never activate, for any revenue path whatsoever.** It is provably dead code. This fully explains the baseline v1 null result — RBF-G was bit-identical to RBF because one guardrail was unreachable by construction and the other rarely bound.
+**The payment floor can never activate, for any revenue path whatsoever.** It is provably dead code.
+
+> **⚠️ Corrected (D-040).** The sentence that followed — that this "fully explains" the null because RBF-G was bit-identical to RBF — is **withdrawn**. The floor explanation is right; the bit-identity is not. RBF-G differs numerically from RBF in **6 of 10** baseline scenarios, and those six are exactly the ones where the *ceiling* `p_max = 2·r·R₀` binds (1,400 of 12,000 month-observations in `growth`, 11 in `seasonal_strong`, 1 each in `seasonal`, `disruption_1m`, `platform_outage`, `returns_spike`). The differences fall below display precision. The surviving claim is about the floor only.
+>
+> ~~This fully explains the baseline v1 null result — RBF-G was bit-identical to RBF because one guardrail was unreachable by construction and the other rarely bound.~~
+>
+> **That sentence is withdrawn too, and it was left standing here by mistake in the first pass of this correction (D-042).** Writing a retraction and then restoring the retracted sentence verbatim two clauses later is worse than not retracting it. Checked directly against `results/baseline_v1.json`: RBF-G differs from RBF in **6 of 10** scenarios *there as well* — `seasonal`, `seasonal_strong`, `growth`, `disruption_1m`, `platform_outage`, `returns_spike`. So the bit-identity claim is false for **v1 and v2 alike**, and the floor explanation does not "fully explain" a null that was never a null. What the floor explains is only that the *floor* never fired.
 
 Breakpoint scan, 36,000 month-observations under strong seasonality + 3%/month growth (the most favourable case for binding):
 

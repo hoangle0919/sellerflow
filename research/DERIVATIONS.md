@@ -77,7 +77,9 @@ The repayment duration is `D = min{ k : S_k ≥ A·f/r }`.
 
 **Proof.** By P1, cumulative RBF payments through `k` equal `min(r·S_k, C)`. This equals `C` iff `r·S_k ≥ C`. ∎
 
-**Consequence — path shape is irrelevant to *whether*, only to *when*.** The threshold `A·f/r` is a constant. Two sellers with identical cumulative sales reach the cap at the same month regardless of how differently that revenue was distributed in time. Seasonality, volatility, and shock timing affect duration only through their effect on the *cumulative* series.
+**Consequence — path shape is irrelevant to *whether*, only to *when*.** The threshold `A·f/r` is a constant. Seasonality, volatility, and shock timing affect duration only through their effect on the *cumulative* series.
+
+> **⚠️ Scope correction (D-042).** This paragraph previously continued: ~~"Two sellers with identical cumulative sales reach the cap at the same month regardless of how differently that revenue was distributed in time."~~ **Withdrawn — it confuses the terminal cumulative total with the cumulative trajectory.** Duration is the **first passage time** `D = min{k : S_k ≥ A·f/r}`, a property of the whole path `S_1, S_2, …`, not of its endpoint. Two sellers with the same *terminal* cumulative base can cross the threshold in different months: front-loaded revenue crosses earlier, back-loaded later. Equal first-passage months follow only from **identical cumulative trajectories up to the crossing**, or trivially from both crossing at the same `k`. What the proposition actually says is that duration depends on the path *only through* `S_k` — which is a much weaker and correct statement.
 
 At `A = R₀`, `f = 1.20`, `r = 0.10`: required cumulative base `= 12·R₀`. The contract needs twelve months of baseline revenue in total, whenever it arrives.
 
@@ -111,7 +113,9 @@ with equality only when `C/(r·B̄)` is an integer. **Whenever the duration roun
 
 ---
 
-## P5 — Proportional underreporting scales recovery exactly, and duration inversely
+## P5 — Proportional underreporting scales recovery exactly, and raises the cumulative-sales threshold by `1/ω`
+
+> **⚠️ Heading and summary corrected (D-040).** This section was previously titled "…and duration inversely", and the §A summary read "duration by `1/ω`". **That is wrong and is withdrawn.** What scales exactly by `1/ω` is the *required cumulative remittance base* `S_k ≥ A·f/(r·ω)` — a threshold. Duration is the **first passage time** to that threshold, which depends on the shape of the path, not only on the threshold's level. The proof below always said this correctly; only the heading and the summary overstated it. Empirically, in the `baseline_v2` sweep mean duration runs 12.862 months at `ω = 1.00` and 18.690 at `ω = 0.70`; exact inverse scaling would give 12.862/0.70 = 18.374.
 
 **Proposition.** If the provider observes `ω·B_t`, then while the cap is not binding:
 
@@ -158,10 +162,10 @@ This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan
 **Proposition.** The RBF contract completes repayment over an applicable horizon `H` (a finite evaluation horizon, a contractual maturity, or the business lifetime, whichever binds first) **if and only if**
 
 ```
-r · Σ_{t ≤ H} B_t  ≥  F · A          equivalently        S_H  ≥  F·A / r
+r · Σ_{t ≤ H} B_t  ≥  f · A          equivalently        S_H  ≥  f·A / r
 ```
 
-Incomplete recovery is exactly the complement: `S_H < F·A/r`.
+Incomplete recovery is exactly the complement: `S_H < f·A/r`.
 
 **Proof.** Immediate from P3 applied at `H`, together with monotonicity of `S_k`. ∎
 
@@ -174,7 +178,7 @@ Incomplete recovery is exactly the complement: `S_H < F·A/r`.
 | 1 | **Business closure / zero-revenue periods** | `B_t = 0` for `t ≥ c` freezes `S` at `S_{c−1}`. Absorbing: no horizon extension helps. |
 | 2 | **Binding maturity or write-off rule** | `H = M` truncates the sum before the threshold is reached. |
 | 3 | **Finite evaluation horizon** | `H = T`. A *measurement* artifact, not an economic loss — the contract might still complete later. |
-| 4 | **Strictly positive but sufficiently fast-decaying revenue** | `Σ_{t=1}^{∞} B_t` **converges** to a finite value below `F·A/r`. Revenue is positive in every period, forever, and the cap is still never reached. |
+| 4 | **Strictly positive but sufficiently fast-decaying revenue** | `Σ_{t=1}^{∞} B_t` **converges** to a finite value below `f·A/r`. Revenue is positive in every period, forever, and the cap is still never reached. |
 
 Cause 4 was **missing** from the earlier version. It is not exotic: any geometric decline is of this form.
 
@@ -184,7 +188,7 @@ Let `S_∞ = Σ_{t=1}^{∞} B_t ∈ (0, ∞]`.
 
 ```
 S_∞ = ∞   (series diverges)   →  completion is guaranteed given an unbounded horizon
-S_∞ < ∞   (series converges)  →  completion iff  S_∞ ≥ F·A/r ;  otherwise NEVER, at any horizon
+S_∞ < ∞   (series converges)  →  completion iff  S_∞ ≥ f·A/r ;  otherwise NEVER, at any horizon
 ```
 
 ### Completion is a finite-time property
@@ -192,7 +196,7 @@ S_∞ < ∞   (series converges)  →  completion iff  S_∞ ≥ F·A/r ;  other
 **Definition (binding).** The contract **completes** iff there exists a **finite** month `T` with
 
 ```
-r · Σ_{t ≤ T} B_t  ≥  F · A
+r · Σ_{t ≤ T} B_t  ≥  f · A
 ```
 
 Completion in the limit is **not** completion. This distinction is vacuous when `S_∞ = ∞` but decisive at the convergent boundary, below.
@@ -207,12 +211,12 @@ S_T = B_0 (1 − ρ^{T+1}) / (1 − ρ)   <   S_∞      strictly, for every fin
 Because `ρ^{T+1} > 0` for all finite `T`, **no finite partial sum ever attains `S_∞`.** Therefore:
 
 ```
-completion in finite time  ⟺  r·S_∞ > F·A  ⟺  ρ  >  ρ* = 1 − r·B_0/(F·A)
+completion in finite time  ⟺  r·S_∞ > f·A  ⟺  ρ  >  ρ* = 1 − r·B_0/(f·A)
 ```
 
 **The inequality is strict.** An earlier version of this section wrote `ρ ≥ ρ*`, which is wrong — see D-022.
 
-With `A = B_0 = 100M`, `F = 1.20`, `r = 0.10`: `ρ* = 1 − 10/120 = 11/12 ≈ 0.916667`.
+With `A = B_0 = 100M`, `f = 1.20`, `r = 0.10`: `ρ* = 1 − 10/120 = 11/12 ≈ 0.916667`. **At the other registered cap factor `f* = 1.0945`, `ρ* = 0.908634`** — the threshold moves with the price, so 11/12 must never be quoted as *the* threshold (D-040).
 
 | Case | Lifetime `r·S_∞` | Verdict |
 |---|---|---|
@@ -220,7 +224,7 @@ With `A = B_0 = 100M`, `F = 1.20`, `r = 0.10`: `ρ* = 1 − 10/120 = 11/12 ≈ 0
 | **`ρ = 11/12 = ρ*`** | **= 120M exactly** | **Never completes in finite time.** Repayment approaches the cap asymptotically from below and never reaches it. An *asymptotic boundary case*, not a completion. |
 | `ρ = 0.95 > ρ*` | 200M > 120M | Completes at a finite month. |
 
-**The boundary case, computed.** At `ρ = ρ*` the shortfall `F·A − r·S_T` is strictly positive at every horizon:
+**The boundary case, computed.** At `ρ = ρ*` the shortfall `f·A − r·S_T` is strictly positive at every horizon:
 
 | `T` | `r·S_T` | Shortfall (VND) |
 |---|---|---|
@@ -238,7 +242,7 @@ The 1-VND-scale tolerance in the engine does **not** make the boundary a bug. It
 
 | Concept | Definition | At `ρ = ρ*` |
 |---|---|---|
-| **Mathematical completion** | ∃ finite `T` with `r·Σ_{t≤T} B_t ≥ F·A` in exact arithmetic | **Never occurs.** Shortfall is strictly positive at every finite `T`. |
+| **Mathematical completion** | ∃ finite `T` with `r·Σ_{t≤T} B_t ≥ f·A` in exact arithmetic | **Never occurs.** Shortfall is strictly positive at every finite `T`. |
 | **Operational completion** | remaining balance `≤ ε`, a settlement tolerance | **Occurs**, at a month determined entirely by `ε`. |
 
 Operational completion month at `ρ = ρ*`, by tolerance:
@@ -263,7 +267,7 @@ A lender settling to the nearest đồng would genuinely regard the balance as d
 "revenue bounded away from zero"   →  SUFFICIENT for eventual completion, NOT necessary
 "revenue strictly positive"        →  NOT SUFFICIENT   ← the corrected error
 "Σ B_t diverges"                   →  SUFFICIENT for eventual completion (unbounded horizon)
-"S_H ≥ F·A/r"                      →  NECESSARY AND SUFFICIENT   ← the general criterion
+"S_H ≥ f·A/r"                      →  NECESSARY AND SUFFICIENT   ← the general criterion
 ```
 
 `Σ B_t = ∞` is strictly weaker than `B_t ≥ B_min > 0` — the harmonic path satisfies the former and violates the latter — so the divergence criterion properly generalises the old corollary.
@@ -285,11 +289,11 @@ Every statement the project makes falls into exactly one of these five classes. 
 ### A. Mathematical properties — hold for any revenue path, no calibration needed
 - **P1** RBF burden ≡ `r` until the capped payment.
 - **P2** Fixed burden has elasticity `−1` in revenue; a −50% month doubles it.
-- **P3** Cap reached iff `S_k ≥ A·f/r`; path shape affects only timing.
-- **P4** RBF leads fixed on recovery iff mean revenue `> B* = P/r`; integer rounding of `N` makes `B* < B̄`.
-- **P5** Underreporting scales recovery by `ω` exactly and duration by `1/ω`.
-- **P6** Multiple is `f` path-independently; APR is path-dependent; price and structure separable.
-- **P7** Completion iff `r·Σ B_t ≥ F·A` over the applicable horizon. Four causes of incomplete recovery: zero revenue, maturity/write-off, finite horizon, **or a strictly positive but fast-decaying path with inadequate lifetime cumulative sales.** Bounded-away-from-zero is sufficient, not necessary; positive is not sufficient. Completion is a **finite-time** property: for geometric decay it requires `ρ > ρ*` **strictly**, since at `ρ = ρ*` the cap is approached asymptotically and never attained.
+- **P3** Cap reached iff `S_k ≥ A·f/r`. Path shape affects only *timing* — but note that two paths with the **same terminal cumulative base need not reach the threshold in the same month**. Equal first-passage months follow only from identical cumulative trajectories up to the crossing, or from the crossing occurring at the same `k`.
+- **P4** RBF leads fixed on cumulative recovery through `k` iff the **realized mean eligible base** `(1/k)·S_k > B* = P/r` — the exact condition at P4 above. It is *not* captured by the labels "declining" versus "non-declining": a declining path whose realized mean still clears `B*` leads, and a flat path below `B*` lags. Integer rounding of `N` makes `B* < B̄`, which is why the stable scenario leads.
+- **P5** Underreporting scales recovery by `ω` exactly and raises the required cumulative base by `1/ω`. **Duration does not generally scale by `1/ω`** — it is the first passage time to that threshold (corrected, D-040).
+- **P6** The **contractual repayment target** is `A·f`, path-independently. **Realized total repayment equals it only upon completion**; where the cap is never reached the realized total falls short. APR is path-dependent; price and structure are separable.
+- **P7** Completion iff `r·Σ B_t ≥ f·A` over the applicable horizon. Four causes of incomplete recovery: zero revenue, maturity/write-off, finite horizon, **or a strictly positive but fast-decaying path with inadequate lifetime cumulative sales.** Bounded-away-from-zero is sufficient, not necessary; positive is not sufficient. Completion is a **finite-time** property: for geometric decay it requires `ρ > ρ*` **strictly**, since at `ρ = ρ*` the cap is approached asymptotically and never attained.
 
 ### B. Simulation results — illustrate A under stated illustrative parameters
 Magnitudes in `baseline_v2.json` and `validation_v1.json`. **Not estimates for Vietnamese sellers.** Example: "under the illustrative severe-downturn scenario, RBF removes 6.85 high-burden months at θ=0.15" — a property of that scenario specification, nothing more.
@@ -336,10 +340,24 @@ and cumulatively, RBF-G can only ever lag plain RBF, never lead it.
 
 | Rule | Status |
 |---|---|
-| **Floor** | **Provably unreachable** for `μ ≤ h`. Universal, path-independent. |
-| **Ceiling** | Binds when `B_t > 2·R₀`. Did **not** bind in the ten baseline scenarios because revenue never reached 2× baseline there — a **scenario-specific** fact, not a theorem. |
+| **Floor** | **Provably unreachable** for `μ ≤ h`. Universal, path-independent. Binds **0 of 36,000** month-observations in the breakpoint scan. |
+| **Ceiling** | Binds when `B_t > 2·R₀`. **It does bind in the baseline scenarios** — see the count below. Scenario-specific, not a theorem. |
 
-So the `baseline_v2` observation "RBF-G ≡ RBF in all ten scenarios" is universal with respect to the floor and scenario-specific with respect to the ceiling. Both parts are now asserted separately by test.
+> **⚠️ Second scope correction (D-040) — the row above previously read "Did **not** bind in the ten baseline scenarios because revenue never reached 2× baseline there." That is false and is withdrawn.** Counting month-observations where `r·B_t > p_max = 2·r·R₀` across the full 500 paths of each `baseline_v2` scenario:
+>
+> | Scenario | Obs. where the ceiling binds | Paths touched |
+> |---|---|---|
+> | `growth` | 1,400 / 12,000 (11.67%) | 497 / 500 |
+> | `seasonal_strong` | 11 / 12,000 | 11 / 500 |
+> | `seasonal` | 1 / 12,000 | 1 / 500 |
+> | `disruption_1m` | 1 / 12,000 | 1 / 500 |
+> | `platform_outage` | 1 / 12,000 | 1 / 500 |
+> | `returns_spike` | 1 / 12,000 | 1 / 500 |
+> | `stable`, `gradual_decline`, `sustained_decline`, `severe_downturn` | 0 | 0 |
+>
+> **The correspondence is exact:** RBF-G differs numerically from RBF in precisely those **six** scenarios and is identical in precisely the four where the ceiling never binds. So the observation "RBF-G ≡ RBF in all ten scenarios" is **false as stated**. What is true: the *floor* is universally dead, and the *ceiling* is what makes the two arms coincide in four scenarios and diverge in six. The divergences are small — e.g. `disruption_1m` mean APR 0.36222857 vs 0.36222809 — and vanish at the Lab's display precision, which is why they went unnoticed. **Invisible at display precision is not identical.**
+>
+> The `platform_outage` and `returns_spike` scenarios were previously offered as cases where the ceiling could not bind. Both in fact bind on one month-observation each.
 
 **A second correction, recorded because it is instructive.** An intermediate test asserted `p_t^{RBF-G} ≤ p_t^{RBF}` pointwise. That is also false: a ceiling-reduced early payment leaves more residual under the cap, so RBF-G can pay *more* in a later month than RBF, which has already capped out. Cap timing confounds any pointwise comparison between the arms. The invariant against `r·B_t` above is confound-free, and is what the test now asserts. **Three attempts were needed to state the consequence correctly; the proposition itself never changed.**
 

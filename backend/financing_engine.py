@@ -9,10 +9,19 @@ share of future revenue ("remittance"). The merchant repays a fixed multiple
 of the advance (the "repayment cap"), collected as remittance_pct of revenue
 each period until the cap is paid off. Because the periodic payment is a
 percentage of revenue rather than a fixed installment, it shrinks when
-revenue shrinks — the tradeoff is a longer repayment period, not a missed
-payment. That's the whole reason RBF underwriting cares about revenue
-*trend* and *stability* more than a traditional fixed-installment lender
-would: a decline doesn't default the merchant, it extends the term.
+revenue shrinks — so a decline lengthens the expected repayment period
+rather than raising the scheduled payment.
+
+That is a statement about the payment RULE, not about outcomes. This is not a
+claim of default prevention. Where revenue stops for long
+enough before the cap is reached, the cap is simply never reached and a
+contractual balance goes unrecovered: in the simulated closure scenarios,
+permanent closure from month 7 leaves 100% of paths incomplete at both
+registered cap factors. Revenue-contingency changes who bears the timing
+risk; it does not remove the risk. See `research/CLAIM_LEDGER.md` S-3, I-3.
+
+This is why RBF underwriting attends to revenue *trend* and *stability*:
+duration, not just level, drives recovery.
 """
 
 import math
