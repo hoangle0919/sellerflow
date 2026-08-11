@@ -274,11 +274,21 @@ def test_intervals_are_not_called_population_confidence_intervals():
     assert "confidence interval" not in html
 
 
-def test_fixed_arm_default_risk_is_not_implied_away():
-    """The fixed arms are modelled as always repaid. Saying so is the point."""
+def test_fixed_arm_is_presented_as_an_optimistic_scheduled_recovery_benchmark():
+    """The fixed arms are modelled as paid in full and on time. Saying so is
+    the point — and the framing matters: "upper bound" implied a derived limit,
+    when it is an assumption. It is a scheduled-recovery benchmark, and the
+    project makes no claim about real missed payments (A-8)."""
     caveats = " ".join(c["text"].lower()
                        for c in client.get("/api/lab/comparison/stable").json()["caveats"])
-    assert "default risk" in caveats and "does not model" in caveats
+    assert "paid in full and on time" in caveats, \
+        "the assumption behind the fixed arm must be stated explicitly"
+    assert "optimistic scheduled-recovery benchmark" in caveats
+    # Ban the ASSERTION, not the word: the caveat legitimately says "is NOT an
+    # upper bound derived from anything measured here", and a blanket ban would
+    # forbid the disavowal along with the claim.
+    assert "is an upper bound" not in caveats, \
+        "'upper bound' asserted; it implies a derived limit, but this is an assumption"
 
 
 def test_no_universal_claim_about_provider_recovery_direction():

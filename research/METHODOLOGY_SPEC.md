@@ -247,7 +247,7 @@ Provider observes `ω·R_t`; true revenue is `R_t`.
 p_t^{RBF}(ω) = min( r·ω·R_t , C − Σ_{s<t} p_s )
 ```
 Reported: `Rec(k)`, `RR(k)`, `Dur`, `IR` across `ω ∈ {1.00, 0.95, 0.90, 0.80, 0.70}`.
-FIX-A and FIX-B are invariant to `ω` by construction — reported plainly as an advantage of fixed structures.
+FIX-A and FIX-B are invariant to `ω` by construction. ~~reported plainly as an advantage of fixed structures~~ → **superseded by A-8:** the supportable statement is **contractual schedule invariance** — `q_t = P` contains no revenue term. It is not a collection claim, and the model assumes those payments are made in full and on time.
 
 ### 10.11 Completion concepts *(added 2026-08-04, amendment A-6)*
 
@@ -401,7 +401,7 @@ Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the 
 ### A-6 — Completion concepts and settlement tolerance · 2026-08-04
 **Change.** §10.11 added, distinguishing **mathematical completion** (exact `r·S_T ≥ f·A` at finite `T`) from **operational completion** (`f·A − r·S_T ≤ ε`). Every reported completion month must name its concept and, if operational, its `ε`.
 **Rationale.** At the geometric boundary `ρ = ρ*` the two diverge permanently: mathematical completion never occurs; operational completion occurs at month 213 / 221 / 266 for `ε` = 1.0 / 0.5 / 0.01. Reporting a single unqualified "completion month" would be ambiguous.
-**Not changed.** The engine's `ε = 0.5` default is retained. D-023 classifies it as a floating-point workaround and proposes an integer-VND correction, which is **not applied** — financial behaviour is not changed without approval, and the measured impact on registered results is zero.
+**Not changed *at the time of A-6*.** ~~The engine's `ε = 0.5` default is retained… which is not applied.~~ → **STALE, superseded by A-7 (D-043):** the integer-VND correction **was** subsequently approved and applied (D-024), `ε = 0` by construction, and the `0.5` defaults were replaced by a single `FLOAT_GUARD_VND = 1e-6`. Read A-7 for current behaviour. Original text retained below for the audit trail. The engine's `ε = 0.5` default is retained. D-023 classifies it as a floating-point workaround and proposes an integer-VND correction, which is **not applied** — financial behaviour is not changed without approval, and the measured impact on registered results is zero.
 
 ### A-5 — RBF-G demoted · 2026-08-03
 **Change.** RBF-G moves from headline arm to documented design-flaw finding.

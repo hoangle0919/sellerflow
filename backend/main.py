@@ -426,14 +426,25 @@ def model_status(_: None = Depends(require_auth)):
         },
         "methodology_validation": {
             "data": "real_public_credit_benchmarks",
-            "auc_uci_german_credit": 0.80,
-            "auc_uci_taiwan_default": 0.77,
+            # PENDING RE-RUN. `RESULTS_REGISTRY.md` R-002 carries these as
+            # "Re-run pending (Phase 5 V-03)" — they have not been
+            # independently reproduced in the current audit. Presenting them
+            # as completed validation while the registry says otherwise is the
+            # contradiction this key exists to prevent, so the status travels
+            # with the numbers rather than sitting in a document nobody reads.
+            "validation_status": "pending_rerun",
+            "reported_auc_uci_german_credit": 0.80,
+            "reported_auc_uci_taiwan_default": 0.77,
             "method": "5-fold cross-validated AUC of the production RF+LR ensemble "
                       "on real borrowers with real, adjudicated default outcomes.",
-            "disclaimer": "Validates the MODELING METHOD on real data — NOT the "
-                          "production merchant model, which uses e-commerce features "
-                          "and still has no real merchant outcomes. Reproduce: "
-                          "backend/validate_on_real_data.py.",
+            "disclaimer": "NOT YET RE-VERIFIED — these figures are carried from an "
+                          "earlier run and are pending independent re-run per "
+                          "RESULTS_REGISTRY R-002 (Phase 5 V-03). Do not present "
+                          "them as completed validation. Even once re-run they "
+                          "would validate the MODELING METHOD on real consumer "
+                          "credit data — NOT the merchant model, which uses "
+                          "e-commerce features and still has no real merchant "
+                          "outcomes. Reproduce: backend/validate_on_real_data.py.",
         },
         "real_world_validation": real,
         # D-028: whether an ensemble is actually loaded, and if not, why. A

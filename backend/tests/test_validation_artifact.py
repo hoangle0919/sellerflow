@@ -87,6 +87,35 @@ def test_the_run_date_moved_to_provenance_rather_than_vanishing():
         "the source run date was dropped instead of moved to provenance"
 
 
+def test_no_public_surface_renders_the_superseded_determinism_field():
+    """`canonical.determinism` still says "produce a byte-identical file" inside
+    all five artifacts — the claim D-041 withdrew. It is NOT corrected in place,
+    because that would change five registered checksums to fix a sentence. The
+    containment is that no surface shows it; this test is that containment."""
+    surfaces = []
+    for root, _dirs, files in os.walk(os.path.join(REPO, "backend")):
+        if "__pycache__" in root or "/tests" in root:
+            continue
+        surfaces += [os.path.join(root, f) for f in files if f.endswith(".py")]
+    surfaces += [os.path.join(REPO, "frontend", f)
+                 for f in os.listdir(os.path.join(REPO, "frontend"))
+                 if f.endswith(".html")]
+    leaking = []
+    for path in surfaces:
+        with open(path, encoding="utf-8", errors="ignore") as fh:
+            if "determinism" in fh.read():
+                leaking.append(os.path.relpath(path, REPO))
+    assert not leaking, (
+        "a public surface reads or renders `canonical.determinism`, which "
+        f"carries the withdrawn byte-reproducibility claim: {leaking}")
+
+    # And confirm the field really is still there, so this test cannot pass
+    # merely because the artifact changed shape without anyone noticing.
+    assert "determinism" in _load(CANON).get("canonical", {}), (
+        "the superseded field is gone — if an artifact was regenerated, the "
+        "registry note and the checksums both need revisiting")
+
+
 def test_registered_baseline_checksums_are_untouched():
     """Canonicalizing the battery must not disturb anything already registered."""
     expected = {

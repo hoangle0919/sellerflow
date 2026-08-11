@@ -29,6 +29,20 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 
 Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v2_canonical.json`
 
+> ### ⚠️ Embedded metadata field `canonical.determinism` is SUPERSEDED — not corrected in place (D-043)
+>
+> Every one of the five artifacts carries this string inside its own `canonical` block:
+>
+> > *"Identical code, configuration and seeds produce a byte-identical file."*
+>
+> **That is the claim D-041 withdrew**, and it is embedded in the very files whose checksums are registered above.
+>
+> **It has NOT been changed, deliberately.** Editing it means editing `rbf_sim/canonical.py` and regenerating all five artifacts, which changes all five registered checksums — invalidating the reproducibility record in order to correct a sentence *about* reproducibility. That trade is not worth making without explicit approval, and this correction pass is not authorised to make it.
+>
+> **Status of the field:** superseded by the measured table above. The current claim is *numeric* reproducibility at published precision on every platform tested, and *byte* reproducibility within a fixed runtime. **No public surface renders `canonical.determinism`** — asserted by `test_no_public_surface_renders_the_superseded_determinism_field`. Anyone reading the raw JSON should read this note instead.
+>
+> **Pending decision.** Changing it would be a deliberate re-registration of all five artifacts with new checksums and a decision-log entry recording why. That has been raised and is awaiting a call; it has not been done.
+
 ---
 
 ## R-000 — Phase 0 audit evidence
@@ -126,12 +140,12 @@ Under a −40% sustained decline, distress-month counts (T-0):
 - **F-1 — trade-off quantified.** Severe downturn: RBF removes 6.24 [6.19, 6.28] high-burden months (θ=0.15) at a cost of 32.5pp [32.3, 32.8] lower 12-month recovery and duration 12.0 → 18.3 months. Benefit and cost both scale with shock severity.
 - **F-2 ⚠️ against the product — ~~"costs ~2.3× the interest of a conventional loan"~~ SUPERSEDED (D-015, `CORRECTED_CLAIMS.md` #2, `DERIVATIONS.md` P6).** The arithmetic stands: Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. The *interpretation* does not. P6 shows total cost is proportional to `f` and that APR is jointly determined by `f` and the revenue path, so a ratio computed at the illustrative `f = 1.20` is a **pricing** result, not a property of revenue-based repayment. Correct framing: at the illustrative 1.20× cap the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at the reference-path cost-matched `f* = 1.0945` it is not. **Do not quote the 2.3× ratio.**
 - **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
-- **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue — a genuine structural advantage of FIX.
+- **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue. ~~a genuine structural advantage~~ → **superseded (A-8, D-043): this is contractual schedule invariance, not a demonstrated advantage.** The model assumes fixed payments are made in full and on time, so it cannot compare *realized* collection between the arms. Original wording follows for the audit trail: a genuine structural advantage of FIX.
 - **F-5 ⚠️ null — ~~"bit-identical to RBF in all ten scenarios"~~ SUPERSEDED (D-040).** The **floor** never binds — 0 of 36,000 month-observations, provably unreachable since `μ = 0.25 < h = 0.50`. The **ceiling** does bind, in 6 of 10 scenarios, and those are exactly the 6 where RBF-G differs numerically from RBF. Present the surviving null as *"the hardship floor never activates by construction"*, never as *"the guardrails never bind"*.
 
 ### Limitations
 
-F-3 is partly a horizon artifact (`T = 24` against a 12-month base duration); the recovery-failure region has **not been located** and Phase 3 must search for it (D-013). F-5 means the guardrail arm currently carries no information. `j`, `N_B`, seasonality shapes, `m`, `F` are unsourced assumptions. No observed data of any kind. No causal or predictive claim. Intervals are Monte Carlo precision only.
+F-3 is partly a horizon artifact (`T = 24` against the **13-month** matched base term at `f = 1.20`). ~~the recovery-failure region has **not been located** and Phase 3 must search for it (D-013)~~ → **STALE, superseded (D-032/D-043): the failure region HAS been located.** `baseline_closure_v1` and `baseline_closure_equalcost_v1` are the registered artifacts; `closure_m7` is 100.0% incomplete at both cap factors. F-5's surviving null concerns the hardship **floor only** — the ceiling binds in 6 of 10 scenarios (D-040). ~~F-5 means the guardrail arm currently carries no information. `j`, `N_B`, seasonality shapes, `m`, `F` are unsourced assumptions. No observed data of any kind. No causal or predictive claim. Intervals are Monte Carlo precision only.
 
 ### Safe for public presentation?
 
@@ -174,7 +188,9 @@ Under stable (−4.3pp), growth (−7.7pp), 1-month disruption (−1.1pp) and st
 
 ---
 
-## R-013 — Two null results, preserved
+## R-013 — Null results: one preserved, one superseded
+
+> **⚠️ Heading corrected (D-043).** ~~"Two null results, preserved"~~ — only **N-1** survives as stated. **N-2 is superseded**: RBF-G is not bit-identical to RBF, and the surviving null is the narrower **N-2′** below.
 
 | ID | Null result | Status |
 |---|---|---|

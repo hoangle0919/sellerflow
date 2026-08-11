@@ -35,7 +35,7 @@ Stable reference path, `A = 185,000,000 VND`, `r = 0.10`, remittance basis `net_
 |---|---|---|---|---|
 | 1.05 | 194,250,000 | 11 | 194,250,000 | 10.47% |
 | 1.08 | 199,800,000 | 12 | 199,800,000 | 16.62% |
-| **1.0945** | **202,482,500** | **12** | **202,482,500** | **19.54%** ← equal-cost |
+| **1.0945** | **202,482,500** | **12** | **202,482,500** | **19.54%** ← nearest reference-path APR grid match (residual ≈0.02416pp vs 19.561817%) |
 | 1.10 | 203,500,000 | 12 | 203,500,000 | 20.64% |
 | 1.12 | 207,200,000 | 12 | 207,200,000 | 24.61% |
 | 1.15 | 212,750,000 | 12 | 212,750,000 | 30.48% |
@@ -49,12 +49,14 @@ Stable reference path, `A = 185,000,000 VND`, `r = 0.10`, remittance basis `net_
 
 ---
 
-## 3. Equal-effective-cost RBF cap
+## 3. Nearest reference-path APR grid match for the RBF cap
+
+> ~~"Equal-effective-cost"~~ **superseded (D-043).** `f*` is the closest point on the swept cap-factor grid, not an exact cost solution: 19.537656% against the reference's 19.561817%, residual **≈0.02416 percentage points**. It was solved on a single flat, shock-free reference path; on simulated paths the realised rate differs because duration moves with revenue.
 
 | | |
 |---|---|
 | Target effective APR (Benchmark B) | 19.5618% |
-| **Equal-cost cap factor `f*`** | **1.0945** |
+| **Nearest-grid-match cap factor `f*`** | **1.0945** (residual ≈0.02416pp) |
 | Resulting cap | 202,482,500 VND |
 | Duration | 12 months |
 | Total repaid | 202,482,500 VND |
@@ -100,7 +102,7 @@ Baseline v1 reported 0.0% everywhere, which was a horizon artifact. Searching ha
 | Advance 3×R₀ (any) | 24 | — | 3.0 | cap unreachable on reference — benchmark A undefined | | |
 | Write-off @ 12m | 24 | 12 | 1.0–2.0 | cap unreachable on reference — benchmark A undefined | | |
 
-**Boundary characterised — CORRECTED 2026-08-04.** The general criterion is `r · Σ_{t≤H} B_t ≥ F·A`. Incomplete recovery has **four** distinct causes:
+**Boundary characterised — CORRECTED 2026-08-04; refined D-043.** The general criterion is `r · Σ_{t≤H} B_t ≥ f·A` (lowercase `f` — uppercase `F` is fixed operating cost). Completion is a **finite-time** property: `S_∞ > Θ = f·A/r` **strictly** implies it, `S_∞ < Θ` precludes it, and at `S_∞ = Θ` it holds only if a finite partial sum *attains* `Θ` — which a strictly positive infinite series never does. Routes to incomplete recovery **include, but are not limited to** (the ~~"four distinct causes"~~ exhaustiveness claim is withdrawn):
 
 1. **Zero-revenue months** (business closure) — absorbing. Closure at month 7 → 100% incomplete.
 2. **A binding maturity or write-off rule** — write-off at month 18 turns a −40% decline from 0% into 25.7%.
@@ -161,7 +163,7 @@ net_sales_t     = gmv_t × (1 − return_rate_t)             ← deduction
 cash_receipts_t = net_sales_t × (1 − platform_fee_rate)   ← deduction
 ```
 
-**Decision: the remittance basis is `net_sales` (GMV net of returns).** Platforms settle after returns, so remitting on GMV would charge the seller a share of money never received. `revenue` remains an alias for `gmv` so that "payment-to-revenue" keeps its conventional top-line meaning as the burden denominator.
+**Decision: the remittance basis is `net_sales` (GMV net of returns).** ~~Platforms settle after returns~~ → **pending external support (A-8, D-043):** no platform settlement documentation was obtained by this project, so that premise is unverified. The decision rests on the definitional argument alone — on a GMV basis the contract would charge a share of money the seller never receives. `revenue` remains an alias for `gmv` so that "payment-to-revenue" keeps its conventional top-line meaning as the burden denominator.
 
 | Basis | Platform fee | Duration | Total repaid | RR(12) |
 |---|---|---|---|---|

@@ -156,12 +156,21 @@ def test_no_public_surface_promotes_a_synthetic_accuracy_figure():
     assert offenders == [], f"withdrawn figure served at: {offenders}"
 
 
-def test_real_data_benchmarks_survive_the_withdrawal():
-    """The withdrawal is scoped. The UCI cross-validation on REAL borrowers with
-    REAL outcomes is a different claim and must not be collateral damage."""
+def test_real_data_benchmarks_survive_the_withdrawal_but_carry_their_status():
+    """The 0.92 withdrawal is scoped — the UCI cross-validation on REAL
+    borrowers with REAL outcomes is a different claim and must not be
+    collateral damage. But `RESULTS_REGISTRY` R-002 marks those figures
+    "Re-run pending (Phase 5 V-03)", and the API previously served them as
+    settled. The status now travels with the numbers, because a registry note
+    nobody curls is not a qualification."""
     mv = client.get("/api/model/status", headers=_auth()).json()["methodology_validation"]
-    assert mv["auc_uci_german_credit"] == 0.80
-    assert mv["auc_uci_taiwan_default"] == 0.77
+    assert mv["reported_auc_uci_german_credit"] == 0.80
+    assert mv["reported_auc_uci_taiwan_default"] == 0.77
+    assert mv["validation_status"] == "pending_rerun", \
+        "the pending-re-run status must ship with the figures"
+    assert "NOT YET RE-VERIFIED" in mv["disclaimer"]
+    assert "auc_uci_german_credit" not in mv, \
+        "the unqualified key must not remain as an alias"
 
 
 # ── Visit beacon ──

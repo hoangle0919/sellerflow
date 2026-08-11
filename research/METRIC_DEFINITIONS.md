@@ -1,5 +1,12 @@
 # Frozen Metric Definitions & Pre-Registered Analysis Plan
 
+> ## ⚠️ SUPERSEDED DOCUMENT — v0.1, retained for audit trail
+>
+> `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 is authoritative. Two families of claim in this file are **specifically superseded and must not be quoted** (D-043):
+>
+> - **Affordability.** Anything here describing an arm as "affordable", or a hypothesis predicting "affordability", is superseded by A-8. The supportable statement is only whether a simulated path clears the **illustrative burden bands (10/15/20/25% of revenue)** chosen for this study. Those are reporting thresholds, not validated hardship cutoffs, and burden is measured against revenue rather than against what the seller retains after costs.
+> - **Fixed-payment "advantage".** Superseded by A-8. The supportable statement is **contractual schedule invariance**: `q_t = P` contains no revenue term, so the schedule does not respond to reported revenue. It is not a collection claim — the model assumes fixed payments are made in full and on time, and so provides an **optimistic scheduled-recovery benchmark**.
+
 **Project:** Revenue-Contingent Financing Under Volatile Sales: A Model-Based and Simulation Study Motivated by Vietnamese E-commerce Sellers
 **Status:** 🔒 **FROZEN 2026-08-03, before any comparison-engine run.**
 **Authority:** `DECISION_LOG.md` D-004 (freeze before analysis) and D-010 (distress definition).

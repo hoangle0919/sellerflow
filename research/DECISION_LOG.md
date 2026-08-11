@@ -166,6 +166,31 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-043 — Completion-theorem edge case, remaining document contradictions, underwriting language, and a verifier that could not report its own finding
+**Date:** 2026-08-10
+**Raised by:** the third Codex claim audit. **Gate A round 2 failed at `f2b84f9`.**
+**Status:** APPLIED on `publication-package`. **No financial formula, seed, scenario, contract, settlement rule or registered numeric result changed. No registered artifact rewritten.**
+
+**1. The completion theorem was wrong at the boundary.** P7's convergence criterion read `completion iff S_∞ ≥ Θ` where `Θ = f·A/r`. **The weak inequality is false at equality**, because the limit is not itself a partial sum: where revenue is strictly positive every period, the partial sums increase strictly toward `S_∞` and never attain it. So `S_∞ = Θ` means the cap is approached asymptotically and reached at no finite horizon. The correct statement is `S_∞ > Θ` **strictly** implies completion; `S_∞ < Θ` precludes it; equality is sufficient only where the series has finitely many non-zero terms so the sum is *achieved*. This is D-022's `ρ > ρ*` argument, which had been applied to the geometric special case but not to the general criterion above it. Corrected in `DERIVATIONS.md`, `CLAIM_LEDGER.md` M-7, `CORRECTED_CLAIMS.md`.
+
+**"Exactly four mechanisms" is withdrawn.** The complete characterisation is the inequality; the four rows are *examples*. Cause 4 was itself missing from an earlier draft — an enumeration that has already been wrong once should not be advertised as closed.
+
+**S-3's matched term was wrong.** It said closure at month 7 precedes "the base-case 12-month completion". At `f = 1.20` the matched term is **13** months (`match_benchmark_a.term`, payment 17,076,923, APR 37.8694%); 12 is the term at `f* = 1.0945`. The two price tracks were crossed.
+
+**2. Document contradictions.** `CORRECTED_CLAIMS.md` still said "equal-cost"/"equal-effective-cost" for `f*` (now: nearest reference-path APR grid match, residual ≈0.02416pp), used uppercase `F·A`, and asserted "platforms settle after returns" — a premise A-8 marks unverified. `DERIVATIONS.md`'s pricing section called `f*` an exact cost solution and stated the under-reporting conclusion unconditionally (it holds only where the contract still completes, which needs both an adequate horizon and `S_∞ > Θ/ω`). `METHODOLOGY_SPEC.md` A-6 still said the integer-VND correction was "**not applied**" — stale since A-7 applied it. `RESULTS_REGISTRY.md` carried the fixed-payment value judgement, "the failure region has **not been located**" (it has, D-032), a whole-guardrail null, and "Two null results, preserved" when one is superseded. `METRIC_DEFINITIONS.md` now carries a document-level banner marking its affordability and fixed-payment-advantage claims superseded.
+
+**3. Underwriting language in the shipped prototype.** The product presented an unvalidated synthetic score as a **probability of default**, labelled outcomes **"Approved"**, headed the demo **"LIVE ASSESSMENT"**, told users a merchant **"clears the underwriting bar"**, promised **"three minutes, no documents"** and a result **"in about a second"**, and said **funding is held pending verification** — for a product that holds no capital. It also described merchant-submitted figures as platform-sourced: **the shipped prototype connects to no platform API.** All corrected in markup *and* in the JavaScript render paths. `/api/model/status` now ships the UCI figures as `validation_status: "pending_rerun"` with the numbers renamed `reported_*`, matching R-002 instead of contradicting it — a registry note nobody curls is not a qualification.
+
+**D-026's "purged from every public surface" was itself inaccurate.** `/api/model/status` still returns `training_baseline.withdrawn_value: 0.92`, deliberately and with an allow-list entry in `test_no_withdrawn_claims.py`. Retaining it is right — deleting a retracted number destroys the audit trail — but "purged" is then false. Corrected to *retired as a current result, retained as an explicit withdrawal record.*
+
+**4. The verifier could not report the finding it was written for.** `verify_reproduction.py` deleted every canonical file up front, then ran the generators. `canonicalize_validation.py --write` re-verifies the four registered baseline checksums, so on any platform where a baseline reproduces numerically but **not** byte-for-byte — precisely macOS, with the 9 and 2 last-bit differences — the run aborted instead of printing them. **A verifier that only works when everything matches verifies nothing.** Fixed: per-generator deletion immediately before each run with recreation confirmed; a `--no-registered-check` flag for the scratch tree, with the reasoning recorded at the flag; a `MISSING` sentinel so a dropped key is no longer indistinguishable from an explicit `null`; and `try/finally` cleanup that survives a generator crash. Eleven focused tests, including one that breaks a generator and asserts no scratch tree leaks.
+
+**5. Stale metadata inside the artifacts — raised, contained, NOT changed.** All five canonical files embed `canonical.determinism = "Identical code, configuration and seeds produce a byte-identical file."` — the claim D-041 withdrew. Correcting it means editing `rbf_sim/canonical.py` and regenerating all five, **changing all five registered checksums to fix a sentence about reproducibility**. That is a deliberate re-registration and this pass is not authorised to make it. The field is marked superseded in `RESULTS_REGISTRY.md`, and `test_no_public_surface_renders_the_superseded_determinism_field` asserts no backend or frontend surface reads it. **Awaiting a decision; no artifact touched.**
+
+**Suites:** 1,008 passed, 9 skipped (browser, chromium unavailable — not counted as passes).
+
+---
+
 ### D-042 — Nine incomplete corrections found by re-auditing D-040/D-041, including a retraction that restored its own retracted sentence
 **Date:** 2026-08-10
 **Raised by:** an adversarial verification run against the D-040/D-041 working tree *before* committing.
@@ -628,7 +653,9 @@ Every artifact is **smoke-tested against a fixed feature row at load time**. Loa
 
 ---
 
-### D-026 — Withdrawn 0.92 benchmark purged from every public surface (P0-2 closed)
+### D-026 — Withdrawn 0.92 benchmark retired from every public surface as a *result* (P0-2 closed)
+
+> **⚠️ Heading and wording corrected (D-043).** ~~"purged from every public surface"~~ overstates what was done and what should be done. `GET /api/model/status` **still returns the figure**, as `training_baseline.withdrawn_value: 0.92`, deliberately — alongside `auc: null`, `validation_status: "withdrawn"` and the circularity arithmetic. That is the correct design: silently deleting a retracted number destroys the audit trail and lets it reappear unchallenged. But "purged" is then false, and `test_no_withdrawn_claims.py` allow-lists that exact line with a reason. The accurate statement is: **retired as a current result, retained as an explicit withdrawal record.**
 **Date:** 2026-08-07
 **Raised by:** Hoang, reviewing the research-foundation gate report.
 
@@ -636,7 +663,7 @@ Every artifact is **smoke-tested against a fixed feature row at load time**. Loa
 
 That is the correct reading, and the baseline commit understated it by filing P0-2 as merely "partial". The README withdrew the figure with the circularity arithmetic while `GET /api/model/status` continued to hand it out on request. A reviewer who read the README and then curled the API would have found the two disagreeing — which is precisely the defect PHASE0_AUDIT.md was written about, reproduced by us, after we had documented it.
 
-**Decision.** The withdrawn benchmark is removed from every public surface. `training_baseline.auc` is **`null`**, accompanied by `validation_status: "withdrawn"`, `reason: "synthetic circular-label benchmark"`, and a disclaimer carrying the circularity arithmetic.
+**Decision.** The withdrawn benchmark is removed from every public surface **as a current result** — retained as a labelled withdrawal record. `training_baseline.auc` is **`null`**, accompanied by `validation_status: "withdrawn"`, `reason: "synthetic circular-label benchmark"`, and a disclaimer carrying the circularity arithmetic.
 
 **Why `null` rather than deleting the key.** Removing `auc` entirely would break any consumer reading it and, worse, would make the withdrawal *invisible* — an absent field reads as "not implemented yet", not "retracted". A null beside an explicit `validation_status` states the retraction rather than hiding it. `withdrawn_value: 0.92` is retained under a name that cannot be mistaken for a current result, so the record of *what* was withdrawn survives.
 

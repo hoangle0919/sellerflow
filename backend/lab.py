@@ -479,11 +479,14 @@ def underreporting() -> Optional[dict]:
             {
                 "classification": "mathematical_property",
                 "text": "Under-reporting does not change what is owed. It "
-                        "rescales each payment, so the contract takes longer "
-                        "to reach the same cap. Invariance of the total is "
-                        "conditional on the cap being reached: under-reporting "
-                        "severe enough to push the contract past the horizon "
-                        "leaves the cap unreached and the total short.",
+                        "rescales the UNCAPPED remittances — the final "
+                        "payment is clipped to whatever is left, so it does "
+                        "not scale with \u03c9 — and raises the cumulative "
+                        "sales needed to reach the cap. Invariance of the "
+                        "total is conditional on the cap actually being "
+                        "reached: under-reporting severe enough to push the "
+                        "contract past the horizon leaves the cap unreached "
+                        "and the total short.",
                 "source": "research/DERIVATIONS.md",
             },
             {
@@ -568,9 +571,11 @@ METRIC_DEFINITIONS = {
                   "PATHS for the selected scenario, not the reference-path rate "
                   "the cost-matched contract was priced on. And where any path "
                   "fails to complete it is a SURVIVOR statistic — the "
-                  "unprofitable paths are absent from it, so it understates the "
-                  "cost of the scenario to the provider rather than summarising "
-                  "it.",
+                  "non-completing paths are absent from it, so it understates "
+                  "the cost of the scenario to the provider rather than "
+                  "summarising it. Those paths are not 'unprofitable' — "
+                  "profitability is computed nowhere in this project; they "
+                  "simply did not reach the cap inside the horizon.",
     },
 }
 
@@ -590,10 +595,12 @@ CAVEATS = [
              "No observed seller revenue, repayment or default outcome exists in "
              "this project.",
      "classification": "open_real_world_question"},
-    {"text": "The fixed arms are modelled as always repaid. Real fixed-payment "
-             "lending carries default risk that this comparison does not model, "
-             "so the fixed arm's recovery here is an upper bound, not a "
-             "prediction.",
+    {"text": "The fixed arms are modelled as paid in full and on time in every "
+             "month of the schedule. The fixed arm is therefore an OPTIMISTIC "
+             "SCHEDULED-RECOVERY BENCHMARK: it shows what the schedule would "
+             "deliver under that assumption. It is not an upper bound derived "
+             "from anything measured here, and this project makes no claim "
+             "about how often real fixed-payment borrowers miss payments.",
      "classification": "open_real_world_question"},
     {"text": "Whether revenue-based repayment recovers faster or slower depends "
              "on the revenue path, and both directions appear in this scenario "

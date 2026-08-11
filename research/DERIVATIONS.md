@@ -127,7 +127,7 @@ total repaid:         unchanged at C, provided S_T ≥ A·f/(r·ω)
 
 **Proof.** Substituting `ω·B_t` into P1 gives `p_t = r·ω·B_t` while uncapped, so cumulative recovery scales by `ω`. The cap condition of P3 becomes `r·ω·S_k ≥ C`, i.e. `S_k ≥ A·f/(r·ω)`. ∎
 
-**Consequence.** Underreporting is a **timing attack, not a principal-loss attack**, so long as the horizon is long enough. The required cumulative sales scales as `1/ω`; the total eventually collected is unchanged. Recovery-ratio pass-through is exactly one-for-one, which is why the simulated `RR(12) ≈ ω` to within 0.2pp — that near-identity is a theorem, not a fitted result.
+**Consequence — conditional, and the condition is load-bearing.** Underreporting is a **timing attack rather than a principal-loss attack ONLY where the contract still completes**: that requires both an adequate horizon *and* lifetime cumulative sales `S_∞ > Θ/ω` where `Θ = f·A/r`. Where under-reporting is severe enough that the rescaled threshold is never crossed inside the horizon — or never crossed at all — the total collected **falls short** and the loss is principal, not timing. The required cumulative sales scales as `1/ω`; the total eventually collected is unchanged **conditional on completion**. Recovery-ratio pass-through is exactly one-for-one, which is why the simulated `RR(12) ≈ ω` to within 0.2pp — that near-identity is a theorem, not a fitted result.
 
 **What this does not establish.** The fixed contract's `q_t = P` contains no `B_t` term, so it is **contractually** invariant to `ω`. This says nothing about whether a lender *collects* `P` from a seller whose revenue has fallen. The model contains no default, insolvency, or liquidity-constrained nonpayment. **Contractual invariance is not collection immunity**, and no claim of the latter is made.
 
@@ -149,7 +149,7 @@ IRR(p)  >  IRR(p′)
 
 This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan" was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic (P6a shows cost is proportional to `f`), and it quoted a single APR as though it were a contract property (P6b shows APR is jointly determined by `f` and the path).
 
-**Equal-cost pricing.** Since total cost is `A·f` and is monotone increasing in `f`, for any target cost there exists an `f` attaining it — subject only to the integrality of duration. Solving against the 18% amortizing benchmark gives `f* ≈ 1.0945`. **Price and structure are separable, and P6 is why.**
+**Nearest-grid-match pricing.** Since the contractual target is `A·f` and is monotone increasing in `f`, for any target cost there exists an `f` attaining it — subject to the integrality of duration. ~~"Equal-cost pricing"~~ **superseded (D-043): the search returns the nearest point on the swept grid, not an exact solution.** Against the illustrative 18% amortizing reference the nearest grid point is `f* ≈ 1.0945`. **Price and structure are separable, and P6 is why.**
 
 ---
 
@@ -171,7 +171,9 @@ Incomplete recovery is exactly the complement: `S_H < f·A/r`.
 
 **This is the complete characterisation.** Everything below is a special case of it.
 
-### Four distinct causes of incomplete recovery
+### Distinct causes of incomplete recovery — examples, not an exhaustive list
+
+> **⚠️ Corrected (D-043).** This section was headed "Four distinct causes" and the §A summary said "**exactly four** mechanisms". **The exhaustiveness claim is withdrawn.** The complete characterisation is the single inequality `S_H < f·A/r`; the rows below are illustrative routes to it, not a partition of the ways it can occur, and nothing here proves no fifth route exists. Enumerating examples is useful; claiming the enumeration is closed is a stronger statement than anything proved above.
 
 | # | Cause | Mechanism |
 |---|---|---|
@@ -180,16 +182,22 @@ Incomplete recovery is exactly the complement: `S_H < f·A/r`.
 | 3 | **Finite evaluation horizon** | `H = T`. A *measurement* artifact, not an economic loss — the contract might still complete later. |
 | 4 | **Strictly positive but sufficiently fast-decaying revenue** | `Σ_{t=1}^{∞} B_t` **converges** to a finite value below `f·A/r`. Revenue is positive in every period, forever, and the cap is still never reached. |
 
-Cause 4 was **missing** from the earlier version. It is not exotic: any geometric decline is of this form.
+Cause 4 was **missing** from the earlier version. It is not exotic: any geometric decline is of this form. Its presence is why the list must not be presented as closed — one route was already overlooked once.
 
 ### The convergence criterion
 
 Let `S_∞ = Σ_{t=1}^{∞} B_t ∈ (0, ∞]`.
 
+Write the target `Θ = f·A / r`. **Completion is a finite-time property** (definition below): the contract completes iff there exists a **finite** `t ≤ H` with `S_t ≥ Θ`.
+
 ```
-S_∞ = ∞   (series diverges)   →  completion is guaranteed given an unbounded horizon
-S_∞ < ∞   (series converges)  →  completion iff  S_∞ ≥ f·A/r ;  otherwise NEVER, at any horizon
+S_∞ = ∞   (diverges)   →  some finite partial sum exceeds Θ; completion, given an unbounded horizon
+S_∞ >  Θ  (converges)  →  since S_t ↑ S_∞, some finite t has S_t ≥ Θ; completion
+S_∞ <  Θ  (converges)  →  NEVER, at any horizon
+S_∞ =  Θ  (converges)  →  completion IFF some finite partial sum ATTAINS Θ
 ```
+
+> **⚠️ Boundary case corrected (D-043).** This block previously read `completion iff S_∞ ≥ Θ`, which is **wrong at equality** and is withdrawn. A weak inequality on the *limit* does not give completion, because the limit is not itself a partial sum. Where revenue is strictly positive in every period, the partial sums increase **strictly** toward `S_∞` and never attain it, so `S_∞ = Θ` means the cap is approached asymptotically and **never reached at any finite horizon**. Equality is sufficient only in the degenerate case where the series has finitely many non-zero terms, so that the sum is *achieved* rather than approached. The strict inequality `S_∞ > Θ` is what actually implies completion. This is the same distinction D-022 drew for `ρ > ρ*`, applied to the general criterion rather than only to the geometric case.
 
 ### Completion is a finite-time property
 
@@ -293,7 +301,7 @@ Every statement the project makes falls into exactly one of these five classes. 
 - **P4** RBF leads fixed on cumulative recovery through `k` iff the **realized mean eligible base** `(1/k)·S_k > B* = P/r` — the exact condition at P4 above. It is *not* captured by the labels "declining" versus "non-declining": a declining path whose realized mean still clears `B*` leads, and a flat path below `B*` lags. Integer rounding of `N` makes `B* < B̄`, which is why the stable scenario leads.
 - **P5** Underreporting scales recovery by `ω` exactly and raises the required cumulative base by `1/ω`. **Duration does not generally scale by `1/ω`** — it is the first passage time to that threshold (corrected, D-040).
 - **P6** The **contractual repayment target** is `A·f`, path-independently. **Realized total repayment equals it only upon completion**; where the cap is never reached the realized total falls short. APR is path-dependent; price and structure are separable.
-- **P7** Completion iff `r·Σ B_t ≥ f·A` over the applicable horizon. Four causes of incomplete recovery: zero revenue, maturity/write-off, finite horizon, **or a strictly positive but fast-decaying path with inadequate lifetime cumulative sales.** Bounded-away-from-zero is sufficient, not necessary; positive is not sufficient. Completion is a **finite-time** property: for geometric decay it requires `ρ > ρ*` **strictly**, since at `ρ = ρ*` the cap is approached asymptotically and never attained.
+- **P7** Completion iff some **finite** `t ≤ H` has `r·S_t ≥ f·A`. On the lifetime sum `S_∞` against the target `Θ = f·A/r`: `S_∞ > Θ` **strictly** implies completion; `S_∞ < Θ` precludes it at any horizon; at `S_∞ = Θ` completion holds **only if a finite partial sum attains `Θ`**, which a strictly positive infinite series never does. Routes to incomplete recovery **include** — this list is illustrative, not exhaustive — zero revenue, maturity/write-off, finite horizon, and a strictly positive but fast-decaying path with inadequate lifetime cumulative sales. Bounded-away-from-zero is sufficient, not necessary; positive is not sufficient. For geometric decay the condition is `ρ > ρ*` **strictly** (D-022), the same boundary logic in a special case.
 
 ### B. Simulation results — illustrate A under stated illustrative parameters
 Magnitudes in `baseline_v2.json` and `validation_v1.json`. **Not estimates for Vietnamese sellers.** Example: "under the illustrative severe-downturn scenario, RBF removes 6.85 high-burden months at θ=0.15" — a property of that scenario specification, nothing more.

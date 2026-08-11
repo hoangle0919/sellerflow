@@ -649,7 +649,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
 
       <div class="proof-card">
-        <div class="proof-head"><span>LIVE ASSESSMENT · ADJUST THE PROFILE</span><span id="hero-model">RF+LR ENSEMBLE v1.0</span></div>
+        <div class="proof-head"><span>ILLUSTRATIVE DEMO · ADJUST THE PROFILE</span><span id="hero-model">RF+LR ENSEMBLE v1.0</span></div>
         <div class="proof-body">
           <div>
             <div class="proof-shop" id="hv-shop">Thời Trang Linh Chi</div>
@@ -676,7 +676,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
               <span class="label">Recommendation</span>
               <span class="hd-tier" id="hd-tier">Low Risk</span>
             </div>
-            <div class="decision-word" id="hd-word">Approved</div>
+            <div class="decision-word" id="hd-word">Illustrative tier: low risk</div>
             <div class="hd-pdline" id="hd-pdline">Demo score 2.4% — synthetic, not a validated default probability</div>
             <div class="hd-advance">
               <span class="hd-advance-label">Recommended advance</span>
@@ -707,7 +707,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         </div>
         <div class="arg-entry">
           <span class="arg-num">02</span>
-          <div><h3>Revenue that is recorded, not self-reported</h3><p>Platform revenue arrives timestamped from the platform rather than from the applicant. Verification frequency and integrity depend on each platform's own settlement process, which this project has not audited.</p></div>
+          <div><h3>Revenue data, as submitted</h3><p>The shipped prototype takes merchant-submitted figures and does not connect to any platform API. Reading revenue directly from platforms is the design intent, not the current behaviour — so today these values are self-reported, which is exactly what the integrity screen exists to test.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">03</span>
@@ -724,16 +724,16 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <h2>From revenue data to a financing structure.</h2>
       </div>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics from the platform. Three minutes, no documents.</p></div>
-        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces a probability of default and per-signal risk flags.</p></div>
-        <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Recommended advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each, in about a second.</p></div>
+        <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics as submitted by the merchant. The shipped prototype does not connect to any platform API, so these figures are self-reported and unverified.</p></div>
+        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces an <strong>unvalidated demo risk score</strong> and per-signal flags. It is trained on synthetic data whose label is a formula over the same features, so the score carries no predictive claim.</p></div>
+        <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Recommended advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each. Response time is not benchmarked.</p></div>
       </div>
 
       <div class="flow" id="methodology-flow">
         <div class="flow-node" data-key="signals">Operational signals</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="normalize">Feature normalization</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="ensemble">RF + LR ensemble</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="pd">PD estimate</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="pd">Demo risk score</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="integrity">Integrity screen</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="limit">Financing structure</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="rate">Repayment scenarios</div><span class="flow-sep">→</span>
@@ -1117,7 +1117,7 @@ const FLOW_DESC={
   signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the merchant submission.',
   normalize:'Raw metrics are scaled and bounded so a fast-growing large merchant and a stable small merchant are compared fairly.',
   ensemble:'A Random Forest and a Logistic Regression model each score the normalized profile independently.',
-  pd:'The two model outputs are blended into a single probability of default — 65% RF, 35% LR.',
+  pd:'The two model outputs are blended into a single unvalidated demo risk score — 65% RF, 35% LR. It is not a probability of default: the training label was generated by a formula over the same features (D-001).',
   integrity:'Five rule-based checks — revenue reconciliation, exposure velocity, growth plausibility, and more — screen for misrepresentation alongside the credit score. An elevated flag holds funding for verification. Rule-based screening, not a supervised fraud model.',
   limit:'Low risk unlocks an advance sized to 15% of annual revenue; medium risk unlocks a reduced advance at 8%. All deterministic — no model computes this arithmetic.',
   rate:'Repayment is simulated as a percentage of revenue (the remittance) collected until a fixed repayment cap is reached — under base, decline, and growth assumptions.',
@@ -1203,7 +1203,7 @@ async function submitApplication(){
   renderResult({...applyData,...data}); go('result');
 }
 const VERDICT={APPROVED:'Approved',CONDITIONAL:'Conditional',REJECTED:'Not approved'};
-const EXPLAIN={APPROVED:'The merchant clears the underwriting bar. The recommended advance is sized to annual revenue and structured at the low-risk remittance and repayment cap.',CONDITIONAL:'The merchant has enough signal to support a reduced advance, but monitoring is recommended before increasing exposure.',REJECTED:'The merchant exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
+const EXPLAIN={APPROVED:'This profile falls in the illustrative low-risk tier. The demo advance is sized to annual revenue and structured at the low-risk remittance and repayment cap. No underwriting standard has been validated — the tier is a demonstration of the rule, not an approval.',CONDITIONAL:'The merchant has enough signal to support a reduced advance, but monitoring is recommended before increasing exposure.',REJECTED:'The merchant exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
 const FLAG_CLASS={green:'pass',amber:'warn',red:'fail'}, SIGNAL_LABEL={return_rate:'Return rate',late_ship_rate:'Late shipments',revenue_growth:'Revenue growth',rating:'Store rating',days_active:'Days active',inventory_turnover:'Inventory turnover'};
 function computeSignals(s){
   const f=(v,lo,hi)=>v<=lo?'green':v<=hi?'amber':'red';
@@ -1268,7 +1268,7 @@ function renderIntegrity(intg){
   if(banner){
     if(intg.level==='high'){
       banner.style.display=''; banner.className='gate-banner high';
-      banner.textContent=`Funding held pending verification — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The credit decision below assumes reported figures are accurate; verify revenue before disbursing.`;
+      banner.textContent=`Assessment flagged for review — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The credit decision below assumes reported figures are accurate; verify revenue before disbursing.`;
     } else if(intg.level==='review'){
       banner.style.display=''; banner.className='gate-banner review';
       banner.textContent='Manual review suggested — the integrity screen flagged items to confirm before disbursing. The credit decision below is provisional.';

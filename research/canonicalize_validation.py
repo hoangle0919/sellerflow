@@ -109,6 +109,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--write", action="store_true",
                     help="write the canonical/provenance pair (default: verify only)")
+    ap.add_argument("--no-registered-check", action="store_true",
+                    help="skip the post-write baseline checksum re-verification. "
+                         "Only meaningful inside a scratch tree, where the "
+                         "baselines were themselves just regenerated.")
     args = ap.parse_args()
 
     if not os.path.exists(SOURCE):
@@ -179,6 +183,23 @@ def main():
     print(f"\n  written: results/{STEM}_canonical.json")
     print(f"           results/{STEM}_provenance.json")
     print(f"  SHA-256: {written['sha256']}")
+
+    if args.no_registered_check:
+        # WHY THIS FLAG EXISTS (D-043). This check asks "did writing the
+        # validation pair disturb the registered baselines?" — a real question
+        # against the repository. Inside `verify_reproduction.py`'s scratch
+        # tree the baselines were themselves just regenerated seconds earlier,
+        # so the check is not only meaningless there, it is actively harmful:
+        # on a platform where a baseline reproduces numerically but not
+        # byte-for-byte (macOS CPython 3.11.5: 9 and 2 last-bit float
+        # differences), it aborted the very run whose purpose was to MEASURE
+        # and report that difference.
+        print("\n  registered-baseline re-check SKIPPED (--no-registered-check):")
+        print("    running inside a scratch tree; the baselines here were just")
+        print("    regenerated, so comparing them to the registered checksums")
+        print("    would test the platform, not this script.")
+        print("=" * W)
+        return 0
 
     print("\n  re-verifying the four registered baselines:")
     import hashlib
