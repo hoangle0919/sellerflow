@@ -19,15 +19,22 @@ The head-to-head question — how a revenue-contingent contract and a **cost-mat
 
 ## Section plan, with every figure bound to a source
 
+**Numbering matches the manuscript exactly.** The manuscript's Abstract is unnumbered; numbered sections run §1–§15. An earlier draft of this outline numbered the Abstract as §1 and omitted "Why simulation", putting every subsequent reference one out of step.
+
 Notation: **[ledger-ID | artifact → JSON path]**. Every quantitative statement in the manuscript carries one. Figures are described here; they are **not** generated in Phase B.
 
-### §1 Abstract
-No new numbers. May reference §9 and §10 headline results, each carrying its ledger ID.
+### Abstract *(unnumbered in the manuscript)*
+**Contains the headline results**, each with its artifact source note, and each accompanied in the same passage by: that it is simulation output; that 15% is an illustrative burden band; that burden is payment ÷ GMV; and that the fixed arm's recovery is scheduled recovery under a full-and-on-time payment assumption. *(An earlier draft of this outline said the abstract contained no numbers. It does.)*
 
-### §2 Introduction and motivation
+### §1 Introduction and motivation
 - MSME finance constraint as motivation **[L-01]**. Vietnam-motivated, illustratively parameterised — **no parameter claim** (A-8).
 - Platform-recorded revenue makes revenue-contingent contracting mechanically possible **[L-02, L-05]**.
 - **No CIC prevalence claim** (Gap V-1).
+
+### §2 Why simulation, and what that costs
+- The counterfactual — both contracts on one seller under one realised path — is not in public data, and each seller takes at most one contract.
+- Negative claims scoped to the documented searches: *"We did not identify … in the searches documented through 2026-08-13."* Never "the absence is a finding".
+- States the cost of the method: the revenue process is one we specified.
 
 ### §3 Related literature
 Four strands, each with its transfer limit stated in the text:
@@ -65,15 +72,17 @@ Four strands, each with its transfer limit stated in the text:
 ### §7 Analytical propositions
 Stated as theorems, **not** simulation output — the ledger's class-dependent qualifier applies **[CLAIM_LEDGER §0]**.
 
-| Proposition | Statement | Ledger |
-|---|---|---|
-| P1 | RBF burden ≡ `r` on the contractual base until the final capped payment | M-1 |
-| P2 | Fixed burden has elasticity −1 in revenue; a −50% month doubles it | — |
-| P3 | Cap reached by `k` iff `S_k ≥ A·f/r`; duration is first passage, not a function of the terminal total | M-2 |
-| P4 | RBF leads on recovery through `k` iff `(1/k)·S_k > B* = P/r`; integer rounding makes `B* < B̄` | I-3 |
-| P5 | Under-reporting rescales **uncapped** payments and raises the required cumulative base by `1/ω`; duration does **not** scale by `1/ω` | M-2 |
-| P6 | `A·f` is the contractual **target**, path-independent; realized total equals it only on completion. APR is path-dependent | M-3, M-4 |
-| P7 | Completion ⇔ ∃ finite `t ≤ H` with `S_t ≥ Θ = f·A/r`. For finite `H` only, equivalent to `S_H ≥ Θ`. `S_∞ = Θ` completes only if a finite partial sum attains it | M-5, M-6, M-7 |
+**Column note.** "Related ledger row" is *related*, not equivalent — not every proposition has a dedicated ledger entry, and a ledger row is a **claim licence**, not a proof. The proof always lives in `DERIVATIONS.md`. An earlier draft mapped P1→M-1 and P4→I-3 as though the ledger row *were* the proposition; both were wrong.
+
+| Proposition | Proof | Statement | Related ledger row |
+|---|---|---|---|
+| P1 | `DERIVATIONS.md` **P1** | RBF burden ≡ `r` on the contractual base until the final capped payment | *(none — M-1 is the cap-settlement inequality `Σ payments ≤ cap`, a different result)* |
+| P2 | `DERIVATIONS.md` **P2** | Fixed burden has elasticity −1 in revenue; a −50% month doubles it | *(none)* |
+| P3 | `DERIVATIONS.md` **P3** | Cap reached by `k` iff `S_k ≥ A·f/r`; duration is first passage, not a function of the terminal total | *(none — M-2 is under-reporting)* |
+| P4 | `DERIVATIONS.md` **P4** | For `k ≤ N`, before either arm caps out: RBF leads on recovery iff `(1/k)·S_k > B* = P/r`; integer rounding makes `B* < B̄` | *(none — I-3 is a downstream product judgement drawing on P4, not its proof)* |
+| P5 | `DERIVATIONS.md` **P5** | Under-reporting rescales **uncapped** payments and raises the required cumulative base by `1/ω`; duration does **not** scale by `1/ω` | **M-2** |
+| P6 | `DERIVATIONS.md` **P6** | `A·f` is the contractual **target**, path-independent; realised total equals it only on completion. APR is path-dependent | **M-3, M-4** |
+| P7 | `DERIVATIONS.md` **P7** | Completion ⇔ ∃ finite `t ≤ H` with `S_t ≥ Θ = f·A/r`. For finite `H` only, equivalent to `S_H ≥ Θ`. `S_∞ = Θ` completes only if a finite partial sum attains it | **M-5, M-6, M-7** |
 
 **Figure 2** — P7 boundary: geometric decline, completion vs ρ, showing ρ\* = 11/12 at `f = 1.20` and 0.9086 at `f* = 1.0945`. **[M-6 | DERIVATIONS P7]**
 
@@ -95,7 +104,7 @@ Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
 **Figure 4** — high-burden month counts by threshold (10/15/20/25%), stressing these are **illustrative reporting bands, not validated hardship cutoffs** **[Q-4]**. Distributional reporting follows **[L-13]**.
 
 ### §9 Pricing versus structure
-- At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**.
+- At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**. State precisely what is held constant: the **pre-cap payment rule** is unchanged, the **cap factor changes the contractual target** and therefore completion timing, terminal clipping and the realised stream. Price and payment rule are analytically separable but **jointly determine realised outcomes** — do not write "structural behaviour unchanged".
 - `f* = 1.0945` is the **nearest grid match**: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v1 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
 - Same scenarios repriced **[baseline_equalcost_v1 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
 - **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): cost is proportional to `f` (P6a) and APR is jointly determined by `f` and the path (P6b), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
@@ -108,13 +117,14 @@ Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
 - Closure at `f = 1.20` **[S-3 | baseline_closure_v1 → /scenarios/*/RBF]**: `closure_m7` **100.0%** incomplete (RR(24) 44.30%); `closure_m13` **76.2%** (RR(24) 96.53%); `temp_closure` **2.0%** (RR(24) 99.98%).
 - At `f* = 1.0945` **[S-4 | baseline_closure_equalcost_v1]**: **100.0%**, **7.6%**, **0.0%**. The `closure_m13` figure moves by a factor of ten with **price alone** — P6a made visible.
 - **Incomplete recovery ≠ principal loss** **[I-3]**. `closure_m13` recovers ≈214.3M against a 185M advance — principal covered despite 76.2% incomplete. Only `closure_m7` (≈98.3M) shows a principal shortfall, and it recovers the **same absolute amount at both cap factors** because that path is revenue-limited, not cap-limited.
-- **Censoring.** `duration_mean` and `apr_mean` are computed only over completing paths — survivor statistics estimating `E[T | T ≤ C]`, not `E[T]`. Framed via **[L-36, L-37]**, machinery via **[L-33, L-34, L-35]**. Per **Gap M-2**, the downward bias is argued as a mathematical consequence and **no source is cited as having quantified it**.
+- **Censoring.** `duration_mean` and `apr_mean` are computed only over completing paths — survivor statistics estimating `E[T | completion occurs by horizon H]`, not `E[T]`. Do **not** write `E[T | T ≤ C]`: `C` is already the VND contractual cap. Framed via **[L-36, L-37]**, machinery via **[L-33, L-34, L-35]**. Per **Gap M-2**, the downward bias is argued as a mathematical consequence and **no source is cited as having quantified it**.
 - A short mean duration beside a high incomplete-recovery rate is not a fast contract — it is one where the slow paths were dropped rather than counted.
 
 **Figure 6** — closure panel: incomplete recovery and RR(24) at both cap factors, three closure scenarios.
-**Figure 7** — survivor illustration: duration distribution with the censoring boundary marked, showing what the conditional mean omits.
 
-### §11 Product implications for RBF
+> ~~**Figure 7** — survivor illustration: duration distribution with the censoring boundary marked.~~ **REMOVED (D-046).** The registered artifacts are **aggregates** — `duration_mean`, `duration_sd`, `incomplete_recovery_rate` — and do **not** contain the path-level duration distribution this figure would require. Producing it would mean generating a new artifact, which this pass is not authorised to do. The censoring point is made in prose and by the paired `duration_mean` / `incomplete_recovery_rate` reporting instead.
+
+### §11 Product implications
 - Price and structure must be reported separately, or a pricing choice is silently attributed to a structural property **[I-2]**.
 - A provider is exposed to duration risk in ordinary downturns and to an unrecovered contractual balance where permanent closure precedes completion **[I-3]**.
 - The guardrail finding, both halves: the hardship **floor** never activates — 0 of 36,000 month-observations, `μ = 0.25 < h = 0.50` — while the **ceiling binds**, 6,009 of 36,000, changing 6 of 10 scenarios (`apr_mean` 6, `burden_mean` 6, `recovery_ratio` 3, `duration_mean` 1). **[N-2′ | validation_v1 → /rbf_g_breakpoint; baseline_v2 → /scenarios/*/RBF-G]**. Presenting the floor null alone would read as a whole-arm null, which is false.
