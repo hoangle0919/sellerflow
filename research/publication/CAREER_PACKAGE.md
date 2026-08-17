@@ -1,0 +1,168 @@
+# Career Package — RBF / Revenue-Contingent Financing Study
+
+**Purpose.** Résumé, LinkedIn and portfolio text for this project, plus interview preparation. Every claim below is traceable to `research/CLAIM_LEDGER.md`, a canonical artifact, or the decision log.
+
+**The rule that governs this file.** A CV is where research overclaiming usually happens, because nobody audits a résumé bullet. So the same constraints apply here as in the paper:
+
+- **No predictive-validity claim.** The model is a demonstration trained on synthetic data with a circular label.
+- **No deployment claim.** There is no current public deployment; the previously-linked host serves a superseded build.
+- **No affordability, causal, or population claim.** Nothing here is evidence about real sellers.
+- **No "improved X by Y%"** unless Y is a registered figure with an artifact behind it.
+- Numbers appear with their meaning attached — a simulated magnitude is labelled as one.
+
+---
+
+## 1. Résumé entry
+
+### Long form (for a research or quant-leaning role)
+
+> **Revenue-Contingent Financing Under Volatile Sales** — independent research project · 2026
+>
+> - Designed and built a **paired simulation study** comparing revenue-contingent and cost-matched fixed-instalment financing across 10 revenue scenarios × 4 contract arms × 500 paths, isolating payment *timing* by matching principal, total repayment and term on a reference path.
+> - Established the study's central methodological result: **financing price and payment structure are separable questions**, and conflating them produces false conclusions — demonstrated by repricing an identical payment rule at a second cap factor and showing the cost comparison reverses while the rule is unchanged.
+> - Proved **seven analytical propositions** characterising contract behaviour independent of the simulation, each asserted numerically against the engine, including an exact finite-time completion criterion that corrected a boundary error in an earlier draft.
+> - Built a **reproducibility pipeline**: five checksummed canonical artifacts, byte-versus-numeric equality reported separately across platforms, and a clean-copy regeneration verifier — after discovering that a previous "verification" step had re-hashed a committed file rather than regenerating it.
+> - Wrote and enforced a **claim ledger** binding every public statement to an artifact, a proof, or a cited source, with **1,008 automated tests** including a regression tripwire for retracted phrasings.
+> - **Retracted several of my own published-in-draft claims** — a 2.3× cost ratio, an unqualified byte-reproducibility claim, and a false null result about a guardrail arm — and documented each retraction with the evidence that overturned it.
+
+### Short form (three lines, for a general CV)
+
+> **Revenue-Contingent Financing Under Volatile Sales** — independent research, 2026
+> Paired simulation study (10 scenarios × 4 contracts × 500 paths) separating financing *price* from payment *structure*; seven proved propositions; five checksummed reproducible artifacts; 1,008 automated tests including claim-integrity guards. Produced a working paper, a claim ledger binding every public figure to its source, and a documented record of my own retracted claims.
+
+### Single bullet (for a crowded CV)
+
+> Built a reproducible paired simulation study of revenue-contingent versus fixed small-business financing — separating price from payment structure, proving the contract's completion and recovery conditions analytically, and enforcing every published figure against a checksummed artifact via an automated claim ledger.
+
+---
+
+## 2. LinkedIn
+
+### Project / featured section
+
+> **Revenue-Contingent Financing Under Volatile Sales: Separating Price from Structure**
+>
+> Revenue-based financing takes a fixed share of a seller's revenue instead of a fixed monthly payment. The pitch is that the seller pays less when they earn less. The objection is that the financier waits longer to be repaid. Both are true, and they're the same mechanism seen from opposite sides — so reporting either one alone misrepresents the product.
+>
+> I built a paired simulation to measure both at once: every contract runs on the identical generated revenue path, so the comparison isolates payment timing rather than confounding it with price.
+>
+> Two things I did not expect going in:
+>
+> **The price/structure conflation is easy to commit.** I committed it myself. An early draft stated that the revenue-contingent contract "costs about 2.3× the interest of a conventional loan" — a claim that fixed one cap factor as though it were intrinsic. Reprice the identical payment rule and the comparison reverses. That claim is now withdrawn, and the retraction is in the paper, because it's the clearest example of the error the paper argues against.
+>
+> **Reporting failure honestly is harder than finding it.** The contract does not always repay. Where a business closes permanently before the cap is reached, recovery genuinely fails — 100% of simulated paths in one scenario. But a 76.2% incomplete-recovery rate is *not* a 76.2% loss rate, and I had to build the distinction explicitly so the headline number couldn't be misread.
+>
+> The study is a simulation, not evidence about real sellers. It has no observed revenue, no repayment outcomes, and makes no predictive or affordability claim. What it does have is a claim ledger binding every published figure to a checksummed artifact, and 1,008 tests that fail if a retracted phrase reappears.
+
+### Short post
+
+> Spent this project learning that the hard part of research isn't producing a result — it's noticing when your own result is stated more strongly than your evidence supports.
+>
+> I built a paired simulation comparing revenue-contingent financing against a cost-matched fixed loan. Along the way I retracted three of my own claims: a cost ratio that confused price with structure, a reproducibility claim resting on a check that couldn't have failed, and a null result about a guardrail that turned out to be false in 6 of 10 scenarios.
+>
+> Each retraction is documented next to the evidence that overturned it. That record is the part of the work I'd most want a reviewer to read.
+
+---
+
+## 3. Portfolio summary
+
+### The problem
+
+Small e-commerce sellers with thin credit files are a natural audience for financing that flexes with revenue. But there is no public dataset showing what a revenue-contingent contract and a fixed-instalment contract each do **to the same seller under the same revenue path** — each seller takes at most one contract. Without that counterfactual, the trade-off can be asserted but not measured.
+
+### What I built
+
+A paired simulation supplying the counterfactual by construction, plus the infrastructure to keep it honest:
+
+| Component | What it is |
+|---|---|
+| `research/rbf_sim/` | Simulation package — revenue generation with enforced accounting identities, four contract arms, paired runner |
+| `research/DERIVATIONS.md` | Seven propositions with proofs, each asserted numerically against the engine |
+| `research/CLAIM_LEDGER.md` | Every public claim with its class, artifact, JSON path, checksum and required qualifier |
+| `research/verify_reproduction.py` | Clean-copy regeneration reporting byte and numeric equality separately |
+| Simulation Lab | Web surface rendering every figure from checksummed artifacts, with no financial arithmetic in the frontend |
+| 1,008 tests | Including a named-regression tripwire for retracted phrasings |
+
+### What I found
+
+**Both halves, always.** In a severe-downturn scenario the revenue-contingent arm removes 6.85 months above a 15% burden band and holds mean burden near its stable-scenario level, while recovering 65.46% of its target by month 12 against the fixed arm's 92.31%, with mean duration extending from 13 to 18.718 months. *(Simulated; 15% is an illustrative band; burden is payment ÷ GMV; the fixed arm assumes full, on-time payment.)*
+
+**Price and structure are separable — and both matter.** Repricing the identical payment rule from f = 1.20 to f\* = 1.0945 reverses the cost comparison. The pre-cap payment rule is unchanged; the cap factor moves the contractual target and therefore completion timing and the realised stream.
+
+**Failure is real and needs precision.** Permanent closure before completion leaves a balance unrecovered — 100% of paths in one scenario. But incomplete recovery is not principal loss: one closure scenario recovers ≈214.3M VND against a 185M advance despite 76.2% of paths missing the target.
+
+### What I'd want a reviewer to look at
+
+Not the results — the **decision log**. It records every claim I retracted and why, including three that survived multiple review rounds before an adversarial reader caught them. The pattern in each case was the same: I fixed the instance in front of me and not the family.
+
+---
+
+## 4. Interview preparation
+
+### The question you will be asked first
+
+**"Walk me through the project."**
+
+> Revenue-based financing takes a percentage of revenue instead of a fixed payment. Everyone agrees it helps the seller in a downturn and costs the financier in timing — but nobody had measured both sides on the same revenue path, because you can't observe one seller on two contracts.
+>
+> So I simulated it. Every contract arm runs on the identical generated path, matched on principal, total repayment and term, so the only difference is payment timing.
+>
+> The result I care about most isn't a number, it's a distinction: **price and payment structure are separate questions.** I got that wrong in an early draft — I wrote that the contract "costs 2.3× the interest of a conventional loan", which fixed one cap factor as though it were a property of the structure. It isn't. Reprice the same payment rule and the comparison reverses.
+
+### Questions designed to catch you
+
+**"Is your model accurate?"**
+> It isn't a predictive model, and I don't claim accuracy for it. The simulation describes contract mechanics under assumptions I specified. There's also a machine-learning risk score in the demonstration product — that one I explicitly withdrew, because its training label was generated by a formula over the same features the model consumes. The generating function scores 0.9098 against its own label; the reported ensemble scored 0.9182. It was measuring the noise I chose, not skill.
+
+**"So what does the study actually prove?"**
+> Two classes of thing, and I keep them separate. The propositions are proved and hold for any revenue path — the completion condition, the burden elasticity, the recovery-ordering condition. The magnitudes are illustrations under parameters I chose, and they're labelled as such. What the study does *not* establish is anything about real sellers.
+
+**"Why should I trust the numbers?"**
+> Every figure traces to one of five checksummed artifacts, and the claim ledger names the JSON path. You can regenerate them. I'd also point at what I got wrong: I originally claimed byte-for-byte reproducibility on the strength of a check that re-hashed the committed file instead of regenerating it — a check that couldn't have failed. The corrected claim is numeric reproducibility everywhere, byte reproducibility within a fixed runtime, and 3 of 5 byte-identical on macOS.
+
+**"What's the weakest part?"**
+> Three things. The revenue process is one I specified, and structural uncertainty — whether that process is the right model — is not quantified. The fixed arm is modelled as always paid in full and on time, which flatters it. And almost all the supporting literature on contingent repayment is about student loans, not firms; the construct transfers, the findings don't, and I flag that at every citation.
+
+**"Would you deploy this?"**
+> Not as an underwriting system, no. It's a demonstration. The financing arithmetic is deterministic and tested, and I'd stand behind that. The risk score is not validated and shouldn't drive a decision about anyone.
+
+### The answer worth rehearsing
+
+**"Tell me about a mistake you made."**
+
+> I made the same mistake three times in a row, which is the interesting part.
+>
+> Round one: an audit found overreaching claims in the product copy. I fixed them and wrote a test to catch regressions. Round two: an adversarial reviewer found that the sentence I'd called "the most misleading in the product" was still live on the README and the landing page — my test matched a literal string and the README used a paraphrase. Round three: the same reviewer found my *correction* had restored the retracted sentence two clauses later.
+>
+> Each time I fixed the instance in front of me rather than the family. What actually worked was handing the work to a reader instructed to attack it. That's now a standing step, not a one-off.
+
+---
+
+## 5. What must never be said about this project
+
+Kept explicit because these are the claims that would be tempting.
+
+| Do not say | Say instead |
+|---|---|
+| "Built a credit risk model with 0.92 AUC" | "Built a demonstration scoring component; its benchmark was withdrawn as circular" |
+| "Deployed to production" | "No current public deployment; the previously-linked host serves a superseded build" |
+| "Proved RBF is better/cheaper for sellers" | "Measured a trade-off: lower simulated burden, slower simulated recovery" |
+| "Showed RBF prevents default" | "Showed no guarantee of contractual completion — closure before completion leaves a balance unrecovered" |
+| "Validated on real data" | "The UCI figures are pending re-run; the merchant model has no real outcomes" |
+| "Calibrated to the Vietnamese market" | "Vietnam-motivated and illustratively parameterised; no parameter estimated from Vietnamese data" |
+| "Reproducible byte-for-byte" | "Numerically reproducible at published precision; byte-reproducible within a fixed runtime" |
+| "Analysed 500 sellers" | "Simulated 500 revenue paths per scenario. No seller was observed." |
+
+---
+
+## 6. Source index
+
+| Claim used above | Where it comes from |
+|---|---|
+| 6.85 months, 65.46%, 92.31%, 18.718 | `baseline_v2_canonical.json` → `/scenarios/severe_downturn` · ledger S-1 |
+| f\* = 1.0945, residual ≈0.02416pp | `validation_v1_canonical.json` → `/pricing` · ledger P-1, P-2 |
+| 100%, 76.2%, ≈214.3M, ≈98.3M | closure artifacts → `/scenarios/*/RBF` · ledger S-3, S-4, I-3 |
+| 0.9098 vs 0.9182 | `research/analysis/00_audit_evidence.py` · registry R-000 |
+| 1,008 tests (379 backend + 629 simulation) | test run, 9 browser tests skipped and reported as skips |
+| Five artifacts, byte vs numeric | `research/verify_reproduction.py` · decision log D-041, D-043 |
+| Retractions | decision log D-015 (2.3×), D-040 (RBF-G null), D-041 (reproducibility), D-042/D-046 (incomplete corrections) |
