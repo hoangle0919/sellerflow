@@ -4,8 +4,11 @@
 
 RBF analyzes ecommerce-merchant revenue, tests repayment scenarios, and surfaces the risks and assumptions behind every financing recommendation. The motivating premise is that many small Vietnamese e-commerce sellers have limited or no credit-bureau (CIC) file, while their platform activity — revenue, growth, returns, fulfilment history — is recorded continuously. **No prevalence figure is claimed** — this project holds no such data — and the comparison to a bureau file is a motivation for the design, **not a measured finding**. RBF turns platform data into a structured financing analysis: recommended advance, remittance percentage, repayment cap, downside scenarios, and the categorized risk findings behind the recommendation.
 
-> **⚠️ No current public deployment.**
-> The previously-linked Railway host serves a **superseded build** ("SellerFlow", credit-limit/interest-rate framing) that predates the RBF rework and does not reflect this repository. It is **not** representative of this project, and the link has been removed rather than left to mislead. A corrected deployment will be published only once documentation, validated results, and product agree.
+> **Live demonstration:** https://sellerflow-production.up.railway.app
+>
+> The live demo runs **this repository's current build**. It is a **demonstration, not a lending service**: it holds no capital, makes no real credit decisions, and has **never received an external submission** — the database holds demonstration records and developer tests only, so there is no third-party personal information. Its risk score is trained on synthetic data with a circular label; see [Model status](#model-status).
+>
+> *Deployment discipline.* This link is accurate only while the deployed build matches this branch, so redeploy after any merge that changes user-facing copy. Two earlier versions of this notice were wrong in opposite directions: one said "No current public deployment" (written during a hosting outage, left stale after the service was restored), and one described the host as serving a superseded pre-RBF build (it does not — it serves this repository).
 
 RBF analyzes. It does not hold capital or make loans — a lender or financier structures and funds the actual advance.
 
@@ -177,7 +180,7 @@ Renaming SellerFlow → RBF touched every user-facing surface (landing page, nav
 
 | Identifier | Where | Why retained |
 |---|---|---|
-| `sellerflow-production.up.railway.app` | GitHub repo name, Railway project name | The deployment serving this hostname is superseded and is no longer linked. Renaming the repo is a deliberate branding decision, not a code change. |
+| `sellerflow-production.up.railway.app` | GitHub repo name, Railway project name | This hostname serves the **current** build of this repository — it is the live demonstration linked at the top. The name predates the SellerFlow → RBF rename; renaming the repo and the Railway project is a branding decision, not a code change, and would break the URL for no user-visible benefit. |
 | `data/sellerflow.db` | `DATABASE_URL` default in `backend/database.py` | The production persistent volume already contains a file at this path. Changing the default would make the app write a new, empty database on next deploy and orphan the existing one. |
 | `sellers` table, `/api/sellers/*` routes | `backend/database.py`, `backend/main.py` | Internal/API identifiers, not shown in any UI. Renaming is pure churn with no user-facing benefit. |
 | `sf_live_...` API key prefix | `backend/main.py` | Opaque token prefix, not brand text. Rotating it would invalidate a handful of already-issued test keys for no benefit. |

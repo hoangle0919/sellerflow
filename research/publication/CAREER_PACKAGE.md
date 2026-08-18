@@ -5,7 +5,7 @@
 **The rule that governs this file.** A CV is where research overclaiming usually happens, because nobody audits a résumé bullet. So the same constraints apply here as in the paper:
 
 - **No predictive-validity claim.** The model is a demonstration trained on synthetic data with a circular label.
-- **No deployment claim.** There is no current public deployment; the previously-linked host serves a superseded build.
+- **No production or lending claim.** There is a live *demonstration* deployment at sellerflow-production.up.railway.app. It holds no capital, makes no offers, and has never received an external merchant submission — its database is demo records plus my own tests. Say "live demo", never "in production" or "serving merchants".
 - **No affordability, causal, or population claim.** Nothing here is evidence about real sellers.
 - **No "improved X by Y%"** unless Y is a registered figure with an artifact behind it.
 - Numbers appear with their meaning attached — a simulated magnitude is labelled as one.
@@ -145,7 +145,7 @@ Kept explicit because these are the claims that would be tempting.
 | Do not say | Say instead |
 |---|---|
 | "Built a credit risk model with 0.92 AUC" | "Built a demonstration scoring component; its benchmark was withdrawn as circular" |
-| "Deployed to production" | "No current public deployment; the previously-linked host serves a superseded build" |
+| "Deployed to production" / "serving merchants" | "Live demonstration deployment; no external merchant has ever submitted data" |
 | "Proved RBF is better/cheaper for sellers" | "Measured a trade-off: lower simulated burden, slower simulated recovery" |
 | "Showed RBF prevents default" | "Showed no guarantee of contractual completion — closure before completion leaves a balance unrecovered" |
 | "Validated on real data" | "The UCI figures are pending re-run; the merchant model has no real outcomes" |
