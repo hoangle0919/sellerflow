@@ -166,6 +166,229 @@ Append-only. Do not edit past entries; supersede them with a new entry.
 
 ---
 
+### D-045 — Final line edits: restatements, retired verification script, RBF-G scope, burden denominator
+**Date:** 2026-08-10
+**Raised by:** the final read-only audit of `b1cef86`. **Artifact/reproducibility gate PASSED; Gate A narrowly failed on a dozen sentences.**
+**Status:** APPLIED on `publication-package`. No new framework, scanner, artifact, simulation or broad rewrite. No financial change.
+
+**1. `S_H ≥ Θ` restated without limiting `H`.** Two places still called it the general or complete criterion: the §"complete characterisation" line and the logical-status block. Both now state the binding rule — `completion ⇔ ∃ finite t ≤ H with S_t ≥ Θ` — and note that the reduction to `S_H ≥ Θ` holds **only for finite `H`**, because `S_k` is non-decreasing. The lifetime case is where it fails and is why the rule is written this way.
+
+**2. Current-engine language in the tolerance section.** "The 1-VND-scale tolerance **in the engine**", `0.50 *(engine default)*`, and an instruction telling the paper to report operational completion at `ε = 0.5` all described pre-A-7 behaviour. Since D-024 the operational layer settles in **integer đồng with `ε = 0` by construction**; `FLOAT_GUARD_VND = 1e-6` is analytical representation-error protection and **is not a settlement tolerance**. The `ε` table is retained, relabelled as **hypothetical declared-policy** values, and the reporting instruction now requires any such figure to be marked hypothetical.
+
+**`research/analysis/01_verify_spec.py` retired rather than patched.** It still defaulted to `tol=0.5`. Updating the constant would have been the smaller edit and the wrong one: the script verifies `METRIC_DEFINITIONS.md` **v0.1**, which `METHODOLOGY_SPEC.md` v1.0 superseded, and describes itself as "a throwaway reference implementation — it is not the engine". R-003 already marks its output exploratory and not quotable. It is now banner-marked historical, removed from the reproduction instructions in `RESEARCH_MANIFEST.md`, and retained only so coherence constraint §3.4 has a traceable origin.
+
+**3. RBF-G scope, in the two places that still generalised it.** `CORRECTED_CLAIMS.md` "retained as a null result" → **floor-only null / design flaw**. `RESULTS_REGISTRY.md` "F-5 must be presented as a null result" → **N-2′ is the hardship-floor null, and the live ceiling result must accompany it** (6,009 of 36,000; 6 of 10 scenarios). Also closed an unmatched strikethrough I left in the registry's limitations paragraph, where a D-040 insertion had opened `~~` without closing it and swallowed the following sentence into a struck region.
+
+**4. R-011's incomplete-recovery list** said recovery failure "requires zero revenue, a binding horizon, or a terminal write-off". That is a closed list stated as a requirement. Replaced with the exact criterion plus the same examples marked explicitly non-exhaustive.
+
+**5. The burden denominator, in the two places the D-044 pass missed.** `high_burden_months` still said the count is constant **"BY CONSTRUCTION"**, and a product implication said a revenue share "achieves" flat burden through a downturn. Both overstate: the contractual remittance is a fixed share of **net sales**, while the displayed count and burden use **GMV**, so they equal `r·(1 − return rate)` and move when returns move. Constant only while the net-sales/GMV ratio is fixed.
+
+**6. Remaining live copy.** `index.html`: "if revenue stops, the cap is never reached" → permanent cessation **before completion while a balance remains**; "holds funding for verification" → marks the demonstration assessment for manual review; "verify revenue before disbursing" → verify submitted revenue before relying on the assessment. `README.md`: "gates the credit decision" → marks the demonstration assessment for review. `RESEARCH_MANIFEST.md`: the backend count said **71** in the verification table while saying 379/9 in the reproduction block — the 71 is now labelled as the historical D-028 composition and the current figure is stated.
+
+**Suites:** 379 backend passed / 9 skipped, 629 simulation passed.
+
+---
+
+### D-044 — Final editorial consistency pass: active claims that survived three correction rounds
+**Date:** 2026-08-10
+**Raised by:** the final read-only Gate A audit of `ff470b4` — **FAIL, narrowly.**
+**Status:** APPLIED on `publication-package`. **No financial change, no simulation run, no artifact regeneration.**
+
+**The shape of this round.** D-043 corrected the completion theorem, the RBF-G null, the underwriting language and the verifier — and in several places corrected the *summary* while the *active* statement survived elsewhere in the same file. The verifier repair itself passed natively (3/5 byte-identical, 5/5 numerically equal, exit 0, cleanup confirmed). What remained was editorial.
+
+**P7's proposition itself, not just its summary.** The proposition read `completion ⇔ S_H ≥ f·A/r` for any `H` "including the business lifetime". For a **finite** `H` that is right, and the reduction is sound because `S_k` is non-decreasing. For an unbounded lifetime it is **not**: the limit is not a partial sum. The proposition now states the finite-time criterion — `∃ finite t ≤ H with S_t ≥ Θ` — notes the finite-`H` equivalence explicitly, and marks the unconditional form superseded. D-043 fixed the criterion *below* the proposition and left the proposition itself saying the older thing.
+
+**"For any target cost there exists an `f` attaining it."** True of the **contractual repayment target** `A·f`, which is continuous and monotone. False of **effective APR on the reference path**, which moves in steps because duration is integer-valued — so a target APR generally has *no* exactly-attaining `f`. The two statements are now separated, with the 0.02416pp residual attached to the second.
+
+**Stale ε paragraphs.** `DERIVATIONS.md` still described `ε = 0.5` as the engine default and the integer-VND correction as "not applied" — stale since A-7 applied it. Superseded in place; the `ε` table is retained as **declared-policy sensitivity examples**, which is what it always was.
+
+**Remaining actives.** `CORRECTED_CLAIMS.md`: one uppercase `F·A` in the ρ\* formula, and "the guardrail feature is decoration" — only the **floor** is dead. `METHODOLOGY_SPEC.md`: Benchmark B "represents a realistic alternative", and the incoherent region described as where "no financing structure is affordable" (now: fails the study's illustrative burden/coherence rule).
+
+**Precision the registry lacked.** RBF-G differences are now stated by field — `apr_mean` **6** scenarios, `burden_mean` **6**, `recovery_ratio` **3**, `duration_mean` **1** — rather than as a bare "6 of 10". The P4 reversing condition is stated exactly (realized mean eligible base against `B* = P/r`, plus the integer-rounding qualification that makes `B* < B̄`) instead of the "non-declining revenue" label, which is not the condition.
+
+**The ledger's universal disclaimer was flattening §1.** "Every figure is simulation output" is right for §2–§3 and **wrong for the theorem rows**, which are proved and hold for any path. Applying the simulated-output caveat to them under-claims them and mislabels their warrant; their real limitation is that a contract is not a market. The disclaimer is now class-dependent, with the one unconditional part — no observed seller data, no evidence about any seller — stated first. Source paths for S-2 and S-5 now list every field the claim asserts, rather than the one field that happened to be cited.
+
+**The burden denominator was misstated, and this one is subtle.** `lab.py` said a revenue-share payment's burden "cannot rise when revenue falls… by construction". The contractual remittance is a fixed share of **net sales** — but the burden the Lab *displays* uses **GMV**, so it equals `r·(1 − return rate)` and **moves when returns move**. It is constant only where the net-sales/GMV ratio is fixed. The returns-spike scenario is precisely where the two denominators come apart, and the page was asserting universality over a quantity that is not universal. `DERIVATIONS.md` P1's implementation note had this right all along; the product copy did not.
+
+**Live copy.** README: closure conditioned on permanent zero revenue *before completion while a balance remains*, with the three closure scenarios distinguished (100.0% / 76.2% / 2.0%) rather than a blanket "runs to 100%"; the guardrail split into dead floor and binding ceiling; the exact P4 threshold; and — the honest one — **the README claimed the withdrawn 0.92 "is not reported by the API"**, which is false. It is returned as `withdrawn_value`, deliberately, as audit metadata. The README is corrected rather than the API. "RBF answers the credit-underwriting half today" is removed: it is an unvalidated demonstration. `index.html` keeps the backend enum values for compatibility but displays **illustrative low/medium/high-risk tiers** instead of Approved/Conditional/Not approved, in the verdict map, the dashboard counts and the explanations; "enough signal", "exceeds the risk threshold", "credit decision" and "before disbursing" are gone, and an integrity flag now marks the **demonstration assessment for manual review**.
+
+**Canonical metadata — decision recorded, not deferred.** Approved: **do not regenerate the five registered artifacts.** Checksums and embedded historical metadata stand. The embedded determinism sentence is superseded by D-041/D-043, the corrected reproduction claim is the only one permitted on any surface, and the regression test proving the raw field is never publicly rendered stays. `RESULTS_REGISTRY.md` no longer says "awaiting a call".
+
+---
+
+### D-043 — Completion-theorem edge case, remaining document contradictions, underwriting language, and a verifier that could not report its own finding
+**Date:** 2026-08-10
+**Raised by:** the third Codex claim audit. **Gate A round 2 failed at `f2b84f9`.**
+**Status:** APPLIED on `publication-package`. **No financial formula, seed, scenario, contract, settlement rule or registered numeric result changed. No registered artifact rewritten.**
+
+**1. The completion theorem was wrong at the boundary.** P7's convergence criterion read `completion iff S_∞ ≥ Θ` where `Θ = f·A/r`. **The weak inequality is false at equality**, because the limit is not itself a partial sum: where revenue is strictly positive every period, the partial sums increase strictly toward `S_∞` and never attain it. So `S_∞ = Θ` means the cap is approached asymptotically and reached at no finite horizon. The correct statement is `S_∞ > Θ` **strictly** implies completion; `S_∞ < Θ` precludes it; equality is sufficient only where the series has finitely many non-zero terms so the sum is *achieved*. This is D-022's `ρ > ρ*` argument, which had been applied to the geometric special case but not to the general criterion above it. Corrected in `DERIVATIONS.md`, `CLAIM_LEDGER.md` M-7, `CORRECTED_CLAIMS.md`.
+
+**"Exactly four mechanisms" is withdrawn.** The complete characterisation is the inequality; the four rows are *examples*. Cause 4 was itself missing from an earlier draft — an enumeration that has already been wrong once should not be advertised as closed.
+
+**S-3's matched term was wrong.** It said closure at month 7 precedes "the base-case 12-month completion". At `f = 1.20` the matched term is **13** months (`match_benchmark_a.term`, payment 17,076,923, APR 37.8694%); 12 is the term at `f* = 1.0945`. The two price tracks were crossed.
+
+**2. Document contradictions.** `CORRECTED_CLAIMS.md` still said "equal-cost"/"equal-effective-cost" for `f*` (now: nearest reference-path APR grid match, residual ≈0.02416pp), used uppercase `F·A`, and asserted "platforms settle after returns" — a premise A-8 marks unverified. `DERIVATIONS.md`'s pricing section called `f*` an exact cost solution and stated the under-reporting conclusion unconditionally (it holds only where the contract still completes, which needs both an adequate horizon and `S_∞ > Θ/ω`). `METHODOLOGY_SPEC.md` A-6 still said the integer-VND correction was "**not applied**" — stale since A-7 applied it. `RESULTS_REGISTRY.md` carried the fixed-payment value judgement, "the failure region has **not been located**" (it has, D-032), a whole-guardrail null, and "Two null results, preserved" when one is superseded. `METRIC_DEFINITIONS.md` now carries a document-level banner marking its affordability and fixed-payment-advantage claims superseded.
+
+**3. Underwriting language in the shipped prototype.** The product presented an unvalidated synthetic score as a **probability of default**, labelled outcomes **"Approved"**, headed the demo **"LIVE ASSESSMENT"**, told users a merchant **"clears the underwriting bar"**, promised **"three minutes, no documents"** and a result **"in about a second"**, and said **funding is held pending verification** — for a product that holds no capital. It also described merchant-submitted figures as platform-sourced: **the shipped prototype connects to no platform API.** All corrected in markup *and* in the JavaScript render paths. `/api/model/status` now ships the UCI figures as `validation_status: "pending_rerun"` with the numbers renamed `reported_*`, matching R-002 instead of contradicting it — a registry note nobody curls is not a qualification.
+
+**D-026's "purged from every public surface" was itself inaccurate.** `/api/model/status` still returns `training_baseline.withdrawn_value: 0.92`, deliberately and with an allow-list entry in `test_no_withdrawn_claims.py`. Retaining it is right — deleting a retracted number destroys the audit trail — but "purged" is then false. Corrected to *retired as a current result, retained as an explicit withdrawal record.*
+
+**4. The verifier could not report the finding it was written for.** `verify_reproduction.py` deleted every canonical file up front, then ran the generators. `canonicalize_validation.py --write` re-verifies the four registered baseline checksums, so on any platform where a baseline reproduces numerically but **not** byte-for-byte — precisely macOS, with the 9 and 2 last-bit differences — the run aborted instead of printing them. **A verifier that only works when everything matches verifies nothing.** Fixed: per-generator deletion immediately before each run with recreation confirmed; a `--no-registered-check` flag for the scratch tree, with the reasoning recorded at the flag; a `MISSING` sentinel so a dropped key is no longer indistinguishable from an explicit `null`; and `try/finally` cleanup that survives a generator crash. Eleven focused tests, including one that breaks a generator and asserts no scratch tree leaks.
+
+**5. Stale metadata inside the artifacts — raised, contained, NOT changed.** All five canonical files embed `canonical.determinism = "Identical code, configuration and seeds produce a byte-identical file."` — the claim D-041 withdrew. Correcting it means editing `rbf_sim/canonical.py` and regenerating all five, **changing all five registered checksums to fix a sentence about reproducibility**. That is a deliberate re-registration and this pass is not authorised to make it. The field is marked superseded in `RESULTS_REGISTRY.md`, and `test_no_public_surface_renders_the_superseded_determinism_field` asserts no backend or frontend surface reads it. **Awaiting a decision; no artifact touched.**
+
+**Suites:** 1,008 passed, 9 skipped (browser, chromium unavailable — not counted as passes).
+
+---
+
+### D-042 — Nine incomplete corrections found by re-auditing D-040/D-041, including a retraction that restored its own retracted sentence
+**Date:** 2026-08-10
+**Raised by:** an adversarial verification run against the D-040/D-041 working tree *before* committing.
+**Status:** APPLIED on `publication-package`.
+
+**Why this entry exists.** D-040 and D-041 were written, tested and self-verified. A hostile re-read then found **nine** defects. Every claimed *number* survived independent recomputation; every failure was an **incomplete or self-contradicting correction**. That is now the third consecutive audit in which the pattern was the same: I fixed the instances I had in front of me and not the family.
+
+**The worst one — a retraction that un-retracted itself.** `CORRECTED_CLAIMS.md:132`. I wrote a blockquote opening *"the sentence that followed… is **withdrawn**"*, gave the correct 6-of-10 breakdown, and then **restored the withdrawn sentence verbatim and unmarked two clauses later**: *"This fully explains the baseline v1 null result — RBF-G was bit-identical to RBF…"*. Checked directly against `results/baseline_v1.json`: RBF-G differs from RBF in **6 of 10** scenarios there as well (`seasonal`, `seasonal_strong`, `growth`, `disruption_1m`, `platform_outage`, `returns_spike`). So the sentence is false for **v1 and v2 alike**, and the null it "fully explains" was never a null. Writing a retraction and then reinstating the retracted text is worse than not retracting at all, because it looks corrected.
+
+**The rest:**
+
+| # | Defect | Fix |
+|---|---|---|
+| 2 | `DERIVATIONS.md:80` still asserted *"Two sellers with identical cumulative sales reach the cap at the same month"* — directly contradicted by the §A summary I had just corrected, in the same document | Scope-corrected: duration is **first passage**, a property of the trajectory, not of the terminal total |
+| 3 | `DERIVATIONS.md:217` kept the last uppercase `F = 1.20` — in the ρ\* worked example that M-6 specifically says must not carry it | Lowercased; added the `f*` value 0.908634 beside 11/12 |
+| 4 | `METHODOLOGY_SPEC.md:255` still read `r·S_T ≥ F·A`. **A-8's own table claimed this substitution had been made.** An amendment asserting a change it did not make | Completed |
+| 5 | `METHODOLOGY_SPEC.md:282` and `rbf_sim/README.md:16` said *"reproduce bit-for-bit"* — the D-041 claim, in a synonym the scanner did not watch for | Both corrected; `bit[- ]for[- ]bit` added to the tripwire |
+| 6 | `rbf_sim/README.md:29` kept the *"61% of rows"* identity wording the README had just been corrected away from | Corrected, with the sample sizes distinguished (60.97% of n=3,000 outside the band; 62.30% flagged on the first 1,000) |
+| 7 | `CLAIM_LEDGER.md` P-4 asserted *"Platforms settle after returns"* as fact — a premise A-8 marks **unverified** three files away. The governing document contradicted the spec it governs | Marked pending external support |
+| 8 | `CLAIM_LEDGER.md` was exempt from the per-phrase marker check, which is why #7 survived | Moved into `AUTHORITATIVE`: the document that decides what may be said is now the *most* scrutinized, not the least |
+| 9 | `CLAIM_LEDGER.md` cited spec version `A-1..A-7` after A-8 was added | Corrected |
+
+**Also noted, not fixed, and disclosed rather than hidden.** All five canonical artifacts embed `canonical.determinism = "Identical code, configuration and seeds produce a byte-identical file."` (`rbf_sim/canonical.py`). `validation_v1_canonical.json` is new in this work, so a fresh artifact was minted carrying a claim D-041 withdrew. It is not rendered on any surface. Correcting it would require changing `canonical.py` and regenerating every artifact, which would invalidate four registered checksums to fix a string — a worse trade. **Recorded here so the next reader finds it from the log rather than from the JSON.**
+
+**The lesson, restated because restating it has not yet been enough.** Three audits, three times the same failure mode: a correction scoped to the example that prompted it. The countermeasure that actually worked each time was an adversarial reader instructed to attack, not a test I wrote. Gate B and Gate C must be adversarial before they are confirmatory, and the claim ledger's human review — not the scanner — is the gate.
+
+---
+
+### D-041 — The byte-for-byte reproducibility claim was overstated; byte and numeric equality now reported separately
+**Date:** 2026-08-10
+**Raised by:** the second Codex claim audit at Gate A.
+**Status:** APPLIED on `publication-package`.
+
+**Trigger.** The project claimed its artifacts "reproduce byte-for-byte". An independent regeneration on **macOS / CPython 3.11.5** produced **9** last-bit floating-point differences in `baseline_v2_canonical.json` and **2** in `baseline_equalcost_v1_canonical.json`. The three other artifacts were byte-identical. On Linux/aarch64 CPython 3.10.12 all five are byte-identical. **All five are numerically equal at published precision in both environments.**
+
+**The evidence file was worse than the claim.** `evidence/2026-08-07-native-macos-verification.md` presented a step labelled "recomputed" as proof of cross-platform determinism. That step read the committed `baseline_v2_canonical.json` and hashed it. **Hashing a file against its own recorded checksum tests only that the file is uncorrupted on disk — it cannot fail for any reason connected to determinism.** The conclusion drawn from it was not supported by the evidence shown. The section is now marked withdrawn, with the measured result in its place and the original text preserved beneath.
+
+**Alternatives considered:**
+1. Regenerate the artifacts on macOS so the hashes match. **Rejected, emphatically.** That overwrites the evidence instead of verifying it, and would make the checksums agree for the trivial reason that they had just been written. It is the same error as the "recomputed" step, committed deliberately.
+2. Weaken the claim to "reproducible" without qualification. Rejected — that hides which property holds.
+3. **Chosen:** report the two properties separately, everywhere, and state the platform.
+
+**Reason.** Byte equality is a statement about a *serialization* on one runtime; numeric equality at published precision is the statement a reader needs in order to trust a figure. Collapsing them made the weaker guarantee sound like the stronger one and hid a real cross-platform limitation. IEEE-754 last-bit divergence between CPython builds is expected; presenting it as a research defect would be as wrong as hiding it.
+
+**Consequence.** New `research/verify_reproduction.py` regenerates every artifact into a scratch tree and prints byte equality and numeric-leaf equality as separate columns, with a non-zero exit only on numeric failure. It never writes to `results/`. `RESULTS_REGISTRY.md`, `CLAIM_LEDGER.md` §0 and the evidence file now carry the measured table. **Cross-platform byte determinism is not claimed and must not be claimed until a clean regeneration demonstrates it.**
+
+---
+
+### D-040 — Second claim audit: missing conditions, a false null result, and unsupported factual premises
+**Date:** 2026-08-10
+**Raised by:** the second Codex claim audit at Gate A. **Gate A did not pass.**
+**Status:** APPLIED on `publication-package`. **No formula, seed, scenario, contract, settlement rule or registered result changed.**
+
+**1. Ledger theorems were missing necessary conditions.** Each was true in the case that motivated it and false in general:
+
+| Claim | Missing condition |
+|---|---|
+| M-2 | Under-reporting rescales the **uncapped** payments. The clipped final payment is `min(r·ω·B_t, remaining)` and need not scale. |
+| M-3 | `A·f` is the **contractual target**; realized total equals it **only upon completion**. |
+| M-4 | Path-dependent APR comparison requires **completed, IRR-defined** payment streams. |
+| M-5 | Permanent closure prevents recovery **only where an unrecovered balance remains**. A contract completed before closure is unaffected. |
+| M-6 | ρ\* depends on the cap factor; and the formula used **uppercase `F`**, which denotes fixed operating cost elsewhere. Now lowercase `f`, throughout `DERIVATIONS.md` and `METHODOLOGY_SPEC.md`. |
+| S-3 | "Where revenue reaches zero, recovery fails" is wrong: **temporary** zero-revenue spells often complete — `temp_closure` is 2.0% incomplete at `f = 1.20` and 0.0% at `f*`. The condition is **permanent closure before completion**. |
+| I-3 | **Incomplete recovery ≠ principal loss.** `closure_m13` is 76.2% incomplete yet recovers ≈214.3M against a 185M advance — principal covered. Only `closure_m7` (≈98.3M) shows a principal shortfall, and it recovers the *same absolute amount at both cap factors* because that path is revenue-limited, not cap-limited. |
+| Q-3 | Replaced an unsourced real-world default assertion with what the model actually assumes: fixed payments made in full and on time, giving an **optimistic scheduled-recovery benchmark**. |
+| P-1 | `f* = 1.0945` is the **nearest grid match**, not an exact one: 19.537656% vs 19.561817%, residual **≈0.02416pp**. |
+| P-3 | Convergence was checked for **two estimators on one scenario** (`Δn_HPB`, `ΔRR(12)`, sustained −40%). "Estimates are converged" overstated it. |
+
+**2. N-2 was a false null result, and I preserved it as true.** "RBF-G bit-identical to RBF in all ten scenarios" is wrong: **6 of 10** differ. D-039 caught the ledger's version; this audit found the same false claim still standing in `RESULTS_REGISTRY.md` (F-5 and N-2), `DERIVATIONS.md` and `CORRECTED_CLAIMS.md`. The mechanism is now measured exactly rather than asserted — counting month-observations where `r·B_t > p_max = 2·r·R₀` across the full 500 paths per scenario:
+
+`growth` 1,400/12,000 · `seasonal_strong` 11 · `seasonal` 1 · `disruption_1m` 1 · `platform_outage` 1 · `returns_spike` 1 · the other four **0**.
+
+**The correspondence is exact**: the six scenarios where the ceiling binds are precisely the six where RBF-G differs. `DERIVATIONS.md` previously offered `platform_outage` and `returns_spike` as cases where the ceiling could not bind; both bind on one observation. The surviving null is narrower — **N-2′: the hardship floor never activates on any path, by construction** (0 of 36,000, `μ = 0.25 < h = 0.50`).
+
+**3. Analytical summaries overstated their propositions.** P5's heading and summary said duration scales by `1/ω`; what scales is the **required cumulative base** — duration is the *first passage time* to that threshold and depends on path shape (12.862 → 18.690 observed against 18.374 predicted by inverse scaling). P3's summary implied equal terminal cumulative sales give equal first-passage months. P4's summary used "declining vs non-declining" where the exact condition is realized mean eligible base against `B* = P/r`, and both directions occur. `METRIC_DEFINITIONS.md`'s expected-to-fail note asserted unconditionally that relief is funded by longer duration.
+
+**4. Unsupported factual premises.** Spec amendment **A-8** supersedes "Vietnam-calibrated" → "Vietnam-motivated and illustratively parameterized"; "conventional" / "what a seller would realistically be offered" / "externally cited market APR" → "illustrative 18%/12-month amortizing reference"; and marks "platforms settle after returns" and "real RBF contracts commonly carry a maturity date" as **pending external support** while retaining the definitional and mechanical rationales that actually carry those amendments. Public copy: CIC prevalence, "richer than any bureau file", "third-party verified and updated daily", "one API call in under a second", "common for fashion and gift categories", the unvalidated "Default probability 2.4%" label (now "Demo score — synthetic, not a validated default probability", in the markup *and* both JS render paths), the UCI figures reconciled against R-002's *re-run pending* status, and the "61% of rows" identity wording corrected to what the audit measured (median ratio 0.9751, 60.97% outside the band, 62.30% flagged).
+
+**5. The scanner is reclassified.** It is a **named-regression tripwire**, not a semantic proof of safe copy, and its docstring now says so. It discovers `frontend/**/*.html` by glob instead of a static list, covers `backend/main.py` and `backend/financing_engine.py`, and no longer blanket-exempts the registry and backlog: those two now get a per-phrase supersession-marker check, because a stale claim in the document that decides what may be quoted is live whatever the file is labelled. Seventeen fixtures for the exact claims corrected here. One instructive bug found while writing it: the pattern for the byte-for-byte overclaim excluded any sentence containing the word "platform", so *"reproduce byte-for-byte on every platform"* disabled its own pattern. **Human review against `CLAIM_LEDGER.md` remains the real gate.**
+
+---
+
+### D-039 — Adversarial review of D-037: a false ledger claim, and the retracted sentence still live
+**Date:** 2026-08-10
+**Raised by:** an independent adversarial verification of the D-037/D-038 commit, run before Gate A.
+**Status:** APPLIED on `publication-package`.
+
+**Why this entry exists.** D-037 and D-038 were committed, self-verified, and reported as done. A separate adversarial pass then found that two of the three things that commit claimed to do, it had not done. Both failures shared a shape: **the check was built from the examples that motivated it, so it could only catch those examples.**
+
+**Finding 1 — the worst sentence in the project was still on the two most-read pages.** D-037 called "extends the term… instead of defaulting" the most misleading sentence in the product, removed it from `lab.py`, and listed it in the ledger under "do not restate in any form". It was left standing, one word away, on `README.md:32` ("extends the repayment term **instead of triggering a default** — that **mechanical fact**…") and `frontend/index.html:714` ("a slow month extends the term instead of triggering a default"). The README version was worse than the one removed, because it labelled the claim a mechanical fact. Both scanned clean: the regex was the literal string `instead of defaulting`.
+
+**Finding 2 — the ledger contained a claim its own cited artifact falsifies.** S-6 said RBF-G is "bit-identical to RBF in all ten scenarios" and credited the hardship floor. Diffing the cited JSON path: **6 of 10 scenarios differ**. The floor genuinely never binds (`floor_months: 0`, `reachable: false`), but the **ceiling** `p = min(p, 2.00·r·R0)` binds **6,009 of 36,000** month-observations — a number recorded in the ledger's *other* cited artifact. The differences sit below the Lab's display precision, which is why nobody had noticed. `test_claim_ledger.py` did not test S-6.
+
+**Also corrected:** "equal-effective-cost" (hyphenated) survived in six places across `RESEARCH_MANIFEST.md` and `RESULTS_REGISTRY.md` because the regex checked the spaced form, which this project never uses — including a headline results table. `METRIC_DEFINITIONS.md:86` described FIX-B as priced at "an externally cited market APR", contradicting `lab.py` and ledger Q-5. `README.md:147` and `RESEARCH_MANIFEST.md:25` claimed all seven propositions hold "independent of parameter choice"; P7's threshold is ρ\* = 1 − r·B₀/(F·A), which is 11/12 at `f = 1.20` and **0.9086** at `f* = 1.0945` — quoting 11/12 as *the* threshold is the price/structure conflation D-015 exists to prevent. Ledger M-5 cited `DERIVATIONS.md` "P7a", a label that does not exist in that file.
+
+**Scanner defects found by constructing evasions rather than by inspection.** A bare `"not "` cue at a 90-character window meant **24.6% of README insertion points** already sat inside a pre-disowned zone; nine assertive sentences passed simply by following an unrelated negation ("Fees are not modelled. Benchmark B is a conventional loan priced at 18% nominal."). At a 48-character window "This is a simulation, not a forecast, and the structure is proven safe for providers" still passed — the negation was about *forecast*. The window is now 20 characters, cues must bind to the term, and Python adjacent-string-literal joins are collapsed first so that a qualifier split across source lines still counts.
+
+**Consequence:** window 240 → 48 → **20**; bare `"not "` removed; patterns extended to plurals, tenses, passive voice and hyphen variants; fifteen evasion sentences added as fixtures; `CLAIM_LEDGER.md` and `BACKLOG.md` added to the scanned set; S-6 rewritten and bound by test; §7 of the ledger now states its three known gaps instead of implying full coverage. Suites: 975 → see final count in the Gate A report.
+
+**The lesson, recorded because it will recur.** A verification written by the same author who wrote the thing being verified inherits that author's blind spots. Both failures here were invisible to me and obvious to a reviewer told to attack. Gate B and Gate C should be adversarial by default, not confirmatory.
+
+---
+
+### D-038 — `validation_v1` canonicalized additively; zero numeric change
+**Date:** 2026-08-10
+**Raised by:** the Phase A publication audit, asking which quotable numbers lacked a checksum.
+**Status:** APPLIED on `publication-package`.
+
+**Trigger:** `validation_v1.json` was the only registered result with no canonical form — and it holds the two figures most likely to reach a slide: the reference-path cost-matched cap `f* = 1.0945` and Benchmark B's 19.5618% APR. The most quotable numbers were the least verifiable.
+
+**Alternatives considered:**
+1. Leave it and forbid citing validation-only numbers in the paper. Rejected — `f*` is load-bearing for the price/structure separation (D-015); a paper that cannot cite it cannot make its own central argument.
+2. Rewrite `run_validation.py` to emit a canonical pair. Rejected — that file's bytes are part of what produced the artifact. Changing the generating source without changing the numbers is the confusion the fingerprint exists to prevent.
+3. Widen `NON_DETERMINISTIC_KEYS` to strip nested keys. Rejected — that constant governs the writer that produced four already-registered baselines. Not worth the blast radius for one nested field.
+4. **Chosen:** a separate `canonicalize_validation.py` that reads the committed artifact and re-expresses it, never recomputing.
+
+**Reason:** Re-running the entire battery from a clean tree (`conv_step.py` at N = 500/2000/5000/10000, then sections 2/4/5/6) reproduced the committed file with **exactly one** difference — `/_meta/date` — and **zero** numeric drift across all 174 scalars. Both `run_scenario` (base_seed 20260803) and `bootstrap_ci` (seed 90210) already carried deterministic defaults, so the battery was reproducible all along; it simply had no artifact to prove it with. The date is a *when-it-ran* fact and belongs in provenance.
+
+**Consequence:** `validation_v1_canonical.json` = `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4`. `validation_v1.json` is untouched. The original run date is preserved as `original_run_date` in the provenance record — an earlier draft of the script *dropped* it while printing that it had moved it, which would have made the script lie about its own behaviour. All four baseline checksums re-verified unchanged, and the script re-verifies them on every write. Bound by `test_validation_artifact.py`.
+
+---
+
+### D-037 — Copy reconciled against the artifacts; a claim ledger now governs public wording
+**Date:** 2026-08-10
+**Raised by:** the Phase A publication audit.
+**Status:** APPLIED on `publication-package`.
+
+**Trigger:** Public copy asserted more than the artifacts support, and the results registry still authorized a claim the derivations had formally retracted.
+
+> **Correction, same day (see D-039).** This entry originally opened "Four live surfaces asserted…". That was wrong on both halves: three of the four items below are in a single file (`backend/lab.py`), and the fourth (`RESULTS_REGISTRY.md`) is classified as *historical*, not live, by the very scanner this entry introduces. It also omitted the `RESEARCH_MANIFEST.md` change it made. A decision log that miscounts its own scope is the same failure as a ledger that miscounts its artifacts.
+
+**What was wrong, and why each is not cosmetic:**
+
+1. **`lab.py`: "extends the term when revenue falls *instead of defaulting*."** Asserts default-prevention. `closure_m7` is **100.0%** incomplete at *both* registered cap factors — the contract does not extend, it never completes. This was the most misleading sentence in the product.
+2. **`lab.py`: "takes *proportionally* longer… the total is invariant."** Both unconditional. Invariance holds only when the cap is reached inside the horizon; and 12.862 → 18.690 months against ω 1.00 → 0.70 is not exact proportionality (integrality and clipping). Now derived from the artifact at request time rather than typed, so it cannot go stale.
+3. **`lab.py`: "A *conventional* 12-month amortizing loan at 18%."** Implies a sourced market rate. The 18% is an assumed input; no market survey backs it.
+4. **`RESULTS_REGISTRY.md` R-010** restated "RBF costs ~2.3× the interest of a conventional loan" *and* listed F-2 as publicly presentable — while `DERIVATIONS.md` P6 says that claim "was wrong on two counts" and `CORRECTED_CLAIMS.md` #2 records the correction. A retracted claim was live on the document that decides what may be quoted. F-3's null was likewise unmarked despite D-032 having located the failure region.
+
+**Also corrected:** the ω finding carried a `mathematical_property` label over text that mixed a proof with a measurement; it is now two findings under their own classes, because promoting a simulation result to a theorem is the same error at smaller scale.
+
+**Not touched, deliberately:** `METHODOLOGY_SPEC.md` (frozen; its "Vietnam-calibrated" phrasing is a *limiting* disclaimer, the honest direction) and `DERIVATIONS.md` P1–P7 (load-bearing proofs; "Equal-cost pricing" there names an exact mathematical operation). `BASELINE_FINDINGS.md` retains F-2 as written — it is audit trail and carries a banner naming F-2 as superseded.
+
+**Consequence:** `research/CLAIM_LEDGER.md` now lists every public claim with its class, artifact, JSON path, checksum, required qualifier and superseded predecessor. Enforced by `test_public_copy.py` and `test_claim_ledger.py`.
+
+**A note on the enforcement test, because it failed in an instructive way.** Its first version used a 240-character symmetric negation window including the bare word "not". In dense technical prose that disowns essentially every match: the scanner passed the entire repository while both `lab.py` violations were still in it. A scanner that cannot fail on the text that motivated it is worse than none, because it certifies. The window is now directional and tight, and the test suite includes the verbatim retracted sentences as fixtures — so the scanner must prove it catches the copy this project actually shipped.
+
+---
+
 ### D-036 — Closing two partially-implemented acceptance criteria
 **Date:** 2026-08-09
 **Raised by:** the final-gate audit, re-verifying D-035.
@@ -480,7 +703,9 @@ Every artifact is **smoke-tested against a fixed feature row at load time**. Loa
 
 ---
 
-### D-026 — Withdrawn 0.92 benchmark purged from every public surface (P0-2 closed)
+### D-026 — Withdrawn 0.92 benchmark retired from every public surface as a *result* (P0-2 closed)
+
+> **⚠️ Heading and wording corrected (D-043).** ~~"purged from every public surface"~~ overstates what was done and what should be done. `GET /api/model/status` **still returns the figure**, as `training_baseline.withdrawn_value: 0.92`, deliberately — alongside `auc: null`, `validation_status: "withdrawn"` and the circularity arithmetic. That is the correct design: silently deleting a retracted number destroys the audit trail and lets it reappear unchallenged. But "purged" is then false, and `test_no_withdrawn_claims.py` allow-lists that exact line with a reason. The accurate statement is: **retired as a current result, retained as an explicit withdrawal record.**
 **Date:** 2026-08-07
 **Raised by:** Hoang, reviewing the research-foundation gate report.
 
@@ -488,7 +713,7 @@ Every artifact is **smoke-tested against a fixed feature row at load time**. Loa
 
 That is the correct reading, and the baseline commit understated it by filing P0-2 as merely "partial". The README withdrew the figure with the circularity arithmetic while `GET /api/model/status` continued to hand it out on request. A reviewer who read the README and then curled the API would have found the two disagreeing — which is precisely the defect PHASE0_AUDIT.md was written about, reproduced by us, after we had documented it.
 
-**Decision.** The withdrawn benchmark is removed from every public surface. `training_baseline.auc` is **`null`**, accompanied by `validation_status: "withdrawn"`, `reason: "synthetic circular-label benchmark"`, and a disclaimer carrying the circularity arithmetic.
+**Decision.** The withdrawn benchmark is removed from every public surface **as a current result** — retained as a labelled withdrawal record. `training_baseline.auc` is **`null`**, accompanied by `validation_status: "withdrawn"`, `reason: "synthetic circular-label benchmark"`, and a disclaimer carrying the circularity arithmetic.
 
 **Why `null` rather than deleting the key.** Removing `auc` entirely would break any consumer reading it and, worse, would make the withdrawal *invisible* — an absent field reads as "not implemented yet", not "retracted". A null beside an explicit `validation_status` states the retraction rather than hiding it. `withdrawn_value: 0.92` is retained under a name that cannot be mistaken for a current result, so the record of *what* was withdrawn survives.
 

@@ -1,7 +1,7 @@
 # Corrected Claims & Validation Results
 
 **Date:** 2026-08-03 · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-3
-**Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests:** 169 passing
+**Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests at the time of this document:** 169 passing *(historical; the suites now stand at 629 simulation + 379 backend, 9 skipped — see `RESEARCH_MANIFEST.md`)*
 
 > All figures are **reproducible simulation output under modeled assumptions**. No observed seller revenue, repayment, or default outcome exists in this study.
 
@@ -35,7 +35,7 @@ Stable reference path, `A = 185,000,000 VND`, `r = 0.10`, remittance basis `net_
 |---|---|---|---|---|
 | 1.05 | 194,250,000 | 11 | 194,250,000 | 10.47% |
 | 1.08 | 199,800,000 | 12 | 199,800,000 | 16.62% |
-| **1.0945** | **202,482,500** | **12** | **202,482,500** | **19.54%** ← equal-cost |
+| **1.0945** | **202,482,500** | **12** | **202,482,500** | **19.54%** ← nearest reference-path APR grid match (residual ≈0.02416pp vs 19.561817%) |
 | 1.10 | 203,500,000 | 12 | 203,500,000 | 20.64% |
 | 1.12 | 207,200,000 | 12 | 207,200,000 | 24.61% |
 | 1.15 | 212,750,000 | 12 | 212,750,000 | 30.48% |
@@ -49,12 +49,14 @@ Stable reference path, `A = 185,000,000 VND`, `r = 0.10`, remittance basis `net_
 
 ---
 
-## 3. Equal-effective-cost RBF cap
+## 3. Nearest reference-path APR grid match for the RBF cap
+
+> ~~"Equal-effective-cost"~~ **superseded (D-043).** `f*` is the closest point on the swept cap-factor grid, not an exact cost solution: 19.537656% against the reference's 19.561817%, residual **≈0.02416 percentage points**. It was solved on a single flat, shock-free reference path; on simulated paths the realised rate differs because duration moves with revenue.
 
 | | |
 |---|---|
 | Target effective APR (Benchmark B) | 19.5618% |
-| **Equal-cost cap factor `f*`** | **1.0945** |
+| **Nearest-grid-match cap factor `f*`** | **1.0945** (residual ≈0.02416pp) |
 | Resulting cap | 202,482,500 VND |
 | Duration | 12 months |
 | Total repaid | 202,482,500 VND |
@@ -100,12 +102,12 @@ Baseline v1 reported 0.0% everywhere, which was a horizon artifact. Searching ha
 | Advance 3×R₀ (any) | 24 | — | 3.0 | cap unreachable on reference — benchmark A undefined | | |
 | Write-off @ 12m | 24 | 12 | 1.0–2.0 | cap unreachable on reference — benchmark A undefined | | |
 
-**Boundary characterised — CORRECTED 2026-08-04.** The general criterion is `r · Σ_{t≤H} B_t ≥ F·A`. Incomplete recovery has **four** distinct causes:
+**Boundary characterised — CORRECTED 2026-08-04; refined D-043.** The general criterion is that **some finite `t ≤ H` satisfies `r · Σ_{s≤t} B_s ≥ f·A`** (lowercase `f` — uppercase `F` is fixed operating cost). For finite `H` only, this is equivalent to `r · Σ_{t≤H} B_t ≥ f·A`. Completion is a **finite-time** property: `S_∞ > Θ = f·A/r` **strictly** implies it, `S_∞ < Θ` precludes it, and at `S_∞ = Θ` it holds only if a finite partial sum *attains* `Θ` — which a strictly positive infinite series never does. Routes to incomplete recovery **include, but are not limited to** (the ~~"four distinct causes"~~ exhaustiveness claim is withdrawn):
 
 1. **Zero-revenue months** (business closure) — absorbing. Closure at month 7 → 100% incomplete.
 2. **A binding maturity or write-off rule** — write-off at month 18 turns a −40% decline from 0% into 25.7%.
 3. **A finite evaluation horizon** — `T = 18` → 25.7%. A measurement artifact, not an economic loss.
-4. **Strictly positive but sufficiently fast-decaying revenue** — a path whose *lifetime cumulative* sales are inadequate. Geometric decay completes in finite time **only if `ρ > ρ* = 1 − r·B₀/(F·A)`** (strict). At `ρ = ρ*` the lifetime sum equals the cap exactly but every finite partial sum is strictly below it — an asymptotic boundary case that never completes. Below `ρ*`, lifetime cumulative revenue is simply insufficient. In all these cases revenue is positive in every period forever.
+4. **Strictly positive but sufficiently fast-decaying revenue** — a path whose *lifetime cumulative* sales are inadequate. Geometric decay completes in finite time **only if `ρ > ρ* = 1 − r·B₀/(f·A)`** (strict). At `ρ = ρ*` the lifetime sum equals the cap exactly but every finite partial sum is strictly below it — an asymptotic boundary case that never completes. Below `ρ*`, lifetime cumulative revenue is simply insufficient. In all these cases revenue is positive in every period forever.
 
 ⚠️ **Cause 4 was missing from the previous version of this document,** which asserted that decline alone cannot cause incomplete recovery. That was too broad: it equated *strictly positive revenue* with *revenue bounded away from zero*. See D-020 and `DERIVATIONS.md` §P7.
 
@@ -127,7 +129,13 @@ floor APPLIES when  obs ≥ hardship·R₀            →   obs ≥  0.50·R₀
 0.25 < 0.50  →  conditions are mutually exclusive
 ```
 
-**The payment floor can never activate, for any revenue path whatsoever.** It is provably dead code. This fully explains the baseline v1 null result — RBF-G was bit-identical to RBF because one guardrail was unreachable by construction and the other rarely bound.
+**The payment floor can never activate, for any revenue path whatsoever.** It is provably dead code.
+
+> **⚠️ Corrected (D-040).** The sentence that followed — that this "fully explains" the null because RBF-G was bit-identical to RBF — is **withdrawn**. The floor explanation is right; the bit-identity is not. RBF-G differs numerically from RBF in **6 of 10** baseline scenarios, and those six are exactly the ones where the *ceiling* `p_max = 2·r·R₀` binds (1,400 of 12,000 month-observations in `growth`, 11 in `seasonal_strong`, 1 each in `seasonal`, `disruption_1m`, `platform_outage`, `returns_spike`). The differences fall below display precision. The surviving claim is about the floor only.
+>
+> ~~This fully explains the baseline v1 null result — RBF-G was bit-identical to RBF because one guardrail was unreachable by construction and the other rarely bound.~~
+>
+> **That sentence is withdrawn too, and it was left standing here by mistake in the first pass of this correction (D-042).** Writing a retraction and then restoring the retracted sentence verbatim two clauses later is worse than not retracting it. Checked directly against `results/baseline_v1.json`: RBF-G differs from RBF in **6 of 10** scenarios *there as well* — `seasonal`, `seasonal_strong`, `growth`, `disruption_1m`, `platform_outage`, `returns_spike`. So the bit-identity claim is false for **v1 and v2 alike**, and the floor explanation does not "fully explain" a null that was never a null. What the floor explains is only that the *floor* never fired.
 
 Breakpoint scan, 36,000 month-observations under strong seasonality + 3%/month growth (the most favourable case for binding):
 
@@ -139,9 +147,9 @@ Breakpoint scan, 36,000 month-observations under strong seasonality + 3%/month g
 | 0.80 | 0.50 | reachable | 3,844 | 6,009 |
 | 1.00 | 0.50 | reachable | 9,564 | 6,009 |
 
-**Decision: demote RBF-G from a headline arm to a documented design-flaw finding.** It is retained in the code and the registry as a null result, and is **not** retuned to make it bind — that would be tuning after seeing results. The floor requires `p_min_mult > hardship` to be reachable at all, which is a coherence condition the original design violated.
+**Decision: demote RBF-G from a headline arm to a documented design-flaw finding.** It is retained in the code and the registry as a **floor-only null / design flaw** — the hardship floor is dead, the ceiling is live — and is **not** retuned to make it bind — that would be tuning after seeing results. The floor requires `p_min_mult > hardship` to be reachable at all, which is a coherence condition the original design violated.
 
-**Product implication.** As specified, the guardrail feature is decoration. If it ships, the floor multiplier must exceed the hardship threshold, and the two parameters must be validated jointly.
+**Product implication.** ~~As specified, the guardrail feature is decoration.~~ → **corrected (D-044): only the hardship FLOOR is dead.** The floor never activates on any path (0 of 36,000 month-observations). The **ceiling** `p_max = 2·r·R₀` is live — it binds 6,009 of 36,000 in the breakpoint scan and changes results in **6 of 10** baseline scenarios (mean APR in 6, mean burden in 6, recovery ratio in 3, mean duration in 1), below display precision but present. Calling the whole guardrail design decoration overstates a real finding about one of its two rules. If it ships, the floor multiplier must exceed the hardship threshold, and the two parameters must be validated jointly.
 
 ---
 
@@ -155,7 +163,7 @@ net_sales_t     = gmv_t × (1 − return_rate_t)             ← deduction
 cash_receipts_t = net_sales_t × (1 − platform_fee_rate)   ← deduction
 ```
 
-**Decision: the remittance basis is `net_sales` (GMV net of returns).** Platforms settle after returns, so remitting on GMV would charge the seller a share of money never received. `revenue` remains an alias for `gmv` so that "payment-to-revenue" keeps its conventional top-line meaning as the burden denominator.
+**Decision: the remittance basis is `net_sales` (GMV net of returns).** ~~Platforms settle after returns~~ → **pending external support (A-8, D-043):** no platform settlement documentation was obtained by this project, so that premise is unverified. The decision rests on the definitional argument alone — on a GMV basis the contract would charge a share of money the seller never receives. `revenue` remains an alias for `gmv` so that "payment-to-revenue" keeps its conventional top-line meaning as the burden denominator.
 
 | Basis | Platform fee | Duration | Total repaid | RR(12) |
 |---|---|---|---|---|

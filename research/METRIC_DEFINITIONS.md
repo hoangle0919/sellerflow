@@ -1,5 +1,12 @@
 # Frozen Metric Definitions & Pre-Registered Analysis Plan
 
+> ## ⚠️ SUPERSEDED DOCUMENT — v0.1, retained for audit trail
+>
+> `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 is authoritative. Two families of claim in this file are **specifically superseded and must not be quoted** (D-043):
+>
+> - **Affordability.** Anything here describing an arm as "affordable", or a hypothesis predicting "affordability", is superseded by A-8. The supportable statement is only whether a simulated path clears the **illustrative burden bands (10/15/20/25% of revenue)** chosen for this study. Those are reporting thresholds, not validated hardship cutoffs, and burden is measured against revenue rather than against what the seller retains after costs.
+> - **Fixed-payment "advantage".** Superseded by A-8. The supportable statement is **contractual schedule invariance**: `q_t = P` contains no revenue term, so the schedule does not respond to reported revenue. It is not a collection claim — the model assumes fixed payments are made in full and on time, and so provides an **optimistic scheduled-recovery benchmark**.
+
 **Project:** Revenue-Contingent Financing Under Volatile Sales: A Model-Based and Simulation Study Motivated by Vietnamese E-commerce Sellers
 **Status:** 🔒 **FROZEN 2026-08-03, before any comparison-engine run.**
 **Authority:** `DECISION_LOG.md` D-004 (freeze before analysis) and D-010 (distress definition).
@@ -83,7 +90,7 @@ Therefore `P = C / N`.
 A = Σ_{t=1..N} P / (1 + i)^t         →  APR = (1 + i)^12 − 1
 ```
 
-**Secondary matching — market-APR-matched (sensitivity).** A second FIX arm priced at an externally cited market APR, where total cost differs from `C`. Reported separately and never mixed into the primary comparison.
+**Secondary matching — APR-matched (sensitivity).** A second FIX arm priced at an assumed nominal APR (`j = 18%`, `N_B = 12`), where total cost differs from `C`. Reported separately and never mixed into the primary comparison. The 18% is an assumption chosen for this study — **not a market rate**, and not observed or externally sourced anywhere in this project. See `CLAIM_LEDGER.md` Q-5.
 
 **Stated limitation (goes in the paper, not only here).** An APR loan and a factor-rate cap are not natively commensurable: one prices time, the other prices a multiple regardless of time. Cost-matching at base case makes them comparable *at a single point* — the base path — and the equivalence degrades as realized revenue departs from it. Every reported comparison names its matching basis. **We do not claim the two products are economically equivalent; we claim they are matched at the base case and then diverge, and we measure that divergence.**
 
@@ -270,12 +277,12 @@ Run in full and reported whether or not they support the hypotheses.
 | **H1** | RBF produces a lower payment burden than FIX in low-revenue months | `p_t` in months where `R_t < R_0` | RBF payment ≥ FIX payment in low-revenue months under cost-matching |
 | **H2** | RBF produces fewer distress months under seasonal and negative shocks | `n_distress` (T-0) | Δ ≤ 0, **or** sign unstable across T-0…T-3 |
 | **H3** | Seller-side flexibility costs the provider duration and recovery variance | `sd(D)`, `IR` rate | RBF duration dispersion ≤ FIX **and** `IR^{RBF} ≤ IR^{FIX}` |
-| **H4** *(reframed per audit)* | Revenue stability, turnover, returns, and tenure predict **affordability under simulated stress** better than revenue size alone | ΔR² for stability vs. size predicting `n_distress` | Revenue size alone performs equally or better |
+| **H4** *(reframed per audit; wording corrected A-8)* | Revenue stability, turnover, returns, and tenure predict **whether a simulated path clears the illustrative burden bands (10/15/20/25% of revenue)** better than revenue size alone | ΔR² for stability vs. size predicting `n_distress` | Revenue size alone performs equally or better |
 | **H5** | Underreporting and data quality are material risks requiring conservative design | `∂RR/∂ω`, `∂D/∂ω` | Recovery is insensitive to `ω` across the tested range |
 
 > **H1 is partly true by construction and the paper says so in the same sentence it reports the result.** `p_t^{RBF} = r·R_t` falls mechanically when `R_t` falls; no simulation is needed to know the direction. The research contribution is the **magnitude**, the **cost of that relief** in duration and total repayment, and **whether it is enough to change distress outcomes** (H2) — which is not true by construction and could genuinely fail.
 
-**Expected-to-fail note.** Under cost-matching at base case, RBF's relief in bad months is funded by longer duration and higher total cost in good ones. It is entirely plausible that H2 fails at realistic margins — that RBF smooths payments without preventing distress, because distress is driven by `m·R_t − F`, which financing structure does not touch. **If that is the result, it is the paper's finding and it will be the headline.** It is a more interesting and more defensible result than confirmation.
+**Expected-to-fail note.** ~~Under cost-matching at base case, RBF's relief in bad months is funded by longer duration and higher total cost in good ones.~~ → **corrected (D-040): this is conditional, not universal.** Whether the revenue-share arm recovers faster or slower than the fixed arm follows the exact P4 condition — realized mean eligible base `(1/k)·S_k` relative to `B* = P/r` — and **both directions occur** in the scenario library. Under a path whose realized mean clears `B*`, the revenue share leads on recovery with no duration penalty at all; the stable scenario is such a case, by integer rounding of `N`. The original sentence describes the base-case *expectation*, and it is entirely plausible that H2 fails at realistic margins — that RBF smooths payments without preventing distress, because distress is driven by `m·R_t − F`, which financing structure does not touch. **If that is the result, it is the paper's finding and it will be the headline.** It is a more interesting and more defensible result than confirmation.
 
 ---
 

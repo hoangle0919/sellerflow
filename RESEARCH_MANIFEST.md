@@ -4,7 +4,7 @@
 
 > ✅ **This repository is the source of truth.** The research lives at `research/` in the `sellerflow` repository (`https://github.com/hoangle0919/sellerflow.git`), integrated from bundle v5 on 2026-08-06. The earlier bundle copies — including the one that sat inside an unrelated Excel research folder because it was the only writable location at the time — are **historical backups only**. They are not authoritative and must not be edited, read from, or depended upon. Nothing in this project depends on, reads, or relates to any Excel file.
 
-**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-7
+**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8
 
 > Everything needed to reproduce every number in the project is in this repository.
 >
@@ -20,9 +20,9 @@
 |---|---|
 | `METHODOLOGY_SPEC.md` | **The frozen specification.** Population, unit of analysis, horizon, revenue-path generation, seasonality and shocks, both fixed benchmarks, matched-comparison rules, metric formulas, seeds, sensitivity ranges, exclusion rules, interpretation limits. §16 logs all amendments. Frozen before any outcome analysis. |
 | `DECISION_LOG.md` | Every decision with date, alternatives, reason, consequence. Includes the methodological correction (D-001) and all supersessions. Append-only. |
-| `RESULTS_REGISTRY.md` | Every result with scenario, parameters, code, interpretation, limitation, and public-safety classification. Includes both preserved null results (R-013). |
-| `CORRECTED_CLAIMS.md` | **Current claim set.** Corrected interpretation layer, pricing sensitivity, equal-effective-cost cap, convergence, recovery boundary, RBF-G decision, revenue definition, parameter classification. |
-| `DERIVATIONS.md` | **Analytical backbone.** Seven propositions with proofs, holding for any revenue path independent of simulation or parameters. Includes the five-class claim taxonomy and the rejected RBF-G design. |
+| `RESULTS_REGISTRY.md` | Every result with scenario, parameters, code, interpretation, limitation, and public-safety classification. Null results are kept even when they turn out wrong: **N-1 preserved** (0.0% incomplete recovery across the ten non-closure scenarios, horizon- and scenario-bounded); **N-2 superseded** — RBF-G is *not* bit-identical to RBF, and only the narrower **N-2′** (the hardship floor never activates) survives (R-013). |
+| `CORRECTED_CLAIMS.md` | **Current claim set.** Corrected interpretation layer, pricing sensitivity, reference-path cost-matched cap, convergence, recovery boundary, RBF-G decision, revenue definition, parameter classification. |
+| `DERIVATIONS.md` | **Analytical backbone.** Seven propositions with proofs, established analytically rather than by simulation. P1–P6 hold for any revenue path; P7's completion threshold is exact under the geometric-decline model and depends on the cap factor (ρ\* = 11/12 at `f = 1.20`, 0.9086 at `f* = 1.0945`). Includes the five-class claim taxonomy and the rejected RBF-G design. |
 | `PHASE0_AUDIT.md` | Original audit: 8 integrity risks, 6 gaps, evidence appendix. |
 | `BASELINE_FINDINGS.md` | `baseline_v1` results. **Partly superseded** — banner at top explains what and why. Retained for audit trail. |
 | `METRIC_DEFINITIONS.md` | v0.1, **superseded** by `METHODOLOGY_SPEC.md`. Retained for audit trail. |
@@ -48,7 +48,7 @@
 | File | Purpose |
 |---|---|
 | `00_audit_evidence.py` | Reproduces the three audit findings: circular AUC, impossible population, engine self-contradiction. |
-| `01_verify_spec.py` | Five checks that the frozen spec is implementable. Produced coherence constraint §3.4. |
+| `01_verify_spec.py` | **RETIRED — historical only (D-045).** Five checks that `METRIC_DEFINITIONS.md` v0.1 was implementable; produced coherence constraint §3.4. Superseded by `METHODOLOGY_SPEC.md` v1.0 and by `rbf_sim/tests/`, and carries the pre-A-7 `tol=0.5`. Not part of current verification. |
 
 ### `research/` — run scripts
 
@@ -62,11 +62,13 @@
 
 | File | Purpose |
 |---|---|
-| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds produce byte-identical output. SHA-256 `264d319b…ac5a7849`. |
+| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
 | `baseline_v2_provenance.json` | Execution record for the above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
 | `baseline_v1.json` | Superseded (`gmv` basis). Audit trail. |
-| `validation_v1.json` | Convergence, pricing, equal-cost cap, recovery boundary, RBF-G breakpoint, revenue definition. |
+| `validation_v1_canonical.json` | **Cite this for validation figures.** Checksummed canonical form (D-038), `f89fd2ba…`. Numerically identical to `validation_v1.json` — all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `validation_v1_provenance.json` | Execution record for the above, including `original_run_date` (2026-08-04), the one non-deterministic field in the source. |
+| `validation_v1.json` | Convergence, pricing, reference-path cost-matched cap (JSON key `pricing.equal_cost`), recovery boundary, RBF-G breakpoint, revenue definition. Retained unmodified as the pre-canonicalization source. |
 | `baseline_v2_log.txt` | Full console output of the baseline run. |
 
 ### `patches/`
@@ -84,8 +86,14 @@
 cd research                       # from the repository root
 pip install pytest numpy          # only dependencies
 
-# 1. Test suite  (expect: 629 passed)
+# 1. Simulation suite  (expect: 629 passed)
 python3 -m pytest rbf_sim/tests/ -q
+#    Backend suite (expect: 379 passed, 9 skipped). The 9 skips are the
+#    Playwright browser tests; they skip unless a chromium build is present
+#    and are NOT counted as passes.
+python3 -m pytest ../backend/tests -q
+#    Reproducibility (byte vs numeric equality, reported separately — D-041)
+python3 verify_reproduction.py
 
 # 2. Baseline — 10 scenarios x 4 contracts x 500 paths
 #    -> results/baseline_v2_canonical.json   (deterministic; checksum it)
@@ -93,7 +101,7 @@ python3 -m pytest rbf_sim/tests/ -q
 python3 run_baseline.py
 
 # 3. Validation battery
-python3 run_validation.py 2                 # pricing + equal-effective-cost cap
+python3 run_validation.py 2                 # pricing + reference-path cost-matched cap
 python3 run_validation.py 4                 # incomplete-recovery boundary
 python3 run_validation.py 5                 # RBF-G breakpoint
 python3 run_validation.py 6                 # revenue-definition sensitivity
@@ -108,11 +116,15 @@ python3 conv_step.py 10000
 cd ../backend
 python3 ../research/analysis/00_audit_evidence.py
 
-# 6. Spec verification (standalone, no dependencies)
-cd ../research && python3 analysis/01_verify_spec.py
+# 6. (RETIRED) analysis/01_verify_spec.py is HISTORICAL and is no longer part of
+#    current verification (D-045): it checks the superseded METRIC_DEFINITIONS.md
+#    v0.1 and carries the pre-A-7 tol=0.5. R-003 already marks its output
+#    exploratory and not quotable. Use rbf_sim/tests/ instead.
 ```
 
-**Determinism.** Base seed `20260803`, bootstrap seed `90210`. Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.
+**Determinism.** Base seed `20260803`, bootstrap seed `90210`.
+
+> ~~Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.~~ **Corrected (D-041).** Identical seeds reproduce **numerically at published precision on every platform tested**. **Byte** equality holds within a fixed runtime, not across runtimes: on Linux/aarch64 CPython 3.10.12 all five canonical artifacts are byte-identical; on macOS CPython 3.11.5, `baseline_v2` differs in **9** last-bit floating-point values and `baseline_equalcost_v1` in **2**. That is IEEE-754 serialization, not variance in the model — but it is not bit-for-bit, and the stronger word was withdrawn rather than defended. Check with `python3 research/verify_reproduction.py`, which reports byte equality and numeric-leaf equality separately and fails only on numeric drift.
 
 ### Applying the README patch
 
@@ -132,12 +144,12 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | 71 (47 inherited + 1 credential guard D-025 + 8 withdrawn-claim guards D-026 + 15 model-artifact guards D-028) | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Backend tests passing | **379 passed, 9 skipped** (the 9 are the Playwright browser tests, which skip unless a chromium build is present and are **not** counted as passes). Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |
 | Benchmark B effective APR | 19.5618% | `validation_v1` |
-| **Equal-effective-cost cap `f*`** | **1.0945** (19.5377% APR) | `validation_v1` |
+| **Reference-path cost-matched cap `f*`** | **1.0945** (19.5377% APR) | `validation_v1_canonical` |
 | Convergence Δ 5,000→10,000 | 0.0027 months, 0.042pp | `validation_v1` |
 | Accounting-identity violations | 0 of ~2,400 rows | `test_cohort_wide_identity_holds_for_every_row` |
 | Circular-AUC evidence | 0.9098 generating fn vs 0.9182 model | `00_audit_evidence.py` |
@@ -155,8 +167,10 @@ Spot-check any reproduction against these:
 
 **Complete:** Phase 0 audit · frozen methodology · corrected generator · simulation package · baseline · validation battery · corrected claims · README patch · **analytical backbone (7 propositions, test-validated)** · **repository integration and centralized VND settlement policy (D-024)**.
 
-**Not started:** product integration · paper · poster · deck · deployment.
+**Also complete since this line was last accurate:** product integration — the Simulation Lab (`frontend/lab.html` + `backend/lab.py`) renders every figure from the canonical artifacts and merged to `main` in PR #2; the centralized monetary policy (`backend/money.py`, D-030); the closure baselines (D-032); `validation_v1` canonicalization (D-038); and the claim ledger with its enforcement tests (D-037…D-041).
 
-**Gate:** product integration begins only after the baseline commit is approved.
+**Not started:** paper · poster · deck · deployment.
+
+**Gate:** the publication phase is gated on the Gate A claim audit, not on the baseline commit.
 
 **Not in this project:** Excel. Removed entirely per instruction 2026-08-03 — no dependency, assumption, deliverable, blocker, or reconciliation task remains.

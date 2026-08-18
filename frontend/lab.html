@@ -387,7 +387,8 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
       <h2 style="font-size:1.1rem">Provenance</h2>
       <p style="color:var(--muted);font-size:.88rem;margin-bottom:0">Every figure above is
         read from a committed, checksummed result file. Identical code, configuration and
-        seeds reproduce each byte-for-byte.</p>
+        seeds reproduce each byte-for-byte within a fixed runtime, and numerically at
+        published precision on every platform tested.</p>
       <details class="def fold" data-fold="narrow"><summary>Artifacts and checksums</summary>
         <div class="chart-wrap"><div id="prov-table"></div></div></details>
     </div>
@@ -714,10 +715,12 @@ function renderUnderreporting(u){
         td(num(r.duration_months_mean,1)+" mo")+td(pct(r.effective_apr,2))+
         td(r.total_repaid_mean.display)+td(pct(r.incomplete_recovery_rate,1))+'</tr>';
     }).join("")+'</tbody></table>';
-  el("under-finding").innerHTML='<article class="finding" style="margin-top:12px">'+
-    '<span class="cls cls-'+esc(u.finding.classification)+'">'+
-    esc(u.finding.classification.replace(/_/g," "))+'</span><p>'+esc(u.finding.text)+'</p>'+
-    '<p class="src">source: '+esc(u.finding.source)+'</p></article>';
+  el("under-finding").innerHTML=(u.findings||[]).map(function(f){
+    return '<article class="finding" style="margin-top:12px">'+
+      '<span class="cls cls-'+esc(f.classification)+'">'+
+      esc(f.classification.replace(/_/g," "))+'</span><p>'+esc(f.text)+'</p>'+
+      '<p class="src">source: '+esc(f.source)+'</p></article>';
+  }).join("");
 }
 
 /* ── findings + panels ──────────────────────────────────────── */

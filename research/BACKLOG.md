@@ -17,7 +17,7 @@ Status: `todo` · `doing` · `done` · `frozen` · `cut`
 | A-04 | Backlog + decision log + results registry | P0 | **done** | This file, `DECISION_LOG.md`, `RESULTS_REGISTRY.md` |
 | A-05 | Confirm Q1–Q5 with Hoang | P0 | todo | Blocks Phase 1 framing |
 | P0-1 | **Redeploy Railway from `bff1477`; verify RBF live** | P0 | todo | Highest credibility/effort ratio in the project |
-| P0-2 | Retire 0.92 AUC from README, `/api/model/status`, UI | P0 | **done** | RI-1. D-026, 2026-08-07: API returns `auc: null` + `validation_status: "withdrawn"`; demo, UI and README purged. Enforced by `test_no_withdrawn_claims.py` (source scan, allowlist with reasons). Open elsewhere: `docs/GXS-Stage2-Proposal.md` (gitignored, competition material). |
+| P0-2 | Retire 0.92 AUC from README, `/api/model/status`, UI | P0 | **done** | RI-1. D-026, 2026-08-07: API returns `auc: null` + `validation_status: "withdrawn"`; demo, UI and README no longer present it as a result. **It is retained, not purged:** `training_baseline.withdrawn_value: 0.92` is still served as the explicit withdrawal record (D-043) — deleting it would destroy the audit trail. Enforced by `test_no_withdrawn_claims.py` (source scan, allowlist with reasons). Open elsewhere: `docs/GXS-Stage2-Proposal.md` (gitignored, competition material). |
 | P0-3 | Remove "12.5% vs 40–80% informal rate" claim | P0 | todo | RI-5 — unsourced impact claim |
 | P0-4 | Drop `owner_name` / `phone` from model, form, DB, CSV | P0 | todo | RI-6 |
 | P0-5 | Un-ignore `docs/`; create versioned `research/` tree | P0 | **partial** | `research/` tree created and committed 2026-08-06 (bundle v5). **Still open:** `docs/` remains gitignored. |
@@ -72,7 +72,7 @@ Status: `todo` · `doing` · `done` · `frozen` · `cut`
 | C-04 | Paired runner — same revenue path, all three arms | P1 | todo | |
 | C-05 | Seller-side metrics module | P1 | todo | Per frozen R-02 definitions |
 | C-06 | Provider-side metrics module | P1 | todo | Recovery, duration variance, incomplete-recovery rate |
-| C-07 | Bootstrap CIs | P1 | todo | |
+| C-07 | Monte Carlo intervals (bootstrap over simulated paths; **not** population CIs — D-014) | P1 | todo | |
 | C-08 | Sensitivity: distress threshold, share %, cap, shock size | P1 | todo | |
 | C-09 | Underreporting / diversion analysis | P1 | todo | H5, SQ4 |
 | C-10 | Figures + tables, regenerated from code | P1 | todo | No hand-made numbers anywhere |

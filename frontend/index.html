@@ -649,7 +649,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
 
       <div class="proof-card">
-        <div class="proof-head"><span>LIVE ASSESSMENT · ADJUST THE PROFILE</span><span id="hero-model">RF+LR ENSEMBLE v1.0</span></div>
+        <div class="proof-head"><span>ILLUSTRATIVE DEMO · ADJUST THE PROFILE</span><span id="hero-model">RF+LR ENSEMBLE v1.0</span></div>
         <div class="proof-body">
           <div>
             <div class="proof-shop" id="hv-shop">Thời Trang Linh Chi</div>
@@ -676,8 +676,8 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
               <span class="label">Recommendation</span>
               <span class="hd-tier" id="hd-tier">Low Risk</span>
             </div>
-            <div class="decision-word" id="hd-word">Approved</div>
-            <div class="hd-pdline" id="hd-pdline">Default probability 2.4%</div>
+            <div class="decision-word" id="hd-word">Illustrative tier: low risk</div>
+            <div class="hd-pdline" id="hd-pdline">Demo score 2.4% — synthetic, not a validated default probability</div>
             <div class="hd-advance">
               <span class="hd-advance-label">Recommended advance</span>
               <div class="hd-amount mono" id="hd-limit">333,000,000₫</div>
@@ -698,20 +698,20 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="wrap argument">
       <div>
         <span class="label">Why this exists</span>
-        <h2>The best credit data isn't in a bureau file.</h2>
+        <h2>A different data source, not a proven better one.</h2>
       </div>
       <div>
         <div class="arg-entry">
           <span class="arg-num">01</span>
-          <div><h3>No history ≠ no signal</h3><p>Most Vietnamese sellers have no CIC record. But 680 days of order data, customer ratings, and delivery performance is a richer behavioral dataset than any bureau provides.</p></div>
+          <div><h3>A thin bureau file is not no signal</h3><p>Where a seller's bureau history is thin, order data, customer ratings and delivery performance still accumulate continuously. Whether those predict repayment is not a claim this project tests — it has no seller outcomes to test against, and no comparison against bureau data was performed.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">02</span>
-          <div><h3>Revenue you can verify</h3><p>Platform revenue is timestamped, third-party verified, and updated daily. A payslip is a photocopy.</p></div>
+          <div><h3>Revenue data, as submitted</h3><p>The shipped prototype takes merchant-submitted figures and does not connect to any platform API. Reading revenue directly from platforms is the design intent, not the current behaviour — so today these values are self-reported, which is exactly what the integrity screen exists to test.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">03</span>
-          <div><h3>Structure that flexes with revenue</h3><p>Repayment is a percentage of revenue, not a fixed installment — a slow month extends the term instead of triggering a default.</p></div>
+          <div><h3>Structure that flexes with revenue</h3><p>Repayment is a percentage of revenue, not a fixed installment — a slow month lengthens the term rather than raising the payment. It does not remove the risk: permanent revenue cessation before completion, while a balance is still outstanding, can prevent the cap from ever being reached.</p></div>
         </div>
       </div>
     </div>
@@ -724,16 +724,16 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <h2>From revenue data to a financing structure.</h2>
       </div>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics from the platform. Three minutes, no documents.</p></div>
-        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces a probability of default and per-signal risk flags.</p></div>
-        <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Recommended advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each, in about a second.</p></div>
+        <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics as submitted by the merchant. The shipped prototype does not connect to any platform API, so these figures are self-reported and unverified.</p></div>
+        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces an <strong>unvalidated demo risk score</strong> and per-signal flags. It is trained on synthetic data whose label is a formula over the same features, so the score carries no predictive claim.</p></div>
+        <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Recommended advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each. Response time is not benchmarked.</p></div>
       </div>
 
       <div class="flow" id="methodology-flow">
         <div class="flow-node" data-key="signals">Operational signals</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="normalize">Feature normalization</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="ensemble">RF + LR ensemble</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="pd">PD estimate</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="pd">Demo risk score</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="integrity">Integrity screen</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="limit">Financing structure</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="rate">Repayment scenarios</div><span class="flow-sep">→</span>
@@ -933,9 +933,9 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       <aside class="dash-side">
         <div class="ds-group">Portfolio</div>
         <div class="ds-item active" data-filter="all" onclick="setFilter('all')"><span>All merchants</span><span class="cnt" id="c-all">0</span></div>
-        <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span>Approved</span><span class="cnt" id="c-approved">0</span></div>
-        <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span>Conditional</span><span class="cnt" id="c-conditional">0</span></div>
-        <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span>Declined</span><span class="cnt" id="c-rejected">0</span></div>
+        <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span>Low-risk tier</span><span class="cnt" id="c-approved">0</span></div>
+        <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span>Medium-risk tier</span><span class="cnt" id="c-conditional">0</span></div>
+        <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span>High-risk tier</span><span class="cnt" id="c-rejected">0</span></div>
         <div class="ds-group">Live activity</div>
         <div class="ds-item" data-filter="live" onclick="setFilter('live')"><span>Real submissions</span><span class="cnt" id="c-live">0</span></div>
         <div class="ds-group">Actions</div>
@@ -969,7 +969,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <span class="label">Privacy</span>
     <h2 style="margin:10px 0 24px">How we handle your data</h2>
     <h3>What we collect</h3>
-    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the credit decision our model produces. When you join the access list, we store your email address.</p>
+    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the resulting illustrative risk tier and the assessment record — this is a demonstration, not a credit decision our model produces. When you join the access list, we store your email address.</p>
     <h3>How it is used</h3>
     <p>Submitted metrics are used solely to generate your credit assessment and to display it to authenticated lenders in the portfolio dashboard. Waitlist emails are used only to contact you about access. We do not sell data, and we do not share it with third parties beyond the hosting infrastructure the service runs on.</p>
     <h3>Retention and deletion</h3>
@@ -1117,8 +1117,8 @@ const FLOW_DESC={
   signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the merchant submission.',
   normalize:'Raw metrics are scaled and bounded so a fast-growing large merchant and a stable small merchant are compared fairly.',
   ensemble:'A Random Forest and a Logistic Regression model each score the normalized profile independently.',
-  pd:'The two model outputs are blended into a single probability of default — 65% RF, 35% LR.',
-  integrity:'Five rule-based checks — revenue reconciliation, exposure velocity, growth plausibility, and more — screen for misrepresentation alongside the credit score. An elevated flag holds funding for verification. Rule-based screening, not a supervised fraud model.',
+  pd:'The two model outputs are blended into a single unvalidated demo risk score — 65% RF, 35% LR. It is not a probability of default: the training label was generated by a formula over the same features (D-001).',
+  integrity:'Five rule-based checks — revenue reconciliation, exposure velocity, growth plausibility, and more — screen for misrepresentation alongside the credit score. An elevated flag marks the demonstration assessment for manual review. Rule-based screening, not a supervised fraud model.',
   limit:'Low risk unlocks an advance sized to 15% of annual revenue; medium risk unlocks a reduced advance at 8%. All deterministic — no model computes this arithmetic.',
   rate:'Repayment is simulated as a percentage of revenue (the remittance) collected until a fixed repayment cap is reached — under base, decline, and growth assumptions.',
   explain:'Per-signal risk findings and a plain-language rationale are generated alongside the numeric structure.',
@@ -1180,7 +1180,7 @@ function renderPreview(){
   const rows=[['Shop',applyData.shop_name],['Platform',applyData.platform],['Monthly revenue',fmtVND(applyData.monthly_revenue)],['Revenue growth',signed(applyData.revenue_growth)],['Return rate',pct(applyData.return_rate)],['Late shipments',pct(applyData.late_ship_rate)],['Rating',applyData.rating+' / 5.0'],['Days active',applyData.days_active+' days']];
   document.getElementById('preview-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
 }
-const DECISION_STEPS=['Reading merchant profile','Normalizing platform metrics','Checking revenue stability','Estimating default probability','Structuring the financing','Simulating repayment scenarios','Decision ready'];
+const DECISION_STEPS=['Reading merchant profile','Normalizing platform metrics','Checking revenue stability','Computing the demo risk score','Structuring the financing','Simulating repayment scenarios','Decision ready'];
 async function runDecisionSequence(){
   const fill=document.getElementById('seq-fill'), text=document.getElementById('seq-text');
   for(let i=0;i<DECISION_STEPS.length;i++){
@@ -1202,8 +1202,11 @@ async function submitApplication(){
   if(!data){ toast('Could not reach the scoring service. Please try again.'); return; }
   renderResult({...applyData,...data}); go('result');
 }
-const VERDICT={APPROVED:'Approved',CONDITIONAL:'Conditional',REJECTED:'Not approved'};
-const EXPLAIN={APPROVED:'The merchant clears the underwriting bar. The recommended advance is sized to annual revenue and structured at the low-risk remittance and repayment cap.',CONDITIONAL:'The merchant has enough signal to support a reduced advance, but monitoring is recommended before increasing exposure.',REJECTED:'The merchant exceeds the current risk threshold. Improving returns, shipping reliability, ratings, and operating history would materially improve the outcome.'};
+/* Backend enum values are unchanged for compatibility. Only the DISPLAY
+   changes: these are illustrative risk tiers from a demonstration rule, not
+   lending decisions. Nothing here approves, conditions or declines anything. */
+const VERDICT={APPROVED:'Illustrative low-risk tier',CONDITIONAL:'Illustrative medium-risk tier',REJECTED:'Illustrative high-risk tier'};
+const EXPLAIN={APPROVED:'This profile falls in the illustrative low-risk tier. The demo advance is sized to annual revenue and structured at the low-risk remittance and repayment cap. No underwriting standard has been validated — the tier is a demonstration of the rule, not an approval.',CONDITIONAL:'This profile falls in the illustrative medium-risk tier, where the demonstration rule sizes a reduced advance. The tier reflects the rule, not a validated assessment of the merchant.',REJECTED:'This profile falls in the illustrative high-risk tier under the demonstration rule. Returns, shipping reliability, ratings and operating history are the inputs that move it. No risk threshold here has been validated against outcomes.'};
 const FLAG_CLASS={green:'pass',amber:'warn',red:'fail'}, SIGNAL_LABEL={return_rate:'Return rate',late_ship_rate:'Late shipments',revenue_growth:'Revenue growth',rating:'Store rating',days_active:'Days active',inventory_turnover:'Inventory turnover'};
 function computeSignals(s){
   const f=(v,lo,hi)=>v<=lo?'green':v<=hi?'amber':'red';
@@ -1268,10 +1271,10 @@ function renderIntegrity(intg){
   if(banner){
     if(intg.level==='high'){
       banner.style.display=''; banner.className='gate-banner high';
-      banner.textContent=`Funding held pending verification — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The credit decision below assumes reported figures are accurate; verify revenue before disbursing.`;
+      banner.textContent=`Assessment flagged for review — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The demonstration assessment below is marked for manual review; it assumes reported figures are accurate; verify submitted revenue before relying on the assessment.`;
     } else if(intg.level==='review'){
       banner.style.display=''; banner.className='gate-banner review';
-      banner.textContent='Manual review suggested — the integrity screen flagged items to confirm before disbursing. The credit decision below is provisional.';
+      banner.textContent='The integrity screen flagged items to confirm. This demonstration assessment is marked for manual review.';
     } else { banner.style.display='none'; }
   }
   document.getElementById('integrity-checks').innerHTML=(intg.checks||[]).map(c=>{
@@ -1505,7 +1508,11 @@ function heroRenderDecision(d, ms){
   word.className='decision-word'+(cls?' '+cls:'');
   word.textContent=VERDICT[d.decision]||d.decision;
   document.getElementById('hd-tier').textContent=d.risk_tier||'—';
-  document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Default probability '+pct(d.pd_score,1)):'';
+  /* Labelled as a synthetic demo score, not a validated PD: the model is
+     trained on generated data whose label is a formula over the same features
+     (D-001). Labelling it a PD would assert predictive validity that this
+     project has withdrawn. */
+  document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Demo score '+pct(d.pd_score,1)+' — synthetic, not a validated default probability'):'';
   document.getElementById('hd-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
   document.getElementById('hd-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
   document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);

@@ -274,11 +274,21 @@ def test_intervals_are_not_called_population_confidence_intervals():
     assert "confidence interval" not in html
 
 
-def test_fixed_arm_default_risk_is_not_implied_away():
-    """The fixed arms are modelled as always repaid. Saying so is the point."""
+def test_fixed_arm_is_presented_as_an_optimistic_scheduled_recovery_benchmark():
+    """The fixed arms are modelled as paid in full and on time. Saying so is
+    the point — and the framing matters: "upper bound" implied a derived limit,
+    when it is an assumption. It is a scheduled-recovery benchmark, and the
+    project makes no claim about real missed payments (A-8)."""
     caveats = " ".join(c["text"].lower()
                        for c in client.get("/api/lab/comparison/stable").json()["caveats"])
-    assert "default risk" in caveats and "does not model" in caveats
+    assert "paid in full and on time" in caveats, \
+        "the assumption behind the fixed arm must be stated explicitly"
+    assert "optimistic scheduled-recovery benchmark" in caveats
+    # Ban the ASSERTION, not the word: the caveat legitimately says "is NOT an
+    # upper bound derived from anything measured here", and a blanket ban would
+    # forbid the disavowal along with the claim.
+    assert "is an upper bound" not in caveats, \
+        "'upper bound' asserted; it implies a derived limit, but this is an assumption"
 
 
 def test_no_universal_claim_about_provider_recovery_direction():
@@ -411,6 +421,35 @@ def test_underreporting_is_offered_but_not_as_a_scenario():
     assert "not a revenue path" in u["why_not_a_scenario"].lower()
     keys = {s["key"] for s in client.get("/api/lab/scenarios").json()["scenarios"]}
     assert not any("underreport" in k for k in keys)
+
+
+def test_underreporting_findings_are_a_list_split_by_claim_class():
+    """Shape guard. This endpoint returned a single `finding` object until
+    D-037 split it, and the page reads `u.findings` — an unguarded rename here
+    would blank the panel silently rather than fail."""
+    u = client.get("/api/lab/underreporting").json()
+    assert isinstance(u.get("findings"), list) and len(u["findings"]) >= 2, \
+        "underreporting must expose a `findings` LIST"
+    classes = {f["classification"] for f in u["findings"]}
+    assert "mathematical_property" in classes and "simulation_result" in classes, \
+        f"the proof and the measurement must carry different classes, got {classes}"
+    for f in u["findings"]:
+        assert f["text"] and f["source"], "every finding needs text and a source"
+
+
+def test_underreporting_numbers_are_not_typed_into_the_finding_text():
+    """The sweep figures must be derived from the artifact, not hard-coded.
+
+    Verified by checking the rendered sentence agrees with the artifact rather
+    than by scanning for literals — a typed constant that happens to be correct
+    today is exactly what goes stale tomorrow."""
+    u = client.get("/api/lab/underreporting").json()
+    sim = [f for f in u["findings"] if f["classification"] == "simulation_result"][0]
+    rows = u["rows"]
+    for r in (rows[0], rows[-1]):
+        assert f"{r['duration_months_mean']:.1f}" in sim["text"], (
+            f"rendered finding does not quote the artifact's own "
+            f"{r['duration_months_mean']:.1f} for ω={r['omega']}")
 
 
 def test_glossary_defines_the_specialist_terms():

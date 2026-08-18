@@ -86,8 +86,10 @@ GLOSSARY = {
     "effective APR": "The annualised internal rate of return of the payment "
                      "stream against the advance. It puts a revenue share and a "
                      "fixed instalment on one axis.",
-    "payment burden": "Payment ÷ revenue in a given month — the share of that "
-                      "month's takings that leaves as a payment.",
+    "payment burden": "Payment ÷ GMV in a given month — the share of that "
+                      "month's gross takings that leaves as a payment. The "
+                      "contract charges its share on NET sales, so this equals "
+                      "r·(1 − return rate) and varies when returns vary.",
     "90th percentile": "The value exceeded in only 10% of active months. It "
                        "describes a bad month, not a typical one.",
     "Monte Carlo interval": "A range showing whether enough simulated paths were "
@@ -95,8 +97,10 @@ GLOSSARY = {
                             "confidence interval and says nothing about real "
                             "sellers.",
     "canonical artifact": "A committed, checksummed result file. Identical code, "
-                          "configuration and seeds reproduce it byte-for-byte, "
-                          "so any figure here can be traced to a verifiable file.",
+                          "configuration and seeds reproduce it byte-for-byte "
+                          "within a fixed runtime, and numerically at published "
+                          "precision on every platform tested — so any figure "
+                          "here can be traced to a verifiable file.",
     "reference path": "A flat, shock-free revenue path used once to price the "
                       "fixed benchmark. Contracts are priced at origination, so "
                       "a later shock cannot retro-price them.",
@@ -110,7 +114,9 @@ SCENARIOS: Dict[str, dict] = {
     "seasonal":          {"label": "Moderate seasonality", "family": "baseline", "order": 2,
                           "description": "Ordinary seasonal swing around a flat trend."},
     "seasonal_strong":   {"label": "Strong seasonality", "family": "baseline", "order": 3,
-                          "description": "Pronounced peaks and troughs — common for fashion and gift categories."},
+                          "description": "Pronounced peaks and troughs. The shape is a "
+                                         "specified input, not an observed category "
+                                         "pattern; no category data informs it."},
     "growth":            {"label": "Growth", "family": "favourable", "order": 4,
                           "description": "3% month-on-month growth with moderate seasonality."},
     "gradual_decline":   {"label": "Gradual decline", "family": "stress", "order": 5,
@@ -156,8 +162,11 @@ ARMS = [
      "short": "Amortizing loan",
      "chart_label": "Amortizing loan",
      "kind": "fixed",
-     "note": "A conventional 12-month amortizing loan at 18% nominal annual "
-             "rate. Not cost-matched; it is the external price reference."},
+     "note": "An illustrative 12-month amortizing loan at 18% nominal annual "
+             "rate. The 18% is an assumption chosen for this study — not a "
+             "market rate, and not observed or externally sourced anywhere in "
+             "this project. Not cost-matched; it is the external price "
+             "reference."},
     {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
      "name": "Reference-path cost-matched RBF",
      "short": "Revenue-based, cost-matched",
@@ -434,6 +443,27 @@ def underreporting() -> Optional[dict]:
             "effective_apr": a.get("apr_mean"),
             "total_repaid_mean": _fmt_money(a.get("total_repaid_mean") or 0),
         })
+    # Derived from `rows`, never typed. A hard-coded "12.9 → 18.7" would go
+    # stale silently the day the artifact changes — the exact failure mode the
+    # literal scanner exists to catch on the HTML side.
+    if not rows:                           # artifact present but sweep empty
+        return None
+    full, least = rows[-1], rows[0]        # rows ascend by ω: [0]=lowest
+    all_complete = all(not (r["incomplete_recovery_rate"] or 0) for r in rows)
+    if all_complete:
+        observed = (
+            f"In this sweep every path still reached the cap inside the "
+            f"24-month window, so the total stayed at the cap and only the "
+            f"duration moved: {full['duration_months_mean']:.1f} → "
+            f"{least['duration_months_mean']:.1f} months as ω falls "
+            f"{full['omega']:.0%} → {least['omega']:.0%}. That is this "
+            f"sweep's result, not a general guarantee.")
+    else:
+        observed = (
+            "In this sweep some paths did NOT reach the cap inside the "
+            "24-month window, so the total is not invariant across all of "
+            "them — read the incomplete-recovery column.")
+
     return {
         "rows": rows,
         "source_artifact": "baseline_v2_canonical.json",
@@ -443,21 +473,39 @@ def underreporting() -> Optional[dict]:
                               "observes; the underlying revenue shape is held "
                               "fixed. It is shown separately so it is not read "
                               "as one of the scenarios.",
-        "finding": {
-            "classification": "mathematical_property",
-            "text": "Under-reporting does not change what is owed. It rescales "
-                    "each payment, so the contract takes proportionally longer "
-                    "to reach the same cap — the total is invariant, the "
-                    "duration is not.",
-            "source": "research/DERIVATIONS.md",
-        },
+        # A list, and split by claim class on purpose. The invariance argument
+        # is a property of the contract; the duration numbers are an output of
+        # one sweep. Carrying both under a single "mathematical_property" label
+        # would promote a simulation result to a theorem.
+        "findings": [
+            {
+                "classification": "mathematical_property",
+                "text": "Under-reporting does not change what is owed. It "
+                        "rescales the UNCAPPED remittances — the final "
+                        "payment is clipped to whatever is left, so it does "
+                        "not scale with \u03c9 — and raises the cumulative "
+                        "sales needed to reach the cap. Invariance of the "
+                        "total is conditional on the cap actually being "
+                        "reached: under-reporting severe enough to push the "
+                        "contract past the horizon leaves the cap unreached "
+                        "and the total short.",
+                "source": "research/DERIVATIONS.md",
+            },
+            {
+                "classification": "simulation_result",
+                "text": observed,
+                "source": "research/results/baseline_v2_canonical.json",
+            },
+        ],
     }
 
 
 METRIC_DEFINITIONS = {
     "burden": {
         "label": "Payment burden",
-        "definition": "Payment ÷ revenue in a given month. Computed from revenue "
+        "definition": "Payment ÷ GMV in a given month — note the denominator is "
+                      "GMV while remittance is charged on net sales, so this "
+                      "is r·(1 − return rate), not r. Computed from revenue "
                       "alone; undefined in months with zero revenue.",
         "why": "It is the share of this month's takings that leaves as a payment.",
         "caveat": "Burden is measured against REVENUE, not against what the "
@@ -473,9 +521,12 @@ METRIC_DEFINITIONS = {
         "caveat": "These thresholds are ILLUSTRATIVE reporting bands chosen for "
                   "this study. They are not validated hardship cutoffs and no "
                   "claim is made that crossing one causes distress. For a "
-                  "revenue share the count is also constant BY CONSTRUCTION — "
-                  "the payment is a fixed share of revenue, so its burden cannot "
-                  "rise. The informative side is the fixed arm.",
+                  "revenue share the count is constant in these scenarios, but "
+                  "NOT by construction: the remittance is a fixed share of net "
+                  "sales while this count is measured against payment ÷ GMV, so "
+                  "it can move when the return rate moves. It is constant only "
+                  "while the net-sales/GMV ratio holds fixed. The informative "
+                  "side is the fixed arm.",
     },
     "duration_months_mean": {
         "label": "Repayment duration",
@@ -484,8 +535,12 @@ METRIC_DEFINITIONS = {
                       "it within the 24-month window. Paths that did not are "
                       "excluded from this mean and reported separately as "
                       "incomplete recovery.",
-        "why": "Revenue-based repayment extends the term when revenue falls "
-               "instead of defaulting. The extension is the provider's cost.",
+        "why": "Revenue-based repayment extends the term when revenue falls, "
+               "rather than holding the payment fixed. The extension is the "
+               "provider's cost. Extension is NOT the same as preventing "
+               "default: where revenue reaches zero the cap may never be "
+               "reached at all, which is exactly what the closure scenarios "
+               "show. Read this beside the incomplete-recovery rate.",
         "caveat": "Where any path fails to complete, this is a SURVIVOR "
                   "statistic. It describes the contracts that finished, not the "
                   "portfolio. A scenario with a short mean duration and a high "
@@ -523,9 +578,11 @@ METRIC_DEFINITIONS = {
                   "PATHS for the selected scenario, not the reference-path rate "
                   "the cost-matched contract was priced on. And where any path "
                   "fails to complete it is a SURVIVOR statistic — the "
-                  "unprofitable paths are absent from it, so it understates the "
-                  "cost of the scenario to the provider rather than summarising "
-                  "it.",
+                  "non-completing paths are absent from it, so it understates "
+                  "the cost of the scenario to the provider rather than "
+                  "summarising it. Those paths are not 'unprofitable' — "
+                  "profitability is computed nowhere in this project; they "
+                  "simply did not reach the cap inside the horizon.",
     },
 }
 
@@ -545,10 +602,12 @@ CAVEATS = [
              "No observed seller revenue, repayment or default outcome exists in "
              "this project.",
      "classification": "open_real_world_question"},
-    {"text": "The fixed arms are modelled as always repaid. Real fixed-payment "
-             "lending carries default risk that this comparison does not model, "
-             "so the fixed arm's recovery here is an upper bound, not a "
-             "prediction.",
+    {"text": "The fixed arms are modelled as paid in full and on time in every "
+             "month of the schedule. The fixed arm is therefore an OPTIMISTIC "
+             "SCHEDULED-RECOVERY BENCHMARK: it shows what the schedule would "
+             "deliver under that assumption. It is not an upper bound derived "
+             "from anything measured here, and this project makes no claim "
+             "about how often real fixed-payment borrowers miss payments.",
      "classification": "open_real_world_question"},
     {"text": "Whether revenue-based repayment recovers faster or slower depends "
              "on the revenue path, and both directions appear in this scenario "
@@ -614,16 +673,25 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
     label = SCENARIOS[scenario]["label"].lower()
     out: List[dict] = [
         {"classification": "mathematical_property",
-         "text": "A revenue-share payment is a fixed proportion of revenue, so "
-                 "its payment burden cannot rise when revenue falls. This holds "
-                 "for every revenue path, by construction — a definition, not a "
-                 "measurement.",
+         "text": "Contractual remittance is a fixed share of NET SALES, so the "
+                 "contractual burden is constant by construction. The burden "
+                 "shown here uses a different denominator — payment ÷ GMV — "
+                 "so it equals r·(1 − return rate) and MOVES when the return "
+                 "rate moves. It is constant only in scenarios where the "
+                 "net-sales/GMV ratio is fixed. Most registered scenarios hold "
+                 "that ratio fixed; `returns_spike` is the explicit exception "
+                 "where the displayed burden moves.",
          "source": "research/DERIVATIONS.md"},
         {"classification": "mathematical_property",
-         "text": "A fixed instalment does not adjust, so its burden rises "
-                 "exactly in proportion as revenue falls. Under a revenue share "
-                 "repayment is extended instead of missed — the trade is timing, "
-                 "not forgiveness.",
+         "text": "A fixed instalment does not adjust, so its burden rises in "
+                 "INVERSE proportion to revenue: halve revenue and the burden "
+                 "doubles. (It does not rise 'in proportion' — that would mean "
+                 "falling with revenue, which is what the revenue share does.) "
+                 "Under a revenue share the expected repayment period lengthens "
+                 "instead. That is a statement about the payment rule, not about "
+                 "whether the contract is ultimately repaid: where revenue stops "
+                 "before the cap is reached, a balance goes unrecovered. The "
+                 "trade is timing, not forgiveness — and not immunity.",
          "source": "research/DERIVATIONS.md"},
     ]
 
@@ -705,11 +773,15 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
 
     out.append({
         "classification": "product_implication",
-        "text": "If a financier wants payment burden to stay flat through a "
-                "downturn, a revenue share achieves it, and the price is a "
-                "longer and more variable recovery period. Which side of that "
-                "trade is worth taking is a commercial judgement this study does "
-                "not make.",
+        "text": "A revenue share makes the CONTRACTUAL remittance a fixed share "
+                "of net sales, so the contractual burden does not rise when "
+                "revenue falls. The burden displayed here uses a different "
+                "denominator — payment ÷ GMV — so it is constant only while the "
+                "net-sales/GMV ratio is fixed, and it varies when returns vary. "
+                "The price of the revenue-contingent structure is a longer and "
+                "more variable recovery period. Which side of that trade is "
+                "worth taking is a commercial judgement this study does not "
+                "make.",
         "source": "author"})
     out.append({
         "classification": "open_real_world_question",
