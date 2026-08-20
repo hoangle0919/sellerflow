@@ -2,7 +2,10 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "cd backend && python train_model.py --skip-if-exists 2>/dev/null; python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+# See backend/start_railway.sh. The previous inline form discarded training
+# stderr and continued through a bare `;`, so a failed build of the model
+# artifact was silent and indistinguishable from success.
+startCommand = "bash backend/start_railway.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
