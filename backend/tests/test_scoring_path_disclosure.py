@@ -112,10 +112,15 @@ SURFACES = [
     "README.md",
     "frontend/index.html",
     "backend/ENVIRONMENT.md",
+    "backend/ml_engine.py",
+    "backend/main.py",
+    "backend/start_railway.sh",
     "research/publication/CAREER_PACKAGE.md",
+    "research/publication/MANUSCRIPT.md",
 ]
 
 # Each pattern asserts the fallback leaves output unchanged. All are false.
+# Every one of these was live somewhere in this repository.
 INVARIANCE_CLAIMS = [
     r"numbers shown are identical either way",
     r"identical either way",
@@ -125,6 +130,15 @@ INVARIANCE_CLAIMS = [
     r"(?:scoring path|fallback|heuristic|ensemble)[^.\n]{0,60}"
     r"(?:does not|doesn't|never) (?:change|affect)[^.\n]{0,30}"
     r"(?:numbers|figures|output|amount)",
+    # ml_engine.py's docstring, until this pass.
+    r"nothing downstream[^.\n]{0,40}depends",
+    # ENVIRONMENT.md §"what happens when the model is missing", until this pass.
+    r"(?:financing )?structure and scenarios are unchanged",
+    r"(?:advance|remittance|cap factor|financing)[^.\n]{0,50}(?:is|are) unchanged",
+    # model_status()'s note field, until this pass. Ambiguous rather than
+    # false on its own -- "does not use it" is true of the arithmetic and
+    # false of the pipeline -- and ambiguity is what let it survive review.
+    r"deterministic and does not use it",
 ]
 
 # A document has to be able to quote the retracted claim in order to retract
@@ -177,6 +191,63 @@ def test_no_public_surface_claims_scoring_path_invariance(rel):
                 "If you are quoting the phrase in order to retract it, put the "
                 "retraction next to it."
             )
+
+
+# The exact strings that were live in this repository before this pass. Each
+# must trip the scanner, or removing it from the source achieved nothing.
+STALE_STATEMENTS = [
+    ("README.md (f652b94)",
+     "because the financing arithmetic never calls the model, the numbers "
+     "shown are identical either way."),
+    ("ml_engine.py docstring",
+     "Nothing downstream of the PD estimate depends on a model: the advance, "
+     "remittance, cap, scenarios and risk findings are plain deterministic "
+     "arithmetic in `financing_engine.py`."),
+    ("ENVIRONMENT.md model-missing section",
+     "assessments are produced via the heuristic, the financing structure and "
+     "scenarios are unchanged, and the full backend and simulation suites "
+     "pass."),
+    ("model_status() note",
+     "The underwriting ensemble is a secondary, explicitly unvalidated "
+     "component. Financing arithmetic is deterministic and does not use it."),
+]
+
+
+@pytest.mark.parametrize("origin,text", STALE_STATEMENTS,
+                         ids=[s[0] for s in STALE_STATEMENTS])
+def test_each_removed_statement_would_be_caught_if_restored(origin, text):
+    """Restoring any of these must fail the scan. Otherwise the fix is cosmetic."""
+    hits = [m for p in INVARIANCE_CLAIMS for m in re.finditer(p, text, re.I)]
+    assert hits, (
+        f"scanner does not catch the statement removed from {origin}; "
+        "it could be reintroduced without failing a test"
+    )
+    assert not all(_is_disowned(text, m) for m in hits), (
+        f"the statement from {origin} was treated as disowned in isolation -- "
+        "the disowning window is too wide"
+    )
+
+
+# Every surface is scanned for the false claim; these must additionally state
+# the true one. Kept as its own list rather than a skip inside the parametrize,
+# so the suite's skip count stays exactly the nine browser checks and nothing
+# else. A skip that means "not applicable" is noise in a count that is supposed
+# to mean "could not run".
+MUST_DISCLOSE = [
+    "README.md",
+    "backend/ENVIRONMENT.md",
+    "backend/ml_engine.py",
+    "frontend/index.html",
+]
+
+
+@pytest.mark.parametrize("rel", MUST_DISCLOSE)
+def test_surfaces_that_should_name_the_dependency_do(rel):
+    """Removing the false claim is not the same as stating the true one."""
+    text = open(os.path.join(REPO, rel), encoding="utf-8", errors="replace").read()
+    assert re.search(r"risk tier|assigned tier|the tier", text, re.I), (
+        f"{rel} must name the risk tier as the thing the scorer changes"
+    )
 
 
 def test_the_invariance_scanner_can_actually_fail():

@@ -1,10 +1,22 @@
 """Underwriting ensemble loading and scoring.
 
 THE MODEL IS SECONDARY AND EXPLICITLY UNVALIDATED. Its training benchmark was
-withdrawn as circular (D-026). Nothing downstream of the PD estimate depends on
-a model: the advance, remittance, cap, scenarios and risk findings are plain
-deterministic arithmetic in `financing_engine.py`. The service is fully
-functional with no model artifact at all.
+withdrawn as circular (D-026). The service is fully functional with no model
+artifact at all, and falls back to a deterministic heuristic.
+
+BUT THE FALLBACK IS NOT OUTPUT-NEUTRAL, and an earlier version of this
+docstring said it was. The advance, remittance rate, cap factor, scenarios and
+eligibility are plain deterministic arithmetic in `financing_engine.py` --
+*given a risk tier*. The tier is not an input to that arithmetic from outside;
+it is produced here, by whichever path is active:
+
+    scoring_path -> pd_score -> risk tier -> advance %, remittance %,
+                                             cap factor, eligibility
+
+The two paths compute pd_score differently and read different features, so they
+can assign different tiers to the same merchant, and High Risk removes the
+offer entirely. "Deterministic" describes the arithmetic, not the end-to-end
+output. See tests/test_scoring_path_disclosure.py.
 
 MODEL ARTIFACTS ARE NOT IN THE REPOSITORY. `*.pkl` is gitignored. Production
 trains its own at deploy time (`railway.toml`: `train_model.py
@@ -73,8 +85,11 @@ def model_status() -> dict:
             "model_dir": MODEL_DIR,
             "scoring_path": "ensemble" if _STATUS["available"] else "heuristic",
             "note": "The underwriting ensemble is a secondary, explicitly "
-                    "unvalidated component. Financing arithmetic is "
-                    "deterministic and does not use it."}
+                    "unvalidated component. Financing formulas are "
+                    "deterministic once a risk tier is supplied; however, the "
+                    "active scoring path can change the assigned tier and "
+                    "therefore the advance, remittance rate, cap factor, "
+                    "repayment amounts and eligibility."}
 
 
 def load_models(model_dir: str = None) -> bool:

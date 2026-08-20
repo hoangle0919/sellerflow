@@ -23,7 +23,10 @@ RBF analyzes. It does not hold capital or make loans — a lender or financier s
 ## How it works
 
 ```
-merchant-submitted revenue ──▶ RF + LR ensemble ──▶ unvalidated demo risk score ──▶ deterministic financing engine ──▶ illustrative structure
+merchant-submitted revenue ──▶ active scorer ──▶ unvalidated demo risk score ──▶ risk tier ──▶ deterministic financing engine ──▶ illustrative structure
+                               │                                                  │
+                               │ RF + LR ensemble when the artifact loads;         └─ sets advance %, remittance %,
+                               └─ deterministic heuristic fallback otherwise           cap factor and eligibility
 (revenue, growth,      (scikit-learn,                        (backend/financing_engine.py —        + scenarios
  returns, ratings,       synthetic baseline)                   plain Python, no model calls           + risk findings
  fulfillment, tenure)                                          arithmetic, unit-tested)

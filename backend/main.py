@@ -111,6 +111,17 @@ def health():
                   if _ml_engine.model_status()["available"]
                   else "deterministic heuristic fallback (no model artifact loaded)"),
         "scoring_path": _ml_engine.model_status()["scoring_path"],
+        # Unauthenticated on purpose: a library version string is not a
+        # secret, and it is the field that distinguishes "training failed"
+        # from "scikit-learn is absent from the image" without shell access.
+        # start_railway.sh points operators here, so it has to be here.
+        "sklearn_runtime": _ml_engine.model_status()["sklearn_runtime"],
+        # The fallback changes the assigned tier, not just the label on it.
+        "scoring_path_note": (
+            "Financing formulas are deterministic once a risk tier is "
+            "supplied; the active scoring path can change the tier and "
+            "therefore the advance, remittance rate, cap factor, repayment "
+            "amounts and eligibility."),
         "sellers_assessed": sellers,
         "waitlist_count": waitlist,
         "avg_response_ms": 1200,

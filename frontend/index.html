@@ -645,11 +645,11 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
       <hr class="hero-rule">
       <div class="data-strip">
-        <span>RF+LR risk model</span><span>rule-based integrity screen</span><span>deterministic financing engine</span><span>Vietnam</span>
+        <span>active scorer — RF+LR or heuristic</span><span>rule-based integrity screen</span><span>deterministic financing engine</span><span>Vietnam</span>
       </div>
 
       <div class="proof-card">
-        <div class="proof-head"><span>ILLUSTRATIVE DEMO · ADJUST THE PROFILE</span><span id="hero-model">RF+LR ENSEMBLE v1.0</span></div>
+        <div class="proof-head"><span>ILLUSTRATIVE DEMO · ADJUST THE PROFILE</span><span id="hero-model" title="The ensemble is optional at runtime; this label is read from /api/health.">ACTIVE SCORER — CHECKING…</span></div>
         <div class="proof-body">
           <div>
             <div class="proof-shop" id="hv-shop">Thời Trang Linh Chi</div>
@@ -725,15 +725,16 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       </div>
       <div class="steps">
         <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics as submitted by the merchant. The shipped prototype does not connect to any platform API, so these figures are self-reported and unverified.</p></div>
-        <div class="step"><span class="step-num">2</span><h3>The model scores risk</h3><p>A Random Forest and Logistic Regression ensemble produces an <strong>unvalidated demo risk score</strong> and per-signal flags. It is trained on synthetic data whose label is a formula over the same features, so the score carries no predictive claim.</p></div>
+        <div class="step"><span class="step-num">2</span><h3>The active scorer rates risk</h3><p>A Random Forest and Logistic Regression ensemble produces an <strong>unvalidated demo risk score</strong> and per-signal flags. It is trained on synthetic data whose label is a formula over the same features, so the score carries no predictive claim. <strong>The ensemble is optional at runtime:</strong> if its artifact fails to build or load, scoring falls back to a deterministic heuristic. The score sets the risk tier, and the tier sets the advance, remittance rate, cap factor and eligibility — so the active scorer can change the terms shown. <code>/api/health</code> reports which path is running.</p></div>
         <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Recommended advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each. Response time is not benchmarked.</p></div>
       </div>
 
       <div class="flow" id="methodology-flow">
         <div class="flow-node" data-key="signals">Operational signals</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="normalize">Feature normalization</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="ensemble">RF + LR ensemble</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="ensemble">Active scorer</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="pd">Demo risk score</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="tier">Risk tier</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="integrity">Integrity screen</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="limit">Financing structure</div><span class="flow-sep">→</span>
         <div class="flow-node" data-key="rate">Repayment scenarios</div><span class="flow-sep">→</span>
@@ -1116,7 +1117,8 @@ async function runConsole(){
 const FLOW_DESC={
   signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the merchant submission.',
   normalize:'Raw metrics are scaled and bounded so a fast-growing large merchant and a stable small merchant are compared fairly.',
-  ensemble:'A Random Forest and a Logistic Regression model each score the normalized profile independently.',
+  ensemble:'When the model artifact is available, a Random Forest and a Logistic Regression model each score the normalized profile independently. The ensemble is optional at runtime — if the artifact fails to build or load, a deterministic heuristic scores instead, and /api/health reports which path is active. The two paths read different inputs and can reach different tiers.',
+  tier:'The demo risk score is thresholded into Low, Medium or High Risk. The tier — not the score — is what the financing engine consumes: it sets the advance percentage, the remittance rate, the cap factor, and whether financing is offered at all. High Risk shows no offer. The formulas are deterministic once the tier is fixed, but a change of scoring path can change the tier and therefore every figure below.',
   pd:'The two model outputs are blended into a single unvalidated demo risk score — 65% RF, 35% LR. It is not a probability of default: the training label was generated by a formula over the same features (D-001).',
   integrity:'Five rule-based checks — revenue reconciliation, exposure velocity, growth plausibility, and more — screen for misrepresentation alongside the credit score. An elevated flag marks the demonstration assessment for manual review. Rule-based screening, not a supervised fraud model.',
   limit:'Low risk unlocks an advance sized to 15% of annual revenue; medium risk unlocks a reduced advance at 8%. All deterministic — no model computes this arithmetic.',
@@ -1584,6 +1586,34 @@ heroRunPreview();
       body:JSON.stringify({path:(location.pathname+location.hash).slice(0,200),referrer:(document.referrer||'').slice(0,300)}),
       keepalive:true}).catch(function(){});
   }catch(e){}
+})();
+
+/* Scoring-path badge. The hero badge used to be the literal string
+   "RF+LR ENSEMBLE v1.0", which asserted the ensemble was running whether or
+   not it had loaded — the same defect class as the withdrawn AUC, a label
+   contradicting the artifact. It now reads the live value.
+
+   Fails closed: if /api/health is unreachable the badge says the path is
+   unknown, never that the ensemble is active. */
+(function(){
+  var el = document.getElementById('hero-model');
+  if(!el) return;
+  fetch('/api/health').then(function(r){ return r.json(); }).then(function(h){
+    if(h.scoring_path === 'ensemble'){
+      el.textContent = 'RF+LR ENSEMBLE v1.0';
+      el.title = 'Model artifact loaded and smoke-tested. Source: /api/health.';
+    }else if(h.scoring_path === 'heuristic'){
+      el.textContent = 'HEURISTIC FALLBACK';
+      el.title = 'The model artifact is not loaded, so a deterministic '
+               + 'heuristic is scoring. This can change the assigned risk '
+               + 'tier and therefore the terms shown. Source: /api/health.';
+    }else{
+      el.textContent = 'ACTIVE SCORER — UNKNOWN';
+    }
+  }).catch(function(){
+    el.textContent = 'ACTIVE SCORER — UNKNOWN';
+    el.title = 'Could not reach /api/health.';
+  });
 })();
 </script>
 </body>

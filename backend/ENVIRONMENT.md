@@ -102,9 +102,23 @@ research layer (`research/rbf_sim/`) has no dependency on the backend at all
 and does not import scikit-learn.
 
 Concretely, with no model artifact present: the API serves, `/api/health`
-returns `operational`, assessments are produced via the heuristic, the
-financing structure and scenarios are unchanged, and the full backend and
-simulation suites pass. Asserted by `tests/test_model_artifacts.py`.
+returns `operational`, assessments are produced via the heuristic, and the full
+backend and simulation suites pass. Asserted by `tests/test_model_artifacts.py`.
+
+**What is *not* unchanged.** An earlier version of this paragraph said the
+financing structure and scenarios were unchanged without the ensemble. They are
+unchanged *as formulas*, and that is all. The formulas are keyed to a risk
+tier, and the tier is produced by whichever scorer is active:
+
+```
+scoring_path → pd_score → risk tier → advance %, remittance %,
+                                      cap factor, eligibility
+```
+
+The two paths read different features and can assign different tiers to the
+same merchant; High Risk zeroes the advance, the remittance rate and the cap,
+so no offer is shown at all. `tests/test_scoring_path_disclosure.py` fails if
+any public surface claims otherwise.
 
 ## Rebuilding the model locally
 
