@@ -127,6 +127,32 @@ INVARIANCE_CLAIMS = [
     r"(?:numbers|figures|output|amount)",
 ]
 
+# A document has to be able to quote the retracted claim in order to retract
+# it -- ENVIRONMENT.md and the decision log both do. So an occurrence passes
+# when a disowning cue sits close to it, following the convention in
+# test_public_copy.py.
+#
+# The windows are deliberately narrow and directional. An early version of the
+# sibling scanner used a 240-character symmetric window that included a bare
+# "not ", and it passed the entire repository while two live violations sat in
+# lab.py. A wide window does not make a lenient test; it makes a vacuous one.
+BEFORE = 90   # retraction framing precedes the quote: 'once claimed that "..."'
+AFTER = 70    # retraction follows the quote: '"..." -- that claim is withdrawn'
+
+DISOWNED_BEFORE = re.compile(
+    r"(?:once claimed|previously|superseded|earlier|retracted|withdrawn|"
+    r"incorrectly|wrongly|false)", re.IGNORECASE)
+DISOWNED_AFTER = re.compile(
+    r"(?:is withdrawn|are withdrawn|is false|is wrong|is incorrect|"
+    r"was withdrawn|that claim is|no longer|retracted|superseded)",
+    re.IGNORECASE)
+
+
+def _is_disowned(text: str, m: re.Match) -> bool:
+    before = text[max(0, m.start() - BEFORE):m.start()]
+    after = text[m.end():m.end() + AFTER]
+    return bool(DISOWNED_BEFORE.search(before) or DISOWNED_AFTER.search(after))
+
 
 @pytest.mark.parametrize("rel", SURFACES)
 def test_no_public_surface_claims_scoring_path_invariance(rel):
@@ -136,16 +162,45 @@ def test_no_public_surface_claims_scoring_path_invariance(rel):
     text = open(path, encoding="utf-8", errors="replace").read()
 
     for pattern in INVARIANCE_CLAIMS:
-        m = re.search(pattern, text, re.IGNORECASE)
-        assert m is None, (
-            f"{rel} claims the scoring path does not change the output: "
-            f"{m.group(0)!r}\n"
-            "It does. scoring_path -> pd_score -> risk tier -> advance %, "
-            "remittance %, cap factor and eligibility. Say instead: the "
-            "financing formulas are deterministic once a risk tier is "
-            "supplied, but the active scoring path can change the tier and "
-            "therefore the displayed figures."
-        )
+        for m in re.finditer(pattern, text, re.IGNORECASE):
+            if _is_disowned(text, m):
+                continue
+            line = text[:m.start()].count("\n") + 1
+            raise AssertionError(
+                f"{rel}:{line} claims the scoring path does not change the "
+                f"output: {m.group(0)!r}\n"
+                "It does. scoring_path -> pd_score -> risk tier -> advance %, "
+                "remittance %, cap factor and eligibility. Say instead: the "
+                "financing formulas are deterministic once a risk tier is "
+                "supplied, but the active scoring path can change the tier and "
+                "therefore the displayed figures.\n"
+                "If you are quoting the phrase in order to retract it, put the "
+                "retraction next to it."
+            )
+
+
+def test_the_invariance_scanner_can_actually_fail():
+    """A check that cannot fail is not a check -- this project has shipped two.
+
+    Guards both directions: the bare claim must trip the scanner, and a
+    quotation that is properly retracted must not.
+    """
+    bare = ("The live demo may be running the heuristic; because the financing "
+            "arithmetic never calls the model, the numbers shown are identical "
+            "either way.")
+    hits = [m for p in INVARIANCE_CLAIMS for m in re.finditer(p, bare, re.I)]
+    assert hits, "scanner failed to match the exact sentence it exists to catch"
+    assert not any(_is_disowned(bare, m) for m in hits), (
+        "the bare claim was treated as disowned -- the window is too wide"
+    )
+
+    quoted = ('A README revision once claimed the numbers shown are identical '
+              'either way; that claim is withdrawn.')
+    hits = [m for p in INVARIANCE_CLAIMS for m in re.finditer(p, quoted, re.I)]
+    assert hits and all(_is_disowned(quoted, m) for m in hits), (
+        "a properly retracted quotation must pass, or the docs cannot "
+        "describe their own corrections"
+    )
 
 
 def test_readme_states_the_tier_dependency():

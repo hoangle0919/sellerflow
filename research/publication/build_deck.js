@@ -352,7 +352,7 @@ function source(s, t) {
     s.addText(lab, { x: x + 0.32, y: 2.82, w: 3.06, h: 0.6, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 16, valign: "top", margin: 0 });
   };
   stat(0.7,  "5",     "canonical artifacts, each with a\nregistered SHA-256");
-  stat(4.80, "1,008", "tests passing — 379 backend,\n629 simulation");
+  stat(4.80, "1,018", "tests passing — 389 backend,\n629 simulation");
   stat(8.90, "44",    "verified sources, with 6\nevidence gaps stated openly");
   s.addText("Reproducibility, stated at the strength the measurement supports", { x: 0.7, y: 3.85, w: 11.9, h: 0.4, fontSize: 16, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
   s.addText([

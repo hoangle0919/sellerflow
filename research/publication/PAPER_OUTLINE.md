@@ -151,7 +151,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 3/5 byte-identical on macOS CPython 3.11.5 (9 and 2 last-bit float differences), 5/5 on Linux 3.10.12 **[D-041, D-043]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: 629 simulation, 379 backend passed, 9 browser tests **skipped** (chromium unavailable) — skips reported as skips.
+- Test counts: 629 simulation, 389 backend passed, 9 browser tests **skipped** (chromium unavailable) — skips reported as skips.
 
 ---
 

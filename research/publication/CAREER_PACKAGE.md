@@ -22,13 +22,13 @@
 > - Established the study's central methodological result: **financing price and payment structure are separable questions**, and conflating them produces false conclusions — demonstrated by repricing an identical payment rule at a second cap factor and showing the cost comparison reverses while the rule is unchanged.
 > - **Formally derived and engine-tested seven contract properties** characterising behaviour independent of the simulation, each asserted numerically against the implementation, including an exact finite-time completion criterion that corrected a boundary error in an earlier draft.
 > - Built a **reproducibility pipeline**: five checksummed canonical artifacts, byte-versus-numeric equality reported separately across platforms, and a clean-copy regeneration verifier — after discovering that a previous "verification" step had re-hashed a committed file rather than regenerating it.
-> - Wrote and enforced a **claim ledger** binding every registered quantitative claim to an artifact, a derivation, or a cited source, backed by **1,008 passing tests — 379 backend and 629 simulation, with nine browser tests reported separately as skipped** — including a regression tripwire for known retracted phrasings, supplemented by adversarial review for the paraphrases a string test cannot catch.
+> - Wrote and enforced a **claim ledger** binding every registered quantitative claim to an artifact, a derivation, or a cited source, backed by **1,018 passing tests — 389 backend and 629 simulation, with nine browser tests reported separately as skipped** — including a regression tripwire for known retracted phrasings, supplemented by adversarial review for the paraphrases a string test cannot catch.
 > - **Retracted several claims from earlier internal drafts** — a 2.3× cost ratio, an unqualified byte-reproducibility claim, and a false null result about a guardrail arm — and documented each retraction with the evidence that overturned it.
 
 ### Short form (three lines, for a general CV)
 
 > **Revenue-Contingent Financing Under Volatile Sales** — independent research, 2026
-> Paired simulation study (10 scenarios × 4 contract arms on identical paths, one cost-matched pair, 500 paths) separating financing *price* from payment *structure*; seven formally derived and engine-tested contract properties; five checksummed reproducible artifacts; 1,008 passing tests — 379 backend and 629 simulation, with nine browser tests reported separately as skipped. Produced a working paper, a claim ledger binding every registered quantitative claim to its source, and a documented record of my own retracted claims.
+> Paired simulation study (10 scenarios × 4 contract arms on identical paths, one cost-matched pair, 500 paths) separating financing *price* from payment *structure*; seven formally derived and engine-tested contract properties; five checksummed reproducible artifacts; 1,018 passing tests — 389 backend and 629 simulation, with nine browser tests reported separately as skipped. Produced a working paper, a claim ledger binding every registered quantitative claim to its source, and a documented record of my own retracted claims.
 
 ### Single bullet (for a crowded CV)
 
@@ -54,7 +54,7 @@
 >
 > **Reporting failure honestly is harder than finding it.** The contract does not always repay. Where a business closes permanently before the cap is reached, recovery genuinely fails — 100% of simulated paths in one scenario. But a 76.2% incomplete-recovery rate is *not* a 76.2% loss rate, and I had to build the distinction explicitly so the headline number couldn't be misread.
 >
-> The study is a simulation, not evidence about real sellers. It has no observed revenue, no repayment outcomes, and makes no predictive or affordability claim. What it does have is a claim ledger binding every registered simulation result to a checksummed artifact, and 1,008 passing tests — 379 backend and 629 simulation, with nine browser tests reported separately as skipped — including guards that fail if a known retracted phrase reappears.
+> The study is a simulation, not evidence about real sellers. It has no observed revenue, no repayment outcomes, and makes no predictive or affordability claim. What it does have is a claim ledger binding every registered simulation result to a checksummed artifact, and 1,018 passing tests — 389 backend and 629 simulation, with nine browser tests reported separately as skipped — including guards that fail if a known retracted phrase reappears.
 
 ### Short post
 
@@ -83,7 +83,7 @@ A paired simulation supplying the counterfactual by construction, plus the infra
 | `research/CLAIM_LEDGER.md` | Every registered quantitative claim with its class, artifact, JSON path, checksum and required qualifier |
 | `research/verify_reproduction.py` | Clean-copy regeneration reporting byte and numeric equality separately |
 | Simulation Lab | Web surface rendering every simulation result from checksummed artifacts, with no financial arithmetic in the frontend |
-| 1,008 passing tests | 379 backend and 629 simulation, with nine browser tests reported separately as skipped. Includes a named-regression tripwire for known retracted phrasings — a tripwire, not a semantic proof, so adversarial review covers the paraphrases it cannot catch |
+| 1,018 passing tests | 389 backend and 629 simulation, with nine browser tests reported separately as skipped. Includes a named-regression tripwire for known retracted phrasings — a tripwire, not a semantic proof, so adversarial review covers the paraphrases it cannot catch |
 
 ### What I found
 
@@ -166,6 +166,6 @@ Kept explicit because these are the claims that would be tempting.
 | f\* = 1.0945, residual ≈0.02416pp | `validation_v1_canonical.json` → `/pricing` · ledger P-1, P-2 |
 | 100%, 76.2%, ≈214.3M, ≈98.3M | closure artifacts → `/scenarios/*/RBF` · ledger S-3, S-4, I-3 |
 | 0.9098 vs 0.9182 | `research/analysis/00_audit_evidence.py` · registry R-000 |
-| 1,008 passing tests — 379 backend, 629 simulation | test run; nine browser tests reported separately as skipped, never counted as passes |
+| 1,018 passing tests — 389 backend, 629 simulation | test run; nine browser tests reported separately as skipped, never counted as passes |
 | Five artifacts, byte vs numeric | `research/verify_reproduction.py` · decision log D-041, D-043 |
 | Retractions | decision log D-015 (2.3×), D-040 (RBF-G null), D-041 (reproducibility), D-042/D-046 (incomplete corrections) |

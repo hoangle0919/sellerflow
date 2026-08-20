@@ -368,7 +368,7 @@ An earlier version of this project claimed byte-for-byte reproducibility without
 
 **A disclosed inconsistency.** Each artifact embeds a metadata field `canonical.determinism` carrying the superseded unqualified claim. The artifacts were **not** regenerated to correct it, because doing so would change all five registered checksums in order to fix a sentence about reproducibility. The field is marked superseded in `research/RESULTS_REGISTRY.md`, and a regression test asserts that no public surface renders it.
 
-**Tests.** 629 simulation tests and 379 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
+**Tests.** 629 simulation tests and 389 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
 
 **Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
 
