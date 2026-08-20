@@ -1,11 +1,28 @@
 /* Builds RBF_DECK.pptx from the registered figures.
  *
- * Every number on a slide carries a source note naming the canonical artifact.
- * The claim-ledger rules are enforced here the same way they are in the paper:
- * seller burden never appears without provider recovery; f = 1.20 never appears
- * without f* = 1.0945; the RBF-G floor null never appears without the live
- * ceiling; and no slide asserts predictive validity, affordability, or default
- * prevention.
+ * Build:  npm install pptxgenjs && node build_deck.js
+ * Build outside the repository -- node_modules must not be committed here.
+ * Verify: soffice --headless --convert-to pdf RBF_DECK.pptx, then inspect all
+ * 13 slides. Chart values live in ppt/charts/chart*.xml, not in the slide
+ * text, so a text-only grep will not find them.
+ *
+ * Every simulated number on a slide carries a source note naming the canonical
+ * artifact. The claim-ledger rules are enforced here the same way they are in
+ * the paper: seller burden never appears without provider recovery; f = 1.20
+ * never appears without f* = 1.0945; the RBF-G floor null never appears without
+ * the live ceiling; and no slide asserts predictive validity, affordability, or
+ * default prevention.
+ *
+ * Four scope rules, each of which an earlier revision of this file broke:
+ *   - "simulation output" is scoped to simulated financing magnitudes. The
+ *     propositions are proved, not simulated, and the cited literature is
+ *     neither.
+ *   - the checksum claim covers simulation results only; proofs are
+ *     derivation-backed and external facts literature-backed.
+ *   - flat burden is qualified: pre-cap, before the terminal clipped payment,
+ *     and only while the net-sales/GMV ratio is fixed.
+ *   - all four arms share identical paths, but only the RBF / FIX-A pair is
+ *     cost-matched. FIX-B is an external price reference matched to nothing.
  *
  * Palette: Okabe-Ito categorical, the same colourblind-safe non-valenced set the
  * Simulation Lab uses (D-033). Colour distinguishes arms; it never encodes good
@@ -19,10 +36,18 @@ const FIXA = "E69F00";  // orange    — matched fixed
 const FIXB = "009E73";  // green     — amortizing reference
 const WARN = "D55E00";  // vermillion — failure cases
 
+const AUTHOR = "Le Huu Hoang";
+const DATED = "August 2026";
+const EMAIL = "lehuuhoang1909@gmail.com";
+const DEMO = "sellerflow-production.up.railway.app";
+const REPO = "github.com/hoangle0919/sellerflow";
+
 const pres = new pptxgen();
 pres.layout = "LAYOUT_WIDE";                // 13.3 x 7.5
-pres.author = "RBF research";
-pres.title = "Revenue-Contingent Financing Under Volatile Sales";
+pres.author = AUTHOR;
+pres.company = "Independent research";
+pres.subject = "Paired simulation study of revenue-contingent versus cost-matched fixed-instalment small-business financing";
+pres.title = "Revenue-Contingent Financing Under Volatile Sales: Separating Price from Structure";
 
 const SRC = (s) => ({ text: s, options: { fontSize: 9, color: MUTED, italic: true } });
 
@@ -47,11 +72,20 @@ function source(s, t) {
   s.addText("Separating price from structure in a paired simulation study", {
     x: 0.9, y: 3.9, w: 11.5, h: 0.5, fontSize: 19, color: "CFCFCF",
     fontFace: "Calibri", margin: 0 });
-  s.addShape(pres.ShapeType.rect, { x: 0.9, y: 4.7, w: 1.6, h: 0.045, fill: { color: RBF } });
-  s.addText("All figures are simulation output under modelled assumptions.\nNo observed seller revenue, repayment or default outcome exists in this study.", {
-    x: 0.9, y: 5.1, w: 11.5, h: 0.8, fontSize: 13, color: "9A9A9A",
+  s.addShape(pres.ShapeType.rect, { x: 0.9, y: 4.55, w: 1.6, h: 0.045, fill: { color: RBF } });
+  s.addText(`${AUTHOR}  ·  Independent research  ·  ${DATED}`, {
+    x: 0.9, y: 4.9, w: 11.5, h: 0.35, fontSize: 14, color: "E4E4E4",
+    fontFace: "Calibri", margin: 0 });
+  s.addText(`${EMAIL}  ·  ${DEMO}  ·  ${REPO}`, {
+    x: 0.9, y: 5.28, w: 11.5, h: 0.35, fontSize: 11.5, color: "9A9A9A",
+    fontFace: "Calibri", margin: 0 });
+  // Scoped deliberately: the analytical propositions are not simulation
+  // output, and the literature figures are neither. Saying "all figures"
+  // would overclaim in the one direction this deck cannot afford.
+  s.addText("Simulated financing magnitudes are simulation output under modelled assumptions.\nNo observed seller revenue, repayment or default outcome exists in this study.", {
+    x: 0.9, y: 5.75, w: 11.5, h: 0.8, fontSize: 13, color: "9A9A9A",
     fontFace: "Calibri", lineSpacing: 20, margin: 0 });
-  s.addNotes("Opening frame: this is a study of contract mechanics, not a claim about sellers. Say the disclaimer out loud — it is the reason the rest is credible.");
+  s.addNotes("Opening frame: this is a study of contract mechanics, not a claim about sellers. Say the disclaimer out loud — it is the reason the rest is credible. Note the scope: simulated magnitudes, not every figure — the propositions are proved, not simulated.");
 }
 
 /* ───────────────── 2. One mechanism, two faces ───────────────── */
@@ -68,13 +102,16 @@ function source(s, t) {
       fontFace: "Calibri", lineSpacing: 22, margin: 0 });
   };
   card(0.7, RBF, "For the seller",
-       "Each payment is a fixed share of revenue, so the payment falls when revenue falls. Under adverse paths the payment burden stays roughly flat.");
+       "Each payment is a fixed share of net sales, so the payment falls when sales fall. Before the cap is reached and before the final clipped payment, burden holds roughly flat — while the net-sales/GMV ratio stays fixed.");
   card(7.0, WARN, "For the financier",
        "The same mechanism delays recovery, and where revenue stops before the cap is reached, a contractual balance goes unrecovered.");
   s.addText("Reporting either side alone misstates the contract. This paper reports both, always.",
-    { x: 0.7, y: 5.0, w: 11.9, h: 0.5, fontSize: 17, bold: true, color: INK,
+    { x: 0.7, y: 4.75, w: 11.9, h: 0.5, fontSize: 17, bold: true, color: INK,
       fontFace: "Calibri", margin: 0 });
-  s.addNotes("The whole argument in one slide. The two cards are the same fact.");
+  s.addText("Contractual burden on net sales is flat by definition (P1). The burden shown throughout this deck uses payment ÷ GMV, so it equals r·(1 − return rate) and moves when the return rate moves — as in the returns_spike scenario.",
+    { x: 0.7, y: 5.3, w: 11.9, h: 0.7, fontSize: 11.5, color: MUTED,
+      fontFace: "Calibri", lineSpacing: 16, margin: 0 });
+  s.addNotes("The whole argument in one slide. The two cards are the same fact. If asked why 'roughly' flat: the final payment is clipped to the remaining balance, and the displayed denominator is GMV rather than net sales.");
 }
 
 /* ───────────────── 3. Why a simulation ───────────────── */
@@ -108,7 +145,7 @@ function source(s, t) {
 /* ───────────────── 4. The design ───────────────── */
 {
   const s = lightSlide();
-  title(s, "Three arms, matched on cost");
+  title(s, "Three arms on identical paths — one matched pair");
   const arm = (x, c, name, def, note) => {
     s.addShape(pres.ShapeType.roundRect, { x, y: 1.85, w: 3.7, h: 3.3, rectRadius: 0.08,
       fill: { color: "FAFAFA" }, line: { color: RULE, width: 1 } });
@@ -119,11 +156,13 @@ function source(s, t) {
   };
   arm(0.7, RBF, "Revenue-contingent", "Pays r × revenue each month until a cap of A × f is reached.", "Cap factor f is the price. r = 0.10.");
   arm(4.80, FIXA, "Matched fixed", "Fixed instalment. Same principal, same total, same term on the reference path.", "Only the timing of payments differs. This is the primary comparison.");
-  arm(8.90, FIXB, "Illustrative reference", "18% nominal, 12-month amortizing schedule.", "The 18% is an assumed input — not a market rate, not observed.");
+  arm(8.90, FIXB, "Illustrative reference", "18% nominal, 12-month amortizing schedule.", "An external price reference — NOT cost-matched. The 18% is an assumed input, not a market rate.");
+  s.addText("All arms run on identical generated paths. Only the RBF / matched-fixed pair is cost-matched — principal, total repayment and term are equal on the reference path.",
+    { x: 0.7, y: 5.3, w: 11.9, h: 0.5, fontSize: 14, bold: true, color: INK, fontFace: "Calibri", margin: 0 });
   s.addText("At f = 1.20 the matched term is 13 months at 17,076,923 VND/month; at f* = 1.0945 it is 12 months at 16,873,542 VND/month.",
-    { x: 0.7, y: 5.35, w: 11.9, h: 0.5, fontSize: 14, bold: true, color: INK, fontFace: "Calibri", margin: 0 });
+    { x: 0.7, y: 5.85, w: 11.9, h: 0.45, fontSize: 12.5, color: "444444", fontFace: "Calibri", margin: 0 });
   source(s, "baseline_v2_canonical.json and baseline_equalcost_v1_canonical.json → /match_benchmark_a");
-  s.addNotes("Matched on the reference path means principal, total and term are equal — so the comparison isolates timing.");
+  s.addNotes("Two distinct ideas, do not merge them. Pairing = every arm sees the same generated path. Cost-matching = only RBF and FIX-A share principal, total and term. FIX-B is an outside price reference and is not matched to anything; its 18% is an assumption of ours.");
 }
 
 /* ───────────────── 5. The headline result — paired ───────────────── */
@@ -196,7 +235,7 @@ function source(s, t) {
   s.addText([
     { text: "It fixed f = 1.20 as though it were intrinsic — total contractual cost is proportional to f.", options: { bullet: true, breakLine: true } },
     { text: "It quoted one effective APR as though it were a contract property — APR is jointly determined by the price and the revenue path.", options: { bullet: true, breakLine: true } },
-    { text: "It survived several drafts, written by authors actively trying to avoid exactly this error.", options: { bullet: true } },
+    { text: "It survived several earlier drafts of this project, written while actively trying to avoid exactly this error.", options: { bullet: true } },
   ], { x: 0.7, y: 3.55, w: 11.7, h: 1.9, fontSize: 15, color: "333333", fontFace: "Calibri", paraSpaceAfter: 10, margin: 0 });
   s.addText("We report the retraction rather than quietly correcting it, because it is the concrete instance of the conflation the paper argues against.",
     { x: 0.7, y: 5.45, w: 11.9, h: 0.7, fontSize: 14, bold: true, color: INK, fontFace: "Calibri", lineSpacing: 19, margin: 0 });
@@ -222,7 +261,7 @@ function source(s, t) {
        catAxisLabelFontSize: 11, valAxisLabelFontSize: 11 });
   s.addText([
     { text: "Timing decides it, not zero revenue as such. ", options: { bold: true } },
-    { text: "A temporary three-month cessation leaves 2.0% of paths incomplete at f = 1.20 and none at f*. Permanent closure before the 13-month matched term leaves every path incomplete.", options: {} },
+    { text: "A temporary three-month cessation leaves 2.0% of paths incomplete at f = 1.20 and none at f*. Closure from month 7 leaves every path incomplete under both cap factors.", options: {} },
   ], { x: 0.7, y: 5.3, w: 11.9, h: 0.9, fontSize: 14, color: "333333", fontFace: "Calibri", lineSpacing: 20, margin: 0 });
   source(s, "baseline_closure_v1 and baseline_closure_equalcost_v1 → /scenarios/*/RBF   ·   claim-ledger S-3, S-4");
   s.addNotes("Note the price effect: closure_m13 falls from 76.2% to 7.6% on the cap factor alone. Same structure, nearer threshold.");
@@ -241,15 +280,20 @@ function source(s, t) {
     s.addText(amt, { x: 7.1, y: y + 0.15, w: 2.7, h: 0.85, fontSize: 14, color: "333333", fontFace: "Calibri", valign: "middle", margin: 0 });
     s.addText(verdict, { x: 9.9, y: y + 0.15, w: 2.5, h: 0.85, fontSize: 13, bold: true, color: c, fontFace: "Calibri", valign: "middle", margin: 0 });
   };
+  // Every figure on this slide is the f = 1.20 case. The month-13 rate is an
+  // order of magnitude lower at f* = 1.0945, so an unlabelled 76.2% would
+  // read as a property of the contract rather than of the price.
+  s.addText("All figures on this slide are the illustrative cap factor f = 1.20.",
+    { x: 0.7, y: 1.42, w: 11.9, h: 0.3, fontSize: 12, bold: true, color: WARN, fontFace: "Calibri", margin: 0 });
   s.addText("Scenario", { x: 1.65, y: 1.78, w: 2.9, h: 0.3, fontSize: 11, bold: true, color: MUTED, fontFace: "Calibri", margin: 0 });
   s.addText("Not reaching target", { x: 4.6, y: 1.78, w: 2.4, h: 0.3, fontSize: 11, bold: true, color: MUTED, fontFace: "Calibri", margin: 0 });
   s.addText("Amount recovered", { x: 7.1, y: 1.78, w: 2.7, h: 0.3, fontSize: 11, bold: true, color: MUTED, fontFace: "Calibri", margin: 0 });
   s.addText("vs 185M advance", { x: 9.9, y: 1.78, w: 2.5, h: 0.3, fontSize: 11, bold: true, color: MUTED, fontFace: "Calibri", margin: 0 });
-  row(2.28, "Closure, month 13", "76.2% of paths", "≈ 214.3M VND", "principal covered", FIXB);
-  row(3.78, "Closure, month 7", "100% of paths", "≈ 98.3M VND", "principal shortfall", WARN);
+  row(2.28, "Closure, month 13", "76.2% at f = 1.20", "≈ 214.3M VND at f = 1.20", "principal covered", FIXB);
+  row(3.78, "Closure, month 7", "100% at both f", "≈ 98.3M VND at both f", "principal shortfall", WARN);
   s.addText([
-    { text: "A 76.2% incomplete-recovery rate is not a 76.2% loss rate.", options: { bold: true, breakLine: true } },
-    { text: "Incomplete recovery means the contractual target was not reached. Whether that touches principal depends on how much was recovered. Closure at month 7 recovers the same absolute amount at both cap factors — that path is revenue-limited, not cap-limited.", options: {} },
+    { text: "A 76.2% incomplete-recovery rate at f = 1.20 is not a 76.2% loss rate.", options: { bold: true, breakLine: true } },
+    { text: "Incomplete recovery means the contractual target was not reached. Whether that touches principal depends on how much was recovered. At f* = 1.0945 the same scenario fails on only 7.6% of paths — the rate is a function of the price. Closure at month 7 recovers the same absolute amount at both cap factors, because that path is revenue-limited rather than cap-limited.", options: {} },
   ], { x: 0.7, y: 5.28, w: 11.9, h: 1.4, fontSize: 14, color: "333333", fontFace: "Calibri", lineSpacing: 20, margin: 0 });
   source(s, "recovery_ratio/24 × terms/cap, from both closure artifacts   ·   claim-ledger I-3");
   s.addNotes("This is the slide that stops the headline failure rate being misread as a loss rate.");
@@ -300,7 +344,7 @@ function source(s, t) {
 /* ───────────────── 12. Reproducibility ───────────────── */
 {
   const s = lightSlide();
-  title(s, "Every figure traces to a checksummed artifact");
+  title(s, "Every simulation result traces to a checksummed artifact");
   const stat = (x, big, lab) => {
     s.addShape(pres.ShapeType.roundRect, { x, y: 1.8, w: 3.7, h: 1.75, rectRadius: 0.08,
       fill: { color: "FAFAFA" }, line: { color: RULE, width: 1 } });
@@ -316,9 +360,9 @@ function source(s, t) {
     { text: "Byte equality holds within a fixed runtime, not across platforms — 3 of 5 byte-identical on macOS CPython 3.11.5, 5 of 5 on Linux 3.10.12.", options: { bullet: true, breakLine: true } },
     { text: "An earlier claim of unqualified byte-for-byte reproducibility rested on a step that re-hashed the committed file rather than regenerating it. Both the claim and the evidence were corrected.", options: { bullet: true } },
   ], { x: 0.7, y: 4.35, w: 11.9, h: 1.9, fontSize: 13, color: "333333", fontFace: "Calibri", paraSpaceAfter: 8, margin: 0 });
-  s.addText("9 browser tests skip where no chromium build is available. They are reported as skips, never counted as passes.",
-    { x: 0.7, y: 6.3, w: 11.9, h: 0.45, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", margin: 0 });
-  s.addNotes("The corrected reproducibility claim is a better credential than the overstated one would have been.");
+  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. 9 browser tests skip where no chromium build is available — reported as skips, never counted as passes.",
+    { x: 0.7, y: 6.25, w: 11.9, h: 0.6, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", lineSpacing: 15, margin: 0 });
+  s.addNotes("The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.");
 }
 
 /* ───────────────── 13. Close ───────────────── */
