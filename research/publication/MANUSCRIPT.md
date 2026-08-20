@@ -1,19 +1,14 @@
 # Revenue-Contingent Financing Under Volatile Sales: Separating Price from Structure in a Paired Simulation Study
 
-**Draft — Phase B.** Gate A frozen at `af2fc2d`. No Gate A document is amended by this manuscript.
+**Le Huu Hoang**\
+Independent research · August 2026\
+lehuuhoang1909@gmail.com · https://sellerflow-production.up.railway.app
 
-> **Source-note convention — type-appropriate.** A single note format cannot serve four different kinds of claim, and an earlier draft promised one that it could not satisfy for external statistics or analytical constants. The rule is:
+> **What this study is, stated once up front.** Reported simulated magnitudes are **simulation output under modelled assumptions**. No observed seller revenue, repayment, or default outcome exists anywhere in this study. The analytical propositions in §7 are **not** simulation output and are not covered by that qualifier.
 >
-> | Claim type | Note format |
-> |---|---|
-> | External fact or finding | **(L-nn)** — entry in `research/publication/LITERATURE_MATRIX.md` |
-> | Analytical claim or constant | proposition reference in `research/DERIVATIONS.md`, and a ledger **M-n** where one exists |
-> | Simulated magnitude | **[artifact → JSON path]**, plus a ledger ID (S-, P-, I-) where one exists |
-> | Test count, checksum, reproducibility | reproducibility evidence, §15 |
+> Every quantitative statement carries a source note identifying its type and origin; the convention is set out in **Appendix A**, and the artifacts and checksums behind the simulated figures in **§15**.
 >
-> A quantitative statement without the note appropriate to its type is a defect, not a stylistic choice. **Ledger IDs are never invented to fill the slot** — where no ledger row exists, the artifact path stands alone.
->
-> **Reported simulated magnitudes are simulation output under modelled assumptions.** No observed seller revenue, repayment, or default outcome exists anywhere in this study. The analytical propositions in §7 are **not** simulation output and are not covered by that qualifier.
+> The accompanying software at the address above is a **demonstration**. It holds no capital, makes no credit decisions, and has never received an external merchant submission.
 
 ---
 
@@ -376,3 +371,20 @@ An earlier version of this project claimed byte-for-byte reproducibility without
 **Tests.** 629 simulation tests and 379 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
 
 **Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
+
+---
+
+## Appendix A. Source-note convention
+
+Quantitative statements in this manuscript are of four different kinds, and a single note format cannot serve all four. An earlier draft promised one that it could not satisfy for external statistics or analytical constants. The rule adopted here is type-appropriate:
+
+| Claim type | Note format |
+|---|---|
+| External fact or finding | **(L-nn)** — entry in `research/publication/LITERATURE_MATRIX.md` |
+| Analytical claim or constant | proposition reference in `research/DERIVATIONS.md`, and a ledger **M-n** where one exists |
+| Simulated magnitude | **[artifact → JSON path]**, plus a ledger ID (S-, P-, I-) where one exists |
+| Test count, checksum, reproducibility | reproducibility evidence, §15 |
+
+A quantitative statement without the note appropriate to its type is a defect, not a stylistic choice. **Ledger IDs are never invented to fill the slot** — where no ledger row exists, the artifact path stands alone.
+
+A reader wanting to check any figure in this paper can therefore go directly to its source: literature entries resolve to `LITERATURE_MATRIX.md`, analytical constants to the proof in `DERIVATIONS.md`, and every simulated magnitude to a JSON path inside one of the five checksummed artifacts listed in §15.
