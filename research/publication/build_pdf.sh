@@ -25,6 +25,9 @@
 #
 # Usage:  ./build_pdf.sh          (from research/publication/)
 # Requires: pandoc, xelatex, DejaVu fonts, xurl.sty, python3.
+#
+# Then gate the result:  python3 check_pdf_bounds.py MANUSCRIPT.pdf
+# That script needs PyMuPDF (`pip install pymupdf`), which this one does not.
 
 set -euo pipefail
 cd "$(dirname "$0")"

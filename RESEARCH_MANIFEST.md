@@ -88,9 +88,13 @@ pip install pytest numpy          # only dependencies
 
 # 1. Simulation suite  (expect: 629 passed)
 python3 -m pytest rbf_sim/tests/ -q
-#    Backend suite (expect: 379 passed, 9 skipped). The 9 skips are the
-#    Playwright browser tests; they skip unless a chromium build is present
-#    and are NOT counted as passes.
+#    Backend suite (expect: 401 passed). The suite also contains 9 Playwright
+#    browser checks. Whether those report as SKIPPED or as passes depends on
+#    the environment: they need both Playwright installed and a chromium build
+#    present. In every environment this project has run in, neither was
+#    available and pytest reported "401 passed, 9 skipped". A different machine
+#    may legitimately report a different skip count. Skips are never counted as
+#    passes; 401 is the passing figure quoted everywhere else.
 python3 -m pytest ../backend/tests -q
 #    Reproducibility (byte vs numeric equality, reported separately — D-041)
 python3 verify_reproduction.py
@@ -144,7 +148,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | **379 passed, 9 skipped** (the 9 are the Playwright browser tests, which skip unless a chromium build is present and are **not** counted as passes). Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Backend tests passing | **401 passed.** The suite additionally contains **9 Playwright browser checks**; they run only where Playwright *and* a chromium build are both present, and in every environment used by this project neither was, so pytest reported `401 passed, 9 skipped`. The skip count is environment-dependent and is **not** part of the passing figure. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |
@@ -169,8 +173,21 @@ Spot-check any reproduction against these:
 
 **Also complete since this line was last accurate:** product integration — the Simulation Lab (`frontend/lab.html` + `backend/lab.py`) renders every figure from the canonical artifacts and merged to `main` in PR #2; the centralized monetary policy (`backend/money.py`, D-030); the closure baselines (D-032); `validation_v1` canonicalization (D-038); and the claim ledger with its enforcement tests (D-037…D-041).
 
-**Not started:** paper · poster · deck · deployment.
+**Publication phase — complete as of 2026-08-20, on branch `publication-final`:**
 
-**Gate:** the publication phase is gated on the Gate A claim audit, not on the baseline commit.
+| Deliverable | State |
+|---|---|
+| Literature matrix | `research/publication/LITERATURE_MATRIX.md` — 44 verified sources, 6 evidence gaps stated |
+| Paper outline | `research/publication/PAPER_OUTLINE.md` — every figure mapped to a ledger ID |
+| Manuscript | `research/publication/MANUSCRIPT.md`, ~8,400 words, 15 sections + Appendix A |
+| Manuscript PDF | `research/publication/MANUSCRIPT.pdf`, 17 pages. Built by `build_pdf.sh`; gated by `check_pdf_bounds.py` at zero text outside the media box |
+| Deck | `research/publication/RBF_DECK.pptx`, 13 slides with speaker notes. Built by `build_deck.js` |
+| Career package | `research/publication/CAREER_PACKAGE.md` |
+| Poster | **not started** — no longer planned; the deck supersedes it |
+| Deployment | live demonstration at `sellerflow-production.up.railway.app`. It holds no capital and makes no credit decisions. The deploy in production predates this branch, so the corrections on `publication-final` are **not yet deployed** |
+
+**Gate:** the publication phase was gated on the Gate A claim audit, which passed
+at `af2fc2d` and is frozen. `publication-final` is unpushed at the time of
+writing; the branch is five-plus commits ahead of `origin/main`.
 
 **Not in this project:** Excel. Removed entirely per instruction 2026-08-03 — no dependency, assumption, deliverable, blocker, or reconciliation task remains.

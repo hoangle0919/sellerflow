@@ -6,7 +6,7 @@ RBF analyzes ecommerce-merchant revenue, tests repayment scenarios, and surfaces
 
 > **Live demonstration:** https://sellerflow-production.up.railway.app
 >
-> The live demo runs **this repository's current build**. It is a **demonstration, not a lending service**: it holds no capital, makes no real credit decisions, and has **never received an external submission** — the database holds demonstration records and developer tests only, so there is no third-party personal information. Its risk score is trained on synthetic data with a circular label; see [Model status](#model-status).
+> The live demo runs **this repository's current build**. It is a **demonstration, not a lending service**: it holds no capital and makes no real credit decisions. **As of August 2026, no external merchant data were used in this study; the public deployment is a demonstration, not a lending service** — the database holds demonstration records and developer tests only, so there is no third-party personal information. Its risk score is trained on synthetic data with a circular label; see [Model status](#model-status).
 >
 > *Deployment discipline.* This link is accurate only while the deployed build matches this branch, so redeploy after any merge that changes user-facing copy. Two earlier versions of this notice were wrong in opposite directions: one said "No current public deployment" (written during a hosting outage, left stale after the service was restored), and one described the host as serving a superseded pre-RBF build (it does not — it serves this repository).
 

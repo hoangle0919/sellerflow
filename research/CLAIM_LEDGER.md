@@ -140,7 +140,7 @@ for exactly this reason.
 | Claim | Why withdrawn | Reference |
 |---|---|---|
 | "0.92 AUC" / any predictive-skill number from the ensemble | Circular: `generate_data.py` creates the `defaulted` label by evaluating a hand-written weighted formula over the same features the model is then trained on. The metric measures the generator's noise variance | D-001; `README.md`; enforced by `test_no_withdrawn_claims.py` |
-| "RBF costs ~2.3× the interest of a conventional loan" | Conflates price with structure. Cost is proportional to `f` (P6a) and APR is jointly determined by `f` and the path (P6b) | D-015; `DERIVATIONS.md` P6; `CORRECTED_CLAIMS.md` #2 |
+| "RBF costs ~2.3× the interest of a conventional loan" | Conflates price with structure. The contractual repayment **target** `A·f` is proportional to `f` (P6a), and realised repayment equals that target only upon completion; APR is jointly determined by `f` and the path (P6b) | D-015; `DERIVATIONS.md` P6; `CORRECTED_CLAIMS.md` #2 |
 | "Fixed payments are immune to underreporting — a structural advantage" | True that scheduled payments do not read revenue; the value judgement does not follow | `CORRECTED_CLAIMS.md` #3 |
 | "Confidence intervals" / "bootstrap CIs" | They are Monte Carlo intervals over simulated paths | D-014; `CORRECTED_CLAIMS.md` #4 |
 | "Revenue-based repayment extends the term instead of defaulting" | Asserts default-prevention. `closure_m7` is 100.0% incomplete at **both** registered cap factors | D-037 (this phase); S-3 |

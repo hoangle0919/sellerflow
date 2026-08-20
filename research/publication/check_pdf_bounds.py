@@ -13,6 +13,11 @@ Two thresholds:
               warning with the offending string, since a path or hash running
               into the margin is what a reader actually notices.
 
+Requires PyMuPDF:  pip install pymupdf
+    (imported as `pymupdf`; the older `fitz` alias is deprecated.) This is the
+    only dependency the publication build adds beyond pandoc and xelatex, and
+    it is not in backend/requirements.txt because nothing at runtime needs it.
+
 Usage:  python3 check_pdf_bounds.py MANUSCRIPT.pdf [margin_cm]
 Exit:   0 clean, 1 text outside the media box, 2 margin intrusions only.
 """

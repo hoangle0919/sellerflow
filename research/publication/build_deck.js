@@ -51,6 +51,17 @@ pres.title = "Revenue-Contingent Financing Under Volatile Sales: Separating Pric
 
 const SRC = (s) => ({ text: s, options: { fontSize: 9, color: MUTED, italic: true } });
 
+/* Speaker notes carry a structured [Sources] block wherever a slide states
+ * something the audience could ask for a citation on. The on-slide source line
+ * has room for one artifact path; a question from the floor usually wants the
+ * literature ID or the regulatory section, and the presenter should not have to
+ * reconstruct it. L-nn resolve in LITERATURE_MATRIX.md, S-/P-/I-/M- in
+ * CLAIM_LEDGER.md, R-nnn in RESULTS_REGISTRY.md. */
+const notes = (s, body, sources) =>
+  s.addNotes(body + (sources && sources.length
+    ? "\n\n[Sources]\n" + sources.map((x) => "  · " + x).join("\n")
+    : ""));
+
 function darkSlide() { const s = pres.addSlide(); s.background = { color: INK }; return s; }
 function lightSlide() { const s = pres.addSlide(); s.background = { color: PAPER }; return s; }
 
@@ -104,14 +115,20 @@ function source(s, t) {
   card(0.7, RBF, "For the seller",
        "Each payment is a fixed share of net sales, so the payment falls when sales fall. Before the cap is reached and before the final clipped payment, burden holds roughly flat — while the net-sales/GMV ratio stays fixed.");
   card(7.0, WARN, "For the financier",
-       "The same mechanism delays recovery, and where revenue stops before the cap is reached, a contractual balance goes unrecovered.");
+       "The same mechanism moves recovery — it may lead or lag a cost-matched fixed schedule depending on the realised path (P4). In the severe downturn it lags. Where revenue stops before the cap is reached, a contractual balance goes unrecovered.");
   s.addText("Reporting either side alone misstates the contract. This paper reports both, always.",
     { x: 0.7, y: 4.75, w: 11.9, h: 0.5, fontSize: 17, bold: true, color: INK,
       fontFace: "Calibri", margin: 0 });
   s.addText("Contractual burden on net sales is flat by definition (P1). The burden shown throughout this deck uses payment ÷ GMV, so it equals r·(1 − return rate) and moves when the return rate moves — as in the returns_spike scenario.",
     { x: 0.7, y: 5.3, w: 11.9, h: 0.7, fontSize: 11.5, color: MUTED,
       fontFace: "Calibri", lineSpacing: 16, margin: 0 });
-  s.addNotes("The whole argument in one slide. The two cards are the same fact. If asked why 'roughly' flat: the final payment is clipped to the remaining balance, and the displayed denominator is GMV rather than net sales.");
+  notes(s, "The whole argument in one slide. The two cards are the same fact. If asked why 'roughly' flat: the final payment is clipped to the remaining balance, and the displayed denominator is GMV rather than net sales. If asked whether recovery is always slower: no — P4 gives the exact condition and both directions occur here.", [
+    "Contractual burden flat by definition: DERIVATIONS.md P1",
+    "Fixed burden has elasticity −1: DERIVATIONS.md P2",
+    "Recovery ordering condition, realised mean base against B* = P/r: DERIVATIONS.md P4",
+    "Burden denominator disclosure (payment ÷ GMV): MANUSCRIPT.md §6.1; spec amendment A-1",
+    "Income-linked repayment as automatic insurance: L-15 Barr et al. (2019)",
+  ]);
 }
 
 /* ───────────────── 3. Why a simulation ───────────────── */
@@ -139,7 +156,12 @@ function source(s, t) {
   ], { x: 8.85, y: 2.5, w: 3.4, h: 2.7, fontSize: 12, color: "333333", fontFace: "Calibri", lineSpacing: 17, paraSpaceAfter: 8, margin: 0 });
   s.addText("Scoped to searches documented through 2026-08-13 — a statement about our searches, not about the field.",
     { x: 8.85, y: 5.35, w: 3.4, h: 0.6, fontSize: 10, italic: true, color: MUTED, fontFace: "Calibri", margin: 0 });
-  s.addNotes("Be precise about the negative claim. It is scoped to our searches, and that scoping is deliberate.");
+  notes(s, "Be precise about the negative claim. It is scoped to our searches, and that scoping is deliberate.", [
+    "Search protocol and inclusion rules: LITERATURE_MATRIX.md \u00a70.1, documented through 2026-08-13",
+    "Gap R-1 \u2014 no peer-reviewed study of the US merchant cash advance market found in those searches",
+    "Gap R-2 \u2014 no head-to-head burden/recovery comparison for small-business financing found",
+    "Closest published work: L-07 Russel, Shi & Clarke (2025), South African payments platform",
+  ]);
 }
 
 /* ───────────────── 4. The design ───────────────── */
@@ -162,7 +184,11 @@ function source(s, t) {
   s.addText("At f = 1.20 the matched term is 13 months at 17,076,923 VND/month; at f* = 1.0945 it is 12 months at 16,873,542 VND/month.",
     { x: 0.7, y: 5.85, w: 11.9, h: 0.45, fontSize: 12.5, color: "444444", fontFace: "Calibri", margin: 0 });
   source(s, "baseline_v2_canonical.json and baseline_equalcost_v1_canonical.json → /match_benchmark_a");
-  s.addNotes("Two distinct ideas, do not merge them. Pairing = every arm sees the same generated path. Cost-matching = only RBF and FIX-A share principal, total and term. FIX-B is an outside price reference and is not matched to anything; its 18% is an assumption of ours.");
+  notes(s, "Two distinct ideas, do not merge them. Pairing = every arm sees the same generated path. Cost-matching = only RBF and FIX-A share principal, total and term. FIX-B is an outside price reference and is not matched to anything; its 18% is an assumption of ours.", [
+    "Matched terms: baseline_v2_canonical.json and baseline_equalcost_v1_canonical.json \u2192 /match_benchmark_a",
+    "FIX-B\u2019s 18% nominal is an assumed input, not a market rate \u2014 spec amendment A-8",
+    "Factor rate and APR are not commensurable without conversion: L-23 (NY 23 NYCRR 600), L-24 (California)",
+  ]);
 }
 
 /* ───────────────── 5. The headline result — paired ───────────────── */
@@ -189,12 +215,17 @@ function source(s, t) {
        valAxisMinVal: 0, valAxisMaxVal: 110, valAxisMajorUnit: 20,
        dataLabelFormatCode: "0.00",
        catAxisLabelFontSize: 11, valAxisLabelFontSize: 11 });
-  s.addText("The burden reduction and the recovery delay are one mechanism. Mean duration extends 13 → 18.718 months.",
+  s.addText("In this scenario the burden reduction and the recovery delay are one mechanism. Mean duration extends 13 → 18.718 months. The pairing rule is general; the direction is scenario-specific.",
     { x: 0.7, y: 5.45, w: 11.9, h: 0.45, fontSize: 15, bold: true, color: INK, fontFace: "Calibri", margin: 0 });
   s.addText("15% is an illustrative reporting band chosen for this study, not a validated hardship cutoff. Burden is payment ÷ GMV. The fixed arm is scheduled recovery under an assumption of full, on-time payment.",
     { x: 0.7, y: 5.95, w: 11.9, h: 0.7, fontSize: 11, color: MUTED, fontFace: "Calibri", lineSpacing: 16, margin: 0 });
   source(s, "baseline_v2_canonical.json → /scenarios/severe_downturn   ·   claim-ledger S-1, I-3");
-  s.addNotes("Never show the left chart without the right one. That pairing is the paper's central discipline.");
+  notes(s, "Never show the left chart without the right one. That pairing is the paper's central discipline. The pairing rule is general; this scenario's direction is not.", [
+    "S-1 | baseline_v2_canonical.json \u2192 /scenarios/severe_downturn",
+    "Burden must be read across the distribution, not at the mean: L-13 Chapman et al. (2010)",
+    "Fixed schedules concentrate burden in low-income states: L-12 Chapman & Lounkaew (2015)",
+    "15% band is illustrative, chosen for this study \u2014 ledger Q-4, not a validated hardship cutoff",
+  ]);
 }
 
 /* ───────────────── 6. Price vs structure ───────────────── */
@@ -219,7 +250,11 @@ function source(s, t) {
   s.addText("Analytically separable — but they jointly determine outcomes. A cost ratio quoted at a single cap factor is a pricing result, not a property of revenue-contingent repayment.",
     { x: 0.7, y: 5.8, w: 11.9, h: 0.7, fontSize: 13, italic: true, color: INK, fontFace: "Calibri", lineSpacing: 18, margin: 0 });
   source(s, "validation_v1_canonical.json → /pricing   ·   claim-ledger P-1, P-2");
-  s.addNotes("This is the contribution. Both halves of the last line matter — separable is not the same as outcome-independent.");
+  notes(s, "This is the contribution. Both halves of the last line matter — separable is not the same as outcome-independent.", [
+    "P-1, P-2 | validation_v1_canonical.json → /pricing/equal_cost, /pricing/benchmark_b_apr",
+    "Separability of price and payment rule: DERIVATIONS.md P6(a), P6(b)",
+    "Contingency can carry a premium in other domains — L-18 (human capital), L-19 (sovereign). Neither is SME finance; no general rule is claimed",
+  ]);
 }
 
 /* ───────────────── 7. The retraction ───────────────── */
@@ -233,13 +268,19 @@ function source(s, t) {
   s.addText("WITHDRAWN — and the reason is this slide deck's argument.", {
     x: 1.1, y: 2.65, w: 11.1, h: 0.4, fontSize: 14, bold: true, color: WARN, fontFace: "Calibri", margin: 0 });
   s.addText([
-    { text: "It fixed f = 1.20 as though it were intrinsic — total contractual cost is proportional to f.", options: { bullet: true, breakLine: true } },
+    { text: "It fixed f = 1.20 as though it were intrinsic. The contractual repayment target A × f is proportional to f — and realised repayment equals that target only when the contract completes.", options: { bullet: true, breakLine: true } },
     { text: "It quoted one effective APR as though it were a contract property — APR is jointly determined by the price and the revenue path.", options: { bullet: true, breakLine: true } },
     { text: "It survived several earlier drafts of this project, written while actively trying to avoid exactly this error.", options: { bullet: true } },
   ], { x: 0.7, y: 3.55, w: 11.7, h: 1.9, fontSize: 15, color: "333333", fontFace: "Calibri", paraSpaceAfter: 10, margin: 0 });
   s.addText("We report the retraction rather than quietly correcting it, because it is the concrete instance of the conflation the paper argues against.",
     { x: 0.7, y: 5.45, w: 11.9, h: 0.7, fontSize: 14, bold: true, color: INK, fontFace: "Calibri", lineSpacing: 19, margin: 0 });
-  s.addNotes("Interviewers respond well to this slide. It demonstrates the discipline rather than asserting it.");
+  notes(s, "Interviewers respond well to this slide. It demonstrates the discipline rather than asserting it.", [
+    "Retraction recorded at D-015; CORRECTED_CLAIMS.md #2; CLAIM_LEDGER.md \u00a76",
+    "Target proportional to f, APR jointly determined: DERIVATIONS.md P6(a), P6(b)",
+    "California SB 362 (2025), Chapter 352 \u2014 L-45, SECTION 1(e)(3) and Financial Code \u00a722806",
+    "New York 23 NYCRR 600 commercial financing disclosure \u2014 L-23",
+    "California 2018 statute and 2022 implementing regulations \u2014 L-24; federal preemption determination \u2014 L-25",
+  ]);
 }
 
 /* ───────────────── 8. Where recovery fails ───────────────── */
@@ -264,7 +305,11 @@ function source(s, t) {
     { text: "A temporary three-month cessation leaves 2.0% of paths incomplete at f = 1.20 and none at f*. Closure from month 7 leaves every path incomplete under both cap factors.", options: {} },
   ], { x: 0.7, y: 5.3, w: 11.9, h: 0.9, fontSize: 14, color: "333333", fontFace: "Calibri", lineSpacing: 20, margin: 0 });
   source(s, "baseline_closure_v1 and baseline_closure_equalcost_v1 → /scenarios/*/RBF   ·   claim-ledger S-3, S-4");
-  s.addNotes("Note the price effect: closure_m13 falls from 76.2% to 7.6% on the cap factor alone. Same structure, nearer threshold.");
+  notes(s, "Note the price effect: closure_m13 falls from 76.2% to 7.6% on the cap factor alone. Same structure, nearer threshold.", [
+    "S-3 | baseline_closure_v1_canonical.json \u2192 /scenarios/*/RBF/incomplete_recovery_rate",
+    "S-4 | baseline_closure_equalcost_v1_canonical.json \u2192 same paths",
+    "Why a nearer cap completes sooner: DERIVATIONS.md P6(a), P7",
+  ]);
 }
 
 /* ───────────────── 9. Incomplete recovery ≠ principal loss ───────────────── */
@@ -296,7 +341,10 @@ function source(s, t) {
     { text: "Incomplete recovery means the contractual target was not reached. Whether that touches principal depends on how much was recovered. At f* = 1.0945 the same scenario fails on only 7.6% of paths — the rate is a function of the price. Closure at month 7 recovers the same absolute amount at both cap factors, because that path is revenue-limited rather than cap-limited.", options: {} },
   ], { x: 0.7, y: 5.28, w: 11.9, h: 1.4, fontSize: 14, color: "333333", fontFace: "Calibri", lineSpacing: 20, margin: 0 });
   source(s, "recovery_ratio/24 × terms/cap, from both closure artifacts   ·   claim-ledger I-3");
-  s.addNotes("This is the slide that stops the headline failure rate being misread as a loss rate.");
+  notes(s, "This is the slide that stops the headline failure rate being misread as a loss rate.", [
+    "I-3 | recovered amount = /scenarios/*/RBF/recovery_ratio/24 \u00d7 /terms/cap, both closure artifacts; advance from /terms/A",
+    "closure_m7 is revenue-limited rather than cap-limited, hence identical at both cap factors",
+  ]);
 }
 
 /* ───────────────── 10. Survivor statistics ───────────────── */
@@ -316,7 +364,13 @@ function source(s, t) {
   s.addText("Closure at month 13, f = 1.20: mean duration 11.99 months — alongside 76.2% of paths never completing.",
     { x: 1.1, y: 5.05, w: 11.1, h: 0.95, fontSize: 15, bold: true, color: "6B2E12", fontFace: "Calibri", valign: "middle", margin: 0 });
   source(s, "baseline_closure_v1_canonical.json → /scenarios/closure_m13/RBF");
-  s.addNotes("Reporting the 11.99 without the 76.2% would invert the finding. Survivor statistics describe the contracts that finished, not the portfolio.");
+  notes(s, "Reporting the 11.99 without the 76.2% would invert the finding. Survivor statistics describe the contracts that finished, not the portfolio.", [
+    "baseline_closure_v1_canonical.json \u2192 /scenarios/closure_m13/RBF/duration_mean, /incomplete_recovery_rate",
+    "Conditioning on a non-random subsample is a specification error: L-36 Heckman (1979)",
+    "Conditioning on a common effect: L-37 Hern\u00e1n, Hern\u00e1ndez-D\u00edaz & Robins (2004)",
+    "Right-censoring machinery: L-32 Kaplan & Meier (1958), L-33 Klein & Moeschberger (2003)",
+    "Duration data in economics: L-34 Lancaster (1990), L-35 Van den Berg (2001)",
+  ]);
 }
 
 /* ───────────────── 11. What this does not claim ───────────────── */
@@ -338,7 +392,12 @@ function source(s, t) {
   });
   s.addText("The fixed arm is modelled as paid in full and on time — an optimistic scheduled-recovery benchmark, which flatters the comparison against it.",
     { x: 0.7, y: 6.35, w: 11.9, h: 0.5, fontSize: 12, italic: true, color: MUTED, fontFace: "Calibri", margin: 0 });
-  s.addNotes("Say this section out loud in any interview. The restraint is the credential.");
+  notes(s, "Say this section out loud in any interview. The restraint is the credential.", [
+    "Circularity evidence: R-000 | research/analysis/00_audit_evidence.py \u2014 generating-function AUC 0.9098 vs reported ensemble 0.9182",
+    "Leakage inflating apparent performance, 294 papers across 17 fields: L-38 Kapoor & Narayanan (2023)",
+    "Synthetic-data limits: L-39 van Breugel et al. (2023), L-40 Jordon et al. (2022)",
+    "No source states the specific circularity result (Gap S-1); argued from our own evidence",
+  ]);
 }
 
 /* ───────────────── 12. Reproducibility ───────────────── */
@@ -352,7 +411,7 @@ function source(s, t) {
     s.addText(lab, { x: x + 0.32, y: 2.82, w: 3.06, h: 0.6, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 16, valign: "top", margin: 0 });
   };
   stat(0.7,  "5",     "canonical artifacts, each with a\nregistered SHA-256");
-  stat(4.80, "1,018", "tests passing — 389 backend,\n629 simulation");
+  stat(4.80, "1,030", "tests passing — 401 backend,\n629 simulation");
   stat(8.90, "44",    "verified sources, with 6\nevidence gaps stated openly");
   s.addText("Reproducibility, stated at the strength the measurement supports", { x: 0.7, y: 3.85, w: 11.9, h: 0.4, fontSize: 16, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
   s.addText([
@@ -362,7 +421,15 @@ function source(s, t) {
   ], { x: 0.7, y: 4.35, w: 11.9, h: 1.9, fontSize: 13, color: "333333", fontFace: "Calibri", paraSpaceAfter: 8, margin: 0 });
   s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. 9 browser tests skip where no chromium build is available — reported as skips, never counted as passes.",
     { x: 0.7, y: 6.25, w: 11.9, h: 0.6, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", lineSpacing: 15, margin: 0 });
-  s.addNotes("The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.");
+  notes(s, "The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.", [
+    "Five registered SHA-256 digests: MANUSCRIPT.md §15; RESULTS_REGISTRY.md",
+    "Byte vs numeric equality, reported separately: research/verify_reproduction.py (D-041)",
+    "44 verified sources and 6 stated gaps: LITERATURE_MATRIX.md §0.1, §9",
+    "Test counts and the environment-dependent browser skip: RESEARCH_MANIFEST.md",
+    "Researcher degrees of freedom in simulation design: L-31 Pawel, Kook & Reeve (2024)",
+    "Simulation-study reporting practice: L-27 Morris, White & Crowther (2019)",
+    "Monte Carlo interval is not a confidence interval: L-28, L-29 (coverage interval)",
+  ]);
 }
 
 /* ───────────────── 13. Close ───────────────── */

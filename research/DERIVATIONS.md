@@ -147,7 +147,7 @@ IRR(p)  >  IRR(p′)
 
 **Consequence — "the APR of RBF" is not well defined as a contract property.** Two sellers on *identical terms* `(A, r, f)` face different effective APRs purely because their revenue arrives at different speeds. Faster revenue → earlier payments → same total, higher APR.
 
-This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan" was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic (P6a shows cost is proportional to `f`), and it quoted a single APR as though it were a contract property (P6b shows APR is jointly determined by `f` and the path).
+This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan" was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic (P6a shows the **contractual repayment target `A·f`** is proportional to `f`, and realised repayment equals that target **only upon completion** — so "cost" is proportional to `f` only on paths that complete), and it quoted a single APR as though it were a contract property (P6b shows APR is jointly determined by `f` and the path).
 
 **Nearest-grid-match pricing — two different statements, kept apart (D-044).**
 

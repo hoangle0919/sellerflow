@@ -554,8 +554,12 @@ METRIC_DEFINITIONS = {
                       "cost-matched fixed arms the denominator is the "
                       "contractual cap; for the amortizing loan, which has no "
                       "cap, it is scheduled total repayment.",
-        "why": "The other side of the trade-off. Slower recovery is a real cost "
-               "to the financier even when the full amount is eventually repaid.",
+        "why": "The other side of the trade-off. Where recovery is slower it is "
+               "a real cost to the financier even when the full amount is "
+               "eventually repaid — but the direction is not universal. "
+               "Revenue-contingent recovery may lead or lag the cost-matched "
+               "fixed arm depending on the realised path (P4), and both occur "
+               "in the registered scenarios. Read the direction per scenario.",
         "caveat": "Denominators differ by arm, so read each arm against its own "
                   "target rather than comparing absolute amounts recovered.",
     },

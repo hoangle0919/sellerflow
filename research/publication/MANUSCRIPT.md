@@ -8,13 +8,13 @@ lehuuhoang1909@gmail.com · https://sellerflow-production.up.railway.app
 >
 > Every quantitative statement carries a source note identifying its type and origin; the convention is set out in **Appendix A**, and the artifacts and checksums behind the simulated figures in **§15**.
 >
-> The accompanying software at the address above is a **demonstration**. It holds no capital, makes no credit decisions, and has never received an external merchant submission.
+> The accompanying software at the address above is a **demonstration**. It holds no capital and makes no credit decisions. **As of August 2026, no external merchant data were used in this study; the public deployment is a demonstration, not a lending service.**
 
 ---
 
 ## Abstract
 
-Revenue-contingent financing makes each repayment a fixed share of realised revenue rather than a fixed instalment. The intuitive case for it is that the seller's payment falls when revenue falls. The intuitive case against it is that the financier waits longer to be repaid. Both are correct, and they are the same mechanism observed from opposite sides of the contract; reporting either alone misstates the product.
+Revenue-contingent financing makes each repayment a fixed share of realised revenue rather than a fixed instalment. The seller-side effect is mechanical: the payment falls when eligible revenue falls. The provider-side effect is conditional: recovery may **lead or lag** a cost-matched fixed schedule depending on the realised revenue path, by the exact condition of Proposition 4, and both directions occur in this scenario library. In the severe-downturn scenario it lags. The two effects are the same mechanism observed from opposite sides of the contract, and reporting either alone misstates the product — but the provider side must be reported with its scenario named, because it has no uniform direction.
 
 This paper separates two questions that are routinely conflated: the **price** of a revenue-contingent contract, set by its cap factor, and its **structure**, meaning how payments respond to revenue. Using a paired simulation in which a revenue-contingent contract and a cost-matched fixed instalment are applied to identical generated revenue paths, we find that at the illustrative cap factor `f = 1.20` the revenue-contingent arm removes **6.85** months above a burden threshold of 15% in a severe-downturn scenario, while recovering **65.46%** of its contractual target by month 12 against the fixed arm's **92.31%** **[S-1 | `baseline_v2_canonical.json` → `/scenarios/severe_downturn`]**. **These are simulated magnitudes, not observations.** The 15% threshold is an illustrative reporting band chosen for this study, not a validated hardship cutoff; burden is measured as payment ÷ GMV; and the fixed arm's recovery is *scheduled* recovery under the modelling assumption that every instalment is paid in full and on time, so it is an optimistic benchmark. Repricing at the nearest reference-path grid match `f* = 1.0945` changes the cost comparison entirely **[P-1, P-2 | `validation_v1_canonical.json` → `/pricing`]**. The **pre-cap payment rule is unchanged** — each payment remains the same fixed share of net sales — but the cap factor sets the contractual target and therefore moves completion timing, terminal clipping and the realised payment stream. Pricing and the revenue-contingent payment rule are **analytically separable**, yet **jointly determine realised outcomes**; which is why a cost ratio quoted at a single cap factor is a pricing result and not a property of revenue-contingent repayment as such.
 
@@ -176,7 +176,7 @@ The revenue-contingent arm leads FIX-A on twelve-month recovery by **4.25 percen
 
 The revenue-contingent arm removes **6.85** months above the 15% threshold and holds mean burden essentially at its stable-scenario level — a rise of **1.14%** against stable — while the fixed arm's burden rises by **73.5%** **[S-1 | `baseline_v2_canonical.json` → `/scenarios/{stable,severe_downturn}/{RBF,FIX-A}/burden_mean`, `/n_high_burden/0.15`]**. The same mechanism costs the provider **26.85 percentage points** of twelve-month recovery and extends mean duration by **5.718 months**.
 
-**Neither column may be reported without the other.** The burden reduction and the recovery delay are one mechanism, and a chart showing only the first is a misrepresentation of the second.
+**Neither column may be reported without the other.** In this scenario the burden reduction and the recovery delay are one mechanism, and a chart showing only the first is a misrepresentation of the second. The pairing rule is general; the *direction* of the recovery effect is not, and is stated per scenario under P4.
 
 The pattern is monotone in shock severity across the stress scenarios: gradual decline (RBF duration 16.148, RR(12) 84.21%; FIX-A 0.894 high-burden months), sustained decline (17.952, 76.04%; FIX-A 3.1), severe downturn as above **[`/scenarios/*`]**.
 
@@ -198,9 +198,9 @@ Repricing under the identical payment rule **[`baseline_equalcost_v1_canonical.j
 
 ### 9.1 A retraction, reported as part of the result
 
-An earlier version of this project stated that "RBF costs approximately 2.3× the interest of a conventional loan." **That claim is withdrawn**, and the reason is the argument of this section. It was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic, when P6(a) shows total contractual cost is proportional to `f`; and it quoted a single effective APR as though it were a contract property, when P6(b) shows APR is jointly determined by the price and the revenue path.
+An earlier version of this project stated that "RBF costs approximately 2.3× the interest of a conventional loan." **That claim is withdrawn**, and the reason is the argument of this section. It was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic, when P6(a) shows the **contractual repayment target `A·f` is proportional to `f`** — and realised repayment equals that target **only when the contract completes**, so even the target is not a realised cost on every path; and it quoted a single effective APR as though it were a contract property, when P6(b) shows APR is jointly determined by the price and the revenue path.
 
-We report the retraction rather than quietly correcting it because it is the concrete instance of the conflation this paper argues against, produced by authors who were actively trying to avoid it. That it survived several drafts is the useful part of the anecdote.
+We report the retraction rather than quietly correcting it because it is the concrete instance of the conflation this paper argues against, produced by this project while actively trying to avoid it. That it survived several earlier drafts is the useful part of the anecdote.
 
 Two external observations support treating price and structure separately as a matter of course.
 
@@ -288,9 +288,9 @@ These are judgements we draw, not measurements.
 
 Revenue-contingent repayment and fixed instalment repayment differ in *when* money moves, and that difference has two faces.
 
-In the simulated scenarios examined here, the revenue-contingent contract holds the seller's **displayed** payment burden roughly flat under adverse revenue paths — a statement that holds for scenarios in which the net-sales/GMV ratio is fixed, and for periods before the final clipped payment — while the fixed contract's burden rises in inverse proportion to revenue. The same mechanism delays the provider's recovery and, where permanent closure precedes completion, leaves a contractual balance unrecovered.
+In the simulated scenarios examined here, the revenue-contingent contract holds the seller's **displayed** payment burden roughly flat under adverse revenue paths — a statement that holds for scenarios in which the net-sales/GMV ratio is fixed, and for periods before the final clipped payment — while the fixed contract's burden rises in inverse proportion to revenue. The same mechanism moves the provider's recovery, and where permanent closure precedes completion it leaves a contractual balance unrecovered.
 
-Two qualifications travel with that sentence. **Provider recovery ordering is scenario-dependent**, not uniform: it follows the exact P4 condition on realised mean eligible base against `B* = P/r`, and both directions occur in this scenario library. And **the fixed arm is an optimistic scheduled-recovery benchmark**, since every instalment is assumed paid in full and on time. Reporting either face alone misstates the contract.
+**In which direction it moves recovery is scenario-dependent, not uniform.** It follows the exact P4 condition on realised mean eligible base against `B* = P/r`, and both directions occur in this scenario library: recovery lags in the severe-downturn scenario and leads at exactly baseline revenue. A summary that states a direction without naming a scenario is not supported by these results. One further qualification travels with the sentence above: **the fixed arm is an optimistic scheduled-recovery benchmark**, since every instalment is assumed paid in full and on time. Reporting either face alone misstates the contract.
 
 The price of the contract is a separate question from its payment rule, and the two are easy to conflate — an earlier project draft stated the conflation, and it was withdrawn before any external publication. At one cap factor the revenue-contingent arm looks expensive; at another it does not; the structure is identical in both. Any cost comparison that does not name its cap factor is uninterpretable.
 
@@ -368,7 +368,7 @@ An earlier version of this project claimed byte-for-byte reproducibility without
 
 **A disclosed inconsistency.** Each artifact embeds a metadata field `canonical.determinism` carrying the superseded unqualified claim. The artifacts were **not** regenerated to correct it, because doing so would change all five registered checksums in order to fix a sentence about reproducibility. The field is marked superseded in `research/RESULTS_REGISTRY.md`, and a regression test asserts that no public surface renders it.
 
-**Tests.** 629 simulation tests and 389 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
+**Tests.** 629 simulation tests and 401 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
 
 **Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
 

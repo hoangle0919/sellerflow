@@ -107,7 +107,7 @@ Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
 - At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**. State precisely what is held constant: the **pre-cap payment rule** is unchanged, the **cap factor changes the contractual target** and therefore completion timing, terminal clipping and the realised stream. Price and payment rule are analytically separable but **jointly determine realised outcomes** — do not write "structural behaviour unchanged".
 - `f* = 1.0945` is the **nearest grid match**: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v1 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
 - Same scenarios repriced **[baseline_equalcost_v1 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
-- **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): cost is proportional to `f` (P6a) and APR is jointly determined by `f` and the path (P6b), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
+- **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): the contractual repayment target `A·f` is proportional to `f` (P6a) — and realised repayment equals that target only upon completion — while APR is jointly determined by `f` and the path (P6b), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
 - Regulatory recognition of the comparability problem **[L-23, L-24]**; contingency carries a premium **[L-18, L-19]**.
 
 **Figure 5** — cap-factor sweep: effective APR against `f`, with the reference APR and `f*` marked, showing the step structure. **[validation_v1 → /pricing/sweep]**
@@ -151,7 +151,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 3/5 byte-identical on macOS CPython 3.11.5 (9 and 2 last-bit float differences), 5/5 on Linux 3.10.12 **[D-041, D-043]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: 629 simulation, 389 backend passed, 9 browser tests **skipped** (chromium unavailable) — skips reported as skips.
+- Test counts: 629 simulation, 401 backend passed, 9 browser tests **skipped** (chromium unavailable) — skips reported as skips.
 
 ---
 

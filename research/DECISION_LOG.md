@@ -952,3 +952,89 @@ The underlying cause is that `financing_engine.py` sizes the advance off revenue
 **Reason:** They are correctly never used as model inputs, but they are stored alongside the assessment, exported to CSV, and presented inside the credit-application flow on the live form. They serve no research purpose. Collecting identifiable personal data in an underwriting submission is indefensible under scrutiny regardless of downstream use.
 
 **Consequence:** `models.py`, the form, DB writes, and CSV export change. Privacy notice is rewritten. Removes a whole category of hostile question.
+
+---
+
+## D-047 — Scoring-path disclosure, claim-family sweep, and publication reconciliation
+**Date:** 2026-08-20 · **Branch:** `publication-final` (unpushed at time of writing)
+
+**Decision: state the scorer→tier→terms dependency on every active surface, and
+correct three claim families that had drifted apart across documents.**
+
+**Trigger.** A README revision (`f652b94`) stated that when scoring falls back
+from the ensemble to the heuristic "the numbers shown are identical either
+way". Verified false against the code: `ml_engine.score()` computes `pd_score`
+differently on each path and thresholds it into Low / Medium / High Risk;
+`financing_engine.RATES` keys every term off that tier. At 200M monthly
+revenue the repayment cap is 414,000,000 at Low Risk against 249,600,000 at
+Medium, and High Risk zeroes the advance, remittance rate and cap so no offer
+appears. The same false or ambiguous claim was live in four further places:
+`ml_engine.py`'s docstring and `model_status()` note, `ENVIRONMENT.md`,
+`.github/PULL_REQUEST_BODY.md` and the generator in `verify_native_macos.sh`.
+
+**Alternatives considered:** correct the README only (rejected — leaves the
+repository self-contradictory, which is how the claim survived); drop the
+fallback so the question cannot arise (rejected — the fallback is the honest
+behaviour and removing it would trade a documentation defect for an outage);
+state the dependency everywhere and make entering the fallback observable
+← **chosen**.
+
+**Three claim families swept repo-wide, not instance by instance.** The
+recurring failure in this project has been fixing the instance in front of us
+and missing the family, so each was searched across every tracked surface:
+
+1. **Recovery ordering.** Universal formulations ("the financier waits longer",
+   "the same mechanism delays recovery") contradicted P4, which makes the
+   ordering conditional on realised mean eligible base against `B* = P/r`. Both
+   directions occur in the registered scenarios. Corrected in the manuscript
+   abstract, results and conclusion, deck slides 2 and 5, the career package
+   and `backend/lab.py`. Scenario-specific statements are retained where the
+   scenario is named. This had already been recorded at D-042 and never
+   propagated — the reason it is being recorded again.
+2. **Cost proportional to `f`.** Only the contractual repayment *target* `A·f`
+   is proportional to `f`; realised repayment equals it only upon completion.
+   Corrected in `DERIVATIONS.md`, `CLAIM_LEDGER.md`, `RESULTS_REGISTRY.md`,
+   `PAPER_OUTLINE.md`, the manuscript, deck slide 7 and the copy scanner's
+   documentation.
+3. **Time-sensitive negatives.** "Has never received an external submission" is
+   a claim about the present that expires the moment anyone visits the site.
+   Replaced everywhere with the dated form: "As of August 2026, no external
+   merchant data were used in this study; the public deployment is a
+   demonstration, not a lending service."
+
+**Consequence.**
+- `railway.toml` now runs `backend/start_railway.sh`, which never discards
+  training stderr and enters the fallback deliberately rather than through a
+  bare `;`. The previous inline command hid the failure and started the service
+  regardless, so the live demo ran on the heuristic for an unknown period with
+  nothing in the logs saying so.
+- `/api/health` exposes `sklearn_runtime` alongside `scoring_path`. The startup
+  warning had told operators to read a field that did not exist.
+- `frontend/index.html` reads the active path from `/api/health` and fails
+  closed; the hero badge was previously the literal string "RF+LR ENSEMBLE
+  v1.0" whether or not the ensemble had loaded.
+- `tests/test_scoring_path_disclosure.py` (22 tests) proves the tier drives the
+  output, proves the heuristic is blind to `revenue_growth` — the ensemble's
+  highest-importance feature — so the paths cannot be output-equivalent, and
+  holds each removed statement as a fixture asserted to trip the scanner.
+- Backend suite 379 → 401 passing. The nine browser checks still skip here;
+  `RESEARCH_MANIFEST.md` now states that the skip count is environment-
+  dependent rather than a fixed expectation.
+
+**Not done, deliberately.** Dated records are not rewritten. `DECISION_LOG.md`
+entries D-042 and D-046 keep their contemporaneous counts;
+`CORRECTED_CLAIMS.md` is marked as a 2026-08-03 snapshot with pointers to
+current state rather than edited in place; and
+`evidence/2026-08-07-native-macos-verification.md` keeps its incorrect closing
+note with a dated addendum above it. An evidence record that is edited after
+the fact cannot be relied on.
+
+**Underlying training failure: not reproduced, not diagnosed.** Training
+succeeds in the development sandbox (exit 0, 1.53s, 153MB peak). The mechanism
+that allows a silent failure is established — `train_model.py` imports
+scikit-learn at module top while `ml_engine` imports it only inside a guarded
+helper, so the service boots in an image without scikit-learn and only training
+fails — but the production cause is not. `ENVIRONMENT.md` records Python 3.10
+as a known gap where scikit-learn 1.9 cannot install, and there is no
+interpreter pin for the builder. That is a candidate, not a finding. The next
+deploy's logs and `sklearn_runtime` will settle it.

@@ -67,7 +67,7 @@ Evidence committed at `evidence/2026-08-07-native-macos-verification.md`, saniti
 ## 8. Research and product limitations
 
 - **All quantitative output is simulation under modeled assumptions.** No observed seller revenue, repayment or default outcome exists in this project.
-- **The underwriting ensemble is a secondary, explicitly unvalidated component** with no measured predictive validity. Nothing downstream of the risk score depends on it; the service is fully functional with no model artifact.
+- **The underwriting ensemble is a secondary, explicitly unvalidated component** with no measured predictive validity. The service is fully functional with no model artifact, falling back to a deterministic heuristic. The financing formulas are deterministic once a risk tier is supplied; however, the active scoring path can change the assigned tier and therefore the advance, remittance rate, cap factor, repayment amounts and eligibility.
 - **No causal claim, no significance test.** Intervals are Monte Carlo intervals over simulated paths — they measure whether enough paths were run, not population uncertainty about real sellers.
 - **No contract parameter is externally sourced.** All are illustrative or derived, with sensitivity analysis rather than claimed calibration.
 - **Null and unfavourable results are retained**, including a guardrail design (RBF-G) that provably never activates — preserved as a rejected design, and excluded from public comparisons.
