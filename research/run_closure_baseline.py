@@ -54,9 +54,9 @@ CLOSURE_SCENARIOS = [
 ]
 
 TRACKS = [
-    ("baseline_closure_v1", BASE_TERMS.f,
+    ("baseline_closure_v2", BASE_TERMS.f,
      "Illustrative pricing, f = 1.20 — closure / zero-revenue scenarios"),
-    ("baseline_closure_equalcost_v1", F_STAR,
+    ("baseline_closure_equalcost_v2", F_STAR,
      "Reference-path cost-matched pricing, f* = 1.0945 — closure / zero-revenue scenarios"),
 ]
 
@@ -105,7 +105,7 @@ def main() -> None:
                              "base_seed": BASE_SEED,
                              "terms": {"A": terms.A, "r": terms.r, "f": terms.f,
                                        "j": terms.j, "N_B": terms.N_B}},
-            spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+            spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
             extra_sources=("run_closure_baseline.py",),
         )
         print(f"\n  Written: results/{stem}_canonical.json")

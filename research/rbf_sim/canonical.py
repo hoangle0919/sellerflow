@@ -47,7 +47,12 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Optional
 
 #: Bump when the canonical SHAPE changes (not when numbers change).
-CANONICAL_SCHEMA_VERSION = "1.0"
+#: Bumped to 2.0 by A-9: aggregates gained apr_defined_count,
+#: apr_defined_rate, completed_count and completed_rate, and the APR
+#: values themselves are computed under a corrected definition. A 1.0
+#: artifact and a 2.0 artifact are not comparable field-for-field on the
+#: rate layer, so the version has to move with the shape.
+CANONICAL_SCHEMA_VERSION = "2.0"
 
 #: Source files whose content defines the generated numbers.
 _GENERATOR_SOURCES = (
@@ -134,9 +139,17 @@ def build_canonical(payload: Dict[str, Any], *, scenario_config: Any,
         "spec_version": spec_version,
         "generator_fingerprint": generator_fingerprint(extra_sources),
         "scenario_config_hash": config_hash(scenario_config),
-        "determinism": "Identical code, configuration and seeds produce a "
-                       "byte-identical file. Wall-clock time, git commit and "
-                       "environment are recorded in the provenance sidecar.",
+        # Corrected while new artifacts were being generated (D-041, D-049).
+        # The previous unqualified byte-identity claim was measured by a step
+        # that re-hashed the committed file rather than regenerating it, and is
+        # false across platforms: macOS CPython 3.11.5 differs from Linux in a
+        # handful of last-bit float values.
+        "determinism": "Identical code, configuration and seeds reproduce this "
+                       "file NUMERICALLY at published precision on every "
+                       "platform tested. BYTE equality holds within a fixed "
+                       "runtime and is NOT claimed across platforms. "
+                       "Wall-clock time, git commit and environment are "
+                       "recorded in the provenance sidecar.",
     }
     return body
 

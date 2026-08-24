@@ -63,7 +63,11 @@ def run_path(path: SellerPath, terms: K.ContractTerms, match: Dict,
             recovery_abs={k: M.recovery_at(p, k) for k in M.CHECKPOINTS},
             incomplete_recovery=M.incomplete_recovery(p, target),
             post_shock_recovery={k: M.post_shock_recovery(p, onset, k) for k in (6, 12)},
-            apr=K.solve_apr(terms.A, [x for x in p if x > 0]),
+            # A-9: the FULL monthly vector, zeros included. Filtering `x > 0`
+            # here deleted internal zero months and moved later payments earlier
+            # in calendar time, inflating the rate wherever a scenario had a
+            # zero-revenue spell in the middle of the stream.
+            apr=K.solve_apr(terms.A, p),
         )
     return out
 
@@ -97,7 +101,17 @@ def run_scenario(n_paths: int, params: PathParams, terms: K.ContractTerms,
             "incomplete_recovery_rate": _mean([r.incomplete_recovery for r in rs]),
             "post_shock_recovery": {k: _mean([r.post_shock_recovery[k] for r in rs])
                                     for k in (6, 12)},
+            # A-9: apr_mean is conditioned on IRR EXISTENCE, not on completion.
+            # duration_mean above is conditioned on completion. Two different
+            # denominators, so both are now reported rather than inferred -- the
+            # publication previously described apr_mean as a completed-path
+            # survivor statistic, which was false and understated the
+            # completed-path figure by ~9pp in closure_m13.
             "apr_mean": _mean([r.apr for r in rs if r.apr is not None]),
+            "apr_defined_count": sum(r.apr is not None for r in rs),
+            "apr_defined_rate": sum(r.apr is not None for r in rs) / n_paths,
+            "completed_count": len(durs),
+            "completed_rate": len(durs) / n_paths,
         }
 
     return {"scenario": params.label or params.shock, "params": asdict(params),

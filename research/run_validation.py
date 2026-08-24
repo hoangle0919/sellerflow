@@ -6,7 +6,7 @@
     python3 run_validation.py 5   # RBF-G guardrail breakpoint
     python3 run_validation.py 6   # revenue-definition sensitivity
 
-Results accumulate in results/validation_v1.json.
+Results accumulate in results/validation_v2.json.
 ALL OUTPUT IS SIMULATED under METHODOLOGY_SPEC.md v1.0 + amendments A-1..A-3.
 """
 import json, os, sys
@@ -20,7 +20,9 @@ from rbf_sim.generator import PathParams, generate_cohort, reference_base_path
 R0 = 185_000_000.0
 BASE = dict(A=185_000_000.0, r=0.10, f=1.20, j=0.18, N_B=12)
 W = 78
-FP = "results/validation_v1.json"
+# A-9: v1 is frozen historical evidence and is never rewritten. The corrected
+# run writes its own raw file, which canonicalize_validation.py then registers.
+FP = "results/validation_v2.json"
 
 
 def hdr(t):
@@ -69,7 +71,15 @@ def sec2():
     hdr("2. PRICING SENSITIVITY - CAP FACTOR f  +  EQUAL-EFFECTIVE-COST CAP")
     print("  Structure (fixed vs revenue-contingent) held constant; only PRICE moves.\n")
     ref = reference_base_path(PathParams(R0=R0), ContractTerms(**BASE))
-    bpay = [x for x in fix_b_payments(ContractTerms(**BASE), 24) if x > 0]
+    # A-9: full monthly vector, zeros included. On the flat reference path the
+    # zeros are trailing only, so this does not move the number -- but the rule
+    # is "never compress", not "never compress where it happens to matter".
+    bpay = fix_b_payments(ContractTerms(**BASE), 24)
+    # `duration` here means the count of PAYING months, which used to be read
+    # off len() of the filtered list. Now that solve_apr takes the full vector,
+    # the two have to be computed separately -- conflating them silently turned
+    # every reported duration into the 24-month horizon.
+    paying = lambda v: sum(1 for x in v if x > 0)
     target = solve_apr(BASE["A"], bpay)
     print(f"  Benchmark B: j=18% nominal, N_B=12 -> effective APR {target:.4%}, "
           f"total repaid {sum(bpay):,.0f}")
@@ -78,24 +88,24 @@ def sec2():
     pricing = {}
     for f in (1.05, 1.08, 1.10, 1.12, 1.15, 1.20, 1.25, 1.30):
         t = ContractTerms(**{**BASE, "f": f})
-        pay = [x for x in rbf_payments(ref, t) if x > 0]
+        pay = rbf_payments(ref, t)                      # A-9: uncompressed
         apr = solve_apr(t.A, pay)
-        pricing[str(f)] = {"cap": t.cap, "duration": len(pay), "total": sum(pay), "apr": apr}
+        pricing[str(f)] = {"cap": t.cap, "duration": paying(pay), "total": sum(pay), "apr": apr}
         mark = "  <- illustrative default" if abs(f - 1.20) < 1e-9 else ""
-        print(f"  {f:>6.2f}{t.cap:>16,.0f}{len(pay):>10}{sum(pay):>16,.0f}{apr:>13.2%}{mark}")
+        print(f"  {f:>6.2f}{t.cap:>16,.0f}{paying(pay):>10}{sum(pay):>16,.0f}{apr:>13.2%}{mark}")
 
     grid = [1.0 + i * 0.0005 for i in range(1, 801)]
     def gap(f):
-        a = solve_apr(BASE["A"], [x for x in rbf_payments(ref, ContractTerms(**{**BASE, "f": f})) if x > 0])
+        a = solve_apr(BASE["A"], rbf_payments(ref, ContractTerms(**{**BASE, "f": f})))
         return abs((a if a is not None else 9.0) - target)
     best = min(grid, key=gap)
     tb = ContractTerms(**{**BASE, "f": best})
-    pay = [x for x in rbf_payments(ref, tb) if x > 0]
+    pay = rbf_payments(ref, tb)                         # A-9: uncompressed
     apr = solve_apr(tb.A, pay)
     print(f"\n  --- EQUAL-EFFECTIVE-COST CAP ---")
     print(f"  target effective APR (Benchmark B) : {target:.4%}")
     print(f"  equal-cost cap factor f*           : {best:.4f}")
-    print(f"  cap / duration / total             : {tb.cap:,.0f} / {len(pay)} mo / {sum(pay):,.0f}")
+    print(f"  cap / duration / total             : {tb.cap:,.0f} / {paying(pay)} mo / {sum(pay):,.0f}")
     print(f"  achieved effective APR             : {apr:.4%}   (residual {abs(apr-target):.4%})")
     print(f"\n  Duration is an integer, so cost moves in steps; an exact match is")
     print(f"  not always attainable.")
@@ -104,7 +114,7 @@ def sec2():
     print(f"  revenue. PRICE and STRUCTURE are separable. The 41.30% figure is a")
     print(f"  property of the illustrative f = 1.20, not of revenue-based repayment.")
     save("pricing", {"benchmark_b_apr": target, "sweep": pricing,
-                     "equal_cost": {"f_star": best, "cap": tb.cap, "duration": len(pay),
+                     "equal_cost": {"f_star": best, "cap": tb.cap, "duration": paying(pay),
                                     "total": sum(pay), "apr": apr}})
 
 

@@ -407,3 +407,61 @@ Verification found that at `m = 0.25`, `F = 0.20·R_0` and the advance size the 
 **Change.** RBF-G moves from headline arm to documented design-flaw finding.
 **Rationale.** Analytic result: the floor binds only when observed revenue `< p_min_mult·R₀ = 0.25·R₀`, but applies only when revenue `≥ hardship·R₀ = 0.50·R₀`. The conditions are mutually exclusive, so **the floor can never activate on any revenue path**. Provably dead code, which fully explains the baseline v1 null.
 **Not done:** the parameters were **not** retuned to make the guardrail bind. That would be tuning after seeing results. The breakpoint scan reports where it *would* activate; the design flaw stands as the finding.
+
+### A-9 — IRR definition, domain, and its conditioning · 2026-08-20
+**Raised by:** an independent audit that reproduced the engine's APR against the
+registered artifacts and found three implementation defects, none of which the
+suite could see.
+
+**Change (i) — the cash-flow vector.** The effective-rate calculation takes the
+**complete monthly payment vector through the observation horizon, including
+internal zero-payment months.** The engine previously filtered `p > 0` before
+solving, which deletes zero months from the middle of a stream and moves every
+later payment earlier in time. A contract that pays nothing in months 7–9 and
+resumes in month 10 was being discounted as though month 10's payment arrived
+in month 7. Trailing zeros are immaterial — they contribute nothing at any
+position — so the defect binds exactly where a scenario contains an *internal*
+zero-revenue spell.
+
+**Change (ii) — the solution domain.** The monthly rate is solved over the
+economically valid domain `i > −1`, not `i ≥ 0`. The previous bracket
+`[1e-12, 2.0]` could not represent a loss, so a contract that recovers less than
+it advanced returned `None` and was reported as *undefined* rather than as the
+negative return it is. Permanent closure at month 7 recovers roughly 98.3M
+against a 185M advance; its annualised IRR is approximately **−86.51%**, and
+"undefined" was hiding a real and adverse result.
+
+**Change (iii) — existence, and what conditions what.**
+- The stream is one negative advance at `t = 0` followed by non-negative
+  payments. Under that sign pattern the NPV is strictly monotone in `i` over
+  `i > −1` wherever any payment is positive, so **a stream with at least one
+  positive payment has a unique IRR**, and a stream with **no** positive payment
+  has none. `None` is returned only in that second case.
+- **Contract completion and IRR existence are separate events.** A path may fail
+  to reach the contractual target and still have a perfectly well-defined
+  return on the payments it did make. In `closure_m13` at `f = 1.20`, 119 of 500
+  paths complete while all 500 have a defined IRR — 381 paths are simultaneously
+  incomplete and IRR-defined.
+- `duration_mean` is conditioned on **completion within the horizon**.
+- `apr_mean` is conditioned on **IRR existence**, not on completion.
+- These are **different denominators** and must never share one qualifier. The
+  publication previously described both as survivor statistics over completed
+  paths; for `apr_mean` that was false, and it understated the completed-path
+  figure by roughly nine percentage points in `closure_m13`
+  (0.3033 reported over 500 IRR-defined paths, against 0.3937 over the 119 that
+  completed).
+
+**Change (iv) — the observed-window caveat.** For an incomplete path that is not
+absorbing — revenue continues, the target simply has not been reached by the
+horizon — the reported rate is an **observed-window IRR over the payments made
+within the horizon**, not necessarily the final lifetime return. Any
+horizon-limited IRR must be reported alongside incomplete-recovery information
+so a reader cannot mistake a censored window for a completed contract.
+
+**Consequence.** `engine.py` preserves every monthly position; `contracts.solve_apr`
+brackets below zero; aggregates gain `apr_defined_count` and `apr_defined_rate`
+so the denominator is reported rather than inferred. The artifact shape changes,
+so the canonical schema version is bumped and new artifacts are registered
+alongside the superseded ones, which are preserved byte-for-byte. Burden,
+recovery, duration, settlement, scenario inputs and seeds are unaffected by
+construction — the change touches only the rate layer.

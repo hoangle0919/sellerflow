@@ -1,6 +1,6 @@
 """Baseline at the EQUAL-EFFECTIVE-COST cap factor f* = 1.0945 (D-031).
 
-    python3 run_equal_cost_baseline.py     # -> results/baseline_equalcost_v1_canonical.json
+    python3 run_equal_cost_baseline.py     # -> results/baseline_equalcost_v2_canonical.json
 
 WHY THIS RUN EXISTS. `baseline_v2` runs every scenario at the **illustrative**
 cap factor f = 1.20. The equal-effective-cost factor f* = 1.0945 — the price at
@@ -74,7 +74,7 @@ def main() -> None:
           f"payment {m['payment']:,.0f} VND | APR {m['apr']:.2%}")
 
     payload = {
-        "run": "baseline_equalcost_v1",
+        "run": "baseline_equalcost_v2",
         "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
         "provenance": "SIMULATED — no observed seller data",
         "purpose": "Seller burden and provider recovery at the equal-effective-cost "
@@ -91,17 +91,17 @@ def main() -> None:
 
     written = write_canonical_pair(
         payload,
-        stem="baseline_equalcost_v1",
+        stem="baseline_equalcost_v2",
         scenario_config={"scenarios": SCENARIOS, "n_paths": N_PATHS,
                          "base_seed": BASE_SEED,
                          "terms": {"A": TERMS.A, "r": TERMS.r, "f": TERMS.f,
                                    "j": TERMS.j, "N_B": TERMS.N_B}},
-        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
         extra_sources=("run_equal_cost_baseline.py",),
     )
     print("\n" + "=" * W)
-    print("  Written: results/baseline_equalcost_v1_canonical.json")
-    print("           results/baseline_equalcost_v1_provenance.json")
+    print("  Written: results/baseline_equalcost_v2_canonical.json")
+    print("           results/baseline_equalcost_v2_provenance.json")
     print(f"  SHA-256: {written['sha256']}")
     print("=" * W)
 

@@ -8,6 +8,7 @@ Four contracts, all originating at t=1 with identical principal A:
 
 Pure arithmetic. No model call anywhere in this module.
 """
+import math
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -114,18 +115,85 @@ def fix_b_payments(terms: ContractTerms, T: int) -> List[float]:
     return [P if t < terms.N_B else 0.0 for t in range(T)]
 
 
-def solve_apr(principal: float, flows: List[float], iters: int = 300) -> Optional[float]:
-    """Annualised IRR by bisection (spec 7.1, 10). None where undefined
-    (no sign change) -- reported as undefined, never dropped (spec 13, E-3)."""
+#: Lower end of the economically valid monthly-rate domain. `i = -1` is the
+#: singularity of `(1+i)^-t`, so the bracket opens just above it. A monthly rate
+#: at this bound is a near-total loss; nothing below it has meaning.
+IRR_MIN_MONTHLY = -1.0 + 1e-9
+#: Upper end. A monthly rate of 10 is 100x annually -- far outside anything this
+#: contract can produce, and present only to bracket the root.
+IRR_MAX_MONTHLY = 10.0
+
+
+def solve_apr(principal: float, flows: List[float], iters: int = 400) -> Optional[float]:
+    """Annualised IRR of the FULL monthly flow vector, over `i > -1` (spec A-9).
+
+    Two things here were wrong before A-9, and both moved published figures.
+
+    **The vector must not be compressed.** Callers previously passed
+    `[x for x in payments if x > 0]`, which deletes internal zero months and so
+    moves every later payment earlier in calendar time. A stream paying nothing
+    in months 7-9 and resuming in month 10 was discounted as though month 10
+    arrived in month 7. Pass the whole vector, zeros included; position is the
+    information. Trailing zeros are harmless at any position, so the defect bound
+    exactly where a scenario had an *internal* zero-revenue spell -- in
+    `temp_closure` it overstated the annualised rate by roughly five points.
+
+    **The domain must include losses.** The bracket was `[1e-12, 2.0]`, which
+    cannot represent a negative return, so a contract recovering less than it
+    advanced returned `None` and was published as *undefined*. Permanent closure
+    at month 7 recovers about 98.3M against 185M; its IRR is roughly -86.5%.
+    Reporting that as undefined hid an adverse result behind a word that reads
+    like a technicality.
+
+    Existence, under this project's sign pattern: one negative advance at `t = 0`
+    followed by non-negative payments. NPV is then strictly decreasing in `i`
+    wherever any payment is positive, so the root is unique and bisection is
+    sufficient. `None` is returned only when **no payment is positive** -- the
+    one case in which no rate satisfies the equation.
+
+    Note this is the rate over the payments actually made within the observation
+    horizon. On an incomplete, non-absorbing path that is an observed-window
+    figure, not the final lifetime return (A-9 iv), and must be reported beside
+    incomplete-recovery information.
+    """
+    if not any(p > 0 for p in flows):
+        return None                      # no root exists under the A-9 definition
+
     def npv(i: float) -> float:
-        return -principal + sum(p / (1.0 + i) ** (t + 1) for t, p in enumerate(flows))
-    lo, hi = 1e-12, 2.0
-    if npv(lo) * npv(hi) > 0:
+        """NPV at monthly rate `i`, with the `i -> -1+` limit handled explicitly.
+
+        As `i` approaches -1 from above, `(1+i)**(t+1)` underflows to 0.0 for
+        long vectors and a naive expression raises ZeroDivisionError. The limit
+        is not undefined, it is `+inf`: the discount factor diverges and any
+        positive payment dominates the finite principal. Returning `inf` keeps
+        the bracket valid instead of crashing at the edge of the domain.
+        """
+        total = -principal
+        base = 1.0 + i
+        for t, p in enumerate(flows):
+            if p == 0.0:
+                continue                 # position still counts; the term is 0
+            d = base ** (t + 1)
+            if d == 0.0:                 # underflow: term -> +inf
+                return math.inf
+            total += p / d
+        return total
+
+    lo, hi = IRR_MIN_MONTHLY, IRR_MAX_MONTHLY
+    f_lo, f_hi = npv(lo), npv(hi)
+
+    # With one negative advance followed by non-negative payments, NPV is
+    # strictly decreasing in `i`: it tends to +inf as i -> -1+ and to
+    # -principal as i grows. So a sign change is guaranteed whenever some
+    # payment is positive, and this branch should be unreachable. It is kept
+    # because "should be unreachable" has been wrong before in this project.
+    if not (f_lo > 0 > f_hi):
         return None
+
     for _ in range(iters):
         mid = (lo + hi) / 2.0
-        if npv(lo) * npv(mid) <= 0:
-            hi = mid
-        else:
+        if npv(mid) > 0:
             lo = mid
+        else:
+            hi = mid
     return (1.0 + (lo + hi) / 2.0) ** 12 - 1.0

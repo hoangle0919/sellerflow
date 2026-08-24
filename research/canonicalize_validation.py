@@ -45,8 +45,8 @@ from rbf_sim.canonical import (canonical_bytes, generator_fingerprint,
                                write_canonical_pair)
 
 RESULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
-SOURCE = os.path.join(RESULTS, "validation_v1.json")
-STEM = "validation_v1"
+SOURCE = os.path.join(RESULTS, "validation_v2.json")
+STEM = "validation_v2"
 
 #: Sources that produced the battery. Both, because the convergence ladder comes
 #: from `conv_step.py` and the remaining sections from `run_validation.py`.
@@ -123,9 +123,9 @@ def main():
     payload, facts = split_payload(raw)
 
     print("=" * W)
-    print("  CANONICALIZE validation_v1 — additive, zero numeric change")
+    print("  CANONICALIZE validation_v2 — additive, zero numeric change")
     print("=" * W)
-    print(f"  source            : results/validation_v1.json (left untouched)")
+    print(f"  source            : results/validation_v2.json (left untouched)")
     print(f"  moved to provenance: {facts or 'nothing'}")
 
     # The load-bearing check: every scalar in the source must survive, by path
@@ -173,7 +173,7 @@ def main():
         with open(written["provenance"], encoding="utf-8") as fh:
             prov = json.load(fh)
         prov["original_run_date"] = facts["date"]
-        prov["original_source"] = "validation_v1.json"
+        prov["original_source"] = "validation_v2.json"
         prov["note"] = (prov.get("note", "") + " `original_run_date` is the "
                         "date stamped by the battery when it first ran; it was "
                         "the only non-deterministic field in the source.")

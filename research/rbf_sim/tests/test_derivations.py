@@ -236,8 +236,8 @@ def test_P6b_earlier_arrival_gives_strictly_higher_irr():
     fast = rbf_payments([R0 * 2] * T, t)
     slow = rbf_payments([R0 * 0.5] * T, t)
     assert math.isclose(sum(fast), sum(slow), abs_tol=CAP_TOL)   # same total
-    irr_fast = solve_apr(t.A, [x for x in fast if x > 0])
-    irr_slow = solve_apr(t.A, [x for x in slow if x > 0])
+    irr_fast = solve_apr(t.A, fast)         # A-9: full vector, zeros included
+    irr_slow = solve_apr(t.A, slow)
     assert irr_fast > irr_slow
 
 
@@ -255,8 +255,8 @@ def test_P6_apr_is_not_a_contract_property():
     """Same (A, r, f); different paths; different APR. This is why quoting a
     single 'RBF APR' as intrinsic was wrong."""
     t = terms()
-    a = solve_apr(t.A, [x for x in rbf_payments([R0 * 2] * T, t) if x > 0])
-    b = solve_apr(t.A, [x for x in rbf_payments([R0 * 0.6] * T, t) if x > 0])
+    a = solve_apr(t.A, rbf_payments([R0 * 2] * T, t))    # A-9: full vector
+    b = solve_apr(t.A, rbf_payments([R0 * 0.6] * T, t))
     assert not math.isclose(a, b, rel_tol=0.05)
 
 

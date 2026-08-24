@@ -1,6 +1,6 @@
 """First reproducible baseline run — METHODOLOGY_SPEC.md v1.0.
 
-    python3 run_baseline.py            # prints report, writes results/baseline_v2.json
+    python3 run_baseline.py            # prints report, writes results/baseline_v3_canonical.json
 
 Every number is a SIMULATION output under stated assumptions. No observed
 seller outcome appears anywhere. See spec section 15 for binding interpretation
@@ -177,7 +177,7 @@ def main():
     # which is what made it un-checksummable. It is preserved, not rewritten.
     os.makedirs("results", exist_ok=True)
     payload = {
-        "run": "baseline_v2",
+        "run": "baseline_v3",
         "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03)",
         "provenance": "SIMULATED — no observed seller data",
         "n_paths": N_PATHS, "base_seed": 20260803,
@@ -190,17 +190,17 @@ def main():
     }
     written = write_canonical_pair(
         payload,
-        stem="baseline_v2",
+        stem="baseline_v3",
         scenario_config={"scenarios": SCENARIOS, "n_paths": N_PATHS,
                          "base_seed": 20260803,
                          "terms": {"A": TERMS.A, "r": TERMS.r, "f": TERMS.f,
                                    "j": TERMS.j, "N_B": TERMS.N_B}},
-        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
         extra_sources=("run_baseline.py",),
     )
     print("\n" + "=" * W)
-    print("  Written: results/baseline_v2_canonical.json")
-    print("           results/baseline_v2_provenance.json")
+    print("  Written: results/baseline_v3_canonical.json")
+    print("           results/baseline_v3_provenance.json")
     print(f"  SHA-256: {written['sha256']}")
     print("  Reproduce: python3 run_baseline.py  — identical code, config and")
     print("             seeds produce a byte-identical canonical file.")
