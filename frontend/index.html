@@ -1276,7 +1276,15 @@ function renderScenarios(scenarios){
   }).join('');
   const closure=scenarios.find(s=>s.case==='closure');
   const note=document.getElementById('scenario-closure-note');
-  if(note) note.textContent=closure&&closure.note?closure.note:'';
+  if(note){
+    let txt=closure&&closure.note?closure.note:'';
+    // The provider's realised rate on that path, stated beside the unrecovered
+    // balance rather than instead of it (A-9): an observed-window figure.
+    if(closure&&closure.observed_apr_to_closure!=null){
+      txt+=` Return to the provider on this path: ${pct(closure.observed_apr_to_closure,1)} (observed window, not a lifetime return).`;
+    }
+    note.textContent=txt;
+  }
 }
 const SEV_LABEL={low:'Low',medium:'Medium',high:'High',unknown:'Unknown'};
 const INT_LEVEL={clear:['Clear','low'],review:['Review','medium'],high:['Elevated','high']};

@@ -379,3 +379,59 @@ def test_end_to_end_analysis_applies_the_submitted_return_rate():
     s = build_financing_analysis(features, "Low Risk")["structure"]
     assert s["return_rate_applied"] == 0.10
     assert s["periodic_remittance"] == 10_800_000
+
+
+# ── A-9: the IRR definition, domain and conditioning ─────────────────────────
+# These assert what the rate MEANS, which is precisely what no test asserted
+# when the defect shipped. The product mirrors the corrected research engine
+# (research/rbf_sim/contracts.py::solve_apr, post-A-9).
+
+def test_a9_domain_includes_losses_so_a_shortfall_is_a_rate_not_undefined():
+    """A contract recovering less than it advanced has a negative rate. The
+    pre-A-9 bracket started above zero and returned None, publishing an adverse
+    result as 'undefined' — a word that reads like a technicality."""
+    # 333,000,000 advanced; six collections of 14,385,600 = 86,313,600 back.
+    apr = effective_apr(333_000_000, [14_385_600] * 6)
+    assert apr is not None, "a shortfall must report its rate, not None"
+    assert apr < 0, "recovering a quarter of the advance is a negative return"
+    assert apr == pytest.approx(-0.983, abs=5e-3)
+
+
+def test_a9_internal_zero_months_keep_their_position():
+    """Compressing the vector moves later payments earlier in calendar time and
+    overstates the rate. The same 150 paid in month 4 is worth far less than in
+    month 1, and the two must not evaluate alike."""
+    delayed = effective_apr(100.0, [0.0, 0.0, 0.0, 150.0])
+    immediate = effective_apr(100.0, [150.0])
+    assert delayed is not None and immediate is not None
+    assert delayed < immediate
+    # Not a rounding difference: compression inflated this case ~54-fold.
+    assert immediate > delayed * 10
+
+
+def test_a9_trailing_zeros_are_immaterial():
+    """Position matters; padding the tail does not. A stream that has finished
+    paying is the same contract however long the observation window runs."""
+    base = effective_apr(100.0, [60.0, 60.0])
+    padded = effective_apr(100.0, [60.0, 60.0, 0.0, 0.0, 0.0])
+    assert base == pytest.approx(padded, abs=1e-9)
+
+
+def test_a9_none_only_when_no_payment_is_positive():
+    """The single case where no rate satisfies the equation. Everything else —
+    including a near-total loss — has a root."""
+    assert effective_apr(100.0, [0.0, 0.0]) is None
+    assert effective_apr(100.0, []) is None
+    assert effective_apr(100.0, [0.01]) is not None   # a root exists, however bad
+
+
+def test_closure_scenario_reports_its_observed_window_return():
+    """The closure row carries the provider's realised rate BESIDE the
+    unrecovered balance — never instead of it. An observed-window figure on an
+    incomplete path is not a lifetime return, and the row says so."""
+    st = financing_structure(185_000_000, "Low Risk", return_rate=0.028)
+    closure = [s for s in scenario_analysis(185_000_000, 0.22, st, return_rate=0.028)
+               if s["case"] == "closure"][0]
+    assert closure["observed_apr_to_closure"] < 0
+    assert closure["amount_unrecovered"] > 0          # reported beside, not instead
+    assert "observed-window" in closure["apr_basis"]

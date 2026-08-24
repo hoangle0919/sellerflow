@@ -51,38 +51,74 @@ TIER_PARAMS = {
 MIN_MEANINGFUL_GROWTH = 0.05  # floor used only to keep the "growth case" distinct from base
 
 
-def effective_apr(principal: float, payments: List[float], iters: int = 300) -> Optional[float]:
-    """Annualised IRR of the advance's actual cash flows, by bisection.
+# IRR search domain (spec A-9). The lower bound must sit just above -1 so a
+# loss-making contract has a representable rate: a bracket starting at 0 cannot
+# express "recovered less than was advanced" and returns undefined instead,
+# which hides an adverse result behind a word that reads like a technicality.
+IRR_MIN_MONTHLY = -1.0 + 1e-9
+IRR_MAX_MONTHLY = 10.0
+
+
+def effective_apr(principal: float, flows: List[float], iters: int = 400) -> Optional[float]:
+    """Annualised IRR of the FULL monthly flow vector, over `i > -1` (spec A-9).
 
     A factor rate is not a rate: 1.15 says nothing about *when* the money comes
-    back, and the same factor is far more expensive over 12 months than over
-    36. California SB 362 (in force 2026-01-01) names quoting a factor rate
-    without an annualised cost a confusing representation, so the APR travels
-    with the factor everywhere the factor is shown.
+    back, and the same factor is far more expensive over 12 months than over 36.
+    California SB 362 (in force 2026-01-01) names quoting a factor rate without
+    an annualised cost a confusing representation, so the APR travels with the
+    factor everywhere the factor is shown.
 
-    Same method as the registered simulation (`research/rbf_sim/contracts.py::
-    solve_apr`) — reimplemented here rather than imported, because the deployed
-    backend must not depend on the research package. Returns None where the IRR
-    is undefined (no sign change in the bracket); undefined is reported as
-    undefined and never silently dropped or replaced with 0.
+    Two properties are load-bearing, both corrected in the research engine under
+    A-9 and mirrored here:
+
+    **The vector is not compressed.** Zero-payment months keep their position;
+    dropping them would move every later payment earlier in calendar time and
+    overstate the rate. Trailing zeros are immaterial at any position, but an
+    internal zero spell is not.
+
+    **The domain includes losses.** The bracket starts just above -1, so a
+    contract that recovers less than it advanced reports its (negative) rate
+    instead of `None`. `None` is returned only when no payment is positive —
+    the one case where no rate satisfies the equation.
+
+    Method mirrors `research/rbf_sim/contracts.py::solve_apr` (post-A-9).
+    Reimplemented rather than imported: the deployed backend must not depend on
+    the research package. On an incomplete path this is the rate over payments
+    actually made within the observed horizon, not a lifetime return, and must
+    be reported beside the unrecovered balance.
     """
-    if principal <= 0 or not payments or sum(payments) <= 0:
-        return None
+    if principal <= 0 or not any(p > 0 for p in flows):
+        return None                      # no root exists under the A-9 definition
 
     def npv(i: float) -> float:
-        return -principal + sum(p / (1.0 + i) ** (t + 1) for t, p in enumerate(payments))
+        # The `i -> -1+` limit is +inf, not undefined: the discount factor
+        # diverges and any positive payment dominates the finite principal.
+        # Returning inf keeps the bracket valid instead of crashing on underflow.
+        total = -principal
+        base = 1.0 + i
+        for t, p in enumerate(flows):
+            if p == 0.0:
+                continue                 # position still counts; the term is 0
+            d = base ** (t + 1)
+            if d == 0.0:
+                return math.inf
+            total += p / d
+        return total
 
-    lo, hi = 1e-12, 2.0
-    if npv(lo) * npv(hi) > 0:
+    lo, hi = IRR_MIN_MONTHLY, IRR_MAX_MONTHLY
+    if not (npv(lo) > 0 > npv(hi)):
+        # Unreachable for one advance followed by non-negative payments, where
+        # NPV is strictly decreasing. Kept because "unreachable" has been wrong
+        # in this project before.
         return None
+
     for _ in range(iters):
         mid = (lo + hi) / 2.0
-        if npv(lo) * npv(mid) <= 0:
-            hi = mid
-        else:
+        if npv(mid) > 0:
             lo = mid
-    monthly = (lo + hi) / 2.0
-    return (1.0 + monthly) ** 12 - 1.0
+        else:
+            hi = mid
+    return (1.0 + (lo + hi) / 2.0) ** 12 - 1.0
 
 
 def net_collectible_revenue(monthly_revenue: float, return_rate: float = 0.0) -> int:
@@ -343,6 +379,25 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
     months_paid = CLOSURE_SCENARIO_MONTH - 1
     collected = min(to_vnd(base_remittance * months_paid), repayment_cap)
     unrecovered = to_vnd(repayment_cap - collected)
+
+    # The provider's realised return on this path. Under the A-9 IRR domain a
+    # loss has a representable rate, so this is a number rather than the word
+    # "undefined" — which is the point: a path recovering a quarter of the cap
+    # should not be reported with the same word used for "not applicable".
+    # It is an OBSERVED-WINDOW rate over payments actually made, not a lifetime
+    # return, so it is reported beside the unrecovered balance, never instead.
+    closure_payments = []
+    if base_remittance > 0 and months_paid > 0:
+        running = 0
+        for _ in range(months_paid):
+            pay = min(base_remittance, repayment_cap - running)
+            if pay <= 0:
+                break
+            closure_payments.append(pay)
+            running += pay
+    principal = structure.get("amount_used_for_structure") or 0
+    closure_apr = effective_apr(principal, closure_payments)
+
     out.append({
         "case": "closure",
         "label": f"Merchant closes at month {CLOSURE_SCENARIO_MONTH} (permanent)",
@@ -358,6 +413,11 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
         "amount_unrecovered": unrecovered,
         "share_of_cap_unrecovered": (round(unrecovered / repayment_cap, 4)
                                      if repayment_cap else None),
+        "observed_apr_to_closure": (round(closure_apr, 4)
+                                    if closure_apr is not None else None),
+        "apr_basis": ("Annualised IRR over the payments actually collected "
+                      "before closure — an observed-window return on an "
+                      "incomplete path, not a lifetime return."),
         "note": ("Revenue-contingent repayment reschedules a decline; it does not "
                  "survive a stop. Collection ends with trading, and the balance "
                  "outstanding at that moment is unrecovered."),
