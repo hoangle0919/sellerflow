@@ -1246,7 +1246,9 @@ function renderStructure(structure, financing){
   const rows=[];
   rows.push(['Recommended advance', fmtVND(structure.recommended_amount)]);
   if(structure.requested_amount) rows.push(['Requested amount', fmtVND(structure.requested_amount)+(structure.exceeds_recommendation?' — exceeds recommendation':'')]);
-  rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+' of monthly revenue':'—']);
+  rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+(structure.collection_base==='net_of_returns'?' of monthly net revenue':' of monthly revenue'):'—']);
+  if(structure.collection_base==='net_of_returns' && structure.net_collectible_revenue!=null)
+    rows.push(['Collected on (net of '+pct(structure.return_rate_applied||0,1)+' returns)', fmtVND(structure.net_collectible_revenue)]);
   rows.push(['Repayment cap', fmtVND(structure.repayment_cap)]);
   rows.push(['Base-case repayment term', structure.base_case_duration_months?structure.base_case_duration_months+' months':'—']);
   rows.push(['Effective APR (base case)', structure.effective_apr_base_case!=null?pct(structure.effective_apr_base_case,1):'—']);
@@ -1534,7 +1536,11 @@ function heroRenderDecision(d, ms){
      project has withdrawn. */
   document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Demo score '+pct(d.pd_score,1)+' — synthetic, not a validated default probability'):'';
   document.getElementById('hd-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
-  document.getElementById('hd-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
+  /* A-1: say which base, or the merchant cannot reconcile the figure —
+     it is deliberately below remittance_pct x gross revenue. */
+  document.getElementById('hd-rate').textContent=structure.remittance_pct
+    ?pct(structure.remittance_pct)+(structure.collection_base==='net_of_returns'?' of net revenue':' of revenue')
+    :'—';
   document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);
   const dur=structure.base_case_duration_months;
   document.getElementById('hd-dur').textContent=dur?dur+(dur===1?' month':' months'):'—';

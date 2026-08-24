@@ -28,7 +28,7 @@ import math
 from typing import Optional, List
 
 from money import (illustrative_schedule, periodic_payment, recommended_advance,
-                   repayment_cap, to_vnd)
+                   repayment_cap, to_decimal, to_vnd)
 
 # Risk-tier parameters. These are underwriting policy, not a fitted model —
 # documented here so they're one place to change, not scattered constants.
@@ -83,6 +83,26 @@ def effective_apr(principal: float, payments: List[float], iters: int = 300) -> 
             lo = mid
     monthly = (lo + hi) / 2.0
     return (1.0 + monthly) ** 12 - 1.0
+
+
+def net_collectible_revenue(monthly_revenue: float, return_rate: float = 0.0) -> int:
+    """Revenue the remittance is actually collected on (spec amendment A-1).
+
+    A returned order is refunded: the merchant never keeps that money. Taking
+    the remittance off GROSS sales therefore charges a share of revenue that
+    does not exist, and the overcharge scales with the return rate — worst
+    exactly for the merchants whose margins are thinnest. Collection is on
+    net sales: `monthly_revenue * (1 - return_rate)`.
+
+    Scope: this changes what is COLLECTED, not what is ADVANCED. Advance
+    sizing stays a share of gross annual revenue, which is the tier policy in
+    TIER_RATES and a separate decision from the collection base.
+
+    `return_rate` defaults to 0.0, where net == gross — the correct degenerate
+    case for a caller that does not supply one.
+    """
+    rate = min(max(float(return_rate or 0.0), 0.0), 0.95)
+    return to_vnd(to_decimal(monthly_revenue) * to_decimal(str(1.0 - rate)))
 
 
 def _base_case_payments(cap: float, remittance: float) -> List[float]:
@@ -162,7 +182,8 @@ def revenue_metrics(monthly_revenue: float, revenue_growth: float, revenue_histo
     return result
 
 
-def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount: Optional[float] = None) -> dict:
+def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount: Optional[float] = None,
+                        return_rate: float = 0.0) -> dict:
     """Recommended RBF structure for the given revenue and risk tier.
 
     Formulas — all deterministic, all in integer đồng under ROUND_HALF_UP
@@ -207,7 +228,10 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
     exceeds_recommendation = bool(requested_amount and requested_amount > recommended_amount)
 
     cap = repayment_cap(amount, rates["factor_rate"])
-    remittance = periodic_payment(monthly_revenue, rates["remittance_pct"])
+    # A-1: collect on net sales. Returns are refunded, so remitting on gross
+    # takes a share of money the merchant never kept.
+    net_revenue = net_collectible_revenue(monthly_revenue, return_rate)
+    remittance = periodic_payment(net_revenue, rates["remittance_pct"])
     duration_months = math.ceil(cap / remittance) if remittance > 0 else None
     apr = effective_apr(amount, _base_case_payments(cap, remittance))
 
@@ -218,6 +242,12 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
         "amount_used_for_structure": amount,
         "exceeds_recommendation": exceeds_recommendation,
         "remittance_pct": params["remittance_pct"],
+        # The base the remittance is actually taken on, and the rate netted out
+        # of it — stated so the merchant can reconcile the figure rather than
+        # having to infer why it is below remittance_pct x gross revenue.
+        "collection_base": "net_of_returns",
+        "return_rate_applied": round(min(max(float(return_rate or 0.0), 0.0), 0.95), 4),
+        "net_collectible_revenue": net_revenue,
         "factor_rate": params["factor_rate"],
         # The factor rate's annualised cost on the base-case timing. Depends on
         # duration, so it moves with revenue even though the factor does not —
@@ -245,7 +275,8 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
 CLOSURE_SCENARIO_MONTH = 7
 
 
-def scenario_analysis(monthly_revenue: float, reported_growth: float, structure: dict) -> list[dict]:
+def scenario_analysis(monthly_revenue: float, reported_growth: float, structure: dict,
+                      return_rate: float = 0.0) -> list[dict]:
     """Base / moderate decline / severe decline / growth / closure scenarios.
 
     Because remittance is a fixed percentage of revenue, the merchant's
@@ -281,7 +312,11 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
     for key, label, shift in cases:
         # D-030: integer đồng under ROUND_HALF_UP, same policy as the structure.
         scenario_revenue = to_vnd(monthly_revenue * (1 + shift))
-        scenario_remittance = periodic_payment(scenario_revenue, share_rate)
+        # A-1: the same collection base as the structure. Returns scale with
+        # sales, so the netting travels into every scenario rather than being
+        # applied once at the base case.
+        scenario_net = net_collectible_revenue(scenario_revenue, return_rate)
+        scenario_remittance = periodic_payment(scenario_net, share_rate)
         duration_months = (math.ceil(repayment_cap / scenario_remittance)
                            if scenario_remittance > 0 else None)
         out.append({
@@ -289,6 +324,7 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
             "label": label,
             "assumption": "system_derived_metric" if key == "base" else "assumption",
             "scenario_monthly_revenue": scenario_revenue,
+            "net_collectible_revenue": scenario_net,
             "periodic_remittance": scenario_remittance,
             "repayment_duration_months": duration_months,
             "merchant_retained_revenue_pct": round(1 - remittance_pct, 4),
@@ -303,7 +339,7 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
     # at that point is unrecovered — there is no later period to collect it in.
     # Reported as an amount and a share of the cap rather than a duration,
     # because "duration" has no meaning for a balance that is never reached.
-    base_remittance = periodic_payment(to_vnd(monthly_revenue), share_rate)
+    base_remittance = periodic_payment(net_collectible_revenue(monthly_revenue, return_rate), share_rate)
     months_paid = CLOSURE_SCENARIO_MONTH - 1
     collected = min(to_vnd(base_remittance * months_paid), repayment_cap)
     unrecovered = to_vnd(repayment_cap - collected)
@@ -422,8 +458,11 @@ def risk_findings(features: dict) -> list[dict]:
 def build_financing_analysis(features: dict, risk_tier: str, requested_amount: Optional[float] = None) -> dict:
     """Orchestrates the full deterministic RBF analysis for one submission."""
     revenue = revenue_metrics(features.get("monthly_revenue", 0), features.get("revenue_growth", 0))
-    structure = financing_structure(features.get("monthly_revenue", 0), risk_tier, requested_amount)
-    scenarios = scenario_analysis(features.get("monthly_revenue", 0), features.get("revenue_growth", 0), structure)
+    return_rate = features.get("return_rate", 0) or 0
+    structure = financing_structure(features.get("monthly_revenue", 0), risk_tier, requested_amount,
+                                    return_rate=return_rate)
+    scenarios = scenario_analysis(features.get("monthly_revenue", 0), features.get("revenue_growth", 0),
+                                  structure, return_rate=return_rate)
     risks = risk_findings(features)
     missing = [f["resolution_needed"] for f in risks if f.get("resolution_needed")]
     return {

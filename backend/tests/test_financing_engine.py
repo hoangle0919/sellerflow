@@ -14,6 +14,7 @@ from financing_engine import (
     build_financing_analysis,
     effective_apr,
     _base_case_payments,
+    net_collectible_revenue,
 )
 
 GOOD_FEATURES = {
@@ -300,3 +301,81 @@ def test_base_case_payment_stream_sums_to_the_cap_exactly():
     assert len(payments) == 26
     assert payments[-1] == 10_500_000
     assert sum(payments) == 310_500_000
+
+
+# ── Collection on net sales (spec amendment A-1) ──────────────────────────────
+
+def test_remittance_is_collected_on_net_sales_not_gross():
+    """A returned order is refunded — the merchant never keeps that money, so
+    remitting on gross charges a share of revenue that does not exist.
+
+    150,000,000/mo at a 10% return rate: net 135,000,000, remittance
+    135,000,000 * 0.08 = 10,800,000, exactly 90% of the gross-based 12,000,000.
+    """
+    gross = financing_structure(150_000_000, "Low Risk")
+    net = financing_structure(150_000_000, "Low Risk", return_rate=0.10)
+    assert gross["periodic_remittance"] == 12_000_000
+    assert net["periodic_remittance"] == 10_800_000
+    assert net["net_collectible_revenue"] == 135_000_000
+    assert net["collection_base"] == "net_of_returns"
+    assert net["return_rate_applied"] == 0.10
+
+
+def test_netting_changes_what_is_collected_never_what_is_owed():
+    """The correction is to the collection base, not to the price. The advance
+    and the cap are tier policy on gross annual revenue and must not move —
+    otherwise a high-return merchant would silently be offered a smaller deal
+    as well as a slower one."""
+    gross = financing_structure(150_000_000, "Low Risk")
+    net = financing_structure(150_000_000, "Low Risk", return_rate=0.10)
+    assert net["recommended_amount"] == gross["recommended_amount"]
+    assert net["repayment_cap"] == gross["repayment_cap"]
+    # Same cap, smaller instalment -> the term stretches. That is the provider's
+    # cost of charging fairly, and it should be visible rather than absorbed.
+    assert net["base_case_duration_months"] > gross["base_case_duration_months"]
+
+
+def test_the_overcharge_removed_scales_with_the_return_rate():
+    """The merchants most overcharged by gross collection are the ones with the
+    highest returns, whose margins are already thinnest."""
+    base = financing_structure(150_000_000, "Low Risk")["periodic_remittance"]
+    overcharge = [base - financing_structure(150_000_000, "Low Risk",
+                                             return_rate=r)["periodic_remittance"]
+                  for r in (0.05, 0.20, 0.40)]
+    assert overcharge == sorted(overcharge)          # monotonically increasing
+    assert overcharge[0] > 0
+
+
+def test_default_return_rate_leaves_gross_collection_unchanged():
+    """A caller that supplies no return rate gets net == gross, the correct
+    degenerate case — so this amendment cannot silently alter an existing
+    structure computed without one."""
+    assert net_collectible_revenue(150_000_000) == 150_000_000
+    assert (financing_structure(150_000_000, "Low Risk")["periodic_remittance"]
+            == financing_structure(150_000_000, "Low Risk", return_rate=0.0)["periodic_remittance"])
+
+
+def test_return_rate_is_clamped_so_collection_can_never_go_negative():
+    assert net_collectible_revenue(100_000_000, -0.5) == 100_000_000   # below 0
+    assert net_collectible_revenue(100_000_000, 2.0) == 5_000_000      # clamped at 0.95
+
+
+def test_scenarios_collect_on_the_same_net_base_as_the_structure():
+    """Returns scale with sales, so the netting travels into every scenario
+    rather than being applied once at the base case."""
+    s = financing_structure(150_000_000, "Low Risk", return_rate=0.10)
+    rows = {r["case"]: r for r in scenario_analysis(150_000_000, 0.10, s, return_rate=0.10)}
+    assert rows["base"]["net_collectible_revenue"] == 135_000_000
+    assert rows["base"]["periodic_remittance"] == 10_800_000
+    # -20% revenue -> 120,000,000 gross, 108,000,000 net, 8,640,000 remittance
+    assert rows["moderate_decline"]["net_collectible_revenue"] == 108_000_000
+    assert rows["moderate_decline"]["periodic_remittance"] == 8_640_000
+
+
+def test_end_to_end_analysis_applies_the_submitted_return_rate():
+    """build_financing_analysis must pass the merchant's own return rate
+    through — the amendment is worthless if only direct callers get it."""
+    features = dict(GOOD_FEATURES, monthly_revenue=150_000_000, return_rate=0.10)
+    s = build_financing_analysis(features, "Low Risk")["structure"]
+    assert s["return_rate_applied"] == 0.10
+    assert s["periodic_remittance"] == 10_800_000
