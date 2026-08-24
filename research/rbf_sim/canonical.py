@@ -175,8 +175,18 @@ def source_state(declared_outputs: Iterable[str] = ()) -> Dict[str, Any]:
     committed source" from "generated from uncommitted edits", which is the one
     question it exists to answer.
 
-    `declared_outputs` are basenames under `results/`. Anything else modified
-    is real source dirtiness and is reported.
+    Two exclusions, for two different reasons.
+
+    `declared_outputs` are the specific files this run creates, excluded by
+    name. And `results/` as a whole is excluded because it holds OUTPUTS, not
+    source: a full regeneration runs the generators in sequence, so each one
+    would otherwise see the artifacts written by the ones before it and report
+    a dirty source tree caused entirely by its own siblings. "Was this
+    generated from committed source?" is a question about source.
+
+    Anything modified outside `results/` is real source dirtiness and is
+    reported, with the offending paths named so the answer is checkable rather
+    than a bare boolean.
     """
     porcelain = _git("status", "--porcelain")
     if porcelain is None:
@@ -186,14 +196,26 @@ def source_state(declared_outputs: Iterable[str] = ()) -> Dict[str, Any]:
     declared = {os.path.basename(p) for p in declared_outputs}
     residual = []
     for line in porcelain.splitlines():
-        path = line[3:].strip().strip('"')
+        if not line.strip():
+            continue
+        # Porcelain v1 is "XY PATH", but the status field width is not worth
+        # trusting -- an earlier version sliced a fixed [3:] and cut the first
+        # character off every path, so the exclusion never matched. Split on
+        # whitespace instead and take the last field (renames read "old -> new";
+        # the destination is what exists on disk).
+        path = line.split()[-1].strip('"')
         if os.path.basename(path) in declared:
+            continue
+        if f"{os.sep}results{os.sep}" in f"{os.sep}{path}" or path.startswith("results/"):
             continue
         residual.append(path)
     return {
         "source_commit": _git("rev-parse", "HEAD"),
         "source_tree_dirty": bool(residual),
         "source_dirty_paths": sorted(residual)[:20] or None,
+        "source_state_scope": ("Tracked source outside research/results/. "
+                               "Generated artifacts are outputs, not source, "
+                               "and are excluded."),
     }
 
 
