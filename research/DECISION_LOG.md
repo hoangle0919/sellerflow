@@ -1038,3 +1038,94 @@ fails — but the production cause is not. `ENVIRONMENT.md` records Python 3.10
 as a known gap where scikit-learn 1.9 cannot install, and there is no
 interpreter pin for the builder. That is a candidate, not a finding. The next
 deploy's logs and `sklearn_runtime` will settle it.
+
+---
+
+## D-048 — Final publication-integrity reconciliation
+**Date:** 2026-08-20 · **Branch:** `publication-final` (unpushed at time of writing)
+**Raised by:** an independent read-only gate that passed the branch on engineering
+and visual grounds and failed it on claim consistency and stale provenance.
+
+**Decision: correct seven wording/provenance families and one factual error of
+my own before the branch is publishable.** No formula, generator, settlement
+routine or registered artifact changes; all five canonical checksums are
+unchanged and `research/results/` is untouched.
+
+**1. A factual error I introduced, corrected.** D-047 and the manifest stated
+that in every environment this project has run in, neither Playwright nor
+Chromium was available. **That is false.** D-036 records "browser tests 5 → 9
+with no skips" — the nine browser checks *passed* in a browser-capable run. The
+agreed wording now used everywhere: *1,030 non-browser tests pass — 401 backend
+and 629 simulation. Nine browser checks are defined and excluded from that
+total. They passed in the earlier browser-capable run recorded at D-036. In
+environments lacking Playwright or Chromium they skip; pytest may report one
+skipped module or nine skipped cases depending on what is installed.* Three
+things were being conflated: passing tests, browser checks defined, and a skip
+count that is a property of the machine rather than of the suite.
+
+**2. The PR body was an obsolete hardening description.** It carried six claims
+that are no longer true — 0.92 "purged from the API", 5/5 cross-platform byte
+identity, the whole RBF-G guardrail never activating, `validation_v1` not
+canonicalized, 196 tests, the Simulation Lab as future work — plus a stale
+commit range. Replaced with a current description of the publication package,
+the runtime disclosure, and the actual reproducibility position: byte equality
+is platform-dependent and not claimed across platforms, and only the narrower
+N-2′ floor null survives while the ceiling binds 6,009 of 36,000.
+
+**3. `PAPER_OUTLINE.md` claimed Gate A was untouched.** Its header said "nothing
+here amends a Gate A document" and its checklist asserted "No Gate A document
+edited", while D-047 had in fact made editorial corrections to Gate-A prose in
+`DERIVATIONS.md`, `CLAIM_LEDGER.md` and `RESULTS_REGISTRY.md`. The header now
+states that those corrections happened, are logged here, and changed no formula,
+generator or registered artifact. The opening argument also carried the
+forbidden "structural behaviour unchanged" phrasing as an assertion — removed,
+along with "that flexibility is not free" and "it is not insurance", both of
+which smuggle in a universal provider-side direction that P4 forbids. The two
+surviving occurrences of the phrase are prohibitions against writing it.
+
+**4. Unconditional scorer descriptions.** `README.md` and `index.html` described
+the RF+LR ensemble as the scoring path without qualification, which misdescribes
+any deploy running the heuristic — including, on present evidence, the live one.
+All now name the **active scorer** and state that neither path has measured
+predictive validity. `README.md` also claimed RBF "turns platform data" into an
+analysis; the prototype connects to no platform API, so this is now
+merchant-submitted operational data with direct integration named as design
+intent, not shipped.
+
+**5. Target versus realised cost, and APR without completion.** Two remaining
+instances of "contractual cost" meant the contractual repayment *target*, and
+P6(b) asserted that identical terms produce different APRs without saying among
+what. Both families were searched rather than patched at the reported instances:
+P6(b) and its §9.1 restatement are now qualified to **completed paths with
+IRR-defined payment streams**, with the further point that on a non-completing
+path no realised total exists to discount and the APR is *undefined*, not merely
+different. Corrected in the manuscript, `DERIVATIONS.md` and the outline.
+
+**6. Deck.** Slide 2 said any revenue stop leaves a balance unrecovered, which
+`temp_closure` contradicts — 2.0% incomplete at `f = 1.20` and 0.0% at `f*`.
+Replaced with the precise condition: permanent cessation *before completion
+while a contractual balance remains*. Slide 13's calibration-versus-causal-
+identification statement now carries a `[Sources]` block naming it as this
+project's own methodological inference and pointing at `MANUSCRIPT.md` §13 — no
+external citation was invented for it, because none supports it.
+
+**7. Tests strengthened without changing the count.** The four parametrized
+stale-statement fixtures became one test looping over six, freeing room for
+three new checks at a constant 22: `/api/health` must expose `scoring_path`,
+`sklearn_runtime` and `scoring_path_note` with the note naming the tier and the
+affected terms and leaking no credentials; the hero badge must retain its
+fail-closed `ACTIVE SCORER — UNKNOWN` path and must not ship asserting a scorer;
+and public scorer copy must be conditional. A fixture list that grows on every
+retraction should not make the suite's headline count drift for reasons
+unrelated to coverage.
+
+**Consequence.** Backend 401 passed / 9 skipped, simulation 629 passed — counts
+unchanged by this pass, so no downstream figure needed republishing.
+`MANUSCRIPT.pdf` 17 pages, zero text outside the media box, four metadata fields
+set. `RBF_DECK.pptx` 13 slides, 13 notes slides, `[Sources]` on 12 of 13 — slide
+1 is the title and states no externally sourced claim. Five canonical checksums
+verified unchanged.
+
+**Left alone deliberately.** The California SB 362 citation is unchanged; it has
+been independently confirmed against the official chaptered text. Dated records
+are still not rewritten.

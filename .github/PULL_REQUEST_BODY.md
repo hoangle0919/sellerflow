@@ -1,94 +1,65 @@
-Integrates the audited simulation research foundation and four hardening corrections. Seven commits, `42b7b1e` → `ae78bfc`. Verified natively on macOS/arm64 with Python 3.11.5.
+Publication package for the revenue-contingent financing study, plus the runtime-disclosure corrections found while preparing it. Branch `publication-final`, based on `f652b94`.
 
-`research-foundation` does not need merging separately — `42b7b1e` is the first commit in this branch.
-
----
-
-## 1. Simulation research foundation
-
-Integrates research bundle v5 (SHA-256 `6b86194a…f606811`, verified at integration) into `research/`: a frozen methodology spec, seven proved propositions in `DERIVATIONS.md`, a simulation package with accounting identities enforced by test, an append-only decision log, and a results registry. This repository is now the source of truth; earlier bundle copies are historical backups.
-
-The quantitative contribution is a **deterministic, line-by-line-verifiable comparison of fixed-payment and revenue-based financing** — not default prediction. It needs no labels.
-
-## 2. Circular AUC withdrawal
-
-The previously reported 0.92 AUC is withdrawn. `generate_data.py` built the `defaulted` label by evaluating a hand-written weighted formula over **the same ten features the model consumed**, so the model was scored on rediscovering a formula written 60 lines away. Measured: the generating function scores **0.9098** against its own label versus the model's **0.9182** — the figure measured the chosen noise variance, not skill.
-
-`GET /api/model/status` now returns `auc: null`, `validation_status: "withdrawn"`, `reason: "synthetic circular-label benchmark"`. Purged from the API, the demo script, the UI and the README. The key is nulled rather than deleted — an absent field reads as "not built yet", not "retracted".
-
-Deliberately **not** withdrawn: the UCI cross-validation (0.80 German Credit, 0.77 Taiwan default) on real borrowers with real adjudicated outcomes. Different claim, asserted by test so a future over-broad purge can't take it.
-
-Enforced by `backend/tests/test_no_withdrawn_claims.py`, a source scanner over every shipped surface that fails on any unexplained `0.92` and requires each permitted occurrence to carry a written reason.
-
-## 3. Deterministic canonical artifacts
-
-`baseline_v2.json` embedded `date.today()`: every quantity reproduced bit-for-bit, but the *file* did not, so it could not be cited by checksum.
-
-Split into `baseline_v2_canonical.json` (result + deterministic identity: schema version, spec version, generator fingerprint, scenario-config hash) and `baseline_v2_provenance.json` (wall-clock, git commit, interpreter/library versions, and the canonical checksum). The original is **preserved unmodified** as historical evidence and is no longer written by `run_baseline.py`; a test asserts it still agrees with the canonical artifact on every number.
-
-Canonical SHA-256 `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849`, reproduced byte-for-byte on both Linux and macOS.
-
-`source_commit` lives in provenance, not canonical: committing the artifact changes `HEAD`, which changes what the next run emits, so it could never be both committed and reproducible. Code identity is captured by a hash of the generating source instead.
-
-## 4. Reproducible environment
-
-Model artifacts are never committed (`*.pkl` is gitignored); production trains its own at deploy. The test suite nonetheless loaded whatever `.pkl` was on the developer's disk, so it passed or failed depending on whose machine ran it.
-
-`load_models()` guarded only `joblib.load`. A pickle from a different scikit-learn **unpickles successfully and raises at first use**, so the guard caught the easy failure and missed the dangerous one — which took down the entire test suite at collection. Every artifact is now smoke-tested against a fixed feature row at load, and failure is classified: `artifacts_absent` / `artifact_unreadable` / `artifact_incompatible`.
-
-`scikit-learn>=1.4.0` had no ceiling — exactly what lets a build/consume mismatch appear silently. Now bounded, with Python ≥ 3.11 documented in `backend/ENVIRONMENT.md`.
-
-## 5. Integer-VND ROUND_HALF_UP policy
-
-`financing_engine` computed contractual money with binary floats and Python's `round()` — **banker's** rounding, ties to even — while the documented settlement policy is **ROUND_HALF_UP** on integer đồng. Deterministic divergence at ties, reachable at ~1 in 10,000 whole-VND revenues.
-
-| | revenue 2,500 | revenue 100,002,500 |
-|---|---|---|
-| advance | 4,000 → **5,000** | 180,004,000 → **180,005,000** |
-| cap | 4,600 → **5,750** | 207,004,600 → **207,005,750** |
-| type | `float` → **`int`** | `float` → **`int`** |
-
-`backend/money.py` holds the product policy in a fixed order: raw advance (Decimal, built from strings) → ROUND_HALF_UP to the 1,000 VND increment → cap from the **rounded** advance → ROUND_HALF_UP to whole đồng → quantize candidate payment → clip to the remaining balance. Rounding before clipping is what makes "cumulative never exceeds the cap" unconditional.
-
-Production does **not** import the research package; the rule is shared, the implementations are separate, and seven cross-layer parity fixtures keep them from drifting.
-
-**A correction to an earlier claim in this branch's own history:** a gate report asserted the engine over-collected by up to 5.77% of the cap. That was wrong — it computed the total as `duration × remittance`, assuming every payment is full-size. Across 6,794 structures the settled total **never** exceeds the cap. The wrong claim, its correction and the evidence are all retained in `DECISION_LOG.md` (D-029, D-030).
-
-## 6. Final-payment disclosure
-
-The API emitted `(cap, remittance, duration)` with no indication the final payment is partial — which is precisely what produced the error above. Every structure and scenario row now carries `illustrative_schedule`: full-payment count and amount, the partial final payment, completion month, total contractual repayment, and explicit statements that the projection **holds revenue constant** and is **not a guaranteed payment or duration**.
-
-## 7. Native macOS verification
-
-macOS 26.0 / arm64, Python 3.11.5, commit `68b8c3d`. Resolved: scikit-learn 1.9.0, numpy 2.4.6, pandas 2.3.3, joblib 1.5.3 — all inside the declared bounds. Both suites pass with counts identical to Linux, so nothing was masked. Canonical checksum reproduces byte-for-byte. `/api/health` 200. The run exercised the **ensemble acceptance** path, complementing the sandbox which only exercised rejection.
-
-Evidence committed at `evidence/2026-08-07-native-macos-verification.md`, sanitized — no usernames, absolute paths, credentials, tokens, device serials or host names. `verify_native_macos.sh` reproduces it and emits sanitized output by default.
-
-## 8. Research and product limitations
-
-- **All quantitative output is simulation under modeled assumptions.** No observed seller revenue, repayment or default outcome exists in this project.
-- **The underwriting ensemble is a secondary, explicitly unvalidated component** with no measured predictive validity. The service is fully functional with no model artifact, falling back to a deterministic heuristic. The financing formulas are deterministic once a risk tier is supplied; however, the active scoring path can change the assigned tier and therefore the advance, remittance rate, cap factor, repayment amounts and eligibility.
-- **No causal claim, no significance test.** Intervals are Monte Carlo intervals over simulated paths — they measure whether enough paths were run, not population uncertainty about real sellers.
-- **No contract parameter is externally sourced.** All are illustrative or derived, with sensitivity analysis rather than claimed calibration.
-- **Null and unfavourable results are retained**, including a guardrail design (RBF-G) that provably never activates — preserved as a rejected design, and excluded from public comparisons.
-- **Not a lending service, credit offer, or financial advice.** Seeded dashboard data is labelled demo data.
-- **Known open items:** `docs/` remains gitignored; the illustrative `1.20×` cap is not a recommendation; `validation_v1.json` is not yet canonicalized (recorded in D-027).
-
-## 9. Test evidence
-
-| Suite | Before | After |
-|---|---|---|
-| Backend | 47 | **196** |
-| Simulation | — | **629** |
-
-Both green from a clean clone and natively on macOS. The 461 inherited simulation tests pass unchanged **including with the cap tolerance tightened by 10⁶**, which is direct evidence the old tolerance was never load-bearing.
-
-New suites were **mutation-tested**, not merely observed green. Deliberate defects — clipping before rounding, `ROUND_DOWN` for half-up, reintroducing a `0.5` default, an epsilon in mathematical completion, removing the cap clip, reinstating the withdrawn AUC, dropping the artifact smoke test, building `Decimal` from a binary float — are each caught. Two mutants initially survived and exposed a genuine gap in coverage; `backend/tests/test_money.py` was added to close it.
-
-## 10. No Excel dependency
-
-Confirmed: no imports, file references, paths, or data dependencies on any Excel project or file. Every remaining mention across the tree is prose recording Excel's **exclusion** (D-014) in the audit trail. No absolute host paths entered the repository.
+**This PR changes no result.** All five registered canonical artifacts are byte-unchanged, nothing under `research/results/` is touched, and no simulation engine, generator or settlement arithmetic is modified. What changes is what the repository *says*, and how a deploy reports what it is doing.
 
 ---
 
-**Do not auto-merge.** Simulation Lab work starts on a fresh `simulation-lab` branch cut from `main` after this merges.
+## 1. Publication deliverables
+
+| Artifact | State |
+|---|---|
+| `research/publication/MANUSCRIPT.md` / `.pdf` | ~8,400 words, 15 sections + Appendix A. PDF is 17 pages, built by `build_pdf.sh`, gated by `check_pdf_bounds.py` at zero text outside the media box |
+| `research/publication/RBF_DECK.pptx` | 13 slides with speaker notes; `[Sources]` blocks on the slides carrying externally sourced claims. Built by `build_deck.js` |
+| `research/publication/LITERATURE_MATRIX.md` | 44 verified sources, 6 evidence gaps stated explicitly |
+| `research/publication/PAPER_OUTLINE.md` | Every figure bound to a ledger ID and artifact path |
+| `research/publication/CAREER_PACKAGE.md` | Résumé, LinkedIn, portfolio and interview text, with a "what must never be said" table |
+
+The PDF build is three-stage because two defects could not be fixed from the markdown: reference URLs were plain text that TeX cannot break, and long artifact paths and SHA-256 digests were being clipped at the page edge — including all five registered checksums. `fix_tex.py` inserts break opportunities that emit no glyph, so extracted text is unchanged, and fills the PDF Title/Author properties pandoc leaves empty. `check_pdf_bounds.py` (requires PyMuPDF) measures the rendered result rather than trusting an overfull-hbox warning, which does not say whether the overflow was cosmetic or truncated a checksum.
+
+## 2. Runtime disclosure — the substantive fix
+
+A previous commit on `main` stated that when scoring falls back from the ensemble to the heuristic, "the numbers shown are identical either way". **That is false end to end**, and the same claim or an ambiguous variant of it was live in five places.
+
+```
+scoring_path → pd_score → risk tier → advance %, remittance %,
+                                      cap factor, eligibility
+```
+
+`ml_engine.score()` computes `pd_score` differently on each path and thresholds it into Low / Medium / High Risk; `financing_engine.RATES` keys every term off that tier. At 200M monthly revenue the repayment cap is **414,000,000 at Low Risk against 249,600,000 at Medium**, and High Risk zeroes the advance, remittance rate and cap, so no offer appears at all.
+
+Corrected in `README.md`, `frontend/index.html`, `backend/ml_engine.py`, `backend/ENVIRONMENT.md`, `verify_native_macos.sh` (which *generated* the claim into every verification report) and this file. The agreed wording throughout: **the financing formulas are deterministic once a risk tier is supplied; the active scoring path can change the assigned tier and therefore the advance, remittance rate, cap factor, repayment amounts and eligibility.**
+
+**Observability.** `railway.toml` previously ran `python train_model.py --skip-if-exists 2>/dev/null; python -m uvicorn ...`. The redirect discarded the only evidence of why training failed and the bare `;` started the service regardless, so entering the fallback was silent and indistinguishable from success. `backend/start_railway.sh` keeps the fallback — it is supported and documented — but never discards stderr, logs the failure and its consequence, and continues deliberately. `/api/health` now exposes `sklearn_runtime` alongside `scoring_path`; the startup message previously told operators to read a field that did not exist. The landing page reads the active path from `/api/health` and **fails closed**: unreachable means "ACTIVE SCORER — UNKNOWN", never "ensemble".
+
+**The underlying training failure is not diagnosed.** Training succeeds in the development sandbox (exit 0, 1.53s, 153MB peak), so the production cause is not reproduced here and no cause is asserted. The mechanism that permits a silent failure is established: `train_model.py` imports scikit-learn at module top, while `ml_engine` imports it only inside a guarded helper, so the service boots in an image without scikit-learn and only training fails. `ENVIRONMENT.md` records Python 3.10 as a known gap where scikit-learn 1.9 cannot install, and there is no interpreter pin for the builder. That is a candidate, not a finding.
+
+## 3. Claim families swept repo-wide
+
+Three families were corrected across every tracked surface rather than at the reported instance, because the recurring failure in this project has been fixing the instance and missing the family:
+
+- **Recovery ordering.** Universal formulations contradicted P4, which makes the ordering conditional on realised mean eligible base against `B* = P/r`. Both directions occur in the registered scenarios: recovery lags in the severe downturn and leads at exactly baseline revenue. Scenario-specific statements are retained where the scenario is named.
+- **Cost proportional to `f`.** Only the contractual repayment **target** `A·f` is proportional to `f`; realised repayment equals that target only upon completion.
+- **Time-sensitive negatives.** "Has never received an external submission" expires the moment anyone visits the site. Replaced with the dated form: *as of August 2026, no external merchant data were used in this study; the public deployment is a demonstration, not a lending service.*
+
+## 4. Registered artifacts and research integrity
+
+- **All quantitative output is simulation under modelled assumptions.** No observed seller revenue, repayment or default outcome exists in this project.
+- The underwriting ensemble is a **secondary, explicitly unvalidated component**. Its 0.92 AUC benchmark was withdrawn as circular (D-026): the training label was generated by a hand-written formula over the same features the model consumes. `GET /api/model/status` reports `auc: null` with `validation_status: "withdrawn"`.
+- **Intervals are Monte Carlo intervals over simulated paths** — they measure whether enough paths were run, not population uncertainty about real sellers.
+- **No contract parameter is externally sourced.** All are illustrative or derived, with sensitivity analysis rather than claimed calibration. The 18% amortizing reference is an assumption of this project, not a market rate.
+- **Reproducibility, at the strength the measurement supports.** All five artifacts reproduce numerically at published precision on every platform tested. Byte equality is **platform-dependent and not claimed across platforms**: 5/5 byte-identical on Linux/aarch64 CPython 3.10.12; on macOS CPython 3.11.5 `baseline_v2` differs in 9 last-bit floating-point values and `baseline_equalcost_v1` in 2. An earlier unqualified byte-identity claim rested on a step that re-hashed the committed file instead of regenerating it, and is withdrawn.
+- **`validation_v1` is canonicalized** (D-038) — all 174 scalars preserved, zero numeric drift, SHA-256 `f89fd2ba…`.
+- **The RBF-G guardrail null is narrow.** The hardship *floor* never activates — 0 of 36,000 month-observations, because the floor multiplier sits below the hardship threshold. The **ceiling does bind**: 6,009 of 36,000 in the breakpoint scan, changing results in 6 of 10 baseline scenarios. The earlier whole-arm null (N-2) is superseded; only N-2′ survives.
+- **The Simulation Lab is shipped**, not future work — `frontend/lab.html` + `backend/lab.py` render every figure from the canonical artifacts, with no financial arithmetic in the frontend.
+
+## 5. Tests
+
+**1,030 non-browser tests pass: 401 backend and 629 simulation.** Nine browser checks are defined and are excluded from that total. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip; pytest may report one skipped module or nine skipped cases depending on what is installed. Skips are never counted as passes.
+
+## 6. Decision log
+
+`D-047` records the scoring-path disclosure and the three-family sweep. `D-048` records this final publication-integrity reconciliation. Dated records are not rewritten: earlier decision entries keep their contemporaneous counts, `CORRECTED_CLAIMS.md` is marked as a 2026-08-03 snapshot with pointers to current state, and `evidence/2026-08-07-native-macos-verification.md` keeps its incorrect closing note under a dated addendum — an evidence record edited after the fact cannot be relied on.
+
+---
+
+**Review focus.** §2 is the one that matters operationally. The rest is documentation catching up to what the code already did.

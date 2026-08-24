@@ -22,6 +22,7 @@ Two kinds of test here, deliberately:
 `conftest.py` points RBF_MODEL_DIR at an empty directory, so the suite never
 depends on a developer's untracked .pkl files.
 """
+import json
 import os
 import re
 import sys
@@ -139,6 +140,12 @@ INVARIANCE_CLAIMS = [
     # false on its own -- "does not use it" is true of the arithmetic and
     # false of the pipeline -- and ambiguity is what let it survive review.
     r"deterministic and does not use it",
+    # Unconditional scorer descriptions. The ensemble runs only when its
+    # artifact loads; stating it flatly misdescribes a heuristic deploy.
+    r"A Random Forest and Logistic Regression ensemble produces",
+    r"The risk score comes from a trained ensemble",
+    r"[Ii]ts risk score is trained on synthetic data with a circular label",
+    r"RBF turns platform data into",
 ]
 
 # A document has to be able to quote the retracted claim in order to retract
@@ -210,22 +217,99 @@ STALE_STATEMENTS = [
     ("model_status() note",
      "The underwriting ensemble is a secondary, explicitly unvalidated "
      "component. Financing arithmetic is deterministic and does not use it."),
+    ("index.html step 2",
+     "A Random Forest and Logistic Regression ensemble produces an "
+     "unvalidated demo risk score and per-signal flags."),
+    ("README.md model description",
+     "The risk score comes from a trained ensemble and is an unvalidated "
+     "demo score, not a probability of default."),
 ]
 
 
-@pytest.mark.parametrize("origin,text", STALE_STATEMENTS,
-                         ids=[s[0] for s in STALE_STATEMENTS])
-def test_each_removed_statement_would_be_caught_if_restored(origin, text):
-    """Restoring any of these must fail the scan. Otherwise the fix is cosmetic."""
-    hits = [m for p in INVARIANCE_CLAIMS for m in re.finditer(p, text, re.I)]
-    assert hits, (
-        f"scanner does not catch the statement removed from {origin}; "
-        "it could be reintroduced without failing a test"
+def test_every_removed_statement_would_be_caught_if_restored():
+    """Restoring any of these must fail the scan. Otherwise the fix is cosmetic.
+
+    One test over all fixtures rather than one test each: the fixture list grows
+    every time a claim is retired, and a per-fixture parametrize would make the
+    suite's headline count drift for reasons that have nothing to do with
+    coverage. Failures name the origin, so diagnosis is unaffected.
+    """
+    for origin, text in STALE_STATEMENTS:
+        hits = [m for p in INVARIANCE_CLAIMS for m in re.finditer(p, text, re.I)]
+        assert hits, (
+            f"scanner does not catch the statement removed from {origin}; "
+            "it could be reintroduced without failing a test"
+        )
+        assert not all(_is_disowned(text, m) for m in hits), (
+            f"the statement from {origin} was treated as disowned in isolation "
+            "-- the disowning window is too wide"
+        )
+
+
+def test_health_endpoint_exposes_the_diagnostic_fields():
+    """start_railway.sh points operators at these. They have to exist.
+
+    A startup message naming a field the endpoint does not return is an
+    instruction that cannot be followed -- which is how the fallback went
+    unnoticed in the first place.
+    """
+    from fastapi.testclient import TestClient
+    import main
+
+    body = TestClient(main.app).get("/api/health").json()
+    for field in ("scoring_path", "sklearn_runtime", "scoring_path_note"):
+        assert field in body, f"/api/health must expose {field}"
+    assert body["scoring_path"] in ("ensemble", "heuristic")
+
+    note = body["scoring_path_note"].lower()
+    assert "tier" in note, "the note must name the risk tier as what changes"
+    for term in ("advance", "remittance", "cap factor"):
+        assert term in note, f"the note must name {term} among the affected terms"
+
+    blob = json.dumps(body).lower()
+    for leak in ("password", "api_key", "secret", "token", "/users/", "/sessions/"):
+        assert leak not in blob, f"/api/health leaked {leak!r}"
+
+
+def test_hero_badge_fails_closed():
+    """The badge must never assert the ensemble it has not confirmed.
+
+    It was previously the literal string "RF+LR ENSEMBLE v1.0", rendered
+    whether or not the artifact had loaded.
+    """
+    html = open(os.path.join(REPO, "frontend/index.html"),
+                encoding="utf-8", errors="replace").read()
+    assert "ACTIVE SCORER — UNKNOWN" in html, (
+        "the unreachable-/api/health path must fall back to an explicit "
+        "unknown state, never to a named scorer"
     )
-    assert not all(_is_disowned(text, m) for m in hits), (
-        f"the statement from {origin} was treated as disowned in isolation -- "
-        "the disowning window is too wide"
+    hero = re.search(r'id="hero-model"[^>]*>([^<]*)<', html)
+    assert hero, "hero-model element not found"
+    assert "ENSEMBLE" not in hero.group(1).upper(), (
+        f"hero badge ships asserting a scorer: {hero.group(1)!r}"
     )
+
+
+def test_public_scorer_copy_is_conditional():
+    """Describing the ensemble unconditionally misstates what may be running."""
+    unconditional = [
+        r"A Random Forest and Logistic Regression ensemble produces",
+        r"The risk score comes from a trained ensemble",
+        r"Its risk score is trained on synthetic data with a circular label",
+        r"RBF turns platform data into",
+    ]
+    for rel in ("README.md", "frontend/index.html"):
+        text = open(os.path.join(REPO, rel), encoding="utf-8",
+                    errors="replace").read()
+        for pattern in unconditional:
+            assert not re.search(pattern, text, re.I), (
+                f"{rel} describes the scorer unconditionally: {pattern!r}. "
+                "The ensemble runs only when its artifact loads; otherwise the "
+                "heuristic does. Neither has measured predictive validity."
+            )
+        assert re.search(r"active scorer|whichever scorer", text, re.I), (
+            f"{rel} must name the active scorer rather than one fixed path"
+        )
 
 
 # Every surface is scanned for the false claim; these must additionally state

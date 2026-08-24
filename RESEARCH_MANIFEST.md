@@ -88,13 +88,13 @@ pip install pytest numpy          # only dependencies
 
 # 1. Simulation suite  (expect: 629 passed)
 python3 -m pytest rbf_sim/tests/ -q
-#    Backend suite (expect: 401 passed). The suite also contains 9 Playwright
-#    browser checks. Whether those report as SKIPPED or as passes depends on
-#    the environment: they need both Playwright installed and a chromium build
-#    present. In every environment this project has run in, neither was
-#    available and pytest reported "401 passed, 9 skipped". A different machine
-#    may legitimately report a different skip count. Skips are never counted as
-#    passes; 401 is the passing figure quoted everywhere else.
+#    Backend suite (expect: 401 non-browser tests passed). The suite also
+#    contains 9 Playwright browser checks, EXCLUDED from that figure. They
+#    PASSED in the earlier browser-capable run recorded at D-036 (browser
+#    tests 5 -> 9, no skips). Where Playwright or Chromium is absent they
+#    skip, and pytest may report one skipped module or nine skipped cases
+#    depending on which of the two is missing — this sandbox reports
+#    "401 passed, 9 skipped". Skips are never counted as passes.
 python3 -m pytest ../backend/tests -q
 #    Reproducibility (byte vs numeric equality, reported separately — D-041)
 python3 verify_reproduction.py
@@ -148,7 +148,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | **401 passed.** The suite additionally contains **9 Playwright browser checks**; they run only where Playwright *and* a chromium build are both present, and in every environment used by this project neither was, so pytest reported `401 passed, 9 skipped`. The skip count is environment-dependent and is **not** part of the passing figure. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Non-browser tests passing | **1,030 — 401 backend and 629 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on what is installed — the current sandbox reports `401 passed, 9 skipped`. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |

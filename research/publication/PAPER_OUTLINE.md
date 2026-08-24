@@ -1,13 +1,17 @@
 # Paper Outline
 
-**Status:** Phase B. Gate A frozen at `af2fc2d`; nothing here amends a Gate A document.
+**Status:** Publication phase. Gate A passed at `af2fc2d`. Subsequent editorial corrections to Gate-A prose — the recovery-ordering and target-versus-cost families — are logged in **D-047** and **D-048**; they changed **no formula, no generator, and no registered artifact**, and all five canonical checksums are unchanged.
 **Governing documents:** `research/CLAIM_LEDGER.md` (what may be claimed), `research/METHODOLOGY_SPEC.md` v1.0 + A-1…A-8 (what was specified), `research/publication/LITERATURE_MATRIX.md` (what external evidence exists).
 
 ---
 
 ## The argument, in one paragraph
 
-**Pricing and payment structure are separate questions, and conflating them is the error this project made and corrected.** A revenue-contingent contract makes each payment a fixed share of realised revenue, so the seller's payment falls when revenue falls. Under adverse revenue paths this reduces the seller's payment burden relative to a fixed instalment of equal contractual cost. That flexibility is not free and it is not insurance: it changes *when* the provider is repaid, and where cumulative eligible revenue is insufficient it leaves a contractual balance unrecovered. The two effects are the same mechanism seen from opposite sides of the contract, and any honest comparison must report both. Separating the price of the contract (the cap factor `f`) from its structure (revenue-contingent versus fixed) is what makes the comparison interpretable at all — because at one price the revenue-contingent arm looks expensive, and at another it does not, while the structural behaviour is unchanged.
+**Pricing and payment structure are separate questions, and conflating them is the error this project made and corrected.** A revenue-contingent contract makes each payment a fixed share of realised revenue, so the seller's payment falls when eligible revenue falls. Under adverse revenue paths this reduces the seller's payment burden relative to a fixed instalment carrying the same contractual repayment target on the reference path.
+
+The provider side is not the mirror image of that statement. It changes *when* the provider is repaid, and the direction is conditional: revenue-contingent recovery may **lead or lag** the cost-matched fixed schedule according to the exact P4 condition on realised mean eligible base against `B* = P/r`. Both directions occur in this scenario library — recovery lags in the severe downturn and leads at exactly baseline revenue — so the direction is reported per scenario and never as a property of the structure. Where permanent cessation precedes completion while a contractual balance remains, no further payment occurs and the balance stays unrecovered. The two effects are the same mechanism seen from opposite sides of the contract, and any honest comparison must report both.
+
+Separating the price of the contract (the cap factor `f`) from its structure (revenue-contingent versus fixed) is what makes the comparison interpretable at all: at one price the revenue-contingent arm looks expensive, and at another it does not. What repricing leaves unchanged is the **pre-cap payment rule** — each payment remains the same fixed share of net sales. What it changes is the **contractual target** `A·f`, and therefore the stopping point, the terminal clipped payment, and the realised outcomes on every path. Price and payment rule are analytically separable but jointly determine what actually happens, so **do not write "structural behaviour unchanged"**.
 
 ---
 
@@ -45,7 +49,7 @@ Four strands, each with its transfer limit stated in the text:
 - State **Gap R-1** (no academic MCA literature) and **Gap R-2** (no head-to-head provider-recovery comparison) explicitly. These define the contribution.
 
 ### §4 Research question and contribution
-- Question: under identical revenue paths, how do seller burden and provider recovery move together when repayment is revenue-contingent rather than fixed, holding contractual cost constant?
+- Question: under identical revenue paths, how do seller burden and provider recovery move together when repayment is revenue-contingent rather than fixed, holding the contractual repayment target constant on the reference path?
 - Contribution: (a) the paired cost-matched design; (b) analytical propositions independent of the simulation; (c) the price/structure separation; (d) an explicit incomplete-recovery characterisation.
 
 ### §5 Contract definitions and comparison design
@@ -107,7 +111,7 @@ Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
 - At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**. State precisely what is held constant: the **pre-cap payment rule** is unchanged, the **cap factor changes the contractual target** and therefore completion timing, terminal clipping and the realised stream. Price and payment rule are analytically separable but **jointly determine realised outcomes** — do not write "structural behaviour unchanged".
 - `f* = 1.0945` is the **nearest grid match**: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v1 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
 - Same scenarios repriced **[baseline_equalcost_v1 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
-- **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): the contractual repayment target `A·f` is proportional to `f` (P6a) — and realised repayment equals that target only upon completion — while APR is jointly determined by `f` and the path (P6b), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
+- **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): the contractual repayment target `A·f` is proportional to `f` (P6a) — and realised repayment equals that target only upon completion — while APR, among completed paths with IRR-defined payment streams, is jointly determined by `f` and the path and is undefined where a path does not complete (P6b), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
 - Regulatory recognition of the comparability problem **[L-23, L-24]**; contingency carries a premium **[L-18, L-19]**.
 
 **Figure 5** — cap-factor sweep: effective APR against `f`, with the reference APR and `f*` marked, showing the step structure. **[validation_v1 → /pricing/sweep]**
@@ -151,7 +155,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 3/5 byte-identical on macOS CPython 3.11.5 (9 and 2 last-bit float differences), 5/5 on Linux 3.10.12 **[D-041, D-043]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: 629 simulation, 401 backend passed, 9 browser tests **skipped** (chromium unavailable) — skips reported as skips.
+- Test counts: **1,030 non-browser tests pass — 401 backend and 629 simulation.** Nine browser checks are defined and excluded from that total; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent. Skips are never reported as passes.
 
 ---
 
@@ -170,6 +174,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 | Uncomfortable and null results preserved | §9 (2.3× retraction), §11 (N-2′), §8 (4.25pp is a rounding artifact) |
 | Every quantitative statement has a ledger ID + artifact path | throughout |
 | Withdrawn 0.92 cited only to explain its withdrawal | §11 |
-| No Gate A document edited | — |
+| Recovery ordering stated per scenario, never as a universal direction | §8, §13; P4 |
+| Editorial corrections to Gate-A prose logged, with no formula, generator or registered artifact changed | D-047, D-048 |
 
 **If the literature contradicts a frozen claim: stop and report. Do not silently edit.**

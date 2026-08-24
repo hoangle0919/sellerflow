@@ -115,7 +115,7 @@ function source(s, t) {
   card(0.7, RBF, "For the seller",
        "Each payment is a fixed share of net sales, so the payment falls when sales fall. Before the cap is reached and before the final clipped payment, burden holds roughly flat — while the net-sales/GMV ratio stays fixed.");
   card(7.0, WARN, "For the financier",
-       "The same mechanism moves recovery — it may lead or lag a cost-matched fixed schedule depending on the realised path (P4). In the severe downturn it lags. Where revenue stops before the cap is reached, a contractual balance goes unrecovered.");
+       "The same mechanism moves recovery — it may lead or lag a cost-matched fixed schedule depending on the realised path (P4). In the severe downturn it lags. Where revenue permanently stops before completion while a contractual balance remains, no further payment occurs and the balance remains unrecovered.");
   s.addText("Reporting either side alone misstates the contract. This paper reports both, always.",
     { x: 0.7, y: 4.75, w: 11.9, h: 0.5, fontSize: 17, bold: true, color: INK,
       fontFace: "Calibri", margin: 0 });
@@ -411,7 +411,7 @@ function source(s, t) {
     s.addText(lab, { x: x + 0.32, y: 2.82, w: 3.06, h: 0.6, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 16, valign: "top", margin: 0 });
   };
   stat(0.7,  "5",     "canonical artifacts, each with a\nregistered SHA-256");
-  stat(4.80, "1,030", "tests passing — 401 backend,\n629 simulation");
+  stat(4.80, "1,030", "non-browser tests passing —\n401 backend, 629 simulation");
   stat(8.90, "44",    "verified sources, with 6\nevidence gaps stated openly");
   s.addText("Reproducibility, stated at the strength the measurement supports", { x: 0.7, y: 3.85, w: 11.9, h: 0.4, fontSize: 16, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
   s.addText([
@@ -419,7 +419,7 @@ function source(s, t) {
     { text: "Byte equality holds within a fixed runtime, not across platforms — 3 of 5 byte-identical on macOS CPython 3.11.5, 5 of 5 on Linux 3.10.12.", options: { bullet: true, breakLine: true } },
     { text: "An earlier claim of unqualified byte-for-byte reproducibility rested on a step that re-hashed the committed file rather than regenerating it. Both the claim and the evidence were corrected.", options: { bullet: true } },
   ], { x: 0.7, y: 4.35, w: 11.9, h: 1.9, fontSize: 13, color: "333333", fontFace: "Calibri", paraSpaceAfter: 8, margin: 0 });
-  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. 9 browser tests skip where no chromium build is available — reported as skips, never counted as passes.",
+  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,030 figure is non-browser: 401 backend and 629 simulation. Nine browser checks are defined and excluded from it; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent.",
     { x: 0.7, y: 6.25, w: 11.9, h: 0.6, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", lineSpacing: 15, margin: 0 });
   notes(s, "The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.", [
     "Five registered SHA-256 digests: MANUSCRIPT.md §15; RESULTS_REGISTRY.md",
@@ -445,7 +445,11 @@ function source(s, t) {
   ], { x: 0.9, y: 3.0, w: 11.5, h: 2.4, fontSize: 16, color: "D8D8D8", fontFace: "Calibri", lineSpacing: 24, margin: 0 });
   s.addText("Calibration and causal identification are different problems. Observed data solves only the first.",
     { x: 0.9, y: 5.65, w: 11.5, h: 0.6, fontSize: 17, bold: true, color: PAPER, fontFace: "Calibri", margin: 0 });
-  s.addNotes("Close on the limitation, not on the result. It is the most defensible note to end on.");
+  notes(s, "Close on the limitation, not on the result. It is the most defensible note to end on. Be clear that the calibration/identification split is our own reasoning about method, not a result we measured and not a finding we are attributing to anyone else.", [
+    "Calibration versus causal identification: this project's own methodological inference, argued in MANUSCRIPT.md §13. No external source is cited for it, and none should be invented",
+    "Why observational data cannot supply the counterfactual: each seller takes at most one contract — MANUSCRIPT.md §2, Gap R-2",
+    "Search protocol behind that gap: LITERATURE_MATRIX.md §0.1, documented through 2026-08-13",
+  ]);
 }
 
 pres.writeFile({ fileName: "RBF_DECK.pptx" }).then(() => console.log("wrote RBF_DECK.pptx"));

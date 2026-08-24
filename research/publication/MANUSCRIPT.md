@@ -30,7 +30,7 @@ Access to finance is a persistent constraint on small enterprises in developing 
 
 The motivating application setting for this study is small e-commerce sellers in Vietnam, a policy-salient digital and e-commerce economy (L-02). **The availability of transaction records to a financier is a modelling premise of this study, not something L-02 or any other source we reviewed establishes.** We make no claim that Vietnamese platforms grant financiers access to seller revenue, returns, orders or fulfilment data, and no claim about seller-level observability in that market. **This study is Vietnam-motivated and illustratively parameterised, not Vietnam-calibrated.** No parameter in the specification was estimated from Vietnamese data, and we make no claim about the prevalence of thin credit-bureau files among Vietnamese sellers; we found no source that would support one.
 
-Continuously recorded revenue makes a particular contract mechanically possible: repayment as a fixed percentage of revenue, continuing until a contractual cap is reached. The question this paper addresses is what that contract does — to the seller, and to the financier — relative to a fixed instalment of the same contractual cost, under the same revenue path.
+Continuously recorded revenue makes a particular contract mechanically possible: repayment as a fixed percentage of revenue, continuing until a contractual cap is reached. The question this paper addresses is what that contract does — to the seller, and to the financier — relative to a fixed instalment with the same contractual repayment target on the reference path, under the same revenue path.
 
 ---
 
@@ -62,7 +62,7 @@ Two firm-side and household-side sources bear on the mechanism but test differen
 
 ## 4. Research question and contribution
 
-**Question.** Under identical revenue paths, how do seller payment burden and provider recovery move together when repayment is revenue-contingent rather than fixed, holding contractual cost constant?
+**Question.** Under identical revenue paths, how do seller payment burden and provider recovery move together when repayment is revenue-contingent rather than fixed, holding the contractual repayment target constant on the reference path?
 
 **Contribution**, in order of what we think carries weight:
 
@@ -150,7 +150,7 @@ This section is an **analytical verification layer**, not a set of claimed novel
 
 **P5 — Under-reporting.** If the provider observes `ω·B_t`, cumulative recovery scales exactly by ω and the required cumulative base rises by `1/ω`. **Duration does not scale by `1/ω`** — the threshold does, and duration is first passage to it. Only **uncapped** payments rescale; the final payment is clipped to the remaining balance and need not scale. Invariance of the total is conditional on the cap still being reached.
 
-**P6 — Cost and rate.** (a) `A·f` is the contractual repayment **target**, path-independent; realised total repayment equals it **only upon completion**. (b) Effective APR is not a well-defined property of the contract: two sellers on identical terms face different APRs purely because revenue arrives at different speeds.
+**P6 — Cost and rate.** (a) `A·f` is the contractual repayment **target**, path-independent; realised total repayment equals it **only upon completion**. (b) Effective APR is not a well-defined property of the contract: **among completed paths with IRR-defined payment streams**, two sellers on identical terms face different APRs purely because revenue arrives at different speeds. On a path that never completes there is no realised total to discount, and no effective APR is defined at all.
 
 **P7 — Completion, exactly.** The contract completes over horizon `H` **iff there exists a finite `t ≤ H` with `S_t ≥ Θ`**, where `Θ = f·A/r`. For a **finite** `H` this reduces to `S_H ≥ Θ`, since `S_k` is non-decreasing. For an unbounded lifetime it does not reduce: the limit is not a partial sum. Writing `S_∞` for the lifetime sum, `S_∞ > Θ` strictly implies completion, `S_∞ < Θ` precludes it at any horizon, and `S_∞ = Θ` completes only if a finite partial sum **attains** `Θ` — which a strictly positive infinite series never does. Under geometric decline the condition is `ρ > ρ*` **strictly**, where `ρ* = 1 − r·B₀/(f·A)`: **11/12 ≈ 0.9167 at `f = 1.20` and 0.9086 at `f* = 1.0945`** **[M-6]**. The threshold moves with the price, so 11/12 must never be quoted as *the* threshold.
 
@@ -198,7 +198,7 @@ Repricing under the identical payment rule **[`baseline_equalcost_v1_canonical.j
 
 ### 9.1 A retraction, reported as part of the result
 
-An earlier version of this project stated that "RBF costs approximately 2.3× the interest of a conventional loan." **That claim is withdrawn**, and the reason is the argument of this section. It was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic, when P6(a) shows the **contractual repayment target `A·f` is proportional to `f`** — and realised repayment equals that target **only when the contract completes**, so even the target is not a realised cost on every path; and it quoted a single effective APR as though it were a contract property, when P6(b) shows APR is jointly determined by the price and the revenue path.
+An earlier version of this project stated that "RBF costs approximately 2.3× the interest of a conventional loan." **That claim is withdrawn**, and the reason is the argument of this section. It was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic, when P6(a) shows the **contractual repayment target `A·f` is proportional to `f`** — and realised repayment equals that target **only when the contract completes**, so even the target is not a realised cost on every path; and it quoted a single effective APR as though it were a contract property, when P6(b) shows that **among completed paths with IRR-defined payment streams** the APR is jointly determined by the price and the revenue path — and that on non-completing paths it is undefined rather than merely different.
 
 We report the retraction rather than quietly correcting it because it is the concrete instance of the conflation this paper argues against, produced by this project while actively trying to avoid it. That it survived several earlier drafts is the useful part of the anecdote.
 
@@ -368,7 +368,7 @@ An earlier version of this project claimed byte-for-byte reproducibility without
 
 **A disclosed inconsistency.** Each artifact embeds a metadata field `canonical.determinism` carrying the superseded unqualified claim. The artifacts were **not** regenerated to correct it, because doing so would change all five registered checksums in order to fix a sentence about reproducibility. The field is marked superseded in `research/RESULTS_REGISTRY.md`, and a regression test asserts that no public surface renders it.
 
-**Tests.** 629 simulation tests and 401 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
+**Tests.** **1,030 non-browser tests pass: 401 backend and 629 simulation.** Nine browser checks are defined and **excluded from that total**. They passed in the earlier browser-capable run recorded at D-036. In environments lacking Playwright or Chromium they skip; pytest may report one skipped module or nine skipped cases depending on what is installed. Skips are never counted as passes.
 
 **Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
 
