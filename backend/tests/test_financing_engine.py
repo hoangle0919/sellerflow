@@ -12,6 +12,8 @@ from financing_engine import (
     scenario_analysis,
     risk_findings,
     build_financing_analysis,
+    effective_apr,
+    _base_case_payments,
 )
 
 GOOD_FEATURES = {
@@ -237,3 +239,64 @@ def test_build_financing_analysis_bad_profile_has_more_gaps():
     # Existing obligations (previous_loans > 0), Data completeness (always) -> 5/7.
     assert len(result["information_needed"]) == 5
     assert result["data_completeness_pct"] == pytest.approx(28.6, abs=0.5)
+
+
+# ── Effective APR (SB 362): the factor rate is not a price ────────────────────
+
+def test_apr_travels_with_the_factor_rate():
+    """A factor of 1.15 is 15% of the advance, but says nothing about *when*.
+    The annualised cost of the base-case stream ships beside it.
+
+    Low Risk @ 150,000,000/mo: advance 270,000,000, cap 310,500,000,
+    remittance 12,000,000 -> 25 full payments + a 10,500,000 clipped tail.
+    The IRR of that stream annualises to ~13.6%.
+    """
+    s = financing_structure(150_000_000, "Low Risk")
+    assert s["factor_rate"] == 1.15
+    assert s["effective_apr_base_case"] == pytest.approx(0.1361, abs=5e-4)
+
+
+def test_apr_rises_as_the_term_shortens_which_is_why_a_factor_is_not_a_price():
+    """The same 1.15 costs more over 12 months than over 26. This is the whole
+    reason SB 362 treats a bare factor rate as a confusing representation, and
+    the reason the APR is computed per-structure rather than per-tier."""
+    principal, cap = 100_000_000, 115_000_000
+    apr_12 = effective_apr(principal, _base_case_payments(cap, cap / 12))
+    apr_26 = effective_apr(principal, _base_case_payments(cap, cap / 26))
+    assert apr_12 == pytest.approx(0.301, abs=5e-3)   # ~30% over a year
+    assert apr_26 == pytest.approx(0.135, abs=5e-3)   # ~13.5% stretched out
+    assert apr_12 > 2 * apr_26
+
+
+def test_the_cheaper_looking_tier_is_the_expensive_one():
+    """Medium Risk carries the higher factor AND the shorter term (a smaller
+    advance against a larger remittance), so its annualised cost is several
+    times Low Risk's. Reading the factors alone (1.15 vs 1.30) understates the
+    gap badly — which is exactly what the APR is here to prevent."""
+    low = financing_structure(150_000_000, "Low Risk")
+    med = financing_structure(150_000_000, "Medium Risk")
+    assert med["base_case_duration_months"] < low["base_case_duration_months"]
+    assert med["effective_apr_base_case"] > 4 * low["effective_apr_base_case"]
+
+
+def test_declined_structure_reports_a_null_apr_not_zero():
+    """High Risk proposes no structure. The APR key stays present so consumers
+    do not KeyError, but it is None — 0.0 would read as free money."""
+    s = financing_structure(150_000_000, "High Risk")
+    assert "effective_apr_base_case" in s
+    assert s["effective_apr_base_case"] is None
+
+
+def test_apr_is_none_where_undefined_rather_than_a_misleading_number():
+    assert effective_apr(0, [1_000_000]) is None          # no principal
+    assert effective_apr(1_000_000, []) is None           # no payments
+    assert effective_apr(1_000_000, [0, 0]) is None       # nothing collected
+
+
+def test_base_case_payment_stream_sums_to_the_cap_exactly():
+    """The clipped tail must not over- or under-collect: an over-collecting
+    final payment would overstate the APR."""
+    payments = _base_case_payments(310_500_000, 12_000_000)
+    assert len(payments) == 26
+    assert payments[-1] == 10_500_000
+    assert sum(payments) == 310_500_000

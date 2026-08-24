@@ -690,6 +690,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
             <div class="decision-row"><span>Remittance</span><span id="hd-rate">8% of revenue</span></div>
             <div class="decision-row"><span>Repayment cap</span><span id="hd-pd">382,950,000₫</span></div>
             <div class="decision-row"><span>Est. duration</span><span id="hd-dur">26 months</span></div>
+            <div class="decision-row"><span>Cost (APR)</span><span id="hd-apr">—</span></div>
             <a class="hero-full-link" id="hero-full-link" onclick="heroViewFull()">View full assessment →</a>
           </div>
         </div>
@@ -1114,6 +1115,7 @@ async function runConsole(){
     decision:data.decision, pd:data.pd_score,
     recommended_amount_vnd:s.recommended_amount, remittance_pct:s.remittance_pct,
     repayment_cap_vnd:s.repayment_cap, base_case_duration_months:s.base_case_duration_months,
+    factor_rate:s.factor_rate, effective_apr_base_case:s.effective_apr_base_case,
     model:data.model_version, response_time_ms:ms
   },null,2);
   badge.style.display='inline-block'; badge.textContent=ms+'ms';
@@ -1247,6 +1249,8 @@ function renderStructure(structure, financing){
   rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+' of monthly revenue':'—']);
   rows.push(['Repayment cap', fmtVND(structure.repayment_cap)]);
   rows.push(['Base-case repayment term', structure.base_case_duration_months?structure.base_case_duration_months+' months':'—']);
+  rows.push(['Effective APR (base case)', structure.effective_apr_base_case!=null?pct(structure.effective_apr_base_case,1):'—']);
+  rows.push(['Factor rate', structure.factor_rate?structure.factor_rate.toFixed(2)+'×':'—']);
   const severe=(financing.scenarios||[]).find(sc=>sc.case==='severe_decline');
   rows.push(['Downside repayment term (-40% revenue)', severe&&severe.repayment_duration_months?severe.repayment_duration_months+' months':'—']);
   rows.push(['Data completeness', financing.data_completeness_pct!=null?financing.data_completeness_pct+'%':'—']);
@@ -1534,6 +1538,11 @@ function heroRenderDecision(d, ms){
   document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);
   const dur=structure.base_case_duration_months;
   document.getElementById('hd-dur').textContent=dur?dur+(dur===1?' month':' months'):'—';
+  /* The factor rate alone hides the price: the same 1.15 costs far more over
+     12 months than over 26, so the annualised cost travels with it. Null where
+     the IRR is undefined — shown as a dash, never as 0%. */
+  const apr=structure.effective_apr_base_case;
+  document.getElementById('hd-apr').textContent=(apr!=null)?pct(apr,1)+' APR':'—';
   document.getElementById('hero-chips').innerHTML=renderChips(d.signals||{});
   document.getElementById('hero-reason').textContent=d.reasoning||'';
   heroLastData=d;

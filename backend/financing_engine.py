@@ -51,6 +51,55 @@ TIER_PARAMS = {
 MIN_MEANINGFUL_GROWTH = 0.05  # floor used only to keep the "growth case" distinct from base
 
 
+def effective_apr(principal: float, payments: List[float], iters: int = 300) -> Optional[float]:
+    """Annualised IRR of the advance's actual cash flows, by bisection.
+
+    A factor rate is not a rate: 1.15 says nothing about *when* the money comes
+    back, and the same factor is far more expensive over 12 months than over
+    36. California SB 362 (in force 2026-01-01) names quoting a factor rate
+    without an annualised cost a confusing representation, so the APR travels
+    with the factor everywhere the factor is shown.
+
+    Same method as the registered simulation (`research/rbf_sim/contracts.py::
+    solve_apr`) — reimplemented here rather than imported, because the deployed
+    backend must not depend on the research package. Returns None where the IRR
+    is undefined (no sign change in the bracket); undefined is reported as
+    undefined and never silently dropped or replaced with 0.
+    """
+    if principal <= 0 or not payments or sum(payments) <= 0:
+        return None
+
+    def npv(i: float) -> float:
+        return -principal + sum(p / (1.0 + i) ** (t + 1) for t, p in enumerate(payments))
+
+    lo, hi = 1e-12, 2.0
+    if npv(lo) * npv(hi) > 0:
+        return None
+    for _ in range(iters):
+        mid = (lo + hi) / 2.0
+        if npv(lo) * npv(mid) <= 0:
+            hi = mid
+        else:
+            lo = mid
+    monthly = (lo + hi) / 2.0
+    return (1.0 + monthly) ** 12 - 1.0
+
+
+def _base_case_payments(cap: float, remittance: float) -> List[float]:
+    """The base-case payment stream: constant remittance until the cap is
+    reached, with the final payment clipped to the remaining balance (D-030).
+    The clip matters — treating the last period as a full remittance would
+    over-collect and overstate the APR."""
+    if remittance <= 0 or cap <= 0:
+        return []
+    n_full = int(cap // remittance)
+    payments = [remittance] * n_full
+    tail = cap - n_full * remittance
+    if tail > 0:
+        payments.append(tail)
+    return payments
+
+
 def revenue_metrics(monthly_revenue: float, revenue_growth: float, revenue_history: Optional[List[float]] = None) -> dict:
     """Revenue-shape metrics. Only computes what the submitted data actually supports.
 
@@ -143,6 +192,9 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
             "requested_amount": requested_amount,
             "remittance_pct": 0.0,
             "factor_rate": 0.0,
+            # Key present with a null value rather than absent: a consumer that
+            # reads the APR must not KeyError on a declined structure.
+            "effective_apr_base_case": None,
             "repayment_cap": 0,
             "periodic_remittance": 0,
             "base_case_duration_months": None,
@@ -157,6 +209,7 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
     cap = repayment_cap(amount, rates["factor_rate"])
     remittance = periodic_payment(monthly_revenue, rates["remittance_pct"])
     duration_months = math.ceil(cap / remittance) if remittance > 0 else None
+    apr = effective_apr(amount, _base_case_payments(cap, remittance))
 
     return {
         "risk_tier": risk_tier,
@@ -166,6 +219,14 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
         "exceeds_recommendation": exceeds_recommendation,
         "remittance_pct": params["remittance_pct"],
         "factor_rate": params["factor_rate"],
+        # The factor rate's annualised cost on the base-case timing. Depends on
+        # duration, so it moves with revenue even though the factor does not —
+        # which is exactly why the factor alone is not a price (SB 362).
+        "effective_apr_base_case": (round(apr, 4) if apr is not None else None),
+        "apr_basis": ("Annualised IRR of the base-case payment stream "
+                      "(constant remittance at the reported revenue, final "
+                      "payment clipped to the cap). Faster repayment raises it; "
+                      "a decline lengthens the term and lowers it."),
         "repayment_cap": cap,
         "total_contractual_repayment": cap,
         "periodic_remittance": remittance,
