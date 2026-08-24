@@ -6,8 +6,9 @@
 WHY THE TWO ARE REPORTED SEPARATELY. Until D-041 this project claimed its
 artifacts "reproduce byte-for-byte". That claim was made on Linux and is not
 true everywhere: an independent regeneration on macOS / CPython 3.11.5 produced
-9 last-bit floating-point differences in `baseline_v2` and 2 in
-`baseline_equalcost_v1`. Byte equality is a statement about a *serialization* on
+9 last-bit floating-point differences in the baseline and 2 in the
+cost-matched track (measured on the v2/v1 generation; the finding is about
+the platform, not the artifact version). Byte equality is a statement about a *serialization* on
 one platform; numeric equality at published precision is the statement a reader
 actually needs. Collapsing them hid a real cross-platform limitation behind a
 stronger-sounding word.

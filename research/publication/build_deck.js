@@ -313,7 +313,10 @@ function source(s, t) {
     { text: "Timing decides it, not zero revenue as such. ", options: { bold: true } },
     { text: "A temporary three-month cessation leaves 2.0% of paths incomplete at f = 1.20 and none at f*. Closure from month 7 leaves every path incomplete under both cap factors.", options: {} },
   ], { x: 0.7, y: 5.3, w: 11.9, h: 0.9, fontSize: 14, color: "333333", fontFace: "Calibri", lineSpacing: 20, margin: 0 });
-  source(s, "baseline_closure_v1 and baseline_closure_equalcost_v1 → /scenarios/*/RBF   ·   claim-ledger S-3, S-4");
+  // The stem sweep matched "<name>_canonical" and bare "<name> →", and missed
+  // this footer because it names two artifacts joined by "and". The plotted
+  // values are unchanged; only the citation was pointing at the superseded pair.
+  source(s, "baseline_closure_v2 and baseline_closure_equalcost_v2 → /scenarios/*/RBF   ·   claim-ledger S-3, S-4");
   notes(s, "Note the price effect: closure_m13 falls from 76.2% to 7.6% on the cap factor alone. Same structure, nearer threshold.", [
     "S-3 | baseline_closure_v2_canonical.json \u2192 /scenarios/*/RBF/incomplete_recovery_rate",
     "S-4 | baseline_closure_equalcost_v2_canonical.json \u2192 same paths",
@@ -420,7 +423,7 @@ function source(s, t) {
     s.addText(lab, { x: x + 0.32, y: 2.82, w: 3.06, h: 0.6, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 16, valign: "top", margin: 0 });
   };
   stat(0.7,  "5",     "canonical artifacts, each with a\nregistered SHA-256");
-  stat(4.80, "1,042", "non-browser tests passing —\n403 backend, 639 simulation");
+  stat(4.80, "1,080", "non-browser tests passing —\n437 backend, 643 simulation");
   stat(8.90, "44",    "verified sources, with 6\nevidence gaps stated openly");
   s.addText("Reproducibility, stated at the strength the measurement supports", { x: 0.7, y: 3.85, w: 11.9, h: 0.4, fontSize: 16, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
   bullets(s, [
@@ -428,7 +431,7 @@ function source(s, t) {
     "Byte equality holds within a fixed runtime, not across platforms — 3 of 5 byte-identical on macOS CPython 3.11.5, 5 of 5 on Linux 3.10.12.",
     "An earlier claim of unqualified byte-for-byte reproducibility rested on a step that re-hashed the committed file rather than regenerating it. Both the claim and the evidence were corrected.",
   ], { x: 0.7, y: 4.3, w: 11.9, step: 0.58, fontSize: 12.5, color: "333333", fontFace: "Calibri", lineSpacing: 16, margin: 0 });
-  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,042 figure is non-browser: 403 backend and 639 simulation. Nine browser checks are defined and excluded from it; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent.",
+  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,080 figure is non-browser: 437 backend and 643 simulation. Nine browser checks are defined and excluded from it; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent.",
     { x: 0.7, y: 6.25, w: 11.9, h: 0.6, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", lineSpacing: 15, margin: 0 });
   notes(s, "The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.", [
     "Five registered SHA-256 digests: MANUSCRIPT.md §15; RESULTS_REGISTRY.md",

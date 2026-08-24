@@ -119,7 +119,7 @@ Severe downturn **[baseline_v3 → /scenarios/severe_downturn]**:
 ### §10 Closure, incomplete recovery and censoring
 - Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid identical at the cap **[S-2]** — **horizon- and scenario-bounded**, and none of those ten reaches zero revenue. Must never appear without §10's closure results.
 - Closure at `f = 1.20` **[S-3 | baseline_closure_v2 → /scenarios/*/RBF]**: `closure_m7` **100.0%** incomplete (RR(24) 44.30%); `closure_m13` **76.2%** (RR(24) 96.53%); `temp_closure` **2.0%** (RR(24) 99.98%).
-- At `f* = 1.0945` **[S-4 | baseline_closure_equalcost_v1]**: **100.0%**, **7.6%**, **0.0%**. The `closure_m13` figure moves by a factor of ten with **price alone** — P6a made visible.
+- At `f* = 1.0945` **[S-4 | baseline_closure_equalcost_v2]**: **100.0%**, **7.6%**, **0.0%**. The `closure_m13` figure moves by a factor of ten with **price alone** — P6a made visible.
 - **Incomplete recovery ≠ principal loss** **[I-3]**. `closure_m13` recovers ≈214.3M against a 185M advance — principal covered despite 76.2% incomplete. Only `closure_m7` (≈98.3M) shows a principal shortfall, and it recovers the **same absolute amount at both cap factors** because that path is revenue-limited, not cap-limited.
 - **Censoring, two different denominators (A-9).** `duration_mean` is computed over completing paths — a survivor statistic estimating `E[T | completion occurs by horizon H]`, not `E[T]`. `apr_mean` is computed over **IRR-defined** paths, which is a different and generally larger set: an incomplete path that made payments still has a rate. In `closure_m13` at `f = 1.20` that is 119 completed against 500 rate-defined. Never share one qualifier between them. Do **not** write `E[T | T ≤ C]`: `C` is already the VND contractual cap. Framed via **[L-36, L-37]**, machinery via **[L-33, L-34, L-35]**. Per **Gap M-2**, the downward bias is argued as a mathematical consequence and **no source is cited as having quantified it**.
 - A short mean duration beside a high incomplete-recovery rate is not a fast contract — it is one where the slow paths were dropped rather than counted.
@@ -155,7 +155,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 3/5 byte-identical on macOS CPython 3.11.5 (9 and 2 last-bit float differences), 5/5 on Linux 3.10.12 **[D-041, D-043]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: **1,042 non-browser tests pass — 403 backend and 639 simulation.** Nine browser checks are defined and excluded from that total; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent. Skips are never reported as passes.
+- Test counts: **1,080 non-browser tests pass — 437 backend and 643 simulation.** Nine browser checks are defined and excluded from that total; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent. Skips are never reported as passes.
 
 ---
 

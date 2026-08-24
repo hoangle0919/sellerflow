@@ -48,13 +48,13 @@ Three families were corrected across every tracked surface rather than at the re
 - **Intervals are Monte Carlo intervals over simulated paths** — they measure whether enough paths were run, not population uncertainty about real sellers.
 - **No contract parameter is externally sourced.** All are illustrative or derived, with sensitivity analysis rather than claimed calibration. The 18% amortizing reference is an assumption of this project, not a market rate.
 - **Reproducibility, at the strength the measurement supports.** All five artifacts reproduce numerically at published precision on every platform tested. Byte equality is **platform-dependent and not claimed across platforms**: 5/5 byte-identical on Linux/aarch64 CPython 3.10.12; on macOS CPython 3.11.5 the baseline differs in 9 last-bit floating-point values and the cost-matched track in 2. An earlier unqualified byte-identity claim rested on a step that re-hashed the committed file instead of regenerating it, and is withdrawn.
-- **`validation_v2` is canonicalized** (D-038, regenerated under A-9) — SHA-256 `7fce85ab…`. Its predecessor `validation_v1` is retained unchanged.
+- **`validation_v2` is canonicalized** (D-038, regenerated under A-9) — SHA-256 `ba79342e…`. Its predecessor `validation_v1` is retained unchanged.
 - **The RBF-G guardrail null is narrow.** The hardship *floor* never activates — 0 of 36,000 month-observations, because the floor multiplier sits below the hardship threshold. The **ceiling does bind**: 6,009 of 36,000 in the breakpoint scan, changing results in 6 of 10 baseline scenarios. The earlier whole-arm null (N-2) is superseded; only N-2′ survives.
 - **The Simulation Lab is shipped**, not future work — `frontend/lab.html` + `backend/lab.py` render every figure from the canonical artifacts, with no financial arithmetic in the frontend.
 
 ## 5. Tests
 
-**1,042 non-browser tests pass: 403 backend and 639 simulation.** Nine browser checks are defined and are excluded from that total. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip; pytest may report one skipped module or nine skipped cases depending on what is installed. Skips are never counted as passes.
+**1,080 non-browser tests pass: 437 backend and 643 simulation.** Nine browser checks are defined and are excluded from that total. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip; pytest may report one skipped module or nine skipped cases depending on what is installed. Skips are never counted as passes.
 
 ## 6. Decision log
 

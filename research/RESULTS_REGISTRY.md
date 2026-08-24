@@ -16,23 +16,23 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 
 | Artifact | SHA-256 | Status |
 |---|---|---|
-| `results/baseline_v3_canonical.json` | `2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674` | **Canonical (A-9). Cite this.** See R-014. |
-| `results/baseline_equalcost_v2_canonical.json` | `5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58` | **Canonical (A-9).** Cost-matched track. |
-| `results/baseline_closure_v2_canonical.json` | `ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f` | **Canonical (A-9).** Closure track, `f = 1.20`. |
-| `results/baseline_closure_equalcost_v2_canonical.json` | `f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df` | **Canonical (A-9).** Closure track, `f* = 1.0945`. |
-| `results/validation_v2_canonical.json` | `7fce85ab39913bf47e6a17867802540c608d6ac84f444780cff97859317656d3` | **Canonical (A-9).** Cite this for validation figures. |
+| `results/baseline_v3_canonical.json` | `818c145ad557ea1f95311fe80d311252103464ba7a7ecac602aab67374ae8308` | **Canonical (A-9). Cite this.** See R-014. |
+| `results/baseline_equalcost_v2_canonical.json` | `9cc6885a3d0d2d54fb08ae85301ae5889e7059f2780cdcfca693b3a8ec47802d` | **Canonical (A-9).** Cost-matched track. |
+| `results/baseline_closure_v2_canonical.json` | `c032625a8e7c17c55a590eac673e447f178fdb192812fe98ee6df0b6e228fd75` | **Canonical (A-9).** Closure track, `f = 1.20`. |
+| `results/baseline_closure_equalcost_v2_canonical.json` | `de7de916cfa73b7ff1c3b153f068ecdae90670ad4e0283e27c9ce36bb544458a` | **Canonical (A-9).** Closure track, `f* = 1.0945`. |
+| `results/validation_v2_canonical.json` | `ba79342ef2865a8a439f3f1a22a9481952c459b96e11f88e8d3be3384fd5b682` | **Canonical (A-9).** Cite this for validation figures. |
 | `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **SUPERSEDED by A-9 (D-049).** Preserved byte-for-byte; the record of what was published before 2026-08-20. Do not cite as current. |
 | `results/baseline_v2_provenance.json` | *(varies by run — that is its purpose)* | Execution record for the above |
 | `results/baseline_v2.json` | `b09ae1f7ec3a92c6b751222f639cc562ee793d71c453298612a5d30e6da356e0` | **Frozen historical evidence.** Not rewritten. Numerically identical to the canonical artifact (0 differing leaves); differs only by an embedded run date. |
 | `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Reference-path cost-matched pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
-| `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the above |
+| `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the superseded artifact above |
 | `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
 | `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f* = 1.0945 (D-032). |
 | `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
 | `results/validation_v1_provenance.json` | *(varies by run)* | Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
 | `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Frozen historical evidence.** The pre-canonicalization source, retained unmodified. Re-running the whole battery reproduces it with exactly one difference — `_meta.date` — and zero numeric drift. |
 
-Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v2_canonical.json`
+Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v3_canonical.json`
 
 > ### ⚠️ Embedded metadata field `canonical.determinism` is SUPERSEDED — not corrected in place (D-043)
 >
@@ -146,7 +146,7 @@ Under a −40% sustained decline, distress-month counts (T-0):
 
 - **F-1 — trade-off quantified.** Severe downturn: RBF removes 6.24 [6.19, 6.28] high-burden months (θ=0.15) at a cost of 32.5pp [32.3, 32.8] lower 12-month recovery and duration 12.0 → 18.3 months. Benefit and cost both scale with shock severity.
 - **F-2 ⚠️ against the product — ~~"costs ~2.3× the interest of a conventional loan"~~ SUPERSEDED (D-015, `CORRECTED_CLAIMS.md` #2, `DERIVATIONS.md` P6).** The arithmetic stands: Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. The *interpretation* does not. P6 shows the contractual repayment **target** `A·f` is proportional to `f` — realised repayment equals that target only upon completion — and that APR is jointly determined by `f` and the revenue path, so a ratio computed at the illustrative `f = 1.20` is a **pricing** result, not a property of revenue-based repayment. Correct framing: at the illustrative 1.20× cap the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at the reference-path cost-matched `f* = 1.0945` it is not. **Do not quote the 2.3× ratio.**
-- **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
+- **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** *(figures below are from the superseded `baseline_v2` generation, retained as the record of what was published.)* Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
 - **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue. ~~a genuine structural advantage~~ → **superseded (A-8, D-043): this is contractual schedule invariance, not a demonstrated advantage.** The model assumes fixed payments are made in full and on time, so it cannot compare *realized* collection between the arms. Original wording follows for the audit trail: a genuine structural advantage of FIX.
 - **F-5 ⚠️ null — ~~"bit-identical to RBF in all ten scenarios"~~ SUPERSEDED (D-040).** The **floor** never binds — 0 of 36,000 month-observations, provably unreachable since `μ = 0.25 < h = 0.50`. The **ceiling** does bind — 6,009 of 36,000 month-observations in the breakpoint scan — in 6 of 10 baseline scenarios, and those are exactly the 6 where RBF-G differs numerically from RBF. By field: `apr_mean` in 6, `burden_mean` in 6, `recovery_ratio` in 3, `duration_mean` in 1. Present the surviving null as *"the hardship floor never activates by construction"*, never as *"the guardrails never bind"*.
 
@@ -247,11 +247,11 @@ the frozen metric definitions (backlog R-02) per decision D-004.
 
 | Artifact | SHA-256 |
 |---|---|
-| `baseline_v3_canonical.json` | `2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674` |
-| `baseline_equalcost_v2_canonical.json` | `5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58` |
-| `baseline_closure_v2_canonical.json` | `ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f` |
-| `baseline_closure_equalcost_v2_canonical.json` | `f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df` |
-| `validation_v2_canonical.json` | `7fce85ab39913bf47e6a17867802540c608d6ac84f444780cff97859317656d3` |
+| `baseline_v3_canonical.json` | `818c145ad557ea1f95311fe80d311252103464ba7a7ecac602aab67374ae8308` |
+| `baseline_equalcost_v2_canonical.json` | `9cc6885a3d0d2d54fb08ae85301ae5889e7059f2780cdcfca693b3a8ec47802d` |
+| `baseline_closure_v2_canonical.json` | `c032625a8e7c17c55a590eac673e447f178fdb192812fe98ee6df0b6e228fd75` |
+| `baseline_closure_equalcost_v2_canonical.json` | `de7de916cfa73b7ff1c3b153f068ecdae90670ad4e0283e27c9ce36bb544458a` |
+| `validation_v2_canonical.json` | `ba79342ef2865a8a439f3f1a22a9481952c459b96e11f88e8d3be3384fd5b682` |
 
 **Superseded, preserved byte-for-byte:** `baseline_v2`, `baseline_equalcost_v1`,
 `baseline_closure_v1`, `baseline_closure_equalcost_v1`, `validation_v1`. These
@@ -263,6 +263,7 @@ and are asserted unchanged by `backend/tests/test_validation_artifact.py`.
 
 | Pair | Leaves | APR fields moved | New denominator keys | Unexpected |
 |---|---|---|---|---|
+| *(superseded → current; every row below names a preserved, historical artifact)* | | | | |
 | `baseline_v2` → `v3` | 1105 → 1285 | 25 | 180 | 0 |
 | `baseline_equalcost_v1` → `v2` | 862 → 1022 | 20 | 160 | 0 |
 | `baseline_closure_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |

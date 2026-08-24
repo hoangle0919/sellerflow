@@ -1228,3 +1228,102 @@ findings are untouched, and the product's financing arithmetic never used this
 layer at all.
 
 **Suites:** 403 backend passed / 9 skipped, 639 simulation passed.
+
+---
+
+## D-050 — A-9 round 2: the engine was right, everything around it was not
+**Date:** 2026-08-24 · **Branch:** `publication-final` (unpushed at time of writing)
+**Raised by:** an independent audit of the A-9 migration.
+**Status:** APPLIED. D-049 is preserved as dated history; the APR passages of
+D-034, D-036, D-044 and D-048 remain superseded as recorded there.
+
+**The mathematics of A-9 was sound and its headline figures never moved.** All
+six registered closure rates are bit-identical before and after this pass, and a
+leaf comparison of the round-1 artifacts against the round-2 ones shows **zero
+data leaves changed** — only spec identifiers and generator fingerprints. What
+failed was synchronisation: the engine was corrected and the documents, the Lab,
+the artifact identity and the verifier went on describing the old rule.
+
+**Nine defects, each reproduced before it was touched.**
+
+**1–2. The solver had a ceiling I chose rather than derived.** `IRR_MAX_MONTHLY
+= 10.0` made `solve_apr(100, [1200])` return `None`, though its unique monthly
+IRR is 11 — the same failure A-9 exists to remove, relocated from the lower
+bound to the upper one. And a root sitting exactly on an endpoint was discarded,
+because the code demanded a strict sign change: `solve_apr(100, [1100])` has
+monthly IRR exactly 10.0. Replaced with an analytic bound `i* ≤ S/P − 1`, valid
+for `i > 0`; the inequality **reverses** below zero, which cost one iteration to
+notice — for `S < P` the root is negative and `NPV(0) = S − P < 0` brackets it
+directly. Endpoint roots are recognised. The single documented numerical limit
+is float64 overflow in annualisation above roughly `i = 1.4e25`.
+
+**3–5. The Lab confused completion with rate-definition.** `censored` meant
+`0 < completed < 1`, so `closure_m7` — where **0 of 500** paths complete —
+reported `censored: False`, took the uncensored branch, and printed *"Every path
+completed under both."* The same flag gates the page's basis text, so a reader
+saw a −86.51% rate and a blank duration with no explanation of either. The
+cross-arm rate comparison branched on that duration flag and then quoted
+completion shares as the rate's denominator.
+
+Now: `censored` is any incompleteness, `fully_censored` marks the total case,
+the rate comparison branches on the **APR-defined** shares, completion is
+reported separately and never inferred, and where the target is unreached the
+figure is labelled an observed-window IRR and paired with the completion share.
+
+**A further defect surfaced while fixing it:** `lab.html` rendered
+`duration_basis` under a single heading covering "these averages" and **never
+rendered `apr_basis` at all** — so the denominator and the observed-window
+caveat, the entire point of A-9, stopped at the API boundary and never reached a
+reader. Both bases are now rendered under separate headings.
+
+**6. The verifier asked for files that no longer exist.** Every entry paired a
+current canonical with a superseded provenance stem. Repaired and pinned.
+
+**7. Provenance measured its own contamination.** `build_provenance` sampled
+`git status` *after* writing the canonical file, so every sidecar recorded
+`source_tree_dirty: true` caused by its own output — destroying the one question
+provenance answers. Two further defects in the fix, both found by regenerating
+and reading the sidecars rather than trusting the change: a fixed `[3:]` slice
+cut the first character off every path so the exclusion never matched, and
+`_git()` returns `None` both on failure and on empty output — which is exactly
+what a clean tree produces, so the cleanest possible result was reported as
+"unknown". `results/` is now excluded as a category, because it holds outputs
+and the question is about source.
+
+The round-1 sidecars also recorded `source_commit: b91d2796`, a commit **amended
+away** and unreachable from the branch — an artifact claiming descent from
+something that does not exist. All five now record `a58e696`, reachable, with a
+clean source tree.
+
+**8. Artifacts disagreed with themselves about their own specification.**
+Top-level `spec` read v1.0 with no amendments in `baseline_v3`, `A-1..A-7` in
+three others and `A-1..A-3` in `validation_v2`, while `canonical.spec_version`
+said `A-1..A-9`.
+
+**9. A claim I wrote in round 1 contradicted A-9.** P6(b) and its restatements
+said *"on a path that never completes there is no realised total to discount,
+and no effective APR is defined at all"* — written in the same pass that
+introduced A-9, whose central example is `closure_m7`: completes on no path,
+defined rate of −86.5129%. Corrected in `DERIVATIONS.md`, `MANUSCRIPT.md` and
+`PAPER_OUTLINE.md`.
+
+**Terminology boundary, new in this pass.** `b047cc8` put an effective APR on
+the product surface. It is the annualised IRR of one deterministic base-case
+schedule for one merchant. The Lab's APR is a mean observed-window IRR across
+the rate-defined paths of a registered scenario. Same words, different
+calculation, different data, different evidentiary weight.
+`tests/test_apr_surface_boundary.py` asserts each surface keeps saying which one
+it is and that neither claims the other validates it. The incoming product
+formulas were not reopened.
+
+**Artifacts regenerated a third time**, from a clean committed tree, so
+provenance could honestly record what produced them. Superseded five unchanged
+throughout. New stem-currency scanner (`test_artifact_stem_currency.py`) is
+contextual rather than a blanket ban: a superseded name inside a marked
+historical block is the audit trail, and only an unmarked one is a defect. It
+carries the deck's slide-8 footer — two artifacts joined by "and", which no
+suffix-based sweep matched — as a fixture.
+
+**Consequence.** Backend 403 → 437 passing, simulation 639 → 643. Verifier runs
+from a clean temporary checkout at exit 0, 5/5 byte-identical and 5/5
+numerically equal. Manuscript 17 → 18 pages. Deck unchanged at 13 slides.

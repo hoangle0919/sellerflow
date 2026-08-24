@@ -362,11 +362,11 @@ All entries verified against a publisher deposit, DOI resolution, or the issuing
 
 | Artifact | SHA-256 |
 |---|---|
-| `baseline_v3_canonical.json` | `2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674` |
-| `baseline_equalcost_v2_canonical.json` | `5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58` |
-| `baseline_closure_v2_canonical.json` | `ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f` |
-| `baseline_closure_equalcost_v2_canonical.json` | `f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df` |
-| `validation_v2_canonical.json` | `7fce85ab39913bf47e6a17867802540c608d6ac84f444780cff97859317656d3` |
+| `baseline_v3_canonical.json` | `818c145ad557ea1f95311fe80d311252103464ba7a7ecac602aab67374ae8308` |
+| `baseline_equalcost_v2_canonical.json` | `9cc6885a3d0d2d54fb08ae85301ae5889e7059f2780cdcfca693b3a8ec47802d` |
+| `baseline_closure_v2_canonical.json` | `c032625a8e7c17c55a590eac673e447f178fdb192812fe98ee6df0b6e228fd75` |
+| `baseline_closure_equalcost_v2_canonical.json` | `de7de916cfa73b7ff1c3b153f068ecdae90670ad4e0283e27c9ce36bb544458a` |
+| `validation_v2_canonical.json` | `ba79342ef2865a8a439f3f1a22a9481952c459b96e11f88e8d3be3384fd5b682` |
 
 **Superseded by A-9 (D-049), preserved byte-for-byte.** Every figure published
 before 2026-08-20 was computed from these files, so the record of what was
@@ -386,9 +386,9 @@ by `backend/tests/test_validation_artifact.py`.
 
 An earlier version of this project claimed byte-for-byte reproducibility without qualification, on the basis of an evidence step that re-hashed the committed file rather than regenerating it. That step could not have failed for any reason connected to determinism. Both the claim and the evidence are corrected.
 
-**A disclosed inconsistency.** Each artifact embeds a metadata field `canonical.determinism` carrying the superseded unqualified claim. The artifacts were **not** regenerated to correct it, because doing so would change all five registered checksums in order to fix a sentence about reproducibility. The field is marked superseded in `research/RESULTS_REGISTRY.md`, and a regression test asserts that no public surface renders it.
+**A resolved inconsistency, and where it survives.** The five **superseded** artifacts each embed a metadata field `canonical.determinism` carrying an unqualified byte-identity claim that D-041 withdrew. They were deliberately not rewritten: correcting a sentence *about* reproducibility by regenerating the files whose checksums record it would have destroyed the evidence in order to tidy it. That trade was reopened only when A-9 demonstrated a genuine defect in the rate layer, at which point regeneration had to happen anyway — so the **current** artifacts carry the corrected wording: numeric equality at published precision across tested platforms, byte equality only within a fixed runtime. The superseded files keep the old string, are preserved byte-for-byte as the record of what was published, and a regression test asserts that no public surface renders the field (D-043, D-044, D-049).
 
-**Tests.** **1,042 non-browser tests pass: 403 backend and 639 simulation.** Nine browser checks are defined and **excluded from that total**. They passed in the earlier browser-capable run recorded at D-036. In environments lacking Playwright or Chromium they skip; pytest may report one skipped module or nine skipped cases depending on what is installed. Skips are never counted as passes.
+**Tests.** **1,080 non-browser tests pass: 437 backend and 643 simulation.** Nine browser checks are defined and **excluded from that total**. They passed in the earlier browser-capable run recorded at D-036. In environments lacking Playwright or Chromium they skip; pytest may report one skipped module or nine skipped cases depending on what is installed. Skips are never counted as passes.
 
 **Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-9 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
 

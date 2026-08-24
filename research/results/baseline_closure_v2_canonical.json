@@ -2,7 +2,7 @@
   "base_seed": 20260803,
   "canonical": {
     "determinism": "Identical code, configuration and seeds reproduce this file NUMERICALLY at published precision on every platform tested. BYTE equality holds within a fixed runtime and is NOT claimed across platforms. Wall-clock time, git commit and environment are recorded in the provenance sidecar.",
-    "generator_fingerprint": "3d57b0392605ac0d151394ad776a514a9d74abda18dd918ef51588218123a187",
+    "generator_fingerprint": "8aad49dbc5094fdd9875e65ef2d95da63112adf02e63c11b4b8ff0eb9640c1d9",
     "scenario_config_hash": "45a5134ff520a08d6ff369dacb98c142378e3b1cbf2e149bb9cf4077179d2c81",
     "schema_version": "2.0",
     "spec_version": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9"
@@ -421,7 +421,7 @@
       }
     }
   },
-  "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+  "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
   "terms": {
     "A": 185000000.0,
     "N_B": 12,
