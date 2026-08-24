@@ -178,3 +178,68 @@ def _scratch_dirs():
     base = tempfile.gettempdir()
     return [os.path.join(base, d) for d in os.listdir(base)
             if d.startswith("rbf_verify_") and not d.startswith("rbf_verify_test_")]
+
+
+# ── A-9 round 2 (D-050): stem pairing and provenance honesty ────────────────
+
+def _load_verifier():
+    spec = importlib.util.spec_from_file_location("verify_reproduction", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_canonical_and_provenance_stems_are_never_crossed():
+    """The A-9 migration renamed canonicals and left provenance behind.
+
+    `verify_reproduction.py` asked for `baseline_v3_canonical.json` beside
+    `baseline_v2_provenance.json` — a file the current generators no longer
+    write. The run would then report a missing output for a file it had asked
+    for by the wrong name, which reads as a reproducibility failure and is not
+    one. Every declared output must share the stem of its partner.
+    """
+    mod = _load_verifier()
+    for script, _flags, outputs in mod.GENERATORS:
+        canon = [o for o in outputs if o.endswith("_canonical.json")]
+        prov = [o for o in outputs if o.endswith("_provenance.json")]
+        assert len(canon) == len(prov), f"{script}: unpaired outputs {outputs}"
+        canon_stems = sorted(o[: -len("_canonical.json")] for o in canon)
+        prov_stems = sorted(o[: -len("_provenance.json")] for o in prov)
+        assert canon_stems == prov_stems, (
+            f"{script}: crossed stems — canonical {canon_stems} against "
+            f"provenance {prov_stems}"
+        )
+
+
+def test_verifier_targets_only_current_artifact_stems():
+    """Superseded artifacts are evidence, not regeneration targets."""
+    mod = _load_verifier()
+    superseded = ("baseline_v2_", "baseline_equalcost_v1_",
+                  "baseline_closure_v1_", "baseline_closure_equalcost_v1_",
+                  "validation_v1_")
+    for _script, _flags, outputs in mod.GENERATORS:
+        for o in outputs:
+            assert not o.startswith(superseded), (
+                f"verifier tries to regenerate the superseded artifact {o}; "
+                "those are preserved byte-for-byte and must never be rewritten"
+            )
+
+
+def test_provenance_excludes_its_own_outputs_from_the_dirty_check():
+    """A sidecar must not report dirtiness it caused itself.
+
+    `build_provenance` used to sample `git status` after the canonical file had
+    already been written, so every artifact recorded `source_tree_dirty: true`
+    — which destroys the one question provenance answers: was this generated
+    from committed source?
+    """
+    sys.path.insert(0, RESEARCH)
+    from rbf_sim.canonical import source_state
+
+    declared = ("baseline_v3_canonical.json", "baseline_v3_provenance.json")
+    state = source_state(declared)
+    assert set(state) >= {"source_commit", "source_tree_dirty"}
+    for path in state.get("source_dirty_paths") or ():
+        assert os.path.basename(path) not in declared, (
+            "declared outputs must be excluded from the source-state check"
+        )

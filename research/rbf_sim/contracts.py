@@ -119,9 +119,42 @@ def fix_b_payments(terms: ContractTerms, T: int) -> List[float]:
 #: singularity of `(1+i)^-t`, so the bracket opens just above it. A monthly rate
 #: at this bound is a near-total loss; nothing below it has meaning.
 IRR_MIN_MONTHLY = -1.0 + 1e-9
-#: Upper end. A monthly rate of 10 is 100x annually -- far outside anything this
-#: contract can produce, and present only to bracket the root.
-IRR_MAX_MONTHLY = 10.0
+
+
+def irr_upper_bound(principal: float, flows: List[float]) -> float:
+    """Exact analytic upper bracket for the monthly IRR. No arbitrary ceiling.
+
+    A fixed upper bracket is a silent correctness bug, not a convenience. The
+    first version of this solver used a hard `10.0`, which returned `None` for
+    `solve_apr(100, [1200])` -- a stream whose unique monthly IRR is 11 -- and
+    reported it as "no rate exists". A ceiling chosen for comfort will always
+    be exceeded by some input, and the failure mode is indistinguishable from
+    a genuine absence.
+
+    The bound is derivable instead, in two cases, because the key inequality
+    reverses sign at `i = 0` -- which cost one iteration of this function to
+    notice.
+
+    **Repaid more than advanced (`S > P`), so the root is positive.** For any
+    `t >= 1` and `i > 0`, `(1+i)^t >= (1+i)`, so
+
+        NPV(i) = -P + sum_t f_t/(1+i)^t  <=  -P + S/(1+i)
+
+    which is `<= 0` as soon as `1+i >= S/P`. NPV is strictly decreasing, so
+    `i* <= S/P - 1`, with equality exactly in the single-payment case.
+
+    **Repaid less than advanced (`S < P`), so the root is negative.** The
+    inequality above does not hold for `i < 0`: there `(1+i) < 1`, so
+    `(1+i)^t <= (1+i)` and the direction flips. But no bound is needed --
+    `NPV(0) = S - P < 0` directly, so `0` brackets the root from above.
+
+    `S == P` puts the root exactly at `0`, which the caller handles as an
+    endpoint root.
+    """
+    total = sum(flows)
+    if principal <= 0:
+        raise ValueError("principal must be positive to bracket an IRR")
+    return max(total / principal - 1.0, 0.0)
 
 
 def solve_apr(principal: float, flows: List[float], iters: int = 400) -> Optional[float]:
@@ -179,14 +212,25 @@ def solve_apr(principal: float, flows: List[float], iters: int = 400) -> Optiona
             total += p / d
         return total
 
-    lo, hi = IRR_MIN_MONTHLY, IRR_MAX_MONTHLY
+    lo, hi = IRR_MIN_MONTHLY, irr_upper_bound(principal, flows)
     f_lo, f_hi = npv(lo), npv(hi)
 
+    # A root sitting exactly on a bracket endpoint is still a root. The previous
+    # version required a strict sign change, so `solve_apr(100, [1100])` --
+    # monthly IRR exactly 10.0, the old hard ceiling -- was reported as having
+    # no rate. With the analytic bound above, the single-payment case lands on
+    # the endpoint by construction, so this is the common case rather than a
+    # curiosity.
+    if f_hi == 0.0:
+        return _annualise(hi)
+    if f_lo == 0.0:
+        return _annualise(lo)
+
     # With one negative advance followed by non-negative payments, NPV is
-    # strictly decreasing in `i`: it tends to +inf as i -> -1+ and to
-    # -principal as i grows. So a sign change is guaranteed whenever some
-    # payment is positive, and this branch should be unreachable. It is kept
-    # because "should be unreachable" has been wrong before in this project.
+    # strictly decreasing in `i`: it tends to +inf as i -> -1+ and is <= 0 at
+    # the analytic upper bound. A sign change is therefore guaranteed whenever
+    # some payment is positive, and this branch should be unreachable. It is
+    # kept because "should be unreachable" has been wrong before in this project.
     if not (f_lo > 0 > f_hi):
         return None
 
@@ -196,4 +240,17 @@ def solve_apr(principal: float, flows: List[float], iters: int = 400) -> Optiona
             lo = mid
         else:
             hi = mid
-    return (1.0 + (lo + hi) / 2.0) ** 12 - 1.0
+    return _annualise((lo + hi) / 2.0)
+
+
+def _annualise(monthly: float) -> float:
+    """Monthly rate -> effective annual rate.
+
+    The one documented numerical limit in this module: `(1+i)**12` overflows a
+    float64 above roughly `i = 1.4e25`, which needs a stream repaying about
+    1e25x the advance in a single month. No contract this project models can
+    produce it, and a real one would be a data error. If it ever happens the
+    overflow is raised rather than silently returned as `inf`, because an
+    infinite return reported as a number is worse than a crash.
+    """
+    return (1.0 + monthly) ** 12 - 1.0

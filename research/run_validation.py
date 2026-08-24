@@ -34,7 +34,10 @@ def save(key, val):
     d = json.load(open(FP)) if os.path.exists(FP) else {}
     d[key] = val
     d["_meta"] = {"date": str(date.today()), "provenance": "SIMULATED - no observed data",
-                  "spec": "METHODOLOGY_SPEC.md v1.0 + amendments A-1..A-3",
+                  # canonicalize_validation.py reads this straight into
+                  # canonical.spec_version, so a stale value here lands
+                  # inside the registered artifact.
+                  "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
                   "base_terms": BASE, "R0": R0}
     json.dump(d, open(FP, "w"), indent=2, default=str)
     print(f"\n  [saved '{key}' -> {FP}]")

@@ -50,19 +50,19 @@ RESULTS = os.path.join(HERE, "results")
 #: runs, and recreation is confirmed. Nothing else is touched.
 GENERATORS = (
     ("run_baseline.py", (), ("baseline_v3_canonical.json",
-                             "baseline_v2_provenance.json")),
+                             "baseline_v3_provenance.json")),
     ("run_equal_cost_baseline.py", (), ("baseline_equalcost_v2_canonical.json",
-                                        "baseline_equalcost_v1_provenance.json")),
+                                        "baseline_equalcost_v2_provenance.json")),
     ("run_closure_baseline.py", (), ("baseline_closure_v2_canonical.json",
-                                     "baseline_closure_v1_provenance.json",
+                                     "baseline_closure_v2_provenance.json",
                                      "baseline_closure_equalcost_v2_canonical.json",
-                                     "baseline_closure_equalcost_v1_provenance.json")),
+                                     "baseline_closure_equalcost_v2_provenance.json")),
     # `--no-registered-check`: inside this scratch tree the baselines were just
     # regenerated, so re-checking them against the registered checksums would
     # abort the run on exactly the platform whose difference we are trying to
     # measure. See the flag's rationale in `canonicalize_validation.py`.
     ("canonicalize_validation.py", ("--write", "--no-registered-check"),
-     ("validation_v2_canonical.json", "validation_v1_provenance.json")),
+     ("validation_v2_canonical.json", "validation_v2_provenance.json")),
 )
 
 ARTIFACTS = (

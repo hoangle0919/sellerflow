@@ -178,7 +178,11 @@ def main():
     os.makedirs("results", exist_ok=True)
     payload = {
         "run": "baseline_v3",
-        "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03)",
+        # Must match canonical.spec_version exactly. These drifted apart in
+        # the first A-9 generation: this field still read "v1.0" with no
+        # amendments while the canonical block said A-1..A-9, so an artifact
+        # disagreed with itself about which specification produced it.
+        "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
         "provenance": "SIMULATED — no observed seller data",
         "n_paths": N_PATHS, "base_seed": 20260803,
         "terms": {"A": TERMS.A, "r": TERMS.r, "f": TERMS.f, "cap": TERMS.cap,
@@ -203,7 +207,9 @@ def main():
     print("           results/baseline_v3_provenance.json")
     print(f"  SHA-256: {written['sha256']}")
     print("  Reproduce: python3 run_baseline.py  — identical code, config and")
-    print("             seeds produce a byte-identical canonical file.")
+    print("             seeds reproduce it NUMERICALLY at published precision")
+    print("             on every platform tested. BYTE equality holds within a")
+    print("             fixed runtime and is not claimed across platforms (D-041).")
     print("  Note:    results/baseline_v2.json is frozen historical evidence")
     print("           (same numbers, embedded run date) and is not rewritten.")
     print("=" * W)

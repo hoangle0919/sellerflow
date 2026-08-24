@@ -86,7 +86,7 @@ def main() -> None:
 
         payload = {
             "run": stem,
-            "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+            "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
             "provenance": "SIMULATED — no observed seller data",
             "purpose": "Closure and zero-revenue scenarios. These are the cases "
                        "where incomplete recovery is real; the ten scenarios in "

@@ -163,15 +163,54 @@ def _git(*args: str) -> Optional[str]:
         return None
 
 
-def build_provenance(canonical: Dict[str, Any], *, artifact: str) -> Dict[str, Any]:
-    """The execution record. Everything here is expected to vary between runs."""
-    dirty = _git("status", "--porcelain")
+def source_state(declared_outputs: Iterable[str] = ()) -> Dict[str, Any]:
+    """Describe the SOURCE state, excluding the outputs this run will create.
+
+    This has to be sampled before anything is written, and it has to ignore the
+    files the run declares it is about to produce. The previous version called
+    `git status --porcelain` from inside `build_provenance`, which runs *after*
+    the canonical file has already been written -- so every sidecar recorded
+    `source_tree_dirty: true`, caused by its own output. A provenance record
+    that reports dirtiness it created itself cannot distinguish "generated from
+    committed source" from "generated from uncommitted edits", which is the one
+    question it exists to answer.
+
+    `declared_outputs` are basenames under `results/`. Anything else modified
+    is real source dirtiness and is reported.
+    """
+    porcelain = _git("status", "--porcelain")
+    if porcelain is None:
+        return {"source_commit": _git("rev-parse", "HEAD"),
+                "source_tree_dirty": None, "source_dirty_paths": None}
+
+    declared = {os.path.basename(p) for p in declared_outputs}
+    residual = []
+    for line in porcelain.splitlines():
+        path = line[3:].strip().strip('"')
+        if os.path.basename(path) in declared:
+            continue
+        residual.append(path)
+    return {
+        "source_commit": _git("rev-parse", "HEAD"),
+        "source_tree_dirty": bool(residual),
+        "source_dirty_paths": sorted(residual)[:20] or None,
+    }
+
+
+def build_provenance(canonical: Dict[str, Any], *, artifact: str,
+                     source: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """The execution record. Everything here is expected to vary between runs.
+
+    `source` must be sampled by the caller *before* writing any output; see
+    `source_state`. It is computed here only as a fallback for direct callers,
+    and that path cannot exclude outputs it does not know about.
+    """
+    src = source if source is not None else source_state()
     return {
         "artifact": artifact,
         "canonical_sha256": checksum(canonical),
         "run_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source_commit": _git("rev-parse", "HEAD"),
-        "source_tree_dirty": bool(dirty) if dirty is not None else None,
+        **src,
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "numpy": _numpy_version(),
@@ -199,6 +238,11 @@ def write_canonical_pair(payload: Dict[str, Any], *, stem: str,
     results_dir = results_dir or os.path.join(_research_root(), "results")
     os.makedirs(results_dir, exist_ok=True)
 
+    # Sample the source state FIRST, and tell it which files this run is about
+    # to create. Doing it after the write made every sidecar report dirtiness
+    # it had caused itself.
+    src = source_state((f"{stem}_canonical.json", f"{stem}_provenance.json"))
+
     canonical = build_canonical(payload, scenario_config=scenario_config,
                                 spec_version=spec_version,
                                 extra_sources=extra_sources)
@@ -206,7 +250,8 @@ def write_canonical_pair(payload: Dict[str, Any], *, stem: str,
     with open(c_path, "wb") as fh:
         fh.write(canonical_bytes(canonical))
 
-    prov = build_provenance(canonical, artifact=f"{stem}_canonical.json")
+    prov = build_provenance(canonical, artifact=f"{stem}_canonical.json",
+                            source=src)
     p_path = os.path.join(results_dir, f"{stem}_provenance.json")
     with open(p_path, "wb") as fh:
         fh.write(canonical_bytes(prov))

@@ -75,7 +75,7 @@ def main() -> None:
 
     payload = {
         "run": "baseline_equalcost_v2",
-        "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+        "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
         "provenance": "SIMULATED — no observed seller data",
         "purpose": "Seller burden and provider recovery at the equal-effective-cost "
                    "cap factor f* = 1.0945, for like-for-like comparison against "

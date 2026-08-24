@@ -792,6 +792,7 @@ def test_uncensored_arms_are_not_mislabelled_as_conditional():
     for a in client.get("/api/lab/comparison/stable").json()["arms"]:
         assert a["incomplete_recovery_rate"] == 0.0
         assert a["censored"] is False
+        assert a["fully_censored"] is False
         assert a["apr_label"] == "Mean simulated APR"
         assert "every path reached the repayment target" in a["apr_basis"].lower()
         assert a["denominators_differ"] is False
@@ -801,7 +802,12 @@ def test_fully_incomplete_arms_report_duration_undefined_but_keep_their_rate():
     """Nothing completed, so there is no duration. Payments were still made."""
     for a in client.get("/api/lab/comparison/closure_m7").json()["arms"]:
         if a["incomplete_recovery_rate"] == 1.0:
-            assert a["censored"] is False       # nothing survived to condition on
+            # Nothing completed. That is total censoring, not the absence of
+            # it -- the old flag said False here and the page then hid the
+            # basis text entirely.
+            assert a["censored"] is True
+            assert a["fully_censored"] is True
+            assert a["completed_share"] == 0.0
             assert a["duration_months_mean"] is None
             assert a["effective_apr"] is not None, (
                 "A-9: an incomplete contract that paid something has a rate"
@@ -890,33 +896,63 @@ def test_settlement_table_qualifies_the_duration_cell_per_row():
 
 
 def test_arm_disclosure_carries_the_api_supplied_basis():
+    """Both bases, separately labelled — they explain different denominators.
+
+    The page used to render `duration_basis` under one heading covering "these
+    averages", which left the rate's basis unrendered entirely.
+    """
     js = open(LAB_HTML, encoding="utf-8").read()
-    assert "a.duration_basis" in js
-    assert "How these averages are computed" in js
+    assert "a.duration_basis" in js and "a.apr_basis" in js
+    assert "How the duration mean is computed" in js
+    assert "How the rate is computed" in js
+    assert "How these averages are computed" not in js, (
+        "one heading over two different denominators is the conflation A-9 removed"
+    )
 
 
 @pytest.mark.parametrize("scenario", ["closure_m13", "temp_closure"])
 def test_censored_scenarios_do_not_claim_a_pure_pricing_effect(scenario):
+    """A-9 / D-050: the rate comparison is governed by the RATE's denominator.
+
+    This test used to gate on `censored`, which is a duration property, and so
+    suppressed a legitimate rate comparison whenever completion was partial. A
+    rate averaged over 100% of paths under both arms IS like-for-like; what
+    must never happen is quoting completion shares as though they were the
+    rate's denominator, or omitting completion entirely.
+    """
     d = client.get(f"/api/lab/comparison/{scenario}").json()
     by = {a["id"]: a for a in d["arms"]}
-    if not (by["RBF-EQ"]["censored"] or by["RBF-ILL"]["censored"]):
+    eq, ill = by["RBF-EQ"], by["RBF-ILL"]
+    if not (eq["censored"] or ill["censored"]):
         pytest.skip("fixture is not censored")
     txt = " ".join(f["text"] for f in d["findings"])
-    assert "cannot be compared on rate alone" in txt
-    assert "not a like-for-like price comparison" in txt
-    assert "property of the chosen cap factor" not in txt, \
-        "pricing claim made across differently-selected subsets"
+
+    if abs(eq["apr_defined_share"] - ill["apr_defined_share"]) < 1e-9:
+        # Same rate population -> a like-for-like rate conclusion is allowed,
+        # but completion must still be stated separately, and the
+        # observed-window caveat must travel with it.
+        assert "Both means are taken over the same share of paths" in txt
+        assert "Completion is reported separately" in txt
+        assert "observed-window IRR" in txt
+    else:
+        assert "cannot be compared on rate alone" in txt
+        assert "differently selected sets" in txt
+        assert "property of the chosen cap factor" not in txt
+
+    # Never, under any branch, the retired conflation.
+    assert "Every path completed under both" not in txt
 
 
 def test_closure_m13_discloses_both_completion_shares_in_the_finding():
-    """Pinned: cost-matched completes 92.4%, illustrative 23.8%. The page must
-    not compare their survivor rates without saying so."""
+    """Pinned: completion differs (92.4% / 23.8%), rate population does not."""
     d = client.get("/api/lab/comparison/closure_m13").json()
     by = {a["id"]: a for a in d["arms"]}
     assert round(by["RBF-EQ"]["completed_share"], 3) == 0.924
     assert round(by["RBF-ILL"]["completed_share"], 3) == 0.238
+    assert by["RBF-EQ"]["apr_defined_share"] == 1.0
+    assert by["RBF-ILL"]["apr_defined_share"] == 1.0
     txt = " ".join(f["text"] for f in d["findings"])
-    assert "92.4%" in txt and "23.8%" in txt
+    assert "92.4%" in txt and "23.8%" in txt, "both completion shares must appear"
     assert f"{by['RBF-EQ']['effective_apr']:.2%}" in txt
     assert f"{by['RBF-ILL']['effective_apr']:.2%}" in txt
 
@@ -925,8 +961,33 @@ def test_uncensored_scenarios_keep_the_pricing_finding():
     d = client.get("/api/lab/comparison/stable").json()
     txt = " ".join(f["text"] for f in d["findings"])
     assert "property of the chosen cap factor" in txt
-    assert "Every path completed under both" in txt
     assert "cannot be compared on rate alone" not in txt
+    # Completion is stated from the completion share, never inferred from the
+    # rate being defined. The retired sentence asserted the former from the
+    # latter and printed it over closure_m7, where nothing completed at all.
+    assert "Every path completed under both" not in txt
+    assert "Completion is reported separately" in txt
+
+
+def test_closure_m7_never_claims_completion():
+    """The worst output of the old logic, pinned so it cannot return.
+
+    0 of 500 paths complete. `censored` was False because the old flag meant
+    "partially censored", so the page took the else-branch and asserted every
+    path completed.
+    """
+    d = client.get("/api/lab/comparison/closure_m7").json()
+    by = {a["id"]: a for a in d["arms"]}
+    for arm in ("RBF-EQ", "RBF-ILL"):
+        assert by[arm]["completed_share"] == 0.0
+        assert by[arm]["apr_defined_share"] == 1.0
+        assert by[arm]["censored"] is True
+        assert by[arm]["fully_censored"] is True
+    txt = " ".join(f["text"] for f in d["findings"])
+    for banned in ("Every path completed", "every path completed",
+                   "all paths completed"):
+        assert banned not in txt, f"closure_m7 finding claims completion: {banned!r}"
+    assert "Completion is reported separately: 0.0%" in txt
 
 
 def test_fully_incomplete_scenario_reports_a_rate_and_no_duration():

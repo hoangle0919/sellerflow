@@ -567,12 +567,26 @@ function renderArms(arms){
         kv(a.repayment_target.label, a.repayment_target.amount.display)+
         kv(a.apr_label, apr(a))+
         kv(a.duration_label, dur(a))+
-        (a.incomplete_recovery_rate>0
+        // A-9 / D-050: the two denominators are different quantities, so both
+        // are shown whenever either is partial. Showing the completion share
+        // only when recovery is incomplete hid it at exactly 0% completion.
+        (a.completed_share<1
           ? kv("Paths completing within 24 months", pct(a.completed_share,1)) : "")+
+        (a.denominators_differ
+          ? kv("Paths with a defined rate", pct(a.apr_defined_share,1)) : "")+
       '</dl>'+
+      // The rate's caveat sits next to the rate, not buried: where the target
+      // is not reached this is an observed-window figure, not the cost of a
+      // repaid contract.
+      (a.completed_share<1
+        ? '<p class="small" style="margin:6px 0 0">Observed-window rate — read it beside the completion share above.</p>' : '')+
       '<details><summary>What this contract is</summary><p>'+esc(a.note)+'</p>'+
       '<p><b>'+esc(a.repayment_target.label)+':</b> '+esc(a.repayment_target.basis)+'</p>'+
-      (a.censored ? '<p><b>How these averages are computed:</b> '+esc(a.duration_basis)+'</p>' : '')+
+      // Both bases are rendered. The page previously showed duration_basis
+      // only, so the APR's denominator and its observed-window caveat never
+      // reached the reader at all -- the exact explanation A-9 exists to give.
+      (a.censored ? '<p><b>How the duration mean is computed:</b> '+esc(a.duration_basis)+'</p>' : '')+
+      '<p><b>How the rate is computed:</b> '+esc(a.apr_basis)+'</p>'+
       '</details></article>';
   }).join("");
 }

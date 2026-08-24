@@ -25,8 +25,8 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
-from rbf_sim.contracts import (ContractTerms, IRR_MIN_MONTHLY, rbf_payments,
-                               solve_apr)
+from rbf_sim.contracts import (ContractTerms, IRR_MIN_MONTHLY, irr_upper_bound,
+                               rbf_payments, solve_apr)
 from rbf_sim.engine import run_scenario
 from rbf_sim.generator import PathParams
 from rbf_sim.metrics import duration
@@ -79,6 +79,67 @@ def test_solver_domain_opens_just_above_minus_one():
     # A near-total loss still resolves rather than raising or returning None.
     irr = solve_apr(1_000_000.0, [1.0] + [0.0] * 23)
     assert irr is not None and irr < -0.99
+
+
+def _monthly(annual):
+    return (1.0 + annual) ** (1.0 / 12.0) - 1.0
+
+
+def test_no_undocumented_ceiling_on_the_monthly_rate():
+    """A fixed upper bracket reports a real rate as "no rate exists".
+
+    The first A-9 solver bracketed `[-1+eps, 10.0]`. `solve_apr(100, [1200])`
+    has a unique monthly IRR of 11 and was returned as `None` -- reported to a
+    reader as undefined, which is the same failure mode A-9 exists to remove,
+    relocated from the lower bound to the upper one.
+    """
+    got = solve_apr(100.0, [1200.0])
+    assert got is not None, "a single 1200 on 100 has a monthly IRR of 11"
+    assert math.isclose(_monthly(got), 11.0, rel_tol=1e-9)
+
+    # And far above the old ceiling, to show the bound is derived, not chosen.
+    got = solve_apr(100.0, [100_000.0])
+    assert got is not None and math.isclose(_monthly(got), 999.0, rel_tol=1e-9)
+
+
+def test_a_root_exactly_on_a_bracket_endpoint_is_found():
+    """`solve_apr(100, [1100])` sits precisely on the old ceiling.
+
+    Requiring a strict sign change discarded it. With the analytic bound the
+    single-payment case lands on the endpoint by construction, so this is the
+    common case rather than an edge one.
+    """
+    got = solve_apr(100.0, [1100.0])
+    assert got is not None
+    assert math.isclose(_monthly(got), 10.0, rel_tol=1e-9)
+
+    # S == P puts the root exactly at zero.
+    assert math.isclose(solve_apr(100.0, [100.0]), 0.0, abs_tol=1e-12)
+
+
+def test_upper_bound_brackets_the_root_on_both_sides_of_zero():
+    """The derivation's inequality reverses at i = 0; both branches are covered.
+
+    Repaying more than advanced puts the root above zero and the bound at
+    `S/P - 1`. Repaying less puts it below zero, where that expression is not a
+    valid bound at all and `0` is used instead. An earlier revision of this
+    function used the first branch unconditionally and turned every negative
+    IRR into `None`.
+    """
+    gain = solve_apr(100.0, [40.0, 40.0, 40.0])      # S > P, root > 0
+    loss = solve_apr(100.0, [20.0, 20.0, 20.0])      # S < P, root < 0
+    assert gain is not None and gain > 0
+    assert loss is not None and loss < 0
+
+    assert irr_upper_bound(100.0, [40.0, 40.0, 40.0]) > 0
+    assert irr_upper_bound(100.0, [20.0, 20.0, 20.0]) == 0.0
+
+
+def test_registered_closure_rates_are_unchanged_by_the_bracket_fix():
+    """The bracket repair must not move any published A-9 figure."""
+    res = _closure_scenario(7, n=500)
+    assert math.isclose(res["arms"]["RBF"]["apr_mean"], -0.8651291952065058,
+                        rel_tol=1e-12)
 
 
 # --------------------------------------------------------------------------

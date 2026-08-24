@@ -357,8 +357,16 @@ def _censoring(a: dict) -> dict:
             f"beside the incomplete-recovery figure.")
 
     return {
-        # `censored` remains keyed to duration, which is what it always meant.
-        "censored": 0.0 < completed < 1.0,
+        # `censored` is keyed to duration, which is what it always meant -- but
+        # it previously read `0 < completed < 1`, so a scenario where NOTHING
+        # completed reported `censored: False`. That is the most censored case
+        # there is, and the flag gates whether the page shows its basis text at
+        # all: at closure_m7 the reader saw a rate and a blank duration with no
+        # explanation of either. Any incompleteness is now censoring, and the
+        # total case is flagged separately rather than folded into "not
+        # censored".
+        "censored": completed < 1.0,
+        "fully_censored": completed == 0.0,
         "completed_share": completed,
         "apr_defined_share": apr_defined,
         "denominators_differ": abs(apr_defined - completed) > 1e-12,
@@ -773,27 +781,39 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                 "source": ill["source_artifact"]})
 
     if eq and ill and eq["effective_apr"] is not None and ill["effective_apr"] is not None:
-        if eq["censored"] or ill["censored"]:
-            # The two rates are averaged over DIFFERENTLY SELECTED subsets of
-            # paths. At closure_m13 the cost-matched arm completes 92.4% and the
-            # illustrative arm 23.8%, so the gap between their survivor rates
-            # mixes the cap factor with selection. Calling that a pricing effect
-            # would be the survivorship error stated as a finding.
-            out.append({
-                "classification": "simulation_result",
-                "text": (f"In the {label} scenario these two revenue-based arms "
-                         f"cannot be compared on rate alone. The cost-matched arm "
-                         f"shows {eq['effective_apr']:.2%}, averaged over the "
-                         f"{eq['completed_share']:.1%} of its paths that reached "
-                         f"the repayment target; the illustrative arm shows "
-                         f"{ill['effective_apr']:.2%} over the "
-                         f"{ill['completed_share']:.1%} of its paths that did. "
-                         f"Those are different subsets, so the difference between "
-                         f"them combines the cap factor with differing selection "
-                         f"and is not a like-for-like price comparison. The "
-                         f"pricing claim holds only where both arms complete."),
-                "source": eq["source_artifact"]})
-        else:
+        # A-9 / D-050. This comparison is between two RATES, so the question is
+        # whether the two rates were averaged over comparably selected sets --
+        # which means comparing their APR-DEFINED shares, not their completion
+        # shares. The previous version branched on `censored`, a duration
+        # property, and then quoted completion shares as though they were the
+        # rate's denominator. At closure_m7 that produced the worst possible
+        # output: `censored` is False because *nothing* completed, so the page
+        # asserted "every path completed under both" over 0/500.
+        eq_defined = eq.get("apr_defined_share", 1.0)
+        ill_defined = ill.get("apr_defined_share", 1.0)
+        same_rate_population = abs(eq_defined - ill_defined) < 1e-9
+        partial = min(eq["completed_share"], ill["completed_share"]) < 1.0
+
+        # Completion is reported on its own, always, and never inferred from
+        # the rate. It is a separate sentence because it is a separate fact.
+        completion_note = (
+            f"Completion is reported separately and differs between them: "
+            f"{eq['completed_share']:.1%} of the cost-matched arm's paths and "
+            f"{ill['completed_share']:.1%} of the illustrative arm's reached "
+            f"the repayment target."
+            if abs(eq["completed_share"] - ill["completed_share"]) > 1e-9 else
+            f"Completion is reported separately: {eq['completed_share']:.1%} of "
+            f"paths reached the repayment target under both.")
+
+        # Where the target is not reached, the rate is an observed-window
+        # figure over the 24-month horizon -- not the cost of a repaid
+        # contract. It must never be read as a completed-contract price.
+        window_note = (
+            " Where the target is not reached the rate is an observed-window "
+            "IRR over the payments made inside the 24-month horizon, not the "
+            "cost of a completed contract." if partial else "")
+
+        if same_rate_population:
             out.append({
                 "classification": "sensitivity_result",
                 "text": (f"Price and structure are separable. The same "
@@ -801,17 +821,36 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                          f"cost-matched factor shows a mean simulated rate of "
                          f"{eq['effective_apr']:.2%} in the {label} scenario, "
                          f"against {ill['effective_apr']:.2%} at the illustrative "
-                         f"1.20 factor. Every path completed under both, so this "
-                         f"is a like-for-like comparison: the higher figure is a "
-                         f"property of the chosen cap factor, not of "
-                         f"revenue-based repayment."),
+                         f"1.20 factor. Both means are taken over the same share "
+                         f"of paths — {eq_defined:.1%} have a defined rate under "
+                         f"each — so the rate comparison is like-for-like and the "
+                         f"difference is a property of the chosen cap factor, not "
+                         f"of revenue-based repayment. {completion_note}"
+                         f"{window_note}"),
+                "source": eq["source_artifact"]})
+        else:
+            out.append({
+                "classification": "simulation_result",
+                "text": (f"In the {label} scenario these two revenue-based arms "
+                         f"cannot be compared on rate alone. The cost-matched arm "
+                         f"shows {eq['effective_apr']:.2%}, averaged over the "
+                         f"{eq_defined:.1%} of its paths with a defined rate; the "
+                         f"illustrative arm shows {ill['effective_apr']:.2%} over "
+                         f"{ill_defined:.1%} of its paths. Those are differently "
+                         f"selected sets, so the difference between them combines "
+                         f"the cap factor with differing selection and no "
+                         f"like-for-like price conclusion is drawn. "
+                         f"{completion_note}{window_note}"),
                 "source": eq["source_artifact"]})
     elif ill and ill["effective_apr"] is None:
         out.append({
             "classification": "mathematical_property",
             "text": ("Effective rate is UNDEFINED for the revenue-based arm in "
-                     "this scenario. When revenue stops, the payment stream never "
-                     "repays the advance, so no discount rate sets its present "
+                     "this scenario — not because repayment was incomplete, but "
+                     "because no payment was made at all, so the rate equation "
+                     "has no root. An incomplete contract that paid something "
+                     "does have a rate, and it is reported. Here no discount "
+                     "rate sets its present "
                      "value equal to the amount lent. The study reports this as "
                      "undefined rather than substituting a number "
                      "(specification §13, exclusion E-3)."),
