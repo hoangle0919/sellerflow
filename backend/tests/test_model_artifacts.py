@@ -183,7 +183,7 @@ def test_financing_arithmetic_does_not_depend_on_any_model(tmp_path):
     assert a["repayment_cap"] > 0 and a["base_case_duration_months"] > 0
 
     scenarios = financing_engine.scenario_analysis(120_000_000, 0.10, a)
-    assert len(scenarios) == 4
+    assert len(scenarios) == 5   # base, 2 declines, growth, closure
 
 
 def test_financing_engine_imports_no_ml_stack():

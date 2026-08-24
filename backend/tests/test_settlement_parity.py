@@ -167,6 +167,11 @@ def test_scenario_projections_never_imply_a_breach(revenue):
     s = financing_structure(revenue, "Low Risk")
     cap_vnd = to_vnd(s["repayment_cap"])
     for row in scenario_analysis(revenue, 0.10, s):
+        # The closure row has no duration by construction: the cap is never
+        # reached, so there is no schedule to over-collect. Rows that DO repay
+        # must still land on the cap.
+        if row["repayment_duration_months"] is None:
+            continue
         rev_s = row["scenario_monthly_revenue"]
         sched = settle_payments([rev_s] * (row["repayment_duration_months"] + 10),
                                 TIER_PARAMS["Low Risk"]["remittance_pct"],
@@ -260,6 +265,13 @@ def test_every_scenario_row_discloses_its_own_schedule(revenue):
     s = financing_structure(revenue, "Low Risk")
     for row in scenario_analysis(revenue, 0.10, s):
         sched = row["illustrative_schedule"]
+        if sched is None:
+            # Closure: no completion month exists, so no schedule is disclosed.
+            # It must instead disclose what goes unrecovered.
+            assert row["case"] == "closure"
+            assert row["repayment_duration_months"] is None
+            assert row["amount_unrecovered"] > 0
+            continue
         assert sched["total_contractual_repayment"] == s["repayment_cap"]
         assert sched["completion_month"] == row["repayment_duration_months"]
 

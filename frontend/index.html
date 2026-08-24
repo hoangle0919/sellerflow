@@ -334,6 +334,10 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 /* Financing structure / scenarios / risk findings */
 .scenario-table tr{cursor:default}
 .scenario-table tbody tr:hover td{background:transparent}
+.scenario-table tr.sc-closure td{background:var(--decline-bg);border-top:1px solid var(--decline)}
+.scenario-table tr.sc-closure:hover td{background:var(--decline-bg)}
+.scenario-table td.sc-unrec{color:var(--decline);font-weight:600}
+.sc-note{color:var(--ink-2);line-height:1.55;max-width:64ch}
 .finding-list{display:grid;gap:10px;margin-top:16px}
 .finding-card{border:1px solid var(--hairline);border-radius:8px;padding:16px 18px;background:var(--surface)}
 .finding-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
@@ -686,6 +690,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
             <div class="decision-row"><span>Remittance</span><span id="hd-rate">8% of revenue</span></div>
             <div class="decision-row"><span>Repayment cap</span><span id="hd-pd">382,950,000₫</span></div>
             <div class="decision-row"><span>Est. duration</span><span id="hd-dur">26 months</span></div>
+            <div class="decision-row"><span>Cost (APR)</span><span id="hd-apr">—</span></div>
             <a class="hero-full-link" id="hero-full-link" onclick="heroViewFull()">View full assessment →</a>
           </div>
         </div>
@@ -900,6 +905,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="result-section" id="scenario-section"><h3>Test downside scenarios</h3>
       <p class="small" style="margin-bottom:14px">Remittance is a percentage of revenue, so a decline doesn't miss a payment — it extends the term. Duration is what moves.</p>
       <div class="table-scroll"><table class="scenario-table"><thead><tr><th>Scenario</th><th>Monthly revenue</th><th>Periodic remittance</th><th>Repayment duration</th></tr></thead><tbody id="scenario-body"></tbody></table></div>
+      <p class="small sc-note" id="scenario-closure-note" style="margin-top:12px"></p>
     </div>
     <div class="result-section"><h3>Review the evidence</h3><div class="finding-list" id="finding-list"></div></div>
     <div class="result-section" id="integrity-section"><h3>Integrity screen <span class="sev-badge low" id="int-level">Clear</span></h3>
@@ -1110,6 +1116,7 @@ async function runConsole(){
     decision:data.decision, pd:data.pd_score,
     recommended_amount_vnd:s.recommended_amount, remittance_pct:s.remittance_pct,
     repayment_cap_vnd:s.repayment_cap, base_case_duration_months:s.base_case_duration_months,
+    factor_rate:s.factor_rate, effective_apr_base_case:s.effective_apr_base_case,
     model:data.model_version, response_time_ms:ms
   },null,2);
   badge.style.display='inline-block'; badge.textContent=ms+'ms';
@@ -1241,9 +1248,13 @@ function renderStructure(structure, financing){
   const rows=[];
   rows.push(['Recommended advance', fmtVND(structure.recommended_amount)]);
   if(structure.requested_amount) rows.push(['Requested amount', fmtVND(structure.requested_amount)+(structure.exceeds_recommendation?' — exceeds recommendation':'')]);
-  rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+' of monthly revenue':'—']);
+  rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+(structure.collection_base==='net_of_returns'?' of monthly net revenue':' of monthly revenue'):'—']);
+  if(structure.collection_base==='net_of_returns' && structure.net_collectible_revenue!=null)
+    rows.push(['Collected on (net of '+pct(structure.return_rate_applied||0,1)+' returns)', fmtVND(structure.net_collectible_revenue)]);
   rows.push(['Repayment cap', fmtVND(structure.repayment_cap)]);
   rows.push(['Base-case repayment term', structure.base_case_duration_months?structure.base_case_duration_months+' months':'—']);
+  rows.push(['Effective APR (base case)', structure.effective_apr_base_case!=null?pct(structure.effective_apr_base_case,1):'—']);
+  rows.push(['Factor rate', structure.factor_rate?structure.factor_rate.toFixed(2)+'×':'—']);
   const severe=(financing.scenarios||[]).find(sc=>sc.case==='severe_decline');
   rows.push(['Downside repayment term (-40% revenue)', severe&&severe.repayment_duration_months?severe.repayment_duration_months+' months':'—']);
   rows.push(['Data completeness', financing.data_completeness_pct!=null?financing.data_completeness_pct+'%':'—']);
@@ -1256,7 +1267,18 @@ function renderStructure(structure, financing){
 function renderScenarios(scenarios){
   const body=document.getElementById('scenario-body');
   if(!scenarios.length){ body.innerHTML='<tr><td colspan="4"><div class="empty">No financing structure was recommended for this risk tier, so no repayment scenario applies.</div></td></tr>'; return; }
-  body.innerHTML=scenarios.map(sc=>`<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' mo':'—'}</td></tr>`).join('');
+  body.innerHTML=scenarios.map(sc=>{
+    // Closure is the one row where the cap is never reached. A duration cell
+    // would be meaningless, so it states what goes unrecovered instead.
+    if(sc.case==='closure'){
+      const share=sc.share_of_cap_unrecovered!=null?` (${pct(sc.share_of_cap_unrecovered,0)} of cap)`:'';
+      return `<tr class="sc-closure"><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.amount_collected)} collected</td><td class="t-num sc-unrec">${fmtVND(sc.amount_unrecovered)} unrecovered${share}</td></tr>`;
+    }
+    return `<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' mo':'—'}</td></tr>`;
+  }).join('');
+  const closure=scenarios.find(s=>s.case==='closure');
+  const note=document.getElementById('scenario-closure-note');
+  if(note) note.textContent=closure&&closure.note?closure.note:'';
 }
 const SEV_LABEL={low:'Low',medium:'Medium',high:'High',unknown:'Unknown'};
 const INT_LEVEL={clear:['Clear','low'],review:['Review','medium'],high:['Elevated','high']};
@@ -1516,10 +1538,19 @@ function heroRenderDecision(d, ms){
      project has withdrawn. */
   document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Demo score '+pct(d.pd_score,1)+' — synthetic, not a validated default probability'):'';
   document.getElementById('hd-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
-  document.getElementById('hd-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
+  /* A-1: say which base, or the merchant cannot reconcile the figure —
+     it is deliberately below remittance_pct x gross revenue. */
+  document.getElementById('hd-rate').textContent=structure.remittance_pct
+    ?pct(structure.remittance_pct)+(structure.collection_base==='net_of_returns'?' of net revenue':' of revenue')
+    :'—';
   document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);
   const dur=structure.base_case_duration_months;
   document.getElementById('hd-dur').textContent=dur?dur+(dur===1?' month':' months'):'—';
+  /* The factor rate alone hides the price: the same 1.15 costs far more over
+     12 months than over 26, so the annualised cost travels with it. Null where
+     the IRR is undefined — shown as a dash, never as 0%. */
+  const apr=structure.effective_apr_base_case;
+  document.getElementById('hd-apr').textContent=(apr!=null)?pct(apr,1)+' APR':'—';
   document.getElementById('hero-chips').innerHTML=renderChips(d.signals||{});
   document.getElementById('hero-reason').textContent=d.reasoning||'';
   heroLastData=d;

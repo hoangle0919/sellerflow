@@ -12,6 +12,9 @@ from financing_engine import (
     scenario_analysis,
     risk_findings,
     build_financing_analysis,
+    effective_apr,
+    _base_case_payments,
+    net_collectible_revenue,
 )
 
 GOOD_FEATURES = {
@@ -142,7 +145,22 @@ def test_scenario_analysis_decline_and_growth_cases():
     assert growth["repayment_duration_months"] == math.ceil(310_500_000 / 13_200_000) == 24
 
     # Merchant's retained revenue share is unchanged by revenue level -- proportional remittance.
-    assert all(s["merchant_retained_revenue_pct"] == pytest.approx(0.92) for s in scenarios.values())
+    # Scoped to the revenue-bearing rows: a closed merchant has no revenue to
+    # retain, so `closure` reports None rather than a misleading 0.92.
+    assert all(s["merchant_retained_revenue_pct"] == pytest.approx(0.92)
+               for s in scenarios.values() if s["case"] != "closure")
+
+    # Closure is the case the decline rows cannot show: the cap is never
+    # reached, so there is no duration and a balance goes unrecovered.
+    closure = scenarios["closure"]
+    assert closure["repayment_duration_months"] is None
+    assert closure["scenario_monthly_revenue"] == 0
+    assert closure["merchant_retained_revenue_pct"] is None
+    # 6 months collected at the base remittance (12,000,000), capped at the cap.
+    assert closure["months_collected_before_closure"] == 6
+    assert closure["amount_collected"] == 72_000_000
+    assert closure["amount_unrecovered"] == 310_500_000 - 72_000_000 == 238_500_000
+    assert closure["share_of_cap_unrecovered"] == pytest.approx(238_500_000 / 310_500_000, abs=1e-4)
 
     # Duration must strictly worsen (increase) moving from growth -> base -> moderate -> severe.
     durations = [scenarios["growth"]["repayment_duration_months"], scenarios["base"]["repayment_duration_months"],
@@ -209,7 +227,7 @@ def test_build_financing_analysis_good_profile_completeness():
     # unconditional resolution note for this profile -> 2/7 missing.
     assert len(result["information_needed"]) == 2
     assert result["data_completeness_pct"] == pytest.approx(71.0, abs=0.5)
-    assert len(result["scenarios"]) == 4
+    assert len(result["scenarios"]) == 5   # + closure
 
 
 def test_build_financing_analysis_bad_profile_has_more_gaps():
@@ -222,3 +240,142 @@ def test_build_financing_analysis_bad_profile_has_more_gaps():
     # Existing obligations (previous_loans > 0), Data completeness (always) -> 5/7.
     assert len(result["information_needed"]) == 5
     assert result["data_completeness_pct"] == pytest.approx(28.6, abs=0.5)
+
+
+# ── Effective APR (SB 362): the factor rate is not a price ────────────────────
+
+def test_apr_travels_with_the_factor_rate():
+    """A factor of 1.15 is 15% of the advance, but says nothing about *when*.
+    The annualised cost of the base-case stream ships beside it.
+
+    Low Risk @ 150,000,000/mo: advance 270,000,000, cap 310,500,000,
+    remittance 12,000,000 -> 25 full payments + a 10,500,000 clipped tail.
+    The IRR of that stream annualises to ~13.6%.
+    """
+    s = financing_structure(150_000_000, "Low Risk")
+    assert s["factor_rate"] == 1.15
+    assert s["effective_apr_base_case"] == pytest.approx(0.1361, abs=5e-4)
+
+
+def test_apr_rises_as_the_term_shortens_which_is_why_a_factor_is_not_a_price():
+    """The same 1.15 costs more over 12 months than over 26. This is the whole
+    reason SB 362 treats a bare factor rate as a confusing representation, and
+    the reason the APR is computed per-structure rather than per-tier."""
+    principal, cap = 100_000_000, 115_000_000
+    apr_12 = effective_apr(principal, _base_case_payments(cap, cap / 12))
+    apr_26 = effective_apr(principal, _base_case_payments(cap, cap / 26))
+    assert apr_12 == pytest.approx(0.301, abs=5e-3)   # ~30% over a year
+    assert apr_26 == pytest.approx(0.135, abs=5e-3)   # ~13.5% stretched out
+    assert apr_12 > 2 * apr_26
+
+
+def test_the_cheaper_looking_tier_is_the_expensive_one():
+    """Medium Risk carries the higher factor AND the shorter term (a smaller
+    advance against a larger remittance), so its annualised cost is several
+    times Low Risk's. Reading the factors alone (1.15 vs 1.30) understates the
+    gap badly — which is exactly what the APR is here to prevent."""
+    low = financing_structure(150_000_000, "Low Risk")
+    med = financing_structure(150_000_000, "Medium Risk")
+    assert med["base_case_duration_months"] < low["base_case_duration_months"]
+    assert med["effective_apr_base_case"] > 4 * low["effective_apr_base_case"]
+
+
+def test_declined_structure_reports_a_null_apr_not_zero():
+    """High Risk proposes no structure. The APR key stays present so consumers
+    do not KeyError, but it is None — 0.0 would read as free money."""
+    s = financing_structure(150_000_000, "High Risk")
+    assert "effective_apr_base_case" in s
+    assert s["effective_apr_base_case"] is None
+
+
+def test_apr_is_none_where_undefined_rather_than_a_misleading_number():
+    assert effective_apr(0, [1_000_000]) is None          # no principal
+    assert effective_apr(1_000_000, []) is None           # no payments
+    assert effective_apr(1_000_000, [0, 0]) is None       # nothing collected
+
+
+def test_base_case_payment_stream_sums_to_the_cap_exactly():
+    """The clipped tail must not over- or under-collect: an over-collecting
+    final payment would overstate the APR."""
+    payments = _base_case_payments(310_500_000, 12_000_000)
+    assert len(payments) == 26
+    assert payments[-1] == 10_500_000
+    assert sum(payments) == 310_500_000
+
+
+# ── Collection on net sales (spec amendment A-1) ──────────────────────────────
+
+def test_remittance_is_collected_on_net_sales_not_gross():
+    """A returned order is refunded — the merchant never keeps that money, so
+    remitting on gross charges a share of revenue that does not exist.
+
+    150,000,000/mo at a 10% return rate: net 135,000,000, remittance
+    135,000,000 * 0.08 = 10,800,000, exactly 90% of the gross-based 12,000,000.
+    """
+    gross = financing_structure(150_000_000, "Low Risk")
+    net = financing_structure(150_000_000, "Low Risk", return_rate=0.10)
+    assert gross["periodic_remittance"] == 12_000_000
+    assert net["periodic_remittance"] == 10_800_000
+    assert net["net_collectible_revenue"] == 135_000_000
+    assert net["collection_base"] == "net_of_returns"
+    assert net["return_rate_applied"] == 0.10
+
+
+def test_netting_changes_what_is_collected_never_what_is_owed():
+    """The correction is to the collection base, not to the price. The advance
+    and the cap are tier policy on gross annual revenue and must not move —
+    otherwise a high-return merchant would silently be offered a smaller deal
+    as well as a slower one."""
+    gross = financing_structure(150_000_000, "Low Risk")
+    net = financing_structure(150_000_000, "Low Risk", return_rate=0.10)
+    assert net["recommended_amount"] == gross["recommended_amount"]
+    assert net["repayment_cap"] == gross["repayment_cap"]
+    # Same cap, smaller instalment -> the term stretches. That is the provider's
+    # cost of charging fairly, and it should be visible rather than absorbed.
+    assert net["base_case_duration_months"] > gross["base_case_duration_months"]
+
+
+def test_the_overcharge_removed_scales_with_the_return_rate():
+    """The merchants most overcharged by gross collection are the ones with the
+    highest returns, whose margins are already thinnest."""
+    base = financing_structure(150_000_000, "Low Risk")["periodic_remittance"]
+    overcharge = [base - financing_structure(150_000_000, "Low Risk",
+                                             return_rate=r)["periodic_remittance"]
+                  for r in (0.05, 0.20, 0.40)]
+    assert overcharge == sorted(overcharge)          # monotonically increasing
+    assert overcharge[0] > 0
+
+
+def test_default_return_rate_leaves_gross_collection_unchanged():
+    """A caller that supplies no return rate gets net == gross, the correct
+    degenerate case — so this amendment cannot silently alter an existing
+    structure computed without one."""
+    assert net_collectible_revenue(150_000_000) == 150_000_000
+    assert (financing_structure(150_000_000, "Low Risk")["periodic_remittance"]
+            == financing_structure(150_000_000, "Low Risk", return_rate=0.0)["periodic_remittance"])
+
+
+def test_return_rate_is_clamped_so_collection_can_never_go_negative():
+    assert net_collectible_revenue(100_000_000, -0.5) == 100_000_000   # below 0
+    assert net_collectible_revenue(100_000_000, 2.0) == 5_000_000      # clamped at 0.95
+
+
+def test_scenarios_collect_on_the_same_net_base_as_the_structure():
+    """Returns scale with sales, so the netting travels into every scenario
+    rather than being applied once at the base case."""
+    s = financing_structure(150_000_000, "Low Risk", return_rate=0.10)
+    rows = {r["case"]: r for r in scenario_analysis(150_000_000, 0.10, s, return_rate=0.10)}
+    assert rows["base"]["net_collectible_revenue"] == 135_000_000
+    assert rows["base"]["periodic_remittance"] == 10_800_000
+    # -20% revenue -> 120,000,000 gross, 108,000,000 net, 8,640,000 remittance
+    assert rows["moderate_decline"]["net_collectible_revenue"] == 108_000_000
+    assert rows["moderate_decline"]["periodic_remittance"] == 8_640_000
+
+
+def test_end_to_end_analysis_applies_the_submitted_return_rate():
+    """build_financing_analysis must pass the merchant's own return rate
+    through — the amendment is worthless if only direct callers get it."""
+    features = dict(GOOD_FEATURES, monthly_revenue=150_000_000, return_rate=0.10)
+    s = build_financing_analysis(features, "Low Risk")["structure"]
+    assert s["return_rate_applied"] == 0.10
+    assert s["periodic_remittance"] == 10_800_000
