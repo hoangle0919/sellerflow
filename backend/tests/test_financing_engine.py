@@ -142,7 +142,22 @@ def test_scenario_analysis_decline_and_growth_cases():
     assert growth["repayment_duration_months"] == math.ceil(310_500_000 / 13_200_000) == 24
 
     # Merchant's retained revenue share is unchanged by revenue level -- proportional remittance.
-    assert all(s["merchant_retained_revenue_pct"] == pytest.approx(0.92) for s in scenarios.values())
+    # Scoped to the revenue-bearing rows: a closed merchant has no revenue to
+    # retain, so `closure` reports None rather than a misleading 0.92.
+    assert all(s["merchant_retained_revenue_pct"] == pytest.approx(0.92)
+               for s in scenarios.values() if s["case"] != "closure")
+
+    # Closure is the case the decline rows cannot show: the cap is never
+    # reached, so there is no duration and a balance goes unrecovered.
+    closure = scenarios["closure"]
+    assert closure["repayment_duration_months"] is None
+    assert closure["scenario_monthly_revenue"] == 0
+    assert closure["merchant_retained_revenue_pct"] is None
+    # 6 months collected at the base remittance (12,000,000), capped at the cap.
+    assert closure["months_collected_before_closure"] == 6
+    assert closure["amount_collected"] == 72_000_000
+    assert closure["amount_unrecovered"] == 310_500_000 - 72_000_000 == 238_500_000
+    assert closure["share_of_cap_unrecovered"] == pytest.approx(238_500_000 / 310_500_000, abs=1e-4)
 
     # Duration must strictly worsen (increase) moving from growth -> base -> moderate -> severe.
     durations = [scenarios["growth"]["repayment_duration_months"], scenarios["base"]["repayment_duration_months"],
@@ -209,7 +224,7 @@ def test_build_financing_analysis_good_profile_completeness():
     # unconditional resolution note for this profile -> 2/7 missing.
     assert len(result["information_needed"]) == 2
     assert result["data_completeness_pct"] == pytest.approx(71.0, abs=0.5)
-    assert len(result["scenarios"]) == 4
+    assert len(result["scenarios"]) == 5   # + closure
 
 
 def test_build_financing_analysis_bad_profile_has_more_gaps():

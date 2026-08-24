@@ -334,6 +334,10 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 /* Financing structure / scenarios / risk findings */
 .scenario-table tr{cursor:default}
 .scenario-table tbody tr:hover td{background:transparent}
+.scenario-table tr.sc-closure td{background:var(--decline-bg);border-top:1px solid var(--decline)}
+.scenario-table tr.sc-closure:hover td{background:var(--decline-bg)}
+.scenario-table td.sc-unrec{color:var(--decline);font-weight:600}
+.sc-note{color:var(--ink-2);line-height:1.55;max-width:64ch}
 .finding-list{display:grid;gap:10px;margin-top:16px}
 .finding-card{border:1px solid var(--hairline);border-radius:8px;padding:16px 18px;background:var(--surface)}
 .finding-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
@@ -899,6 +903,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <div class="result-section" id="scenario-section"><h3>Test downside scenarios</h3>
       <p class="small" style="margin-bottom:14px">Remittance is a percentage of revenue, so a decline doesn't miss a payment — it extends the term. Duration is what moves.</p>
       <div class="table-scroll"><table class="scenario-table"><thead><tr><th>Scenario</th><th>Monthly revenue</th><th>Periodic remittance</th><th>Repayment duration</th></tr></thead><tbody id="scenario-body"></tbody></table></div>
+      <p class="small sc-note" id="scenario-closure-note" style="margin-top:12px"></p>
     </div>
     <div class="result-section"><h3>Review the evidence</h3><div class="finding-list" id="finding-list"></div></div>
     <div class="result-section" id="integrity-section"><h3>Integrity screen <span class="sev-badge low" id="int-level">Clear</span></h3>
@@ -1254,7 +1259,18 @@ function renderStructure(structure, financing){
 function renderScenarios(scenarios){
   const body=document.getElementById('scenario-body');
   if(!scenarios.length){ body.innerHTML='<tr><td colspan="4"><div class="empty">No financing structure was recommended for this risk tier, so no repayment scenario applies.</div></td></tr>'; return; }
-  body.innerHTML=scenarios.map(sc=>`<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' mo':'—'}</td></tr>`).join('');
+  body.innerHTML=scenarios.map(sc=>{
+    // Closure is the one row where the cap is never reached. A duration cell
+    // would be meaningless, so it states what goes unrecovered instead.
+    if(sc.case==='closure'){
+      const share=sc.share_of_cap_unrecovered!=null?` (${pct(sc.share_of_cap_unrecovered,0)} of cap)`:'';
+      return `<tr class="sc-closure"><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.amount_collected)} collected</td><td class="t-num sc-unrec">${fmtVND(sc.amount_unrecovered)} unrecovered${share}</td></tr>`;
+    }
+    return `<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' mo':'—'}</td></tr>`;
+  }).join('');
+  const closure=scenarios.find(s=>s.case==='closure');
+  const note=document.getElementById('scenario-closure-note');
+  if(note) note.textContent=closure&&closure.note?closure.note:'';
 }
 const SEV_LABEL={low:'Low',medium:'Medium',high:'High',unknown:'Unknown'};
 const INT_LEVEL={clear:['Clear','low'],review:['Review','medium'],high:['Elevated','high']};

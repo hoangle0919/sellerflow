@@ -176,8 +176,16 @@ def financing_structure(monthly_revenue: float, risk_tier: str, requested_amount
     }
 
 
+# Month at which the illustrative permanent-closure scenario stops revenue.
+# 7 is the registered simulation case (research/CLAIM_LEDGER.md S-3, I-3): at
+# both registered cap factors, permanent closure from month 7 leaves 100% of
+# paths incomplete. It is the earliest registered case and therefore the
+# honest one to show — the decline rows already cover the survivable end.
+CLOSURE_SCENARIO_MONTH = 7
+
+
 def scenario_analysis(monthly_revenue: float, reported_growth: float, structure: dict) -> list[dict]:
-    """Base / moderate decline / severe decline / growth repayment scenarios.
+    """Base / moderate decline / severe decline / growth / closure scenarios.
 
     Because remittance is a fixed percentage of revenue, the merchant's
     post-remittance revenue share is unchanged by revenue swings — what
@@ -185,6 +193,12 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
     repayment takes. That mechanical fact is the actual point of RBF
     scenario analysis, so it's stated explicitly rather than buried in a
     chart.
+
+    The decline rows all repay: that is the mechanism working. The closure row
+    is the case where it does not. Revenue-contingency moves timing risk to the
+    provider; it does not remove the risk, and a scenario table that only shows
+    survivable declines would overstate the instrument. See the module
+    docstring and `research/CLAIM_LEDGER.md` S-3, I-3.
     """
     remittance_pct = structure.get("remittance_pct", 0)
     repayment_cap = structure.get("repayment_cap", 0)
@@ -222,6 +236,36 @@ def scenario_analysis(monthly_revenue: float, reported_growth: float, structure:
             # `remittance x duration`.
             "illustrative_schedule": illustrative_schedule(repayment_cap, scenario_remittance),
         })
+
+    # Closure: revenue is permanent-zero from CLOSURE_SCENARIO_MONTH onward, so
+    # collection stops after the months actually traded. Everything still owed
+    # at that point is unrecovered — there is no later period to collect it in.
+    # Reported as an amount and a share of the cap rather than a duration,
+    # because "duration" has no meaning for a balance that is never reached.
+    base_remittance = periodic_payment(to_vnd(monthly_revenue), share_rate)
+    months_paid = CLOSURE_SCENARIO_MONTH - 1
+    collected = min(to_vnd(base_remittance * months_paid), repayment_cap)
+    unrecovered = to_vnd(repayment_cap - collected)
+    out.append({
+        "case": "closure",
+        "label": f"Merchant closes at month {CLOSURE_SCENARIO_MONTH} (permanent)",
+        "assumption": "assumption",
+        "scenario_monthly_revenue": 0,
+        "periodic_remittance": 0,
+        # A cap that is never reached has no repayment duration. Null, not a
+        # large number, so nothing downstream reads it as "repaid, eventually".
+        "repayment_duration_months": None,
+        "merchant_retained_revenue_pct": None,
+        "months_collected_before_closure": months_paid,
+        "amount_collected": collected,
+        "amount_unrecovered": unrecovered,
+        "share_of_cap_unrecovered": (round(unrecovered / repayment_cap, 4)
+                                     if repayment_cap else None),
+        "note": ("Revenue-contingent repayment reschedules a decline; it does not "
+                 "survive a stop. Collection ends with trading, and the balance "
+                 "outstanding at that moment is unrecovered."),
+        "illustrative_schedule": None,
+    })
     return out
 
 
