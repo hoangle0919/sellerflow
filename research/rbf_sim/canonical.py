@@ -163,6 +163,17 @@ def _git(*args: str) -> Optional[str]:
         return None
 
 
+def _git_status_porcelain():
+    """(succeeded, output). Empty output on success means a clean tree."""
+    try:
+        out = subprocess.run(("git", "status", "--porcelain"),
+                             cwd=_research_root(), capture_output=True,
+                             text=True, timeout=10)
+        return (out.returncode == 0, out.stdout)
+    except Exception:
+        return (False, "")
+
+
 def source_state(declared_outputs: Iterable[str] = ()) -> Dict[str, Any]:
     """Describe the SOURCE state, excluding the outputs this run will create.
 
@@ -188,10 +199,17 @@ def source_state(declared_outputs: Iterable[str] = ()) -> Dict[str, Any]:
     reported, with the offending paths named so the answer is checkable rather
     than a bare boolean.
     """
-    porcelain = _git("status", "--porcelain")
-    if porcelain is None:
+    # `_git` returns None both when the command fails AND when it succeeds with
+    # empty output -- and `git status --porcelain` prints nothing precisely when
+    # the tree is clean. Using it here made the cleanest possible result
+    # indistinguishable from a git failure, and the first artifact of a
+    # regeneration (the only one run against a genuinely clean tree) recorded
+    # `source_tree_dirty: null`. Ask for the exit status explicitly.
+    ok, porcelain = _git_status_porcelain()
+    if not ok:
         return {"source_commit": _git("rev-parse", "HEAD"),
-                "source_tree_dirty": None, "source_dirty_paths": None}
+                "source_tree_dirty": None, "source_dirty_paths": None,
+                "source_state_scope": "git unavailable; state not determined"}
 
     declared = {os.path.basename(p) for p in declared_outputs}
     residual = []
