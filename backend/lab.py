@@ -143,8 +143,8 @@ SCENARIOS: Dict[str, dict] = {
 
 #: A scenario is looked up in its track, first artifact that has it.
 TRACKS = {
-    "illustrative": ["baseline_v2", "baseline_closure_v1"],
-    "cost_matched": ["baseline_equalcost_v1", "baseline_closure_equalcost_v1"],
+    "illustrative": ["baseline_v3", "baseline_closure_v2"],
+    "cost_matched": ["baseline_equalcost_v2", "baseline_closure_equalcost_v2"],
 }
 
 ARMS = [
@@ -216,15 +216,15 @@ def _resolve(track: str, scenario: str):
 
 
 def artifacts_available() -> bool:
-    return _load("baseline_v2_canonical") is not None
+    return _load("baseline_v3_canonical") is not None
 
 
 def manifest() -> dict:
     roles = {
-        "baseline_v2": "Illustrative pricing (cap factor 1.20) — ten scenarios",
-        "baseline_equalcost_v1": "Reference-path cost-matched pricing — ten scenarios",
-        "baseline_closure_v1": "Illustrative pricing — closure / zero-revenue",
-        "baseline_closure_equalcost_v1": "Reference-path cost-matched — closure / zero-revenue",
+        "baseline_v3": "Illustrative pricing (cap factor 1.20) — ten scenarios",
+        "baseline_equalcost_v2": "Reference-path cost-matched pricing — ten scenarios",
+        "baseline_closure_v2": "Illustrative pricing — closure / zero-revenue",
+        "baseline_closure_equalcost_v2": "Reference-path cost-matched — closure / zero-revenue",
     }
     out = []
     for stem, role in roles.items():
@@ -242,7 +242,7 @@ def manifest() -> dict:
             "n_paths": body.get("n_paths"),
             "base_seed": body.get("base_seed"),
         })
-    val = _load("validation_v1")
+    val = _load("validation_v2")
     return {
         "artifacts": out,
         "pricing_reference": {
@@ -291,48 +291,81 @@ def _fmt_money(x) -> dict:
 
 
 def _censoring(a: dict) -> dict:
-    """Duration and rate are SURVIVOR STATISTICS. Say so when it matters.
+    """Duration and rate have DIFFERENT denominators. Report both separately.
 
-    `engine.run_scenario` averages duration over `[r.duration for r in rs if
-    r.duration is not None]` and the rate over paths where an IRR exists — both
-    exclude paths that never reached the repayment target. Where every path
-    completes, the distinction is empty. Where some do not, presenting these as
-    unconditional means describes the survivors and silently drops the failures,
-    which is the same error class as the withdrawn AUC: a number labelled as
-    something it is not.
+    This function used to derive one qualifier from `incomplete_recovery_rate`
+    and attach it to the duration *and* the rate. That was wrong, and A-9
+    corrected it:
 
-    At `closure_m13` the illustrative arm shows ~12 months and ~30% — computed
-    over the 24% of paths that finished, while 76% never did.
+      * `duration_mean` averages paths that COMPLETED within the horizon.
+      * `apr_mean` averages paths where an IRR EXISTS, which is a different and
+        usually larger set. A path can fail to reach the contractual target and
+        still have a perfectly well-defined return on the payments it made.
+
+    At `closure_m13`, f = 1.20: 119 of 500 paths complete, but all 500 have a
+    defined IRR. Labelling the rate "among completed paths" described 500 paths
+    as 119 and understated the completed-path figure by about nine points.
+
+    The artifacts now report `completed_rate` and `apr_defined_rate` explicitly,
+    so neither denominator is inferred here. Older artifacts lack those fields;
+    the fallbacks keep the Lab working against them without pretending to a
+    precision they cannot supply.
     """
     incomplete = a.get("incomplete_recovery_rate") or 0.0
-    partial = 0.0 < incomplete < 1.0
-    completed = max(0.0, 1.0 - incomplete)
-    if partial:
-        note = (f"Averaged over the {completed:.1%} of simulated paths that "
-                f"reached the repayment target within 24 months. The remaining "
-                f"{incomplete:.1%} never did and are excluded from this figure, "
-                f"not counted as long or expensive.")
-        return {
-            "censored": True,
-            "completed_share": completed,
-            "apr_label": "Mean APR among completed paths",
-            "duration_label": "Mean duration among completed paths",
-            "apr_basis": note,
-            "duration_basis": note,
-        }
+    completed = a.get("completed_rate")
+    if completed is None:                       # pre-A-9 artifact
+        completed = max(0.0, 1.0 - incomplete)
+    apr_defined = a.get("apr_defined_rate")
+    if apr_defined is None:                     # pre-A-9 artifact
+        apr_defined = 1.0 if a.get("apr_mean") is not None else 0.0
+
+    # ---- duration: conditioned on completion ------------------------------
+    if 0.0 < completed < 1.0:
+        duration_label = "Mean duration among completed paths"
+        duration_basis = (
+            f"Averaged over the {completed:.1%} of simulated paths that reached "
+            f"the repayment target within 24 months. The remaining "
+            f"{1.0 - completed:.1%} did not and are excluded from this figure, "
+            f"not counted as long.")
+    elif completed >= 1.0:
+        duration_label = "Mean duration"
+        duration_basis = ("Mean across simulated paths for this scenario. Every "
+                          "path reached the repayment target.")
+    else:
+        duration_label = "Mean duration"
+        duration_basis = "No path reached the repayment target within 24 months."
+
+    # ---- rate: conditioned on IRR existence, NOT on completion ------------
+    if apr_defined <= 0.0:
+        apr_label = "Effective APR"
+        apr_basis = ("No payment was made on any simulated path, so the rate "
+                     "equation has no root and no APR is defined.")
+    elif completed >= 1.0:
+        apr_label = "Mean simulated APR"
+        apr_basis = ("Mean across simulated paths for this scenario. Every path "
+                     "has a defined rate and every path reached the repayment "
+                     "target.")
+    else:
+        apr_label = "Mean simulated APR among rate-defined paths"
+        apr_basis = (
+            f"Averaged over the {apr_defined:.1%} of simulated paths with a "
+            f"defined internal rate of return — a different set from the "
+            f"{completed:.1%} that reached the repayment target. A path can "
+            f"miss the target and still have a rate on the payments it made. "
+            f"Where the target is not reached this is the rate over the "
+            f"observed 24-month window, not a final lifetime return; read it "
+            f"beside the incomplete-recovery figure.")
+
     return {
-        "censored": False,
+        # `censored` remains keyed to duration, which is what it always meant.
+        "censored": 0.0 < completed < 1.0,
         "completed_share": completed,
-        "apr_label": "Mean simulated APR",
-        "duration_label": "Mean duration",
-        "apr_basis": "Mean across simulated paths for this scenario. Every path "
-                     "reached the repayment target, so no path is excluded."
-                     if incomplete == 0.0 else
-                     "No path reached the repayment target, so no rate is defined.",
-        "duration_basis": "Mean across simulated paths for this scenario. Every "
-                          "path reached the repayment target."
-                          if incomplete == 0.0 else
-                          "No path reached the repayment target within 24 months.",
+        "apr_defined_share": apr_defined,
+        "denominators_differ": abs(apr_defined - completed) > 1e-12,
+        "apr_label": apr_label,
+        "duration_label": duration_label,
+        "apr_basis": apr_basis,
+        "duration_basis": duration_basis,
     }
 
 
@@ -384,8 +417,13 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
         "cap_basis": target["basis"],
         "total_repaid_mean": _fmt_money(total or 0),
         "effective_apr": a.get("apr_mean"),
+        # A-9: undefined means the rate equation has no root -- i.e. no payment
+        # was made at all. It does NOT mean the contract failed to complete;
+        # closure_m7 misses the target on every path and still returns roughly
+        # -86.5%, which is a result, not an absence.
         "apr_undefined_reason": (None if a.get("apr_mean") is not None else
-                                 "repayment incomplete"),
+                                 "no payment was made, so the rate equation "
+                                 "has no root"),
         **_censoring(a),
         "burden": {
             "mean": a.get("burden_mean"),
@@ -428,7 +466,7 @@ def underreporting() -> Optional[dict]:
     only ω of true revenue. Listing it beside 'severe downturn' would imply it
     is a revenue path, which it is not.
     """
-    body = _load("baseline_v2_canonical")
+    body = _load("baseline_v3_canonical")
     if not body or "underreporting" not in body:
         return None
     rows = []
@@ -466,8 +504,8 @@ def underreporting() -> Optional[dict]:
 
     return {
         "rows": rows,
-        "source_artifact": "baseline_v2_canonical.json",
-        "source_sha256": _checksum("baseline_v2"),
+        "source_artifact": "baseline_v3_canonical.json",
+        "source_sha256": _checksum("baseline_v3"),
         "why_not_a_scenario": "This is a parameter sweep, not a revenue path. ω "
                               "is the share of true revenue the provider "
                               "observes; the underlying revenue shape is held "
@@ -494,7 +532,7 @@ def underreporting() -> Optional[dict]:
             {
                 "classification": "simulation_result",
                 "text": observed,
-                "source": "research/results/baseline_v2_canonical.json",
+                "source": "research/results/baseline_v3_canonical.json",
             },
         ],
     }
@@ -536,11 +574,15 @@ METRIC_DEFINITIONS = {
                       "excluded from this mean and reported separately as "
                       "incomplete recovery.",
         "why": "Revenue-based repayment extends the term when revenue falls, "
-               "rather than holding the payment fixed. The extension is the "
-               "provider's cost. Extension is NOT the same as preventing "
-               "default: where revenue reaches zero the cap may never be "
-               "reached at all, which is exactly what the closure scenarios "
-               "show. Read this beside the incomplete-recovery rate.",
+               "rather than holding the payment fixed. In the scenarios where "
+               "the term extends, that extension is the provider's cost. "
+               "Extension is NOT the same as preventing default: where revenue "
+               "stops PERMANENTLY BEFORE COMPLETION while a contractual "
+               "balance remains, no further payment occurs and the cap is "
+               "never reached. A temporary zero-revenue spell is a different "
+               "case and usually still completes -- temp_closure leaves 2.0% "
+               "of paths incomplete at f = 1.20 and none at f*. Read this "
+               "beside the incomplete-recovery rate.",
         "caveat": "Where any path fails to complete, this is a SURVIVOR "
                   "statistic. It describes the contracts that finished, not the "
                   "portfolio. A scenario with a short mean duration and a high "

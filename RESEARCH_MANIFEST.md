@@ -4,11 +4,11 @@
 
 > ✅ **This repository is the source of truth.** The research lives at `research/` in the `sellerflow` repository (`https://github.com/hoangle0919/sellerflow.git`), integrated from bundle v5 on 2026-08-06. The earlier bundle copies — including the one that sat inside an unrelated Excel research folder because it was the only writable location at the time — are **historical backups only**. They are not authoritative and must not be edited, read from, or depended upon. Nothing in this project depends on, reads, or relates to any Excel file.
 
-**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8
+**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-9
 
 > Everything needed to reproduce every number in the project is in this repository.
 >
-> ⚠️ All quantitative output is **simulation under modeled assumptions**. No observed seller revenue, repayment, or default outcome exists in this project.
+> ⚠️ All reported **simulated magnitudes** are simulation output under modeled assumptions. No observed seller revenue, repayment, or default outcome exists in this project. The seven propositions in `DERIVATIONS.md` are derivation-backed, not simulation output.
 
 ---
 
@@ -54,19 +54,24 @@
 
 | File | Purpose |
 |---|---|
-| `run_baseline.py` | 10 scenarios × 4 contracts × 500 paths → `results/baseline_v2.json` |
-| `run_validation.py` | Sections 1/2/4/5/6 → `results/validation_v1.json` |
+| `run_baseline.py` | 10 scenarios × 4 contracts × 500 paths → `results/baseline_v3_canonical.json` |
+| `run_validation.py` | Sections 1/2/4/5/6 → `results/validation_v2.json`, canonicalized to `validation_v2_canonical.json` |
 | `conv_step.py` | Single-N convergence step (large N split to avoid timeouts) |
 
 ### `research/results/` — versioned outputs
 
 | File | Purpose |
 |---|---|
-| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
+| `baseline_v3_canonical.json` | **Current baseline — cite this (A-9).** Regenerated 2026-08-20 under the corrected IRR definition; adds `apr_defined_count/rate` and `completed_count/rate`. SHA-256 `2673438a…`. |
+| `baseline_equalcost_v2_canonical.json` | Current cost-matched track. SHA-256 `5f57487c…`. |
+| `baseline_closure_v2_canonical.json` | Current closure track, illustrative `f`. SHA-256 `ab2bdcfb…`. |
+| `baseline_closure_equalcost_v2_canonical.json` | Current closure track, `f*`. SHA-256 `f40b7a12…`. |
+| `validation_v2_canonical.json` | Current validation battery. SHA-256 `7fce85ab…`. |
+| `baseline_v2_canonical.json` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte** as the record of what was published before 2026-08-20. Never cited as current, never regenerated, never deleted. Original note follows. **Former baseline.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
 | `baseline_v2_provenance.json` | Execution record for the above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
 | `baseline_v1.json` | Superseded (`gmv` basis). Audit trail. |
-| `validation_v1_canonical.json` | **Cite this for validation figures.** Checksummed canonical form (D-038), `f89fd2ba…`. Numerically identical to `validation_v1.json` — all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `validation_v1_canonical.json` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** Original note follows. ~~Cite this for validation figures.~~ Checksummed canonical form (D-038), `f89fd2ba…`. Numerically identical to `validation_v1.json` — all 174 scalars preserved, verified by `test_validation_artifact.py`. |
 | `validation_v1_provenance.json` | Execution record for the above, including `original_run_date` (2026-08-04), the one non-deterministic field in the source. |
 | `validation_v1.json` | Convergence, pricing, reference-path cost-matched cap (JSON key `pricing.equal_cost`), recovery boundary, RBF-G breakpoint, revenue definition. Retained unmodified as the pre-canonicalization source. |
 | `baseline_v2_log.txt` | Full console output of the baseline run. |
@@ -86,9 +91,9 @@
 cd research                       # from the repository root
 pip install pytest numpy          # only dependencies
 
-# 1. Simulation suite  (expect: 629 passed)
+# 1. Simulation suite  (expect: 639 passed)
 python3 -m pytest rbf_sim/tests/ -q
-#    Backend suite (expect: 401 non-browser tests passed). The suite also
+#    Backend suite (expect: 403 non-browser tests passed). The suite also
 #    contains 9 Playwright browser checks, EXCLUDED from that figure. They
 #    PASSED in the earlier browser-capable run recorded at D-036 (browser
 #    tests 5 -> 9, no skips). Where Playwright or Chromium is absent they
@@ -148,7 +153,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Non-browser tests passing | **1,030 — 401 backend and 629 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on what is installed — the current sandbox reports `401 passed, 9 skipped`. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Non-browser tests passing | **1,042 — 403 backend and 639 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on what is installed — the current sandbox reports `403 passed, 9 skipped`. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
 | Benchmark A implied APR | 37.87% | `baseline_v2` |

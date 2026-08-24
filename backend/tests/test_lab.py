@@ -364,14 +364,26 @@ def test_closure_shows_genuine_incomplete_recovery():
     assert rbf["recovery_ratio"]["24"] < 1.0
 
 
-def test_undefined_apr_is_reported_not_substituted():
-    """When revenue stops the payment stream never repays, so no IRR exists.
-    Spec 13 E-3 requires reporting undefined rather than inventing a number."""
+def test_early_closure_reports_a_negative_rate_not_undefined():
+    """A-9: failing to complete is not the same as having no rate.
+
+    This test previously asserted `effective_apr is None` for closure_m7, which
+    encoded the solver defect rather than a fact about the contract. The stream
+    pays for six months and recovers about 98.3M against a 185M advance; the
+    annualised IRR is roughly -86.5%. Publishing that as "undefined" hid an
+    adverse result behind a word that reads like a technicality. Undefined is
+    now reserved for the one case where the equation has no root: no payment at
+    all.
+    """
     d = client.get("/api/lab/comparison/closure_m7").json()
     rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
-    assert rbf["effective_apr"] is None
-    txt = " ".join(f["text"].lower() for f in d["findings"])
-    assert "undefined" in txt
+    assert rbf["effective_apr"] is not None
+    assert rbf["effective_apr"] < -0.5, "an early closure is a substantial loss"
+    assert rbf["apr_undefined_reason"] is None
+    assert rbf["incomplete_recovery_rate"] == 1.0, (
+        "no path completes here -- which is exactly why the rate must still be "
+        "reported rather than suppressed"
+    )
 
 
 def test_every_rate_declares_its_basis():
@@ -656,13 +668,21 @@ def test_amortizing_loan_reports_its_scheduled_total_not_no_cap():
 
 
 def test_incomplete_closure_contracts_use_the_agreed_wording():
+    """Duration may be undefined where nothing completes; the rate is not.
+
+    A-9 split these. "Not completed within 24 months" is still correct for
+    duration. The old APR string "Undefined — repayment incomplete" asserted a
+    causal link that does not exist and must not come back.
+    """
     html = open(LAB_HTML, encoding="utf-8").read()
-    assert "Undefined — repayment incomplete" in html
     assert "Not completed within 24 months" in html
+    assert "Undefined — repayment incomplete" not in html, (
+        "incomplete recovery does not make the rate undefined"
+    )
     d = client.get("/api/lab/comparison/closure_m7").json()
     rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
-    assert rbf["effective_apr"] is None
-    assert rbf["apr_undefined_reason"] == "repayment incomplete"
+    assert rbf["duration_months_mean"] is None      # nothing completed
+    assert rbf["effective_apr"] is not None         # but payments were made
 
 
 def test_network_failure_has_its_own_message():
@@ -729,15 +749,27 @@ def test_footer_default_is_not_overwritten_by_an_empty_spec():
     ("closure_m13", "RBF-EQ"),       # partially censored cost-matched arm
     ("temp_closure", "RBF-ILL"),     # lightly censored
 ])
-def test_partially_censored_arms_are_labelled_as_completed_path_only(scenario, arm):
+def test_partially_censored_arms_separate_the_two_denominators(scenario, arm):
+    """Duration is completion-conditioned; the rate is IRR-conditioned.
+
+    Previously both labels read "among completed paths", which described the
+    rate's denominator as the duration's. They are different sets, and in
+    closure_m13 they differ by 381 of 500 paths.
+    """
     a = next(x for x in client.get(f"/api/lab/comparison/{scenario}").json()["arms"]
              if x["id"] == arm)
     assert 0.0 < a["incomplete_recovery_rate"] < 1.0, "fixture is not partially censored"
     assert a["censored"] is True
-    assert a["apr_label"] == "Mean APR among completed paths"
     assert a["duration_label"] == "Mean duration among completed paths"
-    assert "excluded" in a["apr_basis"] and "excluded" in a["duration_basis"]
+    assert "excluded" in a["duration_basis"]
+    assert a["apr_label"] != "Mean APR among completed paths", (
+        "the retired conflation must not return"
+    )
+    assert "rate-defined" in a["apr_label"]
     assert 0.0 < a["completed_share"] < 1.0
+    assert a["apr_defined_share"] >= a["completed_share"]
+    # A horizon-limited rate must be shown beside the recovery shortfall.
+    assert "observed 24-month window" in a["apr_basis"]
 
 
 def test_closure_m13_illustrative_is_pinned():
@@ -749,7 +781,11 @@ def test_closure_m13_illustrative_is_pinned():
     assert a["censored"] is True
     assert 11.0 < a["duration_months_mean"] < 13.0
     assert 0.28 < a["effective_apr"] < 0.32
-    assert "completed paths" in a["apr_label"]
+    # The two denominators are visibly different here: ~23.8% completed,
+    # 100% rate-defined. That gap is the whole reason for A-9.
+    assert a["denominators_differ"] is True
+    assert a["apr_defined_share"] > a["completed_share"]
+    assert "rate-defined" in a["apr_label"]
 
 
 def test_uncensored_arms_are_not_mislabelled_as_conditional():
@@ -757,18 +793,22 @@ def test_uncensored_arms_are_not_mislabelled_as_conditional():
         assert a["incomplete_recovery_rate"] == 0.0
         assert a["censored"] is False
         assert a["apr_label"] == "Mean simulated APR"
-        assert "no path is excluded" in a["apr_basis"]
+        assert "every path reached the repayment target" in a["apr_basis"].lower()
+        assert a["denominators_differ"] is False
 
 
-def test_fully_incomplete_arms_keep_the_undefined_wording():
+def test_fully_incomplete_arms_report_duration_undefined_but_keep_their_rate():
+    """Nothing completed, so there is no duration. Payments were still made."""
     for a in client.get("/api/lab/comparison/closure_m7").json()["arms"]:
         if a["incomplete_recovery_rate"] == 1.0:
             assert a["censored"] is False       # nothing survived to condition on
-            assert a["effective_apr"] is None
             assert a["duration_months_mean"] is None
+            assert a["effective_apr"] is not None, (
+                "A-9: an incomplete contract that paid something has a rate"
+            )
     html = open(LAB_HTML, encoding="utf-8").read()
-    assert "Undefined — repayment incomplete" in html
     assert "Not completed within 24 months" in html
+    assert "Undefined — repayment incomplete" not in html
 
 
 def test_the_page_renders_the_api_supplied_labels_not_fixed_ones():
@@ -889,11 +929,17 @@ def test_uncensored_scenarios_keep_the_pricing_finding():
     assert "cannot be compared on rate alone" not in txt
 
 
-def test_fully_incomplete_scenario_keeps_its_wording():
+def test_fully_incomplete_scenario_reports_a_rate_and_no_duration():
+    """A-9 split what this test used to assert as one thing.
+
+    Every path misses the target, so there is no duration to report. Every path
+    made six months of payments, so there is a rate — a large negative one. The
+    findings must not describe the rate as undefined.
+    """
     d = client.get("/api/lab/comparison/closure_m7").json()
     for a in d["arms"]:
         if a["incomplete_recovery_rate"] == 1.0:
-            assert a["effective_apr"] is None and a["duration_months_mean"] is None
+            assert a["duration_months_mean"] is None
+            assert a["effective_apr"] is not None
     txt = " ".join(f["text"] for f in d["findings"])
     assert "cannot be compared on rate alone" not in txt
-    assert "undefined" in txt.lower()

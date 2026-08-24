@@ -120,20 +120,66 @@ def test_no_public_surface_renders_the_superseded_determinism_field():
         "registry note and the checksums both need revisiting")
 
 
-def test_registered_baseline_checksums_are_untouched():
-    """Canonicalizing the battery must not disturb anything already registered."""
-    expected = {
-        "baseline_v2_canonical.json":
-            "264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849",
-        "baseline_equalcost_v1_canonical.json":
-            "6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7",
-        "baseline_closure_v1_canonical.json":
-            "0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470",
-        "baseline_closure_equalcost_v1_canonical.json":
-            "49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9",
-    }
-    for name, want in expected.items():
+# Superseded by A-9. Preserved byte-for-byte as historical evidence: the
+# published figures were computed from these, so the record of what was
+# published has to remain verifiable even though the method was wrong.
+SUPERSEDED_CHECKSUMS = {
+    "baseline_v2_canonical.json":
+        "264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849",
+    "baseline_equalcost_v1_canonical.json":
+        "6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7",
+    "baseline_closure_v1_canonical.json":
+        "0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470",
+    "baseline_closure_equalcost_v1_canonical.json":
+        "49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9",
+    "validation_v1_canonical.json":
+        "f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4",
+}
+
+# The current generation, produced under A-9.
+CURRENT_CHECKSUMS = {
+    "baseline_v3_canonical.json":
+        "2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674",
+    "baseline_equalcost_v2_canonical.json":
+        "5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58",
+    "baseline_closure_v2_canonical.json":
+        "ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f",
+    "baseline_closure_equalcost_v2_canonical.json":
+        "f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df",
+    "validation_v2_canonical.json":
+        "7fce85ab39913bf47e6a17867802540c608d6ac84f444780cff97859317656d3",
+}
+
+
+def test_superseded_artifacts_are_preserved_byte_for_byte():
+    """A-9 replaced these; it must never have deleted or rewritten them."""
+    for name, want in SUPERSEDED_CHECKSUMS.items():
+        p = os.path.join(RESULTS, name)
+        assert os.path.exists(p), (
+            f"{name} is missing. Superseded artifacts are evidence of what was "
+            "published and are retained, not removed."
+        )
+        got = hashlib.sha256(open(p, "rb").read()).hexdigest()
+        assert got == want, f"{name} checksum changed: {got}"
+
+
+def test_current_artifacts_match_their_registered_checksums():
+    for name, want in CURRENT_CHECKSUMS.items():
         p = os.path.join(RESULTS, name)
         assert os.path.exists(p), f"{name} missing"
         got = hashlib.sha256(open(p, "rb").read()).hexdigest()
         assert got == want, f"{name} checksum changed: {got}"
+
+
+def test_current_artifacts_carry_the_new_denominator_fields():
+    """A-9's whole point: the denominator is reported, not inferred."""
+    body = _load(os.path.join(RESULTS, "baseline_closure_v2_canonical.json"))
+    arm = body["scenarios"]["closure_m13"]["RBF"]
+    for field in ("apr_defined_count", "apr_defined_rate",
+                  "completed_count", "completed_rate"):
+        assert field in arm, f"closure_m13/RBF is missing {field}"
+    assert arm["apr_defined_count"] > arm["completed_count"], (
+        "closure_m13 is the scenario where the two denominators come apart; "
+        "if they no longer do, the A-9 conditioning claim needs re-deriving"
+    )
+    assert body["canonical"]["schema_version"] == "2.0"

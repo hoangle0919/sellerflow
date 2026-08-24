@@ -421,11 +421,20 @@ def test_historical_documents_carry_a_supersession_banner(rel):
 
 
 def test_frozen_documents_are_not_in_the_live_or_historical_lists():
-    """The spec and the derivations are inputs, not surfaces to be edited.
+    """The spec and the derivations are inputs, not scanner targets.
 
-    Their version strings are embedded in every canonical artifact and P1-P7 are
-    referenced by the derivation tests. This test exists so a future edit that
-    tries to 'fix the wording' in them has to consciously remove this guard.
+    Their version strings are embedded in every canonical artifact and P1-P7
+    are referenced by the derivation tests, so a blind scan-and-rewrite across
+    them would silently invalidate registered results.
+
+    This protects them from *automated* rewriting. It does not make them
+    immutable: a logged, reviewed, checksum-neutral editorial correction is
+    legitimate and has happened -- D-047 and D-048 corrected prose in
+    DERIVATIONS.md and CLAIM_LEDGER.md with no formula, generator or artifact
+    change, and A-9/D-049 amended the spec deliberately after a genuine
+    implementation defect was demonstrated. The rule is that such a change goes
+    through the decision log and states its artifact impact, not that it never
+    happens.
     """
     for rel in FROZEN:
         assert rel not in LIVE_SURFACES, f"{rel} is frozen; do not scan-and-edit it"

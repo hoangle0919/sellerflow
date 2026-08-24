@@ -416,8 +416,14 @@ var STATE={scenario:null,data:null,manifest:null};
 function el(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
 function pct(x,dp){return (x==null)?"—":(x*100).toFixed(dp==null?1:dp)+"%";}
+// A-9: "undefined" is reserved for the case where the rate equation has no
+// root — no payment was made at all. It used to read "repayment incomplete",
+// which asserted a causal link that does not exist: closure at month 7 misses
+// the target on every path and still returns about -86.5%. The API supplies
+// the reason, so the page states whichever one actually applies.
 function apr(a){return a.effective_apr==null
-  ? "Undefined — repayment incomplete" : pct(a.effective_apr,2);}
+  ? ("Undefined — " + (a.apr_undefined_reason || "the rate equation has no root"))
+  : pct(a.effective_apr,2);}
 function dur(a){return a.duration_months_mean==null
   ? "Not completed within 24 months" : num(a.duration_months_mean,1)+" mo";}
 function num(x,dp){return (x==null)?"—":Number(x).toFixed(dp==null?1:dp);}

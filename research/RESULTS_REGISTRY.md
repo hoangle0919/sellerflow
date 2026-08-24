@@ -16,14 +16,19 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 
 | Artifact | SHA-256 | Status |
 |---|---|---|
-| `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **Canonical.** Cite this. |
+| `results/baseline_v3_canonical.json` | `2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674` | **Canonical (A-9). Cite this.** See R-014. |
+| `results/baseline_equalcost_v2_canonical.json` | `5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58` | **Canonical (A-9).** Cost-matched track. |
+| `results/baseline_closure_v2_canonical.json` | `ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f` | **Canonical (A-9).** Closure track, `f = 1.20`. |
+| `results/baseline_closure_equalcost_v2_canonical.json` | `f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df` | **Canonical (A-9).** Closure track, `f* = 1.0945`. |
+| `results/validation_v2_canonical.json` | `7fce85ab39913bf47e6a17867802540c608d6ac84f444780cff97859317656d3` | **Canonical (A-9).** Cite this for validation figures. |
+| `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **SUPERSEDED by A-9 (D-049).** Preserved byte-for-byte; the record of what was published before 2026-08-20. Do not cite as current. |
 | `results/baseline_v2_provenance.json` | *(varies by run — that is its purpose)* | Execution record for the above |
 | `results/baseline_v2.json` | `b09ae1f7ec3a92c6b751222f639cc562ee793d71c453298612a5d30e6da356e0` | **Frozen historical evidence.** Not rewritten. Numerically identical to the canonical artifact (0 differing leaves); differs only by an embedded run date. |
-| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **Canonical.** Reference-path cost-matched pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
+| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Reference-path cost-matched pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
 | `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the above |
-| `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **Canonical.** Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
-| `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **Canonical.** Closure / zero-revenue at f* = 1.0945 (D-032). |
-| `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **Canonical.** Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
+| `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f* = 1.0945 (D-032). |
+| `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
 | `results/validation_v1_provenance.json` | *(varies by run)* | Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
 | `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Frozen historical evidence.** The pre-canonicalization source, retained unmodified. Re-running the whole battery reproduces it with exactly one difference — `_meta.date` — and zero numeric drift. |
 
@@ -40,6 +45,8 @@ Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;prin
 > **It has NOT been changed, deliberately.** Editing it means editing `rbf_sim/canonical.py` and regenerating all five artifacts, which changes all five registered checksums — invalidating the reproducibility record in order to correct a sentence *about* reproducibility. That trade is not worth making without explicit approval, and this correction pass is not authorised to make it.
 >
 > **Status of the field:** superseded by the measured table above. The current claim is *numeric* reproducibility at published precision on every platform tested, and *byte* reproducibility within a fixed runtime. **No public surface renders `canonical.determinism`** — asserted by `test_no_public_surface_renders_the_superseded_determinism_field`. Anyone reading the raw JSON should read this note instead.
+>
+> > **SUPERSEDED BY D-049 (2026-08-20).** The trade this paragraph declined — regenerating five artifacts to correct a sentence — was reopened when an independent audit demonstrated a genuine implementation defect in the effective-rate calculation. Regeneration then had to happen for a substantive reason, so the embedded `determinism` string was corrected in the same pass at no additional cost. The **new** artifacts carry the accurate wording; the superseded five keep the old string and are preserved unchanged. The decision below was correct for its moment and is retained for the audit trail.
 >
 > **DECISION — FINAL (D-044).** The five registered artifacts are **not** regenerated. Their checksums and their embedded historical metadata stand as written. The embedded sentence is **superseded by D-041 and D-043**, and the corrected reproduction claim — numeric equality at published precision everywhere, byte equality within a fixed runtime — is the only one that may appear in the paper, the API, the Lab, the README or any provenance description. This is not deferred; there is nothing further to decide.
 
@@ -229,3 +236,51 @@ the frozen metric definitions (backlog R-02) per decision D-004.
 4. **Null and unfavorable results get entries too.** A result that contradicts a hypothesis is registered and reported, not quietly dropped.
 5. **Public-safe is a deliberate decision, not a default.** Mark ❌ or ⚠️ freely; R-001 is the worked example.
 6. **Re-run before shipping.** Phase 5 V-03 regenerates every ✅ entry from committed code.
+
+
+---
+
+## R-014 — A-9 artifact generation: corrected IRR definition, domain and conditioning
+**Date:** 2026-08-20 · **Decision:** D-049 · **Spec:** v1.0 + A-1…A-9
+
+**Registered, current:**
+
+| Artifact | SHA-256 |
+|---|---|
+| `baseline_v3_canonical.json` | `2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674` |
+| `baseline_equalcost_v2_canonical.json` | `5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58` |
+| `baseline_closure_v2_canonical.json` | `ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f` |
+| `baseline_closure_equalcost_v2_canonical.json` | `f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df` |
+| `validation_v2_canonical.json` | `7fce85ab39913bf47e6a17867802540c608d6ac84f444780cff97859317656d3` |
+
+**Superseded, preserved byte-for-byte:** `baseline_v2`, `baseline_equalcost_v1`,
+`baseline_closure_v1`, `baseline_closure_equalcost_v1`, `validation_v1`. These
+are the files every figure published before 2026-08-20 came from. They are
+retained so the published record stays verifiable, are never cited as current,
+and are asserted unchanged by `backend/tests/test_validation_artifact.py`.
+
+**What moved, and only what moved.** Compared leaf-by-leaf before registration:
+
+| Pair | Leaves | APR fields moved | New denominator keys | Unexpected |
+|---|---|---|---|---|
+| `baseline_v2` → `v3` | 1105 → 1285 | 25 | 180 | 0 |
+| `baseline_equalcost_v1` → `v2` | 862 → 1022 | 20 | 160 | 0 |
+| `baseline_closure_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |
+| `baseline_closure_equalcost_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |
+| `validation_v1` → `v2` | 189 → 190 | 1 | 1 | 0 |
+
+Burden, recovery, duration, settlement, scenario inputs and seeds are unchanged.
+
+**Headline movements.**
+
+| Figure | Before | After | Cause |
+|---|---|---|---|
+| `temp_closure` `apr_mean`, `f = 1.20` | 29.1869% | **24.1407%** | internal zero months no longer deleted |
+| `temp_closure` `apr_mean`, `f* = 1.0945` | 14.9885% | **12.4321%** | same |
+| `closure_m7` `apr_mean`, both `f` | *undefined* | **−86.5129%** | solver now spans `i > −1` |
+| `closure_m13` denominators, `f = 1.20` | one qualifier | **119 completed / 500 rate-defined** | published separately |
+
+**Public-safety classification.** Quotable with the A-9 qualifiers: name the
+scenario; pair any horizon-limited rate with its incomplete-recovery figure;
+never share one qualifier between `duration_mean` (completion-conditioned) and
+`apr_mean` (IRR-conditioned).

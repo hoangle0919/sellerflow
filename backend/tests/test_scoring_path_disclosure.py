@@ -314,9 +314,11 @@ def test_public_scorer_copy_is_conditional():
 
 # Every surface is scanned for the false claim; these must additionally state
 # the true one. Kept as its own list rather than a skip inside the parametrize,
-# so the suite's skip count stays exactly the nine browser checks and nothing
-# else. A skip that means "not applicable" is noise in a count that is supposed
-# to mean "could not run".
+# so a skip meaning "not applicable" never enters a count that should mean
+# "could not run". The browser checks are the only skips this suite is meant to
+# produce, but their granularity is environment-dependent -- pytest may report
+# one skipped module or nine skipped cases depending on whether Playwright,
+# Chromium, or neither is installed. Do not assert an exact skip number.
 MUST_DISCLOSE = [
     "README.md",
     "backend/ENVIRONMENT.md",

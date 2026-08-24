@@ -1,7 +1,7 @@
 # Paper Outline
 
 **Status:** Publication phase. Gate A passed at `af2fc2d`. Subsequent editorial corrections to Gate-A prose — the recovery-ordering and target-versus-cost families — are logged in **D-047** and **D-048**; they changed **no formula, no generator, and no registered artifact**, and all five canonical checksums are unchanged.
-**Governing documents:** `research/CLAIM_LEDGER.md` (what may be claimed), `research/METHODOLOGY_SPEC.md` v1.0 + A-1…A-8 (what was specified), `research/publication/LITERATURE_MATRIX.md` (what external evidence exists).
+**Governing documents:** `research/CLAIM_LEDGER.md` (what may be claimed), `research/METHODOLOGY_SPEC.md` v1.0 + A-1…A-9 (what was specified), `research/publication/LITERATURE_MATRIX.md` (what external evidence exists).
 
 ---
 
@@ -59,18 +59,18 @@ Four strands, each with its transfer limit stated in the text:
 | **FIX-A** | `q_t = P` for `t ≤ N`, `N·P = C` — matched principal, total and term on the reference path | `METHODOLOGY_SPEC.md` §7.1 |
 | **FIX-B** | Illustrative 18%/12-month amortizing reference | `METHODOLOGY_SPEC.md` §7.2 (A-8) |
 
-- Matched benchmark at `f = 1.20`: term **13** months, payment **17,076,923 VND**, implied APR **37.8694%** **[baseline_v2 → /match_benchmark_a]**.
-- At `f* = 1.0945`: term **12**, payment **16,873,542**, APR **18.3980%** **[baseline_equalcost_v1 → /match_benchmark_a]**.
+- Matched benchmark at `f = 1.20`: term **13** months, payment **17,076,923 VND**, implied APR **37.8694%** **[baseline_v3 → /match_benchmark_a]**.
+- At `f* = 1.0945`: term **12**, payment **16,873,542**, APR **18.3980%** **[baseline_equalcost_v2 → /match_benchmark_a]**.
 - Duration is integer-valued, so cost-matching is exact on total but stepwise in APR — **[M-3, P-1]**.
 - Comparability limit: an APR loan prices time, a factor-rate cap prices a multiple regardless of time **[L-23, L-24]**.
 
-**Figure 1** — contract payment schedules on the reference path, three arms. **[baseline_v2 → /match_benchmark_a; /terms]**
+**Figure 1** — contract payment schedules on the reference path, three arms. **[baseline_v3 → /match_benchmark_a; /terms]**
 
 ### §6 Simulation methodology
 - Frozen spec before outcome analysis; ADEMP-style reporting **[L-27]**; pre-specification defends against researcher degrees of freedom **[L-31]**.
-- 500 paths/scenario, base seed 20260803, bootstrap seed 90210 **[baseline_v2 → /n_paths, /base_seed]**.
+- 500 paths/scenario, base seed 20260803, bootstrap seed 90210 **[baseline_v3 → /n_paths, /base_seed]**.
 - **Terminology, load-bearing:** intervals are **Monte Carlo intervals over simulated paths**, never confidence intervals — synthesis of **[L-28, L-27, L-29]**, per **Gap M-1**. They measure whether enough paths were run; more paths narrow them without adding a fact about the world.
-- Convergence checked for **two estimators on one scenario only**: `Δn_HPB(θ=0.15)` and `ΔRR(12)` under sustained −40% decline, moving **0.0027 months** and **0.042pp** from 5,000→10,000 paths **[P-3 | validation_v1 → /convergence]**. **Do not write "estimates are converged".**
+- Convergence checked for **two estimators on one scenario only**: `Δn_HPB(θ=0.15)` and `ΔRR(12)` under sustained −40% decline, moving **0.0027 months** and **0.042pp** from 5,000→10,000 paths **[P-3 | validation_v2 → /convergence]**. **Do not write "estimates are converged".**
 - Burden denominator disclosure: contractual remittance is a share of **net sales**; displayed burden is payment ÷ **GMV**, equal to `r·(1 − return rate)`, constant only where that ratio is fixed — `returns_spike` is the explicit exception.
 
 ### §7 Analytical propositions
@@ -91,15 +91,15 @@ Stated as theorems, **not** simulation output — the ledger's class-dependent q
 **Figure 2** — P7 boundary: geometric decline, completion vs ρ, showing ρ\* = 11/12 at `f = 1.20` and 0.9086 at `f* = 1.0945`. **[M-6 | DERIVATIONS P7]**
 
 ### §8 Results
-**Table 1** — arm comparison across the ten non-closure scenarios. **[baseline_v2 → /scenarios/*]**
+**Table 1** — arm comparison across the ten non-closure scenarios. **[baseline_v3 → /scenarios/*]**
 
-Stable scenario **[baseline_v2 → /scenarios/stable]**:
+Stable scenario **[baseline_v3 → /scenarios/stable]**:
 - RBF duration **12.86** months, mean burden **0.0933**, RR(12) **96.56%**
 - FIX-A duration 13, burden **0.0943**, RR(12) **92.31%**
 - FIX-B duration 12, burden **0.0936**, RR(12) **100%**
 - RBF leads FIX-A on RR(12) by **4.25pp** — an artifact of integer rounding in the matching rule (P4 corollary), **not** an economic finding. **[I-3]**
 
-Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
+Severe downturn **[baseline_v3 → /scenarios/severe_downturn]**:
 - RBF: duration **18.718**, burden **0.0943**, high-burden months at θ=0.15 **0.0**, RR(12) **65.46%**
 - FIX-A: duration 13, burden **0.1636**, high-burden months **6.85**, RR(12) **92.31%**
 - **Both halves, always** — this is the paper's central table and neither column may appear alone. **[S-1, I-3]**
@@ -109,19 +109,19 @@ Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
 
 ### §9 Pricing versus structure
 - At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**. State precisely what is held constant: the **pre-cap payment rule** is unchanged, the **cap factor changes the contractual target** and therefore completion timing, terminal clipping and the realised stream. Price and payment rule are analytically separable but **jointly determine realised outcomes** — do not write "structural behaviour unchanged".
-- `f* = 1.0945` is the **nearest grid match**: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v1 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
-- Same scenarios repriced **[baseline_equalcost_v1 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
+- `f* = 1.0945` is the **nearest grid match**: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v2 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
+- Same scenarios repriced **[baseline_equalcost_v2 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
 - **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): the contractual repayment target `A·f` is proportional to `f` (P6a) — and realised repayment equals that target only upon completion — while APR, among completed paths with IRR-defined payment streams, is jointly determined by `f` and the path and is undefined where a path does not complete (P6b), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
 - Regulatory recognition of the comparability problem **[L-23, L-24]**; contingency carries a premium **[L-18, L-19]**.
 
-**Figure 5** — cap-factor sweep: effective APR against `f`, with the reference APR and `f*` marked, showing the step structure. **[validation_v1 → /pricing/sweep]**
+**Figure 5** — cap-factor sweep: effective APR against `f`, with the reference APR and `f*` marked, showing the step structure. **[validation_v2 → /pricing/sweep]**
 
 ### §10 Closure, incomplete recovery and censoring
 - Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid identical at the cap **[S-2]** — **horizon- and scenario-bounded**, and none of those ten reaches zero revenue. Must never appear without §10's closure results.
-- Closure at `f = 1.20` **[S-3 | baseline_closure_v1 → /scenarios/*/RBF]**: `closure_m7` **100.0%** incomplete (RR(24) 44.30%); `closure_m13` **76.2%** (RR(24) 96.53%); `temp_closure` **2.0%** (RR(24) 99.98%).
+- Closure at `f = 1.20` **[S-3 | baseline_closure_v2 → /scenarios/*/RBF]**: `closure_m7` **100.0%** incomplete (RR(24) 44.30%); `closure_m13` **76.2%** (RR(24) 96.53%); `temp_closure` **2.0%** (RR(24) 99.98%).
 - At `f* = 1.0945` **[S-4 | baseline_closure_equalcost_v1]**: **100.0%**, **7.6%**, **0.0%**. The `closure_m13` figure moves by a factor of ten with **price alone** — P6a made visible.
 - **Incomplete recovery ≠ principal loss** **[I-3]**. `closure_m13` recovers ≈214.3M against a 185M advance — principal covered despite 76.2% incomplete. Only `closure_m7` (≈98.3M) shows a principal shortfall, and it recovers the **same absolute amount at both cap factors** because that path is revenue-limited, not cap-limited.
-- **Censoring.** `duration_mean` and `apr_mean` are computed only over completing paths — survivor statistics estimating `E[T | completion occurs by horizon H]`, not `E[T]`. Do **not** write `E[T | T ≤ C]`: `C` is already the VND contractual cap. Framed via **[L-36, L-37]**, machinery via **[L-33, L-34, L-35]**. Per **Gap M-2**, the downward bias is argued as a mathematical consequence and **no source is cited as having quantified it**.
+- **Censoring, two different denominators (A-9).** `duration_mean` is computed over completing paths — a survivor statistic estimating `E[T | completion occurs by horizon H]`, not `E[T]`. `apr_mean` is computed over **IRR-defined** paths, which is a different and generally larger set: an incomplete path that made payments still has a rate. In `closure_m13` at `f = 1.20` that is 119 completed against 500 rate-defined. Never share one qualifier between them. Do **not** write `E[T | T ≤ C]`: `C` is already the VND contractual cap. Framed via **[L-36, L-37]**, machinery via **[L-33, L-34, L-35]**. Per **Gap M-2**, the downward bias is argued as a mathematical consequence and **no source is cited as having quantified it**.
 - A short mean duration beside a high incomplete-recovery rate is not a fast contract — it is one where the slow paths were dropped rather than counted.
 
 **Figure 6** — closure panel: incomplete recovery and RR(24) at both cap factors, three closure scenarios.
@@ -131,7 +131,7 @@ Severe downturn **[baseline_v2 → /scenarios/severe_downturn]**:
 ### §11 Product implications
 - Price and structure must be reported separately, or a pricing choice is silently attributed to a structural property **[I-2]**.
 - A provider is exposed to duration risk in ordinary downturns and to an unrecovered contractual balance where permanent closure precedes completion **[I-3]**.
-- The guardrail finding, both halves: the hardship **floor** never activates — 0 of 36,000 month-observations, `μ = 0.25 < h = 0.50` — while the **ceiling binds**, 6,009 of 36,000, changing 6 of 10 scenarios (`apr_mean` 6, `burden_mean` 6, `recovery_ratio` 3, `duration_mean` 1). **[N-2′ | validation_v1 → /rbf_g_breakpoint; baseline_v2 → /scenarios/*/RBF-G]**. Presenting the floor null alone would read as a whole-arm null, which is false.
+- The guardrail finding, both halves: the hardship **floor** never activates — 0 of 36,000 month-observations, `μ = 0.25 < h = 0.50` — while the **ceiling binds**, 6,009 of 36,000, changing 6 of 10 scenarios (`apr_mean` 6, `burden_mean` 6, `recovery_ratio` 3, `duration_mean` 1). **[N-2′ | validation_v2 → /rbf_g_breakpoint; baseline_v3 → /scenarios/*/RBF-G]**. Presenting the floor null alone would read as a whole-arm null, which is false.
 - **No predictive-validity claim.** The demonstration score is trained on synthetic data whose label is a formula over the same features. Own evidence: generating-function AUC **0.9098** vs reported ensemble **0.9182** **[R-000 | research/analysis/00_audit_evidence.py]**. Adjacent mechanism **[L-38]**; per **Gap S-1** the circularity argument is made in the paper's own words.
 - Fixed arms are modelled as **paid in full and on time** — an optimistic scheduled-recovery benchmark, not a realized-recovery one **[Q-3]**.
 
@@ -155,7 +155,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 3/5 byte-identical on macOS CPython 3.11.5 (9 and 2 last-bit float differences), 5/5 on Linux 3.10.12 **[D-041, D-043]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: **1,030 non-browser tests pass — 401 backend and 629 simulation.** Nine browser checks are defined and excluded from that total; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent. Skips are never reported as passes.
+- Test counts: **1,042 non-browser tests pass — 403 backend and 639 simulation.** Nine browser checks are defined and excluded from that total; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent. Skips are never reported as passes.
 
 ---
 

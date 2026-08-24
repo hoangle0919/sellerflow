@@ -55,9 +55,26 @@ EXTRA_SOURCES = ("run_validation.py", "conv_step.py")
 #: Execution facts inside `_meta`. Everything else there is configuration.
 META_PROVENANCE_KEYS = ("date",)
 
-#: The four registered baselines. Re-checked after any write, because this
-#: script imports the same writer they were produced by.
+#: The CURRENT registered baselines (A-9 generation). Re-checked after any
+#: write, because this script imports the same writer they were produced by.
+#: The superseded v1/v2 generation is checked separately in
+#: backend/tests/test_validation_artifact.py -- those files are preserved as
+#: historical evidence and must never move, but they are not what this script
+#: can now reproduce.
 REGISTERED = {
+    "baseline_v3_canonical.json":
+        "2673438a9ff64914ef0a99d03b229d7c38fa5375ea88b6f4b9ad642a31331674",
+    "baseline_equalcost_v2_canonical.json":
+        "5f57487c1c81cbd644f47bbd41a8e213f49abf562e99e3cf31d25aae8f61bb58",
+    "baseline_closure_v2_canonical.json":
+        "ab2bdcfb1d265925abb9ea0d6e880af2781239a62a763050114de5d596da669f",
+    "baseline_closure_equalcost_v2_canonical.json":
+        "f40b7a12c888198eceb5ba7f8419174d5beeefa801af5af63ed5c62f63d2a9df",
+}
+
+#: Superseded by A-9, preserved byte-for-byte. Kept here only so the names are
+#: discoverable from the canonicalizer; their integrity is asserted by test.
+SUPERSEDED = {
     "baseline_v2_canonical.json":
         "264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849",
     "baseline_equalcost_v1_canonical.json":

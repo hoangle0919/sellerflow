@@ -1,0 +1,1739 @@
+{
+  "base_seed": 20260803,
+  "canonical": {
+    "determinism": "Identical code, configuration and seeds reproduce this file NUMERICALLY at published precision on every platform tested. BYTE equality holds within a fixed runtime and is NOT claimed across platforms. Wall-clock time, git commit and environment are recorded in the provenance sidecar.",
+    "generator_fingerprint": "5e05266ffea9b91c8c5bf6891a1c6e6aa668cd7ac2a33185ec3f26d295879922",
+    "scenario_config_hash": "39d0293936b5d500cc2c83a46db3df2b6afda77b536df522571517627ddaef5e",
+    "schema_version": "2.0",
+    "spec_version": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9"
+  },
+  "match_benchmark_a": {
+    "apr": 0.37869389362151806,
+    "payment": 17076923.076923076,
+    "term": 13,
+    "total": 222000000.0
+  },
+  "n_paths": 500,
+  "provenance": "SIMULATED \u2014 no observed seller data",
+  "run": "baseline_v3",
+  "scenarios": {
+    "disruption_1m": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.20443750103691802,
+        "burden_mean": 0.10358462460976332,
+        "burden_p90": 0.12820848018276879,
+        "burden_p95": 0.16028920064507984,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 5.464,
+          "0.15": 1.066,
+          "0.2": 0.546,
+          "0.25": 0.06
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.20304731031901257,
+        "burden_mean": 0.10370387133037591,
+        "burden_p90": 0.12821260128614284,
+        "burden_p95": 0.16261465189160518,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 5.016,
+          "0.15": 1.056,
+          "0.2": 0.526,
+          "0.25": 0.052
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.36222857463514185,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09342050333295422,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.344,
+        "duration_sd": 0.6369175770851359,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 121583508.56928802
+        },
+        "recovery_ratio": {
+          "12": 0.9336538912975827,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3622280894401515,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09342078412252021,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.344,
+        "duration_sd": 0.6369175770851359,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 121583508.56928802
+        },
+        "recovery_ratio": {
+          "12": 0.9336492004568528,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "gradual_decline": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.16250999132172564,
+        "burden_mean": 0.11319611355257184,
+        "burden_p90": 0.13849304972384185,
+        "burden_p95": 0.14925947834361294,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 8.996,
+          "0.15": 0.894,
+          "0.2": 0.048,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.1438578403563401,
+        "burden_mean": 0.10888118735110242,
+        "burden_p90": 0.13026948151765766,
+        "burden_p95": 0.1367961360720081,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 7.85,
+          "0.15": 0.302,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3469085615625404,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09399985566562581,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 16.148,
+        "duration_sd": 0.8637684875011359,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 99452437.73650807
+        },
+        "recovery_ratio": {
+          "12": 0.8421039203615941,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3469085615625404,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09399985566562581,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 16.148,
+        "duration_sd": 0.8637684875011359,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 99452437.73650807
+        },
+        "recovery_ratio": {
+          "12": 0.8421039203615941,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "growth": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.12363173167108929,
+        "burden_mean": 0.0814565842670458,
+        "burden_p90": 0.10668909414718021,
+        "burden_p95": 0.11448999424866521,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 2.464,
+          "0.15": 0.036,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.12279102639472864,
+        "burden_mean": 0.08220931654782508,
+        "burden_p90": 0.10678938294372015,
+        "burden_p95": 0.11445543800688109,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 2.398,
+          "0.15": 0.032,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.4123723569629023,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09305617446996675,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 11.284,
+        "duration_sd": 0.45972165491740763,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 115928080.99771893,
+          "6": 115928080.99771893
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.4123650803098129,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09304084337721442,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 11.286,
+        "duration_sd": 0.4606560539057313,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 115928080.99771893,
+          "6": 115928080.99771893
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "platform_outage": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.3406162825420992,
+        "burden_mean": 0.1140636257782377,
+        "burden_p90": 0.12824706713075723,
+        "burden_p95": 0.21478965345814344,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 5.464,
+          "0.15": 1.086,
+          "0.2": 1.002,
+          "0.25": 0.98
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.3383000656447308,
+        "burden_mean": 0.11497892641520417,
+        "burden_p90": 0.12825571640914166,
+        "burden_p95": 0.2235047399188998,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 5.016,
+          "0.15": 1.076,
+          "0.2": 1.002,
+          "0.25": 0.98
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3569131380307289,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09353367353285529,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.54,
+        "duration_sd": 0.6514598989960932,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 120133401.02337767
+        },
+        "recovery_ratio": {
+          "12": 0.9194241187552465,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3569126633109723,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09353395432242127,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.54,
+        "duration_sd": 0.6514598989960932,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 120133401.02337767
+        },
+        "recovery_ratio": {
+          "12": 0.9194194279145167,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "returns_spike": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.13151055139515605,
+        "burden_mean": 0.09572289354350348,
+        "burden_p90": 0.117301634996495,
+        "burden_p95": 0.1238570539236553,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 5.008,
+          "0.15": 0.088,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.13032489478044332,
+        "burden_mean": 0.09524491141529742,
+        "burden_p90": 0.11669553354200515,
+        "burden_p95": 0.12322937707390835,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 4.542,
+          "0.15": 0.078,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37115241183848857,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09227852736019823,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.006,
+        "duration_sd": 0.5813467123842707,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 122859204.41369231
+        },
+        "recovery_ratio": {
+          "12": 0.9536139361412641,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3711521569284414,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09227864904062091,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.006,
+        "duration_sd": 0.5813467123842707,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 122859204.41369231
+        },
+        "recovery_ratio": {
+          "12": 0.9536139361412641,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "seasonal": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.13151055139515605,
+        "burden_mean": 0.09572289354350348,
+        "burden_p90": 0.117301634996495,
+        "burden_p95": 0.1238570539236553,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 5.008,
+          "0.15": 0.088,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.13032489478044332,
+        "burden_mean": 0.09524491141529742,
+        "burden_p90": 0.11669553354200515,
+        "burden_p95": 0.12322937707390835,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 4.542,
+          "0.15": 0.078,
+          "0.2": 0.002,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37538471016912767,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.0933464649805342,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.862,
+        "duration_sd": 0.5787538336806072,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 123262237.82978497
+        },
+        "recovery_ratio": {
+          "12": 0.9653471868419707,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37538445138502613,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09334658666095687,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.862,
+        "duration_sd": 0.5787538336806072,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123650713.35934973,
+          "6": 123262237.82978497
+        },
+        "recovery_ratio": {
+          "12": 0.9653471868419707,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "seasonal_strong": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.16900586430269968,
+        "burden_mean": 0.1002720445940531,
+        "burden_p90": 0.13227595970016348,
+        "burden_p95": 0.14850912267558575,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 5.928,
+          "0.15": 0.888,
+          "0.2": 0.1,
+          "0.25": 0.002
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.16785661143747918,
+        "burden_mean": 0.1002536364003774,
+        "burden_p90": 0.13251170692608152,
+        "burden_p95": 0.149127167157616,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 5.532,
+          "0.15": 0.86,
+          "0.2": 0.094,
+          "0.25": 0.002
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3544399043308895,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09362424816153651,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.84,
+        "duration_sd": 0.5919459434779497,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 132618031.86610374,
+          "6": 132218168.06617521
+        },
+        "recovery_ratio": {
+          "12": 0.9648759428333555,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3544330690020306,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09362811342797753,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.84,
+        "duration_sd": 0.5919459434779497,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 132618031.86610374,
+          "6": 132218168.06617521
+        },
+        "recovery_ratio": {
+          "12": 0.9648497352103919,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "severe_downturn": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.2775339647140296,
+        "burden_mean": 0.16364224393519478,
+        "burden_p90": 0.24357227533408968,
+        "burden_p95": 0.25967124926905083,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 10.324,
+          "0.15": 6.85,
+          "0.2": 4.152,
+          "0.25": 1.404
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.2752871964201157,
+        "burden_mean": 0.16057338382327105,
+        "burden_p90": 0.2430795803335268,
+        "burden_p95": 0.25876283051398596,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 9.244,
+          "0.15": 5.906,
+          "0.2": 3.774,
+          "0.25": 1.302
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.2827384023555894,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09431754012177425,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 18.718,
+        "duration_sd": 0.5572037329379622,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123518683.16751522,
+          "6": 56012467.92184479
+        },
+        "recovery_ratio": {
+          "12": 0.6545755145270328,
+          "18": 0.977910093476029,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.2827384023555894,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09431754012177425,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 18.718,
+        "duration_sd": 0.5572037329379622,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123518683.16751522,
+          "6": 56012467.92184479
+        },
+        "recovery_ratio": {
+          "12": 0.6545755145270328,
+          "18": 0.977910093476029,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "stable": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.12032663624281807,
+        "burden_mean": 0.09430047699520878,
+        "burden_p90": 0.1104149951260478,
+        "burden_p95": 0.11499758012695875,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 4.226,
+          "0.15": 0.012,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.11873159923897705,
+        "burden_mean": 0.0935891066694561,
+        "burden_p90": 0.10915109916836965,
+        "burden_p95": 0.11374692294916243,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 3.7,
+          "0.15": 0.008,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.40043247597461135,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09325255790810841,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.86,
+        "duration_sd": 0.5834380858325928,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 114082518.65521553,
+          "6": 113683673.85572144
+        },
+        "recovery_ratio": {
+          "12": 0.9656145198535216,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.40043247597461135,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09325255790810841,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.86,
+        "duration_sd": 0.5834380858325928,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 114082518.65521553,
+          "6": 113683673.85572144
+        },
+        "recovery_ratio": {
+          "12": 0.9656145198535216,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    },
+    "sustained_decline": {
+      "FIX-A": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.37869389362151806,
+        "burden_max": 0.18771071110092405,
+        "burden_mean": 0.12750694704621415,
+        "burden_p90": 0.1671430698705781,
+        "burden_p95": 0.1769212972058347,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 13.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1999999999999997,
+        "n_high_burden": {
+          "0.1": 10.156,
+          "0.15": 3.1,
+          "0.2": 0.276,
+          "0.25": 0.004
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 119538461.53846152,
+          "6": 119538461.53846152
+        },
+        "recovery_ratio": {
+          "12": 0.923076923076923,
+          "18": 0.9999999999999999,
+          "24": 0.9999999999999999
+        },
+        "total_repaid_mean": 221999999.99999997
+      },
+      "FIX-B": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.19561817146154947,
+        "burden_max": 0.18366603558542194,
+        "burden_mean": 0.12427916597105464,
+        "burden_p90": 0.16247702636108122,
+        "burden_p95": 0.17276417028925262,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 12.0,
+        "duration_sd": 0.0,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.1001599148747543,
+        "n_high_burden": {
+          "0.1": 9.076,
+          "0.15": 2.454,
+          "0.2": 0.206,
+          "0.25": 0.004
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 101764792.12591474,
+          "6": 101764792.12591474
+        },
+        "recovery_ratio": {
+          "12": 1.0,
+          "18": 1.0,
+          "24": 1.0
+        },
+        "total_repaid_mean": 203529584.25182953
+      },
+      "RBF": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3150362474223974,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09430500104213208,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 17.952,
+        "duration_sd": 0.8280676300882676,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123604657.59737727,
+          "6": 81310917.87279084
+        },
+        "recovery_ratio": {
+          "12": 0.7603717029883676,
+          "18": 0.9949877889467208,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      },
+      "RBF-G": {
+        "apr_defined_count": 500,
+        "apr_defined_rate": 1.0,
+        "apr_mean": 0.3150362474223974,
+        "burden_max": 0.09700000000000002,
+        "burden_mean": 0.09430500104213208,
+        "burden_p90": 0.09700000000000002,
+        "burden_p95": 0.09700000000000002,
+        "completed_count": 500,
+        "completed_rate": 1.0,
+        "duration_censored_rate": 0.0,
+        "duration_mean": 17.952,
+        "duration_sd": 0.8280676300882676,
+        "incomplete_recovery_rate": 0.0,
+        "multiple_mean": 1.2,
+        "n_high_burden": {
+          "0.1": 0.0,
+          "0.15": 0.0,
+          "0.2": 0.0,
+          "0.25": 0.0
+        },
+        "n_paths": 500,
+        "post_shock_recovery": {
+          "12": 123604657.59737727,
+          "6": 81310917.87279084
+        },
+        "recovery_ratio": {
+          "12": 0.7603717029883676,
+          "18": 0.9949877889467208,
+          "24": 1.0
+        },
+        "total_repaid_mean": 222000000.0
+      }
+    }
+  },
+  "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03)",
+  "terms": {
+    "A": 185000000.0,
+    "N_B": 12,
+    "cap": 222000000.0,
+    "f": 1.2,
+    "j": 0.18,
+    "r": 0.1
+  },
+  "tradeoff": {
+    "disruption_1m": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 1.094,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 1.038,
+        "mean": 1.066,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": -0.007169231287949912,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": -0.013974126594574131,
+        "mean": -0.010576968220659715,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "gradual_decline": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.958,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.832,
+        "mean": 0.894,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.08404185853464478,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.07784790391212905,
+        "mean": 0.08097300271532891,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "growth": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.054,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.02,
+        "mean": 0.036,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": -0.076923076923077,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": -0.076923076923077,
+        "mean": -0.076923076923077,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "platform_outage": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 1.112,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 1.062,
+        "mean": 1.086,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.0071454184183633645,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.00016208158731809692,
+        "mean": 0.0036528043216763886,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "returns_spike": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.114,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.064,
+        "mean": 0.088,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": -0.02742461735687395,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": -0.03363081968626789,
+        "mean": -0.03053701306434115,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "seasonal": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.114,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.064,
+        "mean": 0.088,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": -0.03940110044014126,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": -0.045073103649740695,
+        "mean": -0.042270263765047646,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "seasonal_strong": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.94,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.836,
+        "mean": 0.888,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": -0.03890240841958149,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": -0.04464094094394504,
+        "mean": -0.04179901975643257,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "severe_downturn": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 6.898,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 6.802,
+        "mean": 6.85,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.2710267647913106,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.26595910133230877,
+        "mean": 0.2685014085498903,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "stable": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.022,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.004,
+        "mean": 0.012,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": -0.0397082056985301,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": -0.045309933232927736,
+        "mean": -0.042537596776598664,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    },
+    "sustained_decline": {
+      "d_n_hpb_015": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 3.2,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 3.0,
+        "mean": 3.1,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      },
+      "d_rr12": {
+        "does_not_measure": "population-level uncertainty about real sellers",
+        "hi": 0.1655378079204548,
+        "label": "Monte Carlo interval (simulated-path resampling)",
+        "lo": 0.1598622506038907,
+        "mean": 0.16270522008855529,
+        "measures": "stability of the mean across simulated paths given the chosen generative parameters",
+        "n": 500
+      }
+    }
+  },
+  "underreporting": {
+    "0.7": {
+      "apr_defined_count": 500,
+      "apr_defined_rate": 1.0,
+      "apr_mean": 0.2616171330518174,
+      "burden_max": 0.0679,
+      "burden_mean": 0.06617977023106847,
+      "burden_p90": 0.0679,
+      "burden_p95": 0.0679,
+      "completed_count": 500,
+      "completed_rate": 1.0,
+      "duration_censored_rate": 0.0,
+      "duration_mean": 18.69,
+      "duration_sd": 0.7196526940128829,
+      "incomplete_recovery_rate": 0.0,
+      "multiple_mean": 1.2,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "n_paths": 500,
+      "post_shock_recovery": {
+        "12": 152793986.47378913,
+        "6": 94861252.86651184
+      },
+      "recovery_ratio": {
+        "12": 0.680362780964083,
+        "18": 0.980396560193577,
+        "24": 1.0
+      },
+      "total_repaid_mean": 222000000.0
+    },
+    "0.8": {
+      "apr_defined_count": 500,
+      "apr_defined_rate": 1.0,
+      "apr_mean": 0.300362813902726,
+      "burden_max": 0.07760000000000002,
+      "burden_mean": 0.07521073474732459,
+      "burden_p90": 0.0776,
+      "burden_p95": 0.07760000000000002,
+      "completed_count": 500,
+      "completed_rate": 1.0,
+      "duration_censored_rate": 0.0,
+      "duration_mean": 16.362,
+      "duration_sd": 0.6745042624031371,
+      "incomplete_recovery_rate": 0.0,
+      "multiple_mean": 1.2,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "n_paths": 500,
+      "post_shock_recovery": {
+        "12": 143320570.6874798,
+        "6": 108412860.41887069
+      },
+      "recovery_ratio": {
+        "12": 0.777557463958952,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "total_repaid_mean": 222000000.0
+    },
+    "0.9": {
+      "apr_defined_count": 500,
+      "apr_defined_rate": 1.0,
+      "apr_mean": 0.3386110450262195,
+      "burden_max": 0.08730000000000002,
+      "burden_mean": 0.08430886104737599,
+      "burden_p90": 0.08730000000000002,
+      "burden_p95": 0.08730000000000002,
+      "completed_count": 500,
+      "completed_rate": 1.0,
+      "duration_censored_rate": 0.0,
+      "duration_mean": 14.41,
+      "duration_sd": 0.7469270379361025,
+      "incomplete_recovery_rate": 0.0,
+      "multiple_mean": 1.2,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "n_paths": 500,
+      "post_shock_recovery": {
+        "12": 133485642.02341476,
+        "6": 121538221.80211835
+      },
+      "recovery_ratio": {
+        "12": 0.8747338480709418,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "total_repaid_mean": 222000000.0
+    },
+    "0.95": {
+      "apr_defined_count": 500,
+      "apr_defined_rate": 1.0,
+      "apr_mean": 0.35719212737186834,
+      "burden_max": 0.09215000000000001,
+      "burden_mean": 0.0889252577073364,
+      "burden_p90": 0.09215000000000001,
+      "burden_p95": 0.09215000000000001,
+      "completed_count": 500,
+      "completed_rate": 1.0,
+      "duration_censored_rate": 0.0,
+      "duration_mean": 13.538,
+      "duration_sd": 0.6637439265258854,
+      "incomplete_recovery_rate": 0.0,
+      "multiple_mean": 1.2,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "n_paths": 500,
+      "post_shock_recovery": {
+        "12": 128568177.69138224,
+        "6": 125062989.06223652
+      },
+      "recovery_ratio": {
+        "12": 0.9229118706254983,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "total_repaid_mean": 222000000.0
+    },
+    "1.0": {
+      "apr_defined_count": 500,
+      "apr_defined_rate": 1.0,
+      "apr_mean": 0.37538471016912767,
+      "burden_max": 0.09700000000000002,
+      "burden_mean": 0.0933464649805342,
+      "burden_p90": 0.09700000000000002,
+      "burden_p95": 0.09700000000000002,
+      "completed_count": 500,
+      "completed_rate": 1.0,
+      "duration_censored_rate": 0.0,
+      "duration_mean": 12.862,
+      "duration_sd": 0.5787538336806072,
+      "incomplete_recovery_rate": 0.0,
+      "multiple_mean": 1.2,
+      "n_high_burden": {
+        "0.1": 0.0,
+        "0.15": 0.0,
+        "0.2": 0.0,
+        "0.25": 0.0
+      },
+      "n_paths": 500,
+      "post_shock_recovery": {
+        "12": 123650713.35934973,
+        "6": 123262237.82978497
+      },
+      "recovery_ratio": {
+        "12": 0.9653471868419707,
+        "18": 1.0,
+        "24": 1.0
+      },
+      "total_repaid_mean": 222000000.0
+    }
+  }
+}

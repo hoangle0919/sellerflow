@@ -1129,3 +1129,102 @@ verified unchanged.
 **Left alone deliberately.** The California SB 362 citation is unchanged; it has
 been independently confirmed against the official chaptered text. Dated records
 are still not rewritten.
+
+---
+
+## D-049 — A-9: the IRR was wrong, and the artifacts are regenerated
+**Date:** 2026-08-20 · **Branch:** `publication-final` (unpushed at time of writing)
+**Raised by:** an independent audit that reproduced the engine's effective-rate
+calculation against the registered artifacts.
+**Status:** APPLIED. Supersedes the APR passages of **D-034**, **D-036** and
+**D-048**, and reopens the deferral in **D-044**. Those entries are dated
+records and are not rewritten.
+
+**This is the first change in this project to alter a registered result.** Every
+earlier correction pass moved words. This one moves numbers, because the numbers
+were wrong.
+
+**Three defects, reproduced before any edit was made.**
+
+1. **Calendar time was collapsed.** `engine.run_path` passed
+   `[x for x in p if x > 0]` to `solve_apr`, deleting zero-payment months from
+   the middle of a stream. Every later payment was then discounted as though it
+   had arrived earlier. Trailing zeros are immaterial at any position, so this
+   bound exactly where a scenario contained an *internal* zero-revenue spell:
+   `temp_closure` moved 29.1869% → **24.1407%** at `f = 1.20`, and 14.9885% →
+   **12.4321%** at `f*`.
+
+2. **The solver could not express a loss.** The bracket was `[1e-12, 2.0]`.
+   A contract recovering less than it advanced produced no sign change,
+   returned `None`, and was published as *undefined*. `closure_m7` recovers
+   about 98.3M against a 185M advance; its annualised IRR is **−86.5129%**.
+   "Undefined" reads like a technicality and was concealing an adverse result.
+
+3. **Two denominators were reported as one.** `duration_mean` is conditioned on
+   completion. `apr_mean` is conditioned on IRR existence — a different and
+   generally larger set, because a path can miss the contractual target and
+   still have a well-defined return on the payments it made. In `closure_m13`
+   at `f = 1.20`: **119 of 500** complete, **500 of 500** are rate-defined, so
+   **381** paths are simultaneously incomplete and rate-defined. The published
+   30.33% averaged all 500 while the surrounding prose said "among completed
+   paths", where the completed-only figure is **39.37%**.
+
+**Alternatives considered.** (a) Correct the prose and leave the numbers —
+rejected: the numbers are wrong, not merely mislabelled. (b) Regenerate in
+place, overwriting the five registered artifacts — rejected: that destroys the
+record of what was published, and this project's own audit trail depends on
+being able to check a superseded figure against the file it came from.
+(c) **Amend the specification, regenerate under new stems, preserve the old
+five byte-for-byte** ← chosen.
+
+**Specification.** Amendment **A-9** defines the IRR over the complete monthly
+vector including internal zeros; solves over `i > −1`; states existence and
+uniqueness under the project's one-negative-then-non-negative sign pattern;
+separates completion from IRR existence; and adds the observed-window caveat
+for incomplete non-absorbing paths.
+
+**Migration.** New: `baseline_v3`, `baseline_equalcost_v2`,
+`baseline_closure_v2`, `baseline_closure_equalcost_v2`, `validation_v2`, with
+provenance sidecars, registered at R-014. Superseded: the previous five,
+preserved byte-for-byte and asserted unchanged by test. Canonical schema
+1.0 → 2.0; aggregates gained `apr_defined_count`, `apr_defined_rate`,
+`completed_count` and `completed_rate` so no denominator has to be inferred.
+
+**The leaf gate earned its place.** Before registration, old and new artifacts
+were compared leaf-by-leaf with an allow-list of rate fields, new denominator
+keys and identity metadata. It failed on the first attempt: removing the
+`x > 0` filter in `run_validation.sec2` also broke a `len(pay)` that was doing
+double duty as the count of paying months, turning every reported pricing
+duration into the 24-month horizon. Caught, fixed, re-run clean — 0 unexpected
+leaves across all five pairs. Burden, recovery, duration, settlement, scenario
+inputs and seeds are unchanged.
+
+**A latent inconsistency surfaced.** `validation_v1_canonical.json` could not
+have been regenerated from the committed `run_validation.py`: the raw
+`validation_v1.json` predates a `convergence.converged` key added in `42b7b1e`.
+The registered artifact was canonicalized from a raw file produced by an older
+script. Nothing was published from that key, and `validation_v2` is generated
+from the current code, so the inconsistency is closed rather than carried.
+
+**D-044 reopened.** That entry declined to regenerate five artifacts in order to
+correct an embedded sentence about reproducibility, on the ground that the trade
+was not worth it. Correct at the time. Regeneration now had to happen for a
+substantive reason, so the `canonical.determinism` string was corrected in the
+same pass at no extra cost: numeric equality at published precision across
+tested platforms, byte equality only within a fixed runtime.
+
+**Consequence for public surfaces.** The Lab's `_censoring` helper derived one
+qualifier from `incomplete_recovery_rate` and attached it to both the duration
+and the rate; it now reports the two denominators separately and labels a
+horizon-limited rate as an observed-window figure. `frontend/lab.html` no longer
+prints "Undefined — repayment incomplete", which asserted a causal link that
+does not exist. Four Lab tests that encoded the old semantics were rewritten
+rather than deleted, and now assert the corrected behaviour.
+
+**Not claimed.** A-9 changes what the rate *means* and how it is computed. It
+does not make the rate evidence about real sellers, and it does not change the
+paper's argument: price and structure remain separable, the burden and recovery
+findings are untouched, and the product's financing arithmetic never used this
+layer at all.
+
+**Suites:** 403 backend passed / 9 skipped, 639 simulation passed.

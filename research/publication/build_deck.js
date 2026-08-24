@@ -62,6 +62,15 @@ const notes = (s, body, sources) =>
     ? "\n\n[Sources]\n" + sources.map((x) => "  · " + x).join("\n")
     : ""));
 
+/* LibreOffice mis-positions the third run in a multi-run bulleted paragraph --
+ * the bullets render, but the last one lands over the following block. One
+ * text box per bullet costs three calls and renders identically in PowerPoint,
+ * Keynote and LibreOffice. Layout bug, not a content change. */
+const bullets = (s, items, opts) => items.forEach((txt, i) =>
+  s.addText("\u2022   " + txt, Object.assign({}, opts, {
+    y: opts.y + i * opts.step, h: opts.step,
+  })));
+
 function darkSlide() { const s = pres.addSlide(); s.background = { color: INK }; return s; }
 function lightSlide() { const s = pres.addSlide(); s.background = { color: PAPER }; return s; }
 
@@ -183,9 +192,9 @@ function source(s, t) {
     { x: 0.7, y: 5.3, w: 11.9, h: 0.5, fontSize: 14, bold: true, color: INK, fontFace: "Calibri", margin: 0 });
   s.addText("At f = 1.20 the matched term is 13 months at 17,076,923 VND/month; at f* = 1.0945 it is 12 months at 16,873,542 VND/month.",
     { x: 0.7, y: 5.85, w: 11.9, h: 0.45, fontSize: 12.5, color: "444444", fontFace: "Calibri", margin: 0 });
-  source(s, "baseline_v2_canonical.json and baseline_equalcost_v1_canonical.json → /match_benchmark_a");
+  source(s, "baseline_v3_canonical.json and baseline_equalcost_v2_canonical.json → /match_benchmark_a");
   notes(s, "Two distinct ideas, do not merge them. Pairing = every arm sees the same generated path. Cost-matching = only RBF and FIX-A share principal, total and term. FIX-B is an outside price reference and is not matched to anything; its 18% is an assumption of ours.", [
-    "Matched terms: baseline_v2_canonical.json and baseline_equalcost_v1_canonical.json \u2192 /match_benchmark_a",
+    "Matched terms: baseline_v3_canonical.json and baseline_equalcost_v2_canonical.json \u2192 /match_benchmark_a",
     "FIX-B\u2019s 18% nominal is an assumed input, not a market rate \u2014 spec amendment A-8",
     "Factor rate and APR are not commensurable without conversion: L-23 (NY 23 NYCRR 600), L-24 (California)",
   ]);
@@ -219,9 +228,9 @@ function source(s, t) {
     { x: 0.7, y: 5.45, w: 11.9, h: 0.45, fontSize: 15, bold: true, color: INK, fontFace: "Calibri", margin: 0 });
   s.addText("15% is an illustrative reporting band chosen for this study, not a validated hardship cutoff. Burden is payment ÷ GMV. The fixed arm is scheduled recovery under an assumption of full, on-time payment.",
     { x: 0.7, y: 5.95, w: 11.9, h: 0.7, fontSize: 11, color: MUTED, fontFace: "Calibri", lineSpacing: 16, margin: 0 });
-  source(s, "baseline_v2_canonical.json → /scenarios/severe_downturn   ·   claim-ledger S-1, I-3");
+  source(s, "baseline_v3_canonical.json → /scenarios/severe_downturn   ·   claim-ledger S-1, I-3");
   notes(s, "Never show the left chart without the right one. That pairing is the paper's central discipline. The pairing rule is general; this scenario's direction is not.", [
-    "S-1 | baseline_v2_canonical.json \u2192 /scenarios/severe_downturn",
+    "S-1 | baseline_v3_canonical.json \u2192 /scenarios/severe_downturn",
     "Burden must be read across the distribution, not at the mean: L-13 Chapman et al. (2010)",
     "Fixed schedules concentrate burden in low-income states: L-12 Chapman & Lounkaew (2015)",
     "15% band is illustrative, chosen for this study \u2014 ledger Q-4, not a validated hardship cutoff",
@@ -249,9 +258,9 @@ function source(s, t) {
   ], { x: 0.7, y: 4.55, w: 11.9, h: 1.2, fontSize: 15, color: "333333", fontFace: "Calibri", lineSpacing: 23, margin: 0 });
   s.addText("Analytically separable — but they jointly determine outcomes. A cost ratio quoted at a single cap factor is a pricing result, not a property of revenue-contingent repayment.",
     { x: 0.7, y: 5.8, w: 11.9, h: 0.7, fontSize: 13, italic: true, color: INK, fontFace: "Calibri", lineSpacing: 18, margin: 0 });
-  source(s, "validation_v1_canonical.json → /pricing   ·   claim-ledger P-1, P-2");
+  source(s, "validation_v2_canonical.json → /pricing   ·   claim-ledger P-1, P-2");
   notes(s, "This is the contribution. Both halves of the last line matter — separable is not the same as outcome-independent.", [
-    "P-1, P-2 | validation_v1_canonical.json → /pricing/equal_cost, /pricing/benchmark_b_apr",
+    "P-1, P-2 | validation_v2_canonical.json → /pricing/equal_cost, /pricing/benchmark_b_apr",
     "Separability of price and payment rule: DERIVATIONS.md P6(a), P6(b)",
     "Contingency can carry a premium in other domains — L-18 (human capital), L-19 (sovereign). Neither is SME finance; no general rule is claimed",
   ]);
@@ -267,11 +276,11 @@ function source(s, t) {
     x: 1.1, y: 2.05, w: 11.1, h: 0.5, fontSize: 20, italic: true, color: "6B2E12", fontFace: "Cambria", margin: 0 });
   s.addText("WITHDRAWN — and the reason is this slide deck's argument.", {
     x: 1.1, y: 2.65, w: 11.1, h: 0.4, fontSize: 14, bold: true, color: WARN, fontFace: "Calibri", margin: 0 });
-  s.addText([
-    { text: "It fixed f = 1.20 as though it were intrinsic. The contractual repayment target A × f is proportional to f — and realised repayment equals that target only when the contract completes.", options: { bullet: true, breakLine: true } },
-    { text: "It quoted one effective APR as though it were a contract property — APR is jointly determined by the price and the revenue path.", options: { bullet: true, breakLine: true } },
-    { text: "It survived several earlier drafts of this project, written while actively trying to avoid exactly this error.", options: { bullet: true } },
-  ], { x: 0.7, y: 3.55, w: 11.7, h: 1.9, fontSize: 15, color: "333333", fontFace: "Calibri", paraSpaceAfter: 10, margin: 0 });
+  bullets(s, [
+    "It fixed f = 1.20 as though it were intrinsic. The contractual repayment target A × f is proportional to f — and realised repayment equals that target only when the contract completes.",
+    "It quoted one effective APR as though it were a contract property — among rate-defined paths the APR is jointly determined by the price and the revenue path.",
+    "It survived several earlier drafts of this project, written while actively trying to avoid exactly this error.",
+  ], { x: 0.7, y: 3.5, w: 11.7, step: 0.62, fontSize: 14.5, color: "333333", fontFace: "Calibri", lineSpacing: 19, margin: 0 });
   s.addText("We report the retraction rather than quietly correcting it, because it is the concrete instance of the conflation the paper argues against.",
     { x: 0.7, y: 5.45, w: 11.9, h: 0.7, fontSize: 14, bold: true, color: INK, fontFace: "Calibri", lineSpacing: 19, margin: 0 });
   notes(s, "Interviewers respond well to this slide. It demonstrates the discipline rather than asserting it.", [
@@ -306,8 +315,8 @@ function source(s, t) {
   ], { x: 0.7, y: 5.3, w: 11.9, h: 0.9, fontSize: 14, color: "333333", fontFace: "Calibri", lineSpacing: 20, margin: 0 });
   source(s, "baseline_closure_v1 and baseline_closure_equalcost_v1 → /scenarios/*/RBF   ·   claim-ledger S-3, S-4");
   notes(s, "Note the price effect: closure_m13 falls from 76.2% to 7.6% on the cap factor alone. Same structure, nearer threshold.", [
-    "S-3 | baseline_closure_v1_canonical.json \u2192 /scenarios/*/RBF/incomplete_recovery_rate",
-    "S-4 | baseline_closure_equalcost_v1_canonical.json \u2192 same paths",
+    "S-3 | baseline_closure_v2_canonical.json \u2192 /scenarios/*/RBF/incomplete_recovery_rate",
+    "S-4 | baseline_closure_equalcost_v2_canonical.json \u2192 same paths",
     "Why a nearer cap completes sooner: DERIVATIONS.md P6(a), P7",
   ]);
 }
@@ -353,7 +362,7 @@ function source(s, t) {
   title(s, "What our own statistics leave out");
   s.addShape(pres.ShapeType.roundRect, { x: 0.7, y: 1.8, w: 11.9, h: 1.35, rectRadius: 0.08,
     fill: { color: "F4F4F4" }, line: { color: RULE, width: 1 } });
-  s.addText("Mean duration and mean effective APR are computed only over paths that reached the target. They estimate E[T | completion occurs by horizon H] — not E[T].",
+  s.addText("Mean duration is computed only over paths that reached the target — it estimates E[T | completion by horizon H], not E[T]. Mean APR is computed over paths with a DEFINED RATE, a different and larger set: in closure_m13 at f = 1.20, 119 of 500 completed while all 500 had a rate.",
     { x: 1.1, y: 2.0, w: 11.1, h: 0.95, fontSize: 15, color: INK, fontFace: "Calibri", lineSpacing: 21, valign: "middle", margin: 0 });
   s.addText("The reading rule this forces", { x: 0.7, y: 3.45, w: 11.9, h: 0.4, fontSize: 17, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
   s.addText([
@@ -363,9 +372,9 @@ function source(s, t) {
     fill: { color: "FDF3EF" }, line: { color: WARN, width: 1.5 } });
   s.addText("Closure at month 13, f = 1.20: mean duration 11.99 months — alongside 76.2% of paths never completing.",
     { x: 1.1, y: 5.05, w: 11.1, h: 0.95, fontSize: 15, bold: true, color: "6B2E12", fontFace: "Calibri", valign: "middle", margin: 0 });
-  source(s, "baseline_closure_v1_canonical.json → /scenarios/closure_m13/RBF");
+  source(s, "baseline_closure_v2_canonical.json → /scenarios/closure_m13/RBF");
   notes(s, "Reporting the 11.99 without the 76.2% would invert the finding. Survivor statistics describe the contracts that finished, not the portfolio.", [
-    "baseline_closure_v1_canonical.json \u2192 /scenarios/closure_m13/RBF/duration_mean, /incomplete_recovery_rate",
+    "baseline_closure_v2_canonical.json \u2192 /scenarios/closure_m13/RBF/duration_mean, /incomplete_recovery_rate",
     "Conditioning on a non-random subsample is a specification error: L-36 Heckman (1979)",
     "Conditioning on a common effect: L-37 Hern\u00e1n, Hern\u00e1ndez-D\u00edaz & Robins (2004)",
     "Right-censoring machinery: L-32 Kaplan & Meier (1958), L-33 Klein & Moeschberger (2003)",
@@ -411,15 +420,15 @@ function source(s, t) {
     s.addText(lab, { x: x + 0.32, y: 2.82, w: 3.06, h: 0.6, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 16, valign: "top", margin: 0 });
   };
   stat(0.7,  "5",     "canonical artifacts, each with a\nregistered SHA-256");
-  stat(4.80, "1,030", "non-browser tests passing —\n401 backend, 629 simulation");
+  stat(4.80, "1,042", "non-browser tests passing —\n403 backend, 639 simulation");
   stat(8.90, "44",    "verified sources, with 6\nevidence gaps stated openly");
   s.addText("Reproducibility, stated at the strength the measurement supports", { x: 0.7, y: 3.85, w: 11.9, h: 0.4, fontSize: 16, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
-  s.addText([
-    { text: "All five artifacts reproduce numerically at published precision on every platform tested.", options: { bullet: true, breakLine: true } },
-    { text: "Byte equality holds within a fixed runtime, not across platforms — 3 of 5 byte-identical on macOS CPython 3.11.5, 5 of 5 on Linux 3.10.12.", options: { bullet: true, breakLine: true } },
-    { text: "An earlier claim of unqualified byte-for-byte reproducibility rested on a step that re-hashed the committed file rather than regenerating it. Both the claim and the evidence were corrected.", options: { bullet: true } },
-  ], { x: 0.7, y: 4.35, w: 11.9, h: 1.9, fontSize: 13, color: "333333", fontFace: "Calibri", paraSpaceAfter: 8, margin: 0 });
-  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,030 figure is non-browser: 401 backend and 629 simulation. Nine browser checks are defined and excluded from it; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent.",
+  bullets(s, [
+    "All five artifacts reproduce numerically at published precision on every platform tested.",
+    "Byte equality holds within a fixed runtime, not across platforms — 3 of 5 byte-identical on macOS CPython 3.11.5, 5 of 5 on Linux 3.10.12.",
+    "An earlier claim of unqualified byte-for-byte reproducibility rested on a step that re-hashed the committed file rather than regenerating it. Both the claim and the evidence were corrected.",
+  ], { x: 0.7, y: 4.3, w: 11.9, step: 0.58, fontSize: 12.5, color: "333333", fontFace: "Calibri", lineSpacing: 16, margin: 0 });
+  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,042 figure is non-browser: 403 backend and 639 simulation. Nine browser checks are defined and excluded from it; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent.",
     { x: 0.7, y: 6.25, w: 11.9, h: 0.6, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", lineSpacing: 15, margin: 0 });
   notes(s, "The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.", [
     "Five registered SHA-256 digests: MANUSCRIPT.md §15; RESULTS_REGISTRY.md",
