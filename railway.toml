@@ -2,7 +2,14 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "cd backend && python train_model.py --skip-if-exists 2>/dev/null; python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+# Model training is best-effort: the financing arithmetic is deterministic and
+# never calls the ensemble, so a training failure must not stop the service.
+# But it was previously silenced with `2>/dev/null`, which is why nobody noticed
+# the ensemble had stopped building at all — the deploy looked identical whether
+# training succeeded or failed. Errors now reach the deploy log, and the
+# fallback is announced rather than assumed. `/api/health` reports the scorer
+# actually in use.
+startCommand = "cd backend && { python train_model.py --skip-if-exists || echo \"[startup] model training FAILED (see the error above) — serving with the deterministic heuristic fallback\"; } ; python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
