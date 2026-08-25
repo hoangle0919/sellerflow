@@ -27,6 +27,12 @@ import warnings
 import joblib
 import pandas as pd
 
+try:                                    # sklearn >= 1.3
+    from sklearn.exceptions import InconsistentVersionWarning
+except Exception:                       # pragma: no cover - very old/absent sklearn
+    class InconsistentVersionWarning(UserWarning):
+        """Stand-in so the load filter below is always well-defined."""
+
 from database import _build_reasoning
 from money import to_increment
 
@@ -99,7 +105,17 @@ def load_models(model_dir: str = None) -> bool:
 
     try:
         with warnings.catch_warnings():
-            warnings.simplefilter("error")      # version warnings become errors
+            # Only warnings that actually signal a version hazard become errors.
+            # `simplefilter("error")` was too broad: it also promoted benign
+            # DeprecationWarnings raised by a dependency's own internals during
+            # unpickling — in production, NumPy 2.5's "Setting the shape on a
+            # NumPy array has been deprecated" — and reported a perfectly good
+            # artifact as unreadable. That is what silently pinned the live
+            # deployment to the heuristic fallback while training succeeded
+            # every boot. The smoke test below is what proves usability; this
+            # filter only needs to catch the cross-version pickle hazard.
+            warnings.simplefilter("ignore")
+            warnings.simplefilter("error", InconsistentVersionWarning)
             rf = joblib.load(os.path.join(d, MODEL_FILES["rf"]))
             lr = joblib.load(os.path.join(d, MODEL_FILES["lr"]))
             scaler = joblib.load(os.path.join(d, MODEL_FILES["scaler"]))
