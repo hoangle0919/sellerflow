@@ -7,6 +7,8 @@ import math
 import pytest
 
 from financing_engine import (
+    effective_apr,
+    irr_upper_bound,
     revenue_metrics,
     financing_structure,
     scenario_analysis,
@@ -435,3 +437,50 @@ def test_closure_scenario_reports_its_observed_window_return():
     assert closure["observed_apr_to_closure"] < 0
     assert closure["amount_unrecovered"] > 0          # reported beside, not instead
     assert "observed-window" in closure["apr_basis"]
+
+
+# ── IRR solver completeness (research spec A-9, plus the bracket completion) ──
+def test_irr_bracket_is_analytic_not_an_arbitrary_ceiling():
+    """A fixed upper bracket is a silent correctness bug: a stream repaying 12x
+    the advance in one month has a unique monthly IRR of 11, and the earlier
+    hard ceiling of 10.0 reported it as "no rate exists" — indistinguishable
+    from a genuine absence. The bound is derivable: i* <= S/P - 1."""
+    assert irr_upper_bound(100, [1200]) == 11.0
+    assert effective_apr(100, [1200]) is not None
+
+    # S < P: the root is negative and 0 brackets it from above.
+    assert irr_upper_bound(100, [50]) == 0.0
+
+
+def test_a_root_on_the_bracket_endpoint_is_still_a_root():
+    """With the analytic bound the single-payment case lands exactly on the
+    endpoint by construction, so requiring a strict sign change would report
+    the most ordinary case of all as undefined."""
+    assert effective_apr(100, [1100]) is not None      # monthly IRR exactly 10
+    # The ordinary case, and the one that exposed an exact `== 0.0` endpoint
+    # test: S/P - 1 is not exactly representable here, so the residual is a
+    # tiny POSITIVE and a strict test reports no rate for a plain single
+    # payment. Reachable in product whenever a small requested amount makes the
+    # cap smaller than one month's remittance.
+    assert effective_apr(100, [115]) is not None
+
+
+def test_apr_is_none_only_when_no_payment_is_positive():
+    """`None` must mean "no rate satisfies the equation", not "our search
+    window was too small" — the distinction the ceiling erased."""
+    assert effective_apr(100, [0.0, 0.0]) is None
+    assert effective_apr(100, []) is None
+    assert effective_apr(333_000_000, [14_385_600] * 6) < 0   # a loss has a rate
+
+
+def test_the_repayment_cap_keeps_product_returns_far_inside_the_bracket():
+    """Why the bound is not load-bearing *here*, recorded so nobody mistakes
+    the solver's generality for a live risk: collection stops at the cap, so
+    total collected never exceeds 1.30x the advance and the monthly IRR cannot
+    exceed 0.30 even if the whole cap arrived in month one. The completeness
+    fix is adopted for parity with the research method this module claims to
+    mirror, not because the product can reach the old ceiling."""
+    for tier in ("Low Risk", "Medium Risk"):
+        s = financing_structure(150_000_000, tier)
+        advance, cap = s["amount_used_for_structure"], s["repayment_cap"]
+        assert irr_upper_bound(advance, [cap]) <= 0.30 + 1e-9   # 1.30x, float-exact

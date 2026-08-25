@@ -56,7 +56,39 @@ MIN_MEANINGFUL_GROWTH = 0.05  # floor used only to keep the "growth case" distin
 # express "recovered less than was advanced" and returns undefined instead,
 # which hides an adverse result behind a word that reads like a technicality.
 IRR_MIN_MONTHLY = -1.0 + 1e-9
-IRR_MAX_MONTHLY = 10.0
+
+
+def irr_upper_bound(principal: float, flows: List[float]) -> float:
+    """Exact analytic upper bracket for the monthly IRR — no arbitrary ceiling.
+
+    A fixed ceiling is a silent correctness bug, not a convenience: this module
+    previously used 10.0, which reported `effective_apr(100, [1200])` — unique
+    monthly IRR 11 — as "no rate exists". A ceiling chosen for comfort is
+    eventually exceeded, and the failure is indistinguishable from a genuine
+    absence.
+
+    Repaid more than advanced (S > P), root positive: for t >= 1 and i > 0,
+    (1+i)^t >= (1+i), so NPV(i) <= -P + S/(1+i), which is <= 0 once
+    1+i >= S/P. NPV is strictly decreasing, so i* <= S/P - 1.
+
+    Repaid less than advanced (S < P), root negative: the inequality reverses
+    below zero, but no bound is needed — NPV(0) = S - P < 0, so 0 brackets the
+    root from above.
+
+    Mirrors `research/rbf_sim/contracts.py::irr_upper_bound`.
+    """
+    if principal <= 0:
+        raise ValueError("principal must be positive to bracket an IRR")
+    return max(sum(flows) / principal - 1.0, 0.0)
+
+
+def _annualise(monthly: float) -> float:
+    """Monthly rate -> effective annual rate. `(1+i)**12` overflows float64
+    above roughly i = 1.4e25, which needs a stream repaying ~1e25x the advance
+    in one month; no contract this module can produce reaches it. The overflow
+    is allowed to raise rather than return inf, because an infinite return
+    reported as a number is worse than a crash."""
+    return (1.0 + monthly) ** 12 - 1.0
 
 
 def effective_apr(principal: float, flows: List[float], iters: int = 400) -> Optional[float]:
@@ -105,8 +137,31 @@ def effective_apr(principal: float, flows: List[float], iters: int = 400) -> Opt
             total += p / d
         return total
 
-    lo, hi = IRR_MIN_MONTHLY, IRR_MAX_MONTHLY
-    if not (npv(lo) > 0 > npv(hi)):
+    lo, hi = IRR_MIN_MONTHLY, irr_upper_bound(principal, flows)
+    f_lo, f_hi = npv(lo), npv(hi)
+
+    # A root sitting exactly on a bracket endpoint is still a root. Requiring a
+    # strict sign change reported `effective_apr(100, [1100])` — monthly IRR
+    # exactly at the bound — as having no rate. With the analytic bound the
+    # single-payment case lands on the endpoint by construction, so this is the
+    # common case, not a curiosity.
+    # Analytically NPV(bound) <= 0, with equality exactly in the single-payment
+    # case. But `S/P - 1` is not always exactly representable — `(100, [115])`
+    # leaves a residual of ~1e-14 — so an exact `== 0.0` test passes for
+    # `(100, [1200])` and fails for the far more ordinary `(100, [115])`, which
+    # then reports no rate at all. The failure is input-dependent, which is
+    # worse than a consistent one. Accept the endpoint within a tolerance scaled
+    # to the principal, and keep a genuine failure path: a residual too large to
+    # be float error means the bound itself is wrong, and that must not be
+    # silently annualised.
+    if f_hi >= 0.0:
+        if f_hi <= abs(principal) * 1e-9:
+            return _annualise(hi)
+        return None
+    if f_lo == 0.0:
+        return _annualise(lo)
+
+    if not (f_lo > 0 > f_hi):
         # Unreachable for one advance followed by non-negative payments, where
         # NPV is strictly decreasing. Kept because "unreachable" has been wrong
         # in this project before.
@@ -118,7 +173,7 @@ def effective_apr(principal: float, flows: List[float], iters: int = 400) -> Opt
             lo = mid
         else:
             hi = mid
-    return (1.0 + (lo + hi) / 2.0) ** 12 - 1.0
+    return _annualise((lo + hi) / 2.0)
 
 
 def net_collectible_revenue(monthly_revenue: float, return_rate: float = 0.0) -> int:
