@@ -63,13 +63,13 @@ META_PROVENANCE_KEYS = ("date",)
 #: can now reproduce.
 REGISTERED = {
     "baseline_v3_canonical.json":
-        "818c145ad557ea1f95311fe80d311252103464ba7a7ecac602aab67374ae8308",
+        "363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55",
     "baseline_equalcost_v2_canonical.json":
-        "9cc6885a3d0d2d54fb08ae85301ae5889e7059f2780cdcfca693b3a8ec47802d",
+        "b3ebfe6a5a7e7f48726d7e501295b02f84258a3fe9ee4e048875125b1270e0ee",
     "baseline_closure_v2_canonical.json":
-        "c032625a8e7c17c55a590eac673e447f178fdb192812fe98ee6df0b6e228fd75",
+        "21b8e207ff2db9ac866b8cb2bab47c8c2e434d2bff03d802eb6f53a66fdcea4b",
     "baseline_closure_equalcost_v2_canonical.json":
-        "de7de916cfa73b7ff1c3b153f068ecdae90670ad4e0283e27c9ce36bb544458a",
+        "e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665",
 }
 
 #: Superseded by A-9, preserved byte-for-byte. Kept here only so the names are

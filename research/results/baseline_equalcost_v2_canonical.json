@@ -2,12 +2,13 @@
   "base_seed": 20260803,
   "canonical": {
     "determinism": "Identical code, configuration and seeds reproduce this file NUMERICALLY at published precision on every platform tested. BYTE equality holds within a fixed runtime and is NOT claimed across platforms. Wall-clock time, git commit and environment are recorded in the provenance sidecar.",
-    "generator_fingerprint": "16df5bfad7e9aa308931f46f447f8b7cda9247e4bab87df258584d3b09210fb2",
+    "generator_fingerprint": "4d126097775c784a1efcb962585014fbddae632c180ed4e2c89ab5f30ae6532b",
     "scenario_config_hash": "f8c33450b731030409e211c21ed5e50dbb35bf0668ddaa5c8977947b933de619",
     "schema_version": "2.0",
     "spec_version": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9"
   },
-  "f_star_source": "validation_v1.pricing.equal_cost.f_star",
+  "f_star_origin": "first solved in the superseded validation_v1; numerically unchanged through A-9",
+  "f_star_source": "validation_v2.pricing.equal_cost.f_star",
   "match_benchmark_a": {
     "apr": 0.18397982292774206,
     "payment": 16873541.666666668,
@@ -16,7 +17,7 @@
   },
   "n_paths": 500,
   "provenance": "SIMULATED \u2014 no observed seller data",
-  "purpose": "Seller burden and provider recovery at the equal-effective-cost cap factor f* = 1.0945, for like-for-like comparison against baseline_v2 (illustrative f = 1.20). Same scenarios, same seeds, same generator; only the cap factor differs.",
+  "purpose": "Seller burden and provider recovery at the equal-effective-cost cap factor f* = 1.0945, for like-for-like comparison against baseline_v3 (illustrative f = 1.20). Same scenarios, same seeds, same generator; only the cap factor differs.",
   "run": "baseline_equalcost_v2",
   "scenarios": {
     "disruption_1m": {

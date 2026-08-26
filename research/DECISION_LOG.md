@@ -1327,3 +1327,94 @@ suffix-based sweep matched — as a fixture.
 **Consequence.** Backend 403 → 437 passing, simulation 639 → 643. Verifier runs
 from a clean temporary checkout at exit 0, 5/5 byte-identical and 5/5
 numerically equal. Manuscript 17 → 18 pages. Deck unchanged at 13 slides.
+
+---
+
+## D-051 — Convergence: one IRR, one reproduction, one lineage
+**Date:** 2026-08-24 · **Branch:** `publication-final` (unpushed at time of writing)
+**Status:** APPLIED. D-050 preserved as dated history.
+
+**No research finding changed.** Compared leaf-by-leaf against the previous A-9
+generation: **zero numeric leaves moved**. What moved was three generator
+fingerprints, three lineage-metadata strings and one new lineage field.
+
+**1. Two implementations of one equation had drifted three times.** The product
+mirrored `solve_apr` before A-9 corrected it; A-9 fixed the research side and
+the product kept the old ceiling; the product then fixed the ceiling and found
+an endpoint defect the research side still had. Every drift was caught by a
+person reading both files.
+`backend/tests/test_irr_cross_layer_parity.py` now runs thirteen identical cash
+flows through both and compares them, including every case where they
+previously disagreed. A rate quoted to a merchant and a rate published in the
+paper must not differ on the same stream.
+
+**2. An exact float comparison made the solver scale-dependent.** `f_hi == 0.0`
+assumed the analytic bound `S/P − 1` is exactly representable. It is not:
+`solve_apr(100, [115])` leaves a residual of ~1.4e-14 and returned `None`, while
+`(10_000_000, [11_500_000])` — the same contract at a larger scale — returned
+4.35. **A financial contract yielding a rate or "no rate" depending on how the
+money was expressed is worse than a consistent failure**, because nothing about
+the input looks wrong. Found downstream in `206cb48` by the product chat and
+ported here, where it originated. Tolerance is `abs(principal) × 1e-9`:
+relative, because NPV carries the principal's units; seven orders above
+float64's ~1e-16 resolution; 0.185 VND on a 185,000,000 advance. A residual
+above it still returns `None`, because that means the bound is wrong rather
+than that rounding occurred.
+
+**3. The lower floor was a guess, not a limit.** `-1.0 + 1e-9` is seven orders
+coarser than the format allows and excluded real roots —
+`solve_apr(1_000_000, [1e-6])` and `solve_apr(10_000_000_000, [1])` both
+returned `None`, reporting "no rate exists" for streams that pay something.
+That is the precise confusion A-9 was written to remove, surviving in the
+opposite corner of the domain. Now `math.nextafter(-1.0, 0.0)` in both layers,
+with the correctly rounded boundary returned where a root falls below it.
+`None` means only what A-9 says it means: no positive payment.
+
+**4. The verifier was not verifying validation.** `canonicalize_validation.py`
+re-expresses `results/validation_v2.json`; it computes nothing. The scratch
+tree is a `copytree`, so that raw file arrived already written and the step
+rebuilt a canonical form from a committed input — **`run_validation.py` never
+ran, and a completely broken battery would have verified clean.** The raw file
+is now a declared output, deleted with the pair, and the battery runs sections
+1, 2, 4, 5 and 6 first. Three tests cover the ordering, the dependency, and an
+end-to-end break. Writing the third exposed a flaw in my own first attempt: the
+injected failure was appended, so it fired *after* the section had already
+written its output, and the battery "failed" while still producing a file.
+
+**5. Lineage.** `run_equal_cost_baseline` embedded `f_star_source =
+validation_v1` and a comparison against `baseline_v2` in its **current** output;
+`f_star_origin` now records where the value was first derived, kept separate
+from where it is sourced. `lab.manifest()` reported
+`artifact: validation_v1.json` while loading `validation_v2` — provenance for a
+file it was not using. `test_claim_ledger` validated today's headline figures
+against the superseded artifacts. The stem scanner now covers bare stems and
+generator docstrings, not only the `_canonical` suffix where the last sweep
+stopped.
+
+**6. Measurements nobody took are no longer quoted.** The macOS byte-difference
+counts — 9 and 2 — are real measurements of the **superseded** generation on
+commit `68b8c3d`. They were carried across when rows were renamed, asserting a
+measurement of files that have never been regenerated on that platform. Removed
+from every current-generation claim rather than guessed, with the method for
+obtaining them recorded. The superseded figures stay where they belong.
+
+**7. `railway.toml`, resolved.** Both branches fixed the same silent-error
+defect, inline versus script. The script entrypoint is kept: it preserves
+training stderr, announces the fallback, and states its consequence. The
+incoming inline comment said the financing arithmetic never calls the ensemble
+"so a training failure must not stop the service" — the second half is right
+and the first half implies output-neutrality, the claim D-047 withdrew.
+
+**Two incoming fixes worth recording as theirs.** `206cb48` found the endpoint
+defect described above. `00f6b37` diagnosed the production failure I could not:
+`warnings.simplefilter("error")` around unpickling promoted a benign NumPy 2.5
+DeprecationWarning raised inside a dependency, so a good artifact was rejected
+as unreadable and the site pinned itself to the heuristic while training
+succeeded every boot. Across three passes I established the mechanism and
+reported honestly that I could not reproduce the cause. That was the cause.
+
+**Consequence.** Backend 480 passed / 9 skipped, simulation 643 passed.
+Reproduction verifier from a clean temporary checkout: exit 0, 5/5
+byte-identical, 5/5 numerically equal — the first run in which the validation
+battery genuinely executed. Five artifacts regenerated from clean committed
+source `9c2f460`, all sidecars clean and reachable.

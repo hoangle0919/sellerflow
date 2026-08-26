@@ -62,11 +62,11 @@
 
 | File | Purpose |
 |---|---|
-| `baseline_v3_canonical.json` | **Current baseline — cite this (A-9).** Regenerated 2026-08-20 under the corrected IRR definition; adds `apr_defined_count/rate` and `completed_count/rate`. SHA-256 `818c145a…`. |
-| `baseline_equalcost_v2_canonical.json` | Current cost-matched track. SHA-256 `9cc6885a…`. |
-| `baseline_closure_v2_canonical.json` | Current closure track, illustrative `f`. SHA-256 `c032625a…`. |
-| `baseline_closure_equalcost_v2_canonical.json` | Current closure track, `f*`. SHA-256 `de7de916…`. |
-| `validation_v2_canonical.json` | Current validation battery. SHA-256 `ba79342e…`. |
+| `baseline_v3_canonical.json` | **Current baseline — cite this (A-9).** Regenerated 2026-08-20 under the corrected IRR definition; adds `apr_defined_count/rate` and `completed_count/rate`. SHA-256 `36372901…`. |
+| `baseline_equalcost_v2_canonical.json` | Current cost-matched track. SHA-256 `b3ebfe6a…`. |
+| `baseline_closure_v2_canonical.json` | Current closure track, illustrative `f`. SHA-256 `21b8e207…`. |
+| `baseline_closure_equalcost_v2_canonical.json` | Current closure track, `f*`. SHA-256 `e1e6d81b…`. |
+| `validation_v2_canonical.json` | Current validation battery. SHA-256 `4f26f04e…`. |
 | `baseline_v2_canonical.json` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte** as the record of what was published before 2026-08-20. Never cited as current, never regenerated, never deleted. Original note follows. **Former baseline.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
 | `baseline_v2_provenance.json` | **Superseded, preserved.** Execution record for the superseded artifact above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
@@ -93,7 +93,7 @@ pip install pytest numpy          # only dependencies
 
 # 1. Simulation suite  (expect: 643 passed)
 python3 -m pytest rbf_sim/tests/ -q
-#    Backend suite (expect: 437 non-browser tests passed). The suite also
+#    Backend suite (expect: 480 non-browser tests passed). The suite also
 #    contains 9 Playwright browser checks, EXCLUDED from that figure. They
 #    PASSED in the earlier browser-capable run recorded at D-036 (browser
 #    tests 5 -> 9, no skips). Where Playwright or Chromium is absent they
@@ -153,8 +153,8 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 643 (629 + 14 IRR-definition guards, A-9) | `pytest rbf_sim/tests/ -q` |
-| Non-browser tests passing | **1,080 — 437 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on which of the two is missing. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
-| Canonical baseline SHA-256 | `818c145ad557ea1f95311fe80d311252103464ba7a7ecac602aab67374ae8308` | `results/baseline_v3_canonical.json` |
+| Non-browser tests passing | **1,123 — 480 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on which of the two is missing. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Canonical baseline SHA-256 | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` | `results/baseline_v3_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v3` |
 | Benchmark A implied APR | 37.87% | `baseline_v3` |
 | Benchmark B effective APR | 19.5618% | `validation_v2` |
