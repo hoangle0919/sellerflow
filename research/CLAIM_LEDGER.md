@@ -54,23 +54,36 @@ by `backend/tests/test_validation_artifact.py`.
 All five artifacts **reproduce numerically at published precision** from a clean
 tree. **Byte equality is platform-dependent and is not claimed across platforms.**
 
-| Artifact | Bytes (Linux 3.10.12) | Bytes (macOS 3.11.5) | Numeric leaves |
-|---|---|---|---|
-| `baseline_v3` | identical | **not measured** | equal |
-| `baseline_equalcost_v2` | identical | **not measured** | equal |
-| `baseline_closure_v2` | identical | **not measured** | equal |
-| `baseline_closure_equalcost_v2` | identical | **not measured** | equal |
-| `validation_v2` | identical | **not measured** | equal |
+| Artifact | Bytes (Linux 3.10.12) | Bytes (macOS 26.0 arm64, 3.11.5) | Worst rel. diff | Numeric leaves |
+|---|---|---|---|---|
+| `baseline_v3` | identical | **11 last-bit leaves differ** | `5.351e-15` | equal |
+| `baseline_equalcost_v2` | identical | **3 last-bit leaves differ** | `1.532e-16` | equal |
+| `baseline_closure_v2` | identical | identical | `0` | equal |
+| `baseline_closure_equalcost_v2` | identical | identical | `0` | equal |
+| `validation_v2` | identical | identical | `0` | equal |
 
-**On the macOS column.** It previously carried "9 last-bit float differences"
-for the baseline and "2" for the cost-matched track. Those are real
-measurements — of the **superseded** `baseline_v2` / `baseline_equalcost_v1`
-generation, on commit `68b8c3d`. They were carried across to the A-9 artifacts
-when the rows were renamed, which asserts a measurement nobody took: the
-current generation has never been regenerated on macOS. The counts are removed
-rather than guessed. Re-measure with `./verify_native_macos.sh` and record what
-it reports. The superseded figures remain in `RESULTS_REGISTRY.md`, labelled as
-measurements of the generation they describe.
+**Totals:** Linux 5/5 byte-identical; macOS **3/5** byte-identical; **5/5
+numerically equal** at relative tolerance `1e-9` in both environments.
+
+**Provenance of the macOS column.** These are the results of an **independent
+audit run** of `research/verify_reproduction.py` against the current HEAD on
+macOS 26.0 arm64, CPython 3.11.5, NumPy 2.2.6. They were not produced by the
+project's own Linux environment, which has no macOS available; the figures are
+recorded here on the auditor's report.
+
+The column previously read "not measured", and before that carried "9 last-bit
+float differences" for the baseline and "2" for the cost-matched track. Those
+older counts were real measurements — of the
+**superseded** `baseline_v2` / **superseded** `baseline_equalcost_v1`
+generation, on commit `68b8c3d` — that had been carried
+across to the A-9 rows when the rows were renamed, asserting a measurement
+nobody had taken. They were removed rather than guessed, and the row is now
+filled from an actual run of the current artifacts. Note that the current
+counts (11 and 3) are **not** the old ones (9 and 2): the guess would have been
+wrong in both rows. The superseded figures remain in `RESULTS_REGISTRY.md`,
+labelled as measurements of the generation they describe.
+
+Reproduce with `./verify_native_macos.sh` on a macOS host.
 
 Verify with `python3 research/verify_reproduction.py`, which regenerates into a
 scratch tree and reports the two columns separately. The registered artifacts

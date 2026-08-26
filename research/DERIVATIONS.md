@@ -316,7 +316,9 @@ Every statement the project makes falls into exactly one of these five classes. 
 - **P7** Completion iff some **finite** `t ≤ H` has `r·S_t ≥ f·A`. On the lifetime sum `S_∞` against the target `Θ = f·A/r`: `S_∞ > Θ` **strictly** implies completion; `S_∞ < Θ` precludes it at any horizon; at `S_∞ = Θ` completion holds **only if a finite partial sum attains `Θ`**, which a strictly positive infinite series never does. Routes to incomplete recovery **include** — this list is illustrative, not exhaustive — zero revenue, maturity/write-off, finite horizon, and a strictly positive but fast-decaying path with inadequate lifetime cumulative sales. Bounded-away-from-zero is sufficient, not necessary; positive is not sufficient. For geometric decay the condition is `ρ > ρ*` **strictly** (D-022), the same boundary logic in a special case.
 
 ### B. Simulation results — illustrate A under stated illustrative parameters
-Magnitudes in `baseline_v2.json` and `validation_v1.json`. **Not estimates for Vietnamese sellers.** Example: "under the illustrative severe-downturn scenario, RBF removes 6.85 high-burden months at θ=0.15" — a property of that scenario specification, nothing more.
+Magnitudes in `baseline_v3_canonical.json` and `validation_v2_canonical.json` — the current registered artifacts (A-9). **Not estimates for Vietnamese sellers.** Example: "under the illustrative severe-downturn scenario, RBF removes 6.85 high-burden months at θ=0.15" — a property of that scenario specification, nothing more.
+
+> *Superseded pointer.* This paragraph previously sent readers to `baseline_v2.json` and `validation_v1.json`. Those files are frozen historical evidence: they were produced before the IRR definition was corrected, are preserved byte-for-byte, and must not be used to source a current magnitude. See D-049 and R-014.
 
 ### C. Sensitivity results — how B moves across the parameter grid
 S-1…S-16. Where a sign reverses, the claim is demoted to condition-dependent (spec §12).

@@ -345,7 +345,7 @@ def test_equal_cost_label_does_not_overclaim_on_stochastic_paths():
     note = eq["note"].lower()
     assert "reference path" in note and "differs" in note
     caveats = " ".join(c["text"].lower() for c in d["caveats"])
-    assert "solved on the reference path" in caveats
+    assert "the label describes how the price was chosen" in caveats
 
 
 # ── refinement pass (D-033): terminology, scenarios, states, palette ────────
@@ -823,14 +823,35 @@ def test_the_page_renders_the_api_supplied_labels_not_fixed_ones():
     assert 'kv("Mean simulated APR"' not in html
 
 
-def test_metric_definitions_disclose_the_survivor_conditioning():
+def test_metric_definitions_disclose_the_conditioning_of_each_mean():
+    """Duration and rate are conditioned differently, and the page must say so
+    in both places.
+
+    This test used to require the word "survivor" on the RATE as well as the
+    duration. That was the pre-A-9 reading: it treated a path that missed the
+    cap as having no rate, when a path that made payments has a perfectly good
+    rate over the observed window. Requiring the wrong word is how the wrong
+    claim survived a green suite, so the assertion now pins the corrected
+    conditioning instead.
+    """
     d = client.get("/api/lab/comparison/closure_m13").json()["metric_definitions"]
-    assert "excluded" in d["duration_months_mean"]["definition"].lower()
-    assert "survivor" in d["duration_months_mean"]["caveat"].lower()
-    assert "survivor" in d["effective_apr"]["caveat"].lower()
+    dur, apr = d["duration_months_mean"], d["effective_apr"]
+
+    # Duration genuinely IS a survivor statistic.
+    assert "excluded" in dur["definition"].lower()
+    assert "survivor" in dur["caveat"].lower()
+
+    # The rate is conditioned on existence, not completion.
+    apr_text = (apr["definition"] + " " + apr["caveat"]).lower()
+    assert "not restricted to paths that reached the repayment target" in apr_text
+    assert "defined internal rate of return" in apr_text
+    assert "observed window" in apr_text
+    assert "portfolio" in apr_text
+
     caveats = " ".join(c["text"].lower()
                        for c in client.get("/api/lab/comparison/stable").json()["caveats"])
-    assert "only over paths that reached the repayment target" in caveats
+    assert "different denominators" in caveats
+    assert "only over paths that reached the repayment target" not in caveats
 
 
 # ── closing gate (D-036): exception paths and survivor presentation ────────

@@ -14,13 +14,21 @@ have verified clean.
 
 WHY THE TWO ARE REPORTED SEPARATELY. Until D-041 this project claimed its
 artifacts "reproduce byte-for-byte". That claim was made on Linux and is not
-true everywhere: an independent regeneration on macOS / CPython 3.11.5 produced
-last-bit floating-point differences in two of the artifacts (measured on the
-superseded v2/v1 generation; the current generation has not been re-measured
-there, so no count is quoted for it). The finding is about the platform. Byte equality is a statement about a *serialization* on
-one platform; numeric equality at published precision is the statement a reader
-actually needs. Collapsing them hid a real cross-platform limitation behind a
-stronger-sounding word.
+true everywhere. Measured on the CURRENT A-9 generation by an independent audit
+run of this script (macOS 26.0 arm64, CPython 3.11.5, NumPy 2.2.6):
+
+    baseline_v3_canonical.json                    11 last-bit leaves  5.351e-15
+    baseline_equalcost_v2_canonical.json           3 last-bit leaves  1.532e-16
+    baseline_closure_v2_canonical.json             byte-identical
+    baseline_closure_equalcost_v2_canonical.json   byte-identical
+    validation_v2_canonical.json                   byte-identical
+    -> 3/5 byte-identical, 5/5 numerically equal at rel tol 1e-9
+
+On Linux/aarch64 CPython 3.10.12 all five are byte-identical. The finding is
+about the platform, not the research. Byte equality is a statement about a
+*serialization* on one runtime; numeric equality at published precision is the
+statement a reader actually needs. Collapsing them hid a real cross-platform
+limitation behind a stronger-sounding word.
 
 WHAT THIS SCRIPT WILL NOT DO. It never rewrites a registered artifact. Chasing
 byte equality by regenerating the committed files on whichever machine happens
@@ -53,8 +61,9 @@ RESULTS = os.path.join(HERE, "results")
 #: `canonicalize_validation.py`, whose `--write` path re-verifies the four
 #: registered baseline checksums after writing and therefore requires them to
 #: exist — so on any machine where a baseline did not regenerate byte-identically
-#: (which was the case on macOS for the superseded generation), the run
-#: aborted instead of reporting the difference it exists to report.
+#: (which is the case on macOS for the superseded generation AND, as the audit
+#: run above confirms, for the current one), the run aborted instead of
+#: reporting the difference it exists to report.
 #:
 #: Now each generator's own output is deleted immediately before that generator
 #: runs, and recreation is confirmed. Nothing else is touched.

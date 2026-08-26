@@ -55,8 +55,8 @@
 | File | Purpose |
 |---|---|
 | `run_baseline.py` | 10 scenarios × 4 contracts × 500 paths → `results/baseline_v3_canonical.json` |
-| `run_validation.py` | Sections 1/2/4/5/6 → `results/validation_v2.json`, canonicalized to `validation_v2_canonical.json` |
-| `conv_step.py` | Single-N convergence step (large N split to avoid timeouts) |
+| `run_validation.py` | Sections 1/2/4/5/6 → `results/validation_v2.json`, canonicalized to `validation_v2_canonical.json`. Section 1 is the convergence ladder. |
+| `conv_step.py` | **RETIRED — historical, fails closed.** Wrote single convergence steps into `results/validation_v1.json`, which is now frozen evidence. Running it would have rewritten a checksum-registered superseded artifact. Section 1 of `run_validation.py` computes the same ladder into the current raw file. |
 
 ### `research/results/` — versioned outputs
 
@@ -109,17 +109,18 @@ python3 verify_reproduction.py
 #    -> results/baseline_v3_provenance.json  (execution record)
 python3 run_baseline.py
 
-# 3. Validation battery
+# 3. Validation battery — all five sections write results/validation_v2.json
+#    Section 1 is the Monte Carlo convergence ladder (500/2,000/5,000/10,000
+#    paths, ~45s). It used to be split across conv_step.py invocations; that
+#    script wrote into the FROZEN results/validation_v1.json and is retired.
+python3 run_validation.py 1                 # Monte Carlo convergence ladder
 python3 run_validation.py 2                 # pricing + reference-path cost-matched cap
 python3 run_validation.py 4                 # incomplete-recovery boundary
 python3 run_validation.py 5                 # RBF-G breakpoint
 python3 run_validation.py 6                 # revenue-definition sensitivity
 
-# 4. Monte Carlo convergence (run separately; 10k paths takes ~45s)
-python3 conv_step.py 500
-python3 conv_step.py 2000
-python3 conv_step.py 5000
-python3 conv_step.py 10000
+# 4. Register the battery (canonical form + provenance sidecar)
+python3 canonicalize_validation.py --write
 
 # 5. Audit evidence — run from backend/ so its modules are importable
 cd ../backend
@@ -133,7 +134,7 @@ python3 ../research/analysis/00_audit_evidence.py
 
 **Determinism.** Base seed `20260803`, bootstrap seed `90210`.
 
-> ~~Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.~~ **Corrected (D-041).** Identical seeds reproduce **numerically at published precision on every platform tested**. **Byte** equality holds within a fixed runtime, not across runtimes: on Linux/aarch64 CPython 3.10.12 all five canonical artifacts are byte-identical; on macOS CPython 3.11.5, `baseline_v2` differs in **9** last-bit floating-point values and `baseline_equalcost_v1` in **2**. That is IEEE-754 serialization, not variance in the model — but it is not bit-for-bit, and the stronger word was withdrawn rather than defended. Check with `python3 research/verify_reproduction.py`, which reports byte equality and numeric-leaf equality separately and fails only on numeric drift.
+> ~~Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.~~ **Corrected (D-041).** Identical seeds reproduce **numerically at published precision on every platform tested**. **Byte** equality holds within a fixed runtime, not across runtimes. On Linux/aarch64 CPython 3.10.12 all five current canonical artifacts are byte-identical. On macOS 26.0 arm64 / CPython 3.11.5 / NumPy 2.2.6 — measured on the **current A-9 generation** by an independent audit run — `baseline_v3` differs in **11** last-bit floating-point leaves (worst relative difference `5.351e-15`) and `baseline_equalcost_v2` in **3** (`1.532e-16`), while both closure artifacts and `validation_v2` are byte-identical: **3/5 byte-identical, 5/5 numerically equal** at relative tolerance `1e-9`. (The **superseded** generation was measured separately at 9 and 2; those counts describe those files and are retained in `RESULTS_REGISTRY.md`.) That is IEEE-754 serialization, not variance in the model — but it is not bit-for-bit, and the stronger word was withdrawn rather than defended. Check with `python3 research/verify_reproduction.py`, which reports byte equality and numeric-leaf equality separately and fails only on numeric drift.
 
 ### Applying the README patch
 
@@ -153,7 +154,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 643 (629 + 14 IRR-definition guards, A-9) | `pytest rbf_sim/tests/ -q` |
-| Non-browser tests passing | **1,123 — 480 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on which of the two is missing. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Non-browser tests passing | **1,138 — 495 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They were **rewritten in this pass** — the closure-scenario assertions now pin the corrected rate/completion denominators — and have **not executed since**, because Chromium is unavailable in the environment that ran the suites. They skip, and pytest may report one skipped module or nine skipped cases depending on which of the two is missing. A skip is never counted as a pass; browser execution is an open external gate. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` | `results/baseline_v3_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v3` |
 | Benchmark A implied APR | 37.87% | `baseline_v3` |

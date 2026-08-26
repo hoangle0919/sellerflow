@@ -9,11 +9,15 @@
 >
 > Two pointers, because the values below have since moved:
 > **Specification** — this snapshot was taken against `METHODOLOGY_SPEC.md`
-> v1.0 + amendments **A-1…A-3**. The specification now stands at **A-1…A-8**;
-> A-4…A-8 postdate this document and are recorded in the spec and the decision
-> log. **Tests** — 169 passing here; see the manifest for the current figure.
+> v1.0 + amendments **A-1…A-3**. The specification now stands at **A-1…A-9**;
+> A-4…A-9 postdate this document and are recorded in the spec and the decision
+> log. A-9 in particular changed how the effective APR is computed and
+> conditioned, so any rate quoted below is a pre-A-9 figure. **Runs** — the
+> files named below are frozen, superseded artifacts; current magnitudes come
+> from `baseline_v3_canonical.json` and `validation_v2_canonical.json`.
+> **Tests** — 169 passing here; see the manifest for the current figure.
 
-**Date:** 2026-08-03 · **Spec at the time:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-3 *(now A-1…A-8 — see above)*
+**Date:** 2026-08-03 · **Spec at the time:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-3 *(now A-1…A-9 — see above)*
 **Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests at the time of this document:** 169 passing
 
 > All figures are **reproducible simulation output under modeled assumptions**. No observed seller revenue, repayment, or default outcome exists in this study.

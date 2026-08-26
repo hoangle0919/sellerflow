@@ -1418,3 +1418,157 @@ Reproduction verifier from a clean temporary checkout: exit 0, 5/5
 byte-identical, 5/5 numerically equal — the first run in which the validation
 battery genuinely executed. Five artifacts regenerated from clean committed
 source `9c2f460`, all sidecars clean and reachable.
+
+---
+
+## D-052 — Release closure: a page that describes the file it names
+
+**Date:** 2026-08-26 · **Branch:** `publication-final` · **Preceded by:** D-051
+
+The hard correction was A-9 and it is not reopened here. This entry records a
+consistency pass: five places where a surface said something the files behind it
+did not support. **No finding, formula, scenario input, seed or numerical result
+changed.** One checksum moved, for a reason recorded below.
+
+### 1. The pricing block described one file with the contents of another
+
+`lab.manifest()` published a block labelled `validation_v2_canonical.json`,
+carrying that file's SHA-256, while reading its **values** out of the raw
+`validation_v2.json`. The raw file has no `canonical` key, so `spec_version`
+came back `null` sitting directly beside a canonical checksum.
+
+This is the second time the same block has been wrong, and the sequence is worth
+recording because the first fix is what set up the second. Originally it named
+the superseded `validation_v1.json` while reading `validation_v2`. That fix
+corrected the **name and the hash** and left the **read** where it was. The
+label became right, the data stayed wrong, and the null `spec_version` — the one
+visible symptom — was in the payload the whole time.
+
+A reader who checksummed the named file would have verified bytes that never
+produced the numbers displayed next to them. Fixed by reading the canonical
+artifact, so name, hash, spec version and values all refer to the same bytes.
+
+### 2. "Equals" was never true
+
+The same block said the cost-matched cap factor was solved "so that its
+effective rate **equals** the amortizing loan's". It does not. `f*` is chosen by
+`min(grid, key=gap)` over an 800-point sweep; duration is an integer, so cost
+moves in steps and an exact match is not generally attainable. The correct
+statement — nearest point on the swept grid, `19.537656%` against `19.561817%`,
+a residual of about `0.02416` percentage points — was in `run_validation.py`'s
+own printed output from the beginning. Only the Lab dropped it.
+
+Corrected in the pricing note, the RBF-EQ arm note and the pricing caveat. The
+three numbers are **computed from the canonical artifact at request time**, not
+typed in: a residual quoted as a literal is a residual that outlives the sweep
+it describes. The wording is derived too — if a future sweep lands exactly on
+target, the page says so without an edit, and a test pins that branch. The
+`1.0945×` chart label, previously hand-typed, now formats the artifact's own
+cap factor.
+
+### 3. The rate was still conditioned on completion in the copy
+
+A-9 separated completion from IRR existence in the **artifacts** and in
+`_censoring()`. Two prose surfaces did not follow:
+`METRIC_DEFINITIONS["effective_apr"]["caveat"]` and the corresponding entry in
+`CAVEATS` both still said the mean rate excluded non-completing paths. Both now
+state the two denominators separately — `duration_mean` over completing paths,
+`apr_mean` over paths with a defined IRR, an incomplete path that made payments
+having a defined observed-window rate, and neither conditional mean being
+automatically a portfolio-wide outcome.
+
+**A test was holding the wrong claim in place.**
+`test_metric_definitions_disclose_the_survivor_conditioning` asserted the word
+"survivor" appeared in the **rate's** caveat. That is the pre-A-9 reading, so
+correcting the prose broke a green test — the suite was pinning the defect. The
+assertion now pins the corrected conditioning. Duration keeps "survivor",
+because duration genuinely is one.
+
+The nine browser checks had the same problem at a second remove: they required
+`"Mean APR among completed paths"` and a `closure_m13` finding saying the arms
+"cannot be compared on rate alone". Both `closure_m13` arms are **100%**
+rate-defined while completing at 92.4% and 23.8%, so the rates are comparable
+and what differs is coverage. Rewritten to pin both denominators, the
+observed-window note, and the absence of the withdrawn finding.
+
+### 4. The documented reproduction recipe corrupted frozen evidence
+
+`RESEARCH_MANIFEST.md` told the reader to run `conv_step.py` four times. That
+script's last statement was an unconditional `json.dump` into
+`results/validation_v1.json` — now frozen, superseded, and carrying a registered
+checksum quoted in the manuscript, the deck and the registry. **Following the
+documented steps would have rewritten registered evidence in place.** Nothing in
+the script asked whether its target was still writable.
+
+It was also redundant: `run_validation.py 1` computes the same
+500/2,000/5,000/10,000 ladder in one pass into the current raw file. The split
+existed to dodge a timeout that no longer applies.
+
+`conv_step.py` now fails closed — before importing the simulation package,
+before reading anything, before opening any file — and names its replacement.
+The recipe runs sections 1/2/4/5/6 and then the canonicalizer. A test invokes
+the retired script both documented ways and asserts the frozen file's bytes
+**and mtime** are unchanged; mtime, because a rewrite with identical content
+still means the file was opened for writing.
+
+`conv_step.py` was also listed in `canonicalize_validation.py`'s
+`EXTRA_SOURCES`, with a comment claiming the convergence ladder came from it.
+True of `validation_v1`; never true of `validation_v2`. Editing a retired script
+would have moved a current artifact's fingerprint, and a reader tracing
+provenance would have been sent to code that never ran. Removed.
+
+**This changes `validation_v2_canonical.json`'s generator fingerprint, and
+therefore its checksum.** That is the intended consequence of correcting a
+provenance record. The regeneration is a separate commit, made from clean
+committed source, and is verified to move metadata only — zero numeric leaves.
+
+### 5. Two documentation pointers aimed at superseded files
+
+`DERIVATIONS.md`'s claim taxonomy sent readers to `baseline_v2.json` and
+`validation_v1.json` for **current** simulation magnitudes. `METRIC_DEFINITIONS.md`'s
+superseded banner said the authoritative spec ran to **A-8** — one amendment
+short of A-9, which redefines the very metric that file is named for. Both now
+point at the current artifacts and the current amendment. Dated historical
+passages keep their original stems; `CORRECTED_CLAIMS.md` remains a 2026-08-03
+snapshot, with its forward pointers updated.
+
+### 6. The macOS reproducibility row is now a measurement
+
+D-051 removed the macOS byte-difference counts rather than guess them: the 9 and
+2 figures measured the **superseded** generation on `68b8c3d` and had been
+carried across when the rows were renamed. The column read "not measured",
+which was honest and useless.
+
+An independent audit has now run `research/verify_reproduction.py` against
+current HEAD on **macOS 26.0 arm64, CPython 3.11.5, NumPy 2.2.6**:
+
+| Artifact | Bytes | Last-bit leaves | Worst rel. diff |
+|---|---|---|---|
+| `baseline_v3_canonical.json` | differ | 11 | `5.351e-15` |
+| `baseline_equalcost_v2_canonical.json` | differ | 3 | `1.532e-16` |
+| `baseline_closure_v2_canonical.json` | identical | 0 | `0` |
+| `baseline_closure_equalcost_v2_canonical.json` | identical | 0 | `0` |
+| `validation_v2_canonical.json` | identical | 0 | `0` |
+
+**3/5 byte-identical, 5/5 numerically equal** at relative tolerance `1e-9`.
+
+**The counts are 11 and 3, not 9 and 2.** Had the old figures been carried
+across, both rows would have been wrong. That is the case for removing an
+unverified number rather than letting it ride, and it is why this is recorded as
+an **independent audit run** on a platform this project has no access to, rather
+than as something run here.
+
+The deck already carried "3 of 5 byte-identical on macOS" — a figure that
+happened to be right while being unsupported and while every other current
+surface said "not measured". It is retained now that the evidence sits behind
+it, with the environment and the audit provenance attached.
+
+### Consequence
+
+Backend 480 → 495 (13 pricing-provenance tests, 2 retired-script tests);
+simulation 643 unchanged; **1,138 non-browser**. Nine browser checks defined,
+**rewritten in this pass, zero executed** — Chromium is unavailable here and a
+skip is not a pass. Browser execution is an open external gate and is now
+described that way on every surface, including the deck note that previously
+credited them to the D-036 run. That credit no longer holds: the assertions
+those checks make today did not exist when D-036 ran.

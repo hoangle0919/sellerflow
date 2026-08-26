@@ -13,6 +13,8 @@ broken and the artifact must not be cited.
 import hashlib
 import json
 import os
+import re
+import sys
 
 import pytest
 
@@ -169,6 +171,80 @@ def test_current_artifacts_match_their_registered_checksums():
         assert os.path.exists(p), f"{name} missing"
         got = hashlib.sha256(open(p, "rb").read()).hexdigest()
         assert got == want, f"{name} checksum changed: {got}"
+
+
+def test_the_retired_convergence_script_cannot_touch_the_frozen_artifact():
+    """`conv_step.py` used to write straight into `validation_v1.json`.
+
+    That file is now frozen evidence with a registered checksum quoted in the
+    manuscript, the deck and the registry above. The script's final statement
+    was an unconditional `json.dump` into it, and the manifest recipe told
+    people to run it four times. Anyone following the documented steps would
+    have rewritten a superseded artifact in place.
+
+    The script now fails closed before importing the simulation package and
+    before opening anything. This test runs it the documented way and the
+    escape-hatch way, and checks the bytes on both sides.
+    """
+    import subprocess
+
+    script = os.path.join(REPO, "research", "conv_step.py")
+    assert os.path.exists(script), "the retired script was deleted, not retired"
+
+    raw = os.path.join(RESULTS, "validation_v1.json")
+    targets = [raw, os.path.join(RESULTS, "validation_v1_canonical.json")]
+    before = {p: hashlib.sha256(open(p, "rb").read()).hexdigest() for p in targets}
+    mtimes = {p: os.path.getmtime(p) for p in targets}
+
+    attempts = [
+        ({}, "the way the old manifest recipe invoked it"),
+        ({"RBF_ALLOW_RETIRED_CONV_STEP": "1"}, "with the archaeology escape hatch"),
+    ]
+    for extra_env, how in attempts:
+        proc = subprocess.run(
+            [sys.executable, script, "500"],
+            cwd=os.path.join(REPO, "research"),
+            capture_output=True, text=True, timeout=120,
+            env={**os.environ, **extra_env},
+        )
+        assert proc.returncode != 0, f"the retired script still runs {how}"
+        blurb = (proc.stdout + proc.stderr).lower()
+        assert "retired" in blurb or "frozen" in blurb, (
+            f"it failed {how} without saying why:\n{proc.stdout}\n{proc.stderr}")
+        assert "run_validation.py" in proc.stdout + proc.stderr, (
+            "the failure message should name the script that replaces it")
+
+    for p in targets:
+        got = hashlib.sha256(open(p, "rb").read()).hexdigest()
+        assert got == before[p], f"{os.path.basename(p)} changed: {got}"
+        assert os.path.getmtime(p) == mtimes[p], (
+            f"{os.path.basename(p)} was rewritten with identical bytes — the "
+            "script still opens the frozen file for writing")
+
+    # And the checksum is still the one registered above.
+    assert before[targets[1]] == SUPERSEDED_CHECKSUMS["validation_v1_canonical.json"]
+
+
+def test_the_retired_script_is_not_a_current_provenance_source():
+    """A retired script must not fingerprint a current artifact.
+
+    While `conv_step.py` sat in `EXTRA_SOURCES`, editing a script that never
+    ran would have moved `validation_v2_canonical.json`'s generator fingerprint,
+    and a reader tracing provenance would have been pointed at dead code.
+    """
+    src = open(os.path.join(REPO, "research", "canonicalize_validation.py"),
+               encoding="utf-8").read()
+    extra = re.search(r"^EXTRA_SOURCES\s*=\s*\(([^)]*)\)", src, re.M)
+    assert extra, "EXTRA_SOURCES not found"
+    names = re.findall(r'"([^"]+)"', extra.group(1))
+    assert names == ["run_validation.py"], (
+        f"current validation provenance names {names}; only the script that "
+        "actually writes validation_v2.json belongs there")
+
+    prov = _load(os.path.join(RESULTS, "validation_v2_provenance.json"))
+    listed = json.dumps(prov)
+    assert "conv_step.py" not in listed, (
+        "the current provenance sidecar still names the retired script")
 
 
 def test_current_artifacts_carry_the_new_denominator_fields():

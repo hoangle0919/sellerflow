@@ -243,9 +243,20 @@ def test_render_exception_leaks_nothing(server, browser):
     pg.close()
 
 
-def test_censored_arm_shows_completion_share_and_qualifier(server, browser):
-    """closure_m13: cost-matched completes 92.4%, illustrative 23.8%. Both the
-    card row and the per-row table qualifier must be visible."""
+def test_censored_arm_shows_both_denominators_separately(server, browser):
+    """closure_m13 is the scenario where the two denominators come apart.
+
+    Completion: 92.4% cost-matched, 23.8% illustrative. Rate-defined: 100% for
+    BOTH arms — every path made payments, so every path has a rate over the
+    observed window even where the cap was never reached.
+
+    This test previously required "Mean APR among completed paths" and a finding
+    saying the arms "cannot be compared on rate alone". Both encoded the
+    pre-A-9 error of putting the rate under the completion denominator. Since
+    both arms are 100% rate-defined, their rates ARE comparable; what differs is
+    how much of the contract each rate covers, which is what the observed-window
+    note beside the rate is for.
+    """
     pg = browser.new_page(viewport={"width": 1440, "height": 1000})
     pg.goto(f"{server}/lab", wait_until="networkidle")
     pg.wait_for_timeout(700)
@@ -253,10 +264,22 @@ def test_censored_arm_shows_completion_share_and_qualifier(server, browser):
     pg.wait_for_timeout(900)
 
     arms_text = pg.inner_text("#arms")
+
+    # Both denominators are on the card, labelled as different quantities.
     assert "Paths completing within 24 months" in arms_text
+    assert "Paths with a defined rate" in arms_text
     assert "92.4%" in arms_text and "23.8%" in arms_text
-    assert "Mean APR among completed paths" in arms_text
+    assert "100.0%" in arms_text          # the rate-defined share, both arms
+
+    # The rate is labelled by EXISTENCE; only the duration by completion.
+    assert "Mean simulated APR among rate-defined paths" in arms_text
     assert "Mean duration among completed paths" in arms_text
+    assert "Mean APR among completed paths" not in arms_text
+
+    # Both bases are spelled out, and the rate's carries the window caveat.
+    assert "How the rate is computed" in arms_text
+    assert "How the duration mean is computed" in arms_text
+    assert "observed" in arms_text and "window" in arms_text
 
     table = pg.inner_text("#dur-table")
     assert "completed paths only" in table
@@ -264,12 +287,16 @@ def test_censored_arm_shows_completion_share_and_qualifier(server, browser):
     assert "completed in 24 mo" in table.lower()
 
     findings = pg.inner_text("#findings")
-    assert "cannot be compared on rate alone" in findings
-    assert "92.4%" in findings and "23.8%" in findings
+    assert "cannot be compared on rate alone" not in findings
+    # Censoring is still reported, and still not called default.
+    assert "76.2%" in findings
+    assert "not a modelled default" in findings
     pg.close()
 
 
 def test_uncensored_arm_shows_no_spurious_qualifier(server, browser):
+    """At `stable` every path completes and every path has a rate, so the two
+    denominators coincide and neither qualifier belongs on the page."""
     pg = browser.new_page(viewport={"width": 1440, "height": 1000})
     pg.goto(f"{server}/lab", wait_until="networkidle")
     pg.wait_for_timeout(700)
@@ -277,6 +304,9 @@ def test_uncensored_arm_shows_no_spurious_qualifier(server, browser):
     pg.wait_for_timeout(800)
     arms_text = pg.inner_text("#arms")
     assert "among completed paths" not in arms_text
+    assert "among rate-defined paths" not in arms_text
     assert "Paths completing within 24 months" not in arms_text
+    assert "Paths with a defined rate" not in arms_text
+    assert "Mean simulated APR" in arms_text and "Mean duration" in arms_text
     assert "completed paths only" not in pg.inner_text("#dur-table")
     pg.close()

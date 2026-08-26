@@ -19,7 +19,7 @@ python3 -m pytest rbf_sim/tests/ -q     # 643 tests
 python3 run_baseline.py                 # -> results/baseline_v3_canonical.json
 ```
 
-Deterministic: identical seeds reproduce **numerically at published precision**, and byte-identically **within a fixed runtime**. ~~bit-for-bit~~ withdrawn (D-041): the superseded `baseline_v2` / `baseline_equalcost_v1` generation was measured on macOS CPython 3.11.5 and differed in a few last-bit float values. The current generation has **not** been re-measured there, so no count is quoted for it. Verify with `research/verify_reproduction.py`, which runs the full validation battery as well as the baselines.
+Deterministic: identical seeds reproduce **numerically at published precision**, and byte-identically **within a fixed runtime**. ~~bit-for-bit~~ withdrawn (D-041). Current generation, measured by an independent audit run on macOS 26.0 arm64 / CPython 3.11.5 / NumPy 2.2.6: `baseline_v3` **11** last-bit leaves (worst rel. diff `5.351e-15`), `baseline_equalcost_v2` **3** (`1.532e-16`), the two closure artifacts and `validation_v2` byte-identical — **3/5 byte-identical, 5/5 numerically equal**. All five are byte-identical on Linux/aarch64 CPython 3.10.12. Verify with `research/verify_reproduction.py`, which runs the full validation battery as well as the baselines.
 
 ## Modules
 

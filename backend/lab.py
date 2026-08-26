@@ -170,17 +170,22 @@ ARMS = [
     {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
      "name": "Reference-path cost-matched RBF",
      "short": "Revenue-based, cost-matched",
-     "chart_label": "Revenue-based 1.0945×",
+     # Built from the artifact's own cap factor. It used to read "1.0945×",
+     # hand-typed, which would have gone stale silently if a sweep ever moved.
+     "chart_label_fmt": "Revenue-based {f}×",
      "kind": "rbf",
-     "note": "The cap factor was chosen so this contract's cost matches the "
-             "amortizing loan ON THE REFERENCE PATH — a flat, shock-free path "
-             "used once at pricing time. On simulated paths the realised rate "
-             "differs, because duration moves with revenue. The name describes "
-             "how the price was set, not an outcome guaranteed on any path."},
+     # Prefixed at request time with the grid-residual sentence, so the exactness
+     # of the match is stated from the artifact rather than asserted.
+     "note_grid": True,
+     "note": "The cap factor was chosen on THE REFERENCE PATH — a flat, "
+             "shock-free path used once at pricing time. On simulated paths the "
+             "realised rate differs again, because duration moves with revenue. "
+             "The name describes how the price was set, not an outcome "
+             "guaranteed on any path."},
     {"id": "RBF-ILL", "track": "illustrative", "arm": "RBF", "palette": "rbf-ill",
      "name": "Illustrative RBF (cap factor 1.20)",
      "short": "Revenue-based, illustrative",
-     "chart_label": "Revenue-based 1.20×",
+     "chart_label_fmt": "Revenue-based {f}×",
      "kind": "rbf",
      "note": "An ILLUSTRATIVE cap factor, not a recommended or market price. "
              "Its higher cost is a property of choosing 1.20, not of "
@@ -204,6 +209,55 @@ def _load(stem: str) -> Optional[dict]:
 def _checksum(stem: str) -> Optional[str]:
     prov = _load(f"{stem}_provenance")
     return prov.get("canonical_sha256") if prov else None
+
+
+def _grid_pricing() -> dict:
+    """Reference-path pricing, read from the CANONICAL validation artifact.
+
+    `f*` is not solved analytically. `run_validation.py` sweeps a cap-factor
+    grid and keeps the point whose reference-path effective rate lands closest
+    to the amortizing loan's. Duration is an integer, so cost moves in steps and
+    an exact match is not generally attainable — the script has always said so
+    in its own output. The Lab said "equals", which promised an exact match the
+    method cannot deliver and the artifact does not record.
+
+    Every number here is READ FROM THE ARTIFACT. None is hand-typed, so the
+    residual cannot drift away from the file it describes, and if a future sweep
+    lands exactly on target the wording follows automatically.
+    """
+    body = _load("validation_v2_canonical") or {}
+    pricing = body.get("pricing") or {}
+    ec = pricing.get("equal_cost") or {}
+    achieved, target = ec.get("apr"), pricing.get("benchmark_b_apr")
+    exact = (achieved is not None and target is not None and achieved == target)
+    return {
+        "f_star": ec.get("f_star"),
+        "achieved_apr": achieved,
+        "benchmark_apr": target,
+        "residual_pp": (None if achieved is None or target is None
+                        else abs(target - achieved) * 100.0),
+        "exact_match": exact,
+        "basis": "nearest point on the swept cap-factor grid",
+    }
+
+
+def _grid_pricing_sentence() -> str:
+    """One sentence, built from the artifact, stating the residual honestly."""
+    p = _grid_pricing()
+    a, t, r = p["achieved_apr"], p["benchmark_apr"], p["residual_pp"]
+    if a is None or t is None:
+        return ("The cost-matched cap factor is the nearest point on the swept "
+                "cap-factor grid, not an exact solution; the pricing artifact "
+                "needed to quote the residual is not loaded.")
+    if p["exact_match"]:
+        return (f"The cost-matched cap factor is the nearest point on the swept "
+                f"cap-factor grid. On this sweep that point happens to land "
+                f"exactly on the benchmark's {t:.6%}.")
+    return (f"The cost-matched cap factor is the NEAREST POINT ON THE SWEPT "
+            f"cap-factor grid, not an exact match: it prices at {a:.6%} against "
+            f"the amortizing loan's {t:.6%}, a residual of about {r:.5f} "
+            f"percentage points. Duration is an integer, so cost moves in steps "
+            f"and an exact match is not generally attainable.")
 
 
 def _resolve(track: str, scenario: str):
@@ -242,22 +296,30 @@ def manifest() -> dict:
             "n_paths": body.get("n_paths"),
             "base_seed": body.get("base_seed"),
         })
-    val = _load("validation_v2")
+    # Load the CANONICAL validation artifact, because that is the file this
+    # block names and checksums.
+    #
+    # Two defects have now been fixed here. The first was that the block named
+    # the superseded validation_v1.json while reading validation_v2. The second
+    # survived that fix: the name and the checksum moved to
+    # validation_v2_canonical.json but the READ stayed on the raw
+    # validation_v2.json. The raw file carries no `canonical` block, so
+    # `spec_version` came back null while a canonical checksum sat beside it —
+    # a record that described one file with the contents of another. Reading
+    # the canonical file makes the name, the checksum, the spec version and the
+    # values all refer to the same bytes.
+    val = _load("validation_v2_canonical")
     return {
         "artifacts": out,
         "pricing_reference": {
-            # Names the artifact actually loaded. This previously said the
-            # superseded validation_v1.json
-            # while _load() read validation_v2 -- the page reported provenance
-            # for a file it was not using.
             "artifact": "validation_v2_canonical.json",
             "sha256": _checksum("validation_v2"),
             "spec_version": ((val or {}).get("canonical") or {}).get("spec_version"),
             "equal_cost": (val or {}).get("pricing", {}).get("equal_cost"),
             "benchmark_b_apr": (val or {}).get("pricing", {}).get("benchmark_b_apr"),
-            "note": "The cost-matched cap factor was solved on the reference "
-                    "path so that its effective rate equals the amortizing "
-                    "loan's. Rates realised on simulated paths differ.",
+            "grid_pricing": _grid_pricing(),
+            "note": _grid_pricing_sentence() + " Rates realised on simulated "
+                    "paths differ again, because duration moves with revenue.",
         },
         "claim_taxonomy": CLAIM_TAXONOMY,
         "glossary": GLOSSARY,
@@ -289,6 +351,13 @@ def scenarios() -> List[dict]:
         if stem:
             out.append({"key": k, **v, "available": True})
     return sorted(out, key=lambda s: s["order"])
+
+
+def _fmt_factor(f: float) -> str:
+    """Cap factor as it reads on a chart: at least 2 decimals, at most 4, no
+    trailing-zero noise. 1.2 -> "1.20", 1.0945 -> "1.0945"."""
+    frac = len(f"{f:.4f}".rstrip("0").split(".")[1])
+    return f"{f:.{max(2, frac)}f}"
 
 
 def _fmt_money(x) -> dict:
@@ -414,14 +483,27 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
                   "the schedule itself defines the total."),
     }
 
+    # Chart labels carrying a cap factor are formatted from the artifact's own
+    # terms, so the number on the chart and the number in the file cannot
+    # disagree. Only arms without a cap factor keep a fixed label.
+    f = terms.get("f")
+    if spec.get("chart_label_fmt") and f is not None:
+        chart_label = spec["chart_label_fmt"].format(f=_fmt_factor(f))
+    else:
+        chart_label = spec.get("chart_label") or spec["short"]
+
+    note = spec["note"]
+    if spec.get("note_grid"):
+        note = _grid_pricing_sentence() + " " + note
+
     return {
         "id": spec["id"],
         "name": spec["name"],
         "short": spec["short"],
-        "chart_label": spec["chart_label"],
+        "chart_label": chart_label,
         "kind": spec["kind"],
         "palette": spec["palette"],
-        "note": spec["note"],
+        "note": note,
         "source_artifact": f"{stem}_canonical.json",
         "source_sha256": _checksum(stem),
         "cap_factor": terms.get("f") if has_cap else None,
@@ -468,7 +550,7 @@ def comparison(scenario: str) -> Optional[dict]:
         "metric_definitions": METRIC_DEFINITIONS,
         "findings": _findings(scenario, arms),
         "assumptions": ASSUMPTIONS,
-        "caveats": CAVEATS,
+        "caveats": caveats(),
         "summary": _summary(scenario, arms),
     }
 
@@ -630,19 +712,35 @@ METRIC_DEFINITIONS = {
     "effective_apr": {
         "label": "Effective APR",
         "definition": "Annualised internal rate of return of the payment stream "
-                      "against the advance, averaged ONLY over paths where a "
-                      "rate exists. A path that never repays has no internal "
-                      "rate of return and is excluded.",
+                      "against the advance, averaged over the paths where a "
+                      "rate EXISTS. Existence is the only condition: the mean "
+                      "is NOT restricted to paths that reached the repayment "
+                      "target. A path that stopped short of the cap but made "
+                      "payments still has a well-defined rate over the observed "
+                      "window, and it is counted here. Only a path that repays "
+                      "nothing at all has no rate and is excluded.",
         "why": "Puts a revenue share and a fixed instalment on one axis.",
-        "caveat": "Two conditions apply. This is the MEAN ACROSS SIMULATED "
-                  "PATHS for the selected scenario, not the reference-path rate "
-                  "the cost-matched contract was priced on. And where any path "
-                  "fails to complete it is a SURVIVOR statistic — the "
-                  "non-completing paths are absent from it, so it understates "
-                  "the cost of the scenario to the provider rather than "
-                  "summarising it. Those paths are not 'unprofitable' — "
-                  "profitability is computed nowhere in this project; they "
-                  "simply did not reach the cap inside the horizon.",
+        # A-9. This caveat previously said the rate excluded every path that did
+        # not complete. That was the pre-A-9 reading, withdrawn because the two
+        # events are separate: completion is reaching the contractual target,
+        # existence of an IRR is a sign condition on the cash-flow vector. They
+        # coincide often enough to have hidden the error, and come apart sharply
+        # at closure_m13 and closure_m7.
+        "caveat": "Read the two denominators separately. DURATION is averaged "
+                  "over completing paths only. THIS RATE is averaged over paths "
+                  "with a defined internal rate of return, which is a different "
+                  "and usually larger set — an incomplete path that made "
+                  "payments has a defined rate over the OBSERVED WINDOW, and "
+                  "that is a window figure, not a final lifetime return. "
+                  "Neither conditional mean is automatically a portfolio-wide "
+                  "outcome: each describes the subset it is computed over, so "
+                  "read both beside the incomplete-recovery rate rather than "
+                  "treating either as the scenario's result. Paths that fall "
+                  "short are not 'unprofitable' — profitability is computed "
+                  "nowhere in this project; they simply did not reach the cap "
+                  "inside the horizon. Separately, this is the MEAN ACROSS "
+                  "SIMULATED PATHS, not the reference-path rate the "
+                  "cost-matched contract was priced on.",
     },
 }
 
@@ -678,16 +776,22 @@ CAVEATS = [
              "over simulated paths. They are not population confidence intervals "
              "and say nothing about real sellers.",
      "classification": "open_real_world_question"},
-    {"text": "The cost-matched cap factor was solved on the reference path. "
-             "Across simulated paths the realised rate differs, because duration "
-             "varies with revenue and a longer duration lowers the annualised "
-             "rate for the same total. The label describes how the price was "
-             "chosen, not an outcome guaranteed on any path.",
+    {"text": "{grid} The label describes how the price was chosen, not an "
+             "outcome guaranteed on any path: across simulated paths the "
+             "realised rate differs again, because duration varies with revenue "
+             "and a longer duration lowers the annualised rate for the same "
+             "total.",
      "classification": "sensitivity_result"},
-    {"text": "Mean duration and mean rate are computed only over paths that "
-             "reached the repayment target. Where recovery is incomplete they "
-             "describe the contracts that finished and exclude those that did "
-             "not, so they must not be read as portfolio averages.",
+    # A-9. The withdrawn version of this caveat put duration and rate under one
+    # denominator. They have never had one.
+    {"text": "Mean duration and mean rate have DIFFERENT denominators and must "
+             "be read separately. Mean duration covers only paths that reached "
+             "the repayment target. Mean rate covers paths with a defined "
+             "internal rate of return — a larger set, because an incomplete "
+             "path that made payments still has a rate over the observed "
+             "window. Neither is automatically a portfolio-wide outcome; each "
+             "describes the subset it was computed over, and both should be "
+             "read beside the incomplete-recovery rate.",
      "classification": "simulation_result"},
     {"text": "Payment burden is measured against revenue, not against what the "
              "seller retains. Margins, operating costs, reserves and other debts "
@@ -695,6 +799,18 @@ CAVEATS = [
              "that a contract is affordable.",
      "classification": "open_real_world_question"},
 ]
+
+
+def caveats() -> List[dict]:
+    """CAVEATS with artifact-sourced values substituted.
+
+    The pricing caveat quotes a residual, and a quoted number must come from the
+    file it describes. `{grid}` is filled from the canonical validation artifact
+    at request time rather than baked into the constant, so the caveat cannot
+    outlive the sweep it is describing.
+    """
+    grid = _grid_pricing_sentence()
+    return [{**c, "text": c["text"].replace("{grid}", grid)} for c in CAVEATS]
 
 
 def _summary(scenario: str, arms: List[dict]) -> dict:

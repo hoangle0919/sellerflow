@@ -48,9 +48,22 @@ RESULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
 SOURCE = os.path.join(RESULTS, "validation_v2.json")
 STEM = "validation_v2"
 
-#: Sources that produced the battery. Both, because the convergence ladder comes
-#: from `conv_step.py` and the remaining sections from `run_validation.py`.
-EXTRA_SOURCES = ("run_validation.py", "conv_step.py")
+#: Sources that produced the CURRENT battery.
+#:
+#: `run_validation.py` alone. Its section 1 computes the convergence ladder and
+#: sections 2/4/5/6 the rest; every key in `validation_v2.json` is written by
+#: that one script.
+#:
+#: HISTORICAL: `conv_step.py` was listed here as well, and the comment said the
+#: convergence ladder came from it. That was true of the SUPERSEDED
+#: `validation_v1.json`, where the ladder was assembled from four separate
+#: invocations. It has never been true of `validation_v2.json`. Keeping the
+#: retired script in this tuple fingerprinted the current artifact against a
+#: file that contributes nothing to it — so editing a retired script would have
+#: changed the current checksum, and a reader tracing provenance would have been
+#: sent to code that never ran. `conv_step.py` is now retired and fails closed;
+#: see DECISION_LOG D-052.
+EXTRA_SOURCES = ("run_validation.py",)
 
 #: Execution facts inside `_meta`. Everything else there is configuration.
 META_PROVENANCE_KEYS = ("date",)

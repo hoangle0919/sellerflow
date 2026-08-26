@@ -279,7 +279,7 @@ Reported as a paired table and a scatter of `Δn_HPB` against `ΔRR(12)`.
 | Bootstrap resampling | `BOOTSTRAP_SEED = 90210`, independent stream |
 | Parameter sweeps | Seeds held **fixed** across arms and parameter values, so differences are structural, not sampling artifacts |
 
-Every recorded result stores its seeds. Reruns with identical seeds must reproduce **numerically at published precision**, and byte-identically **within a fixed runtime** (A-8 / D-041). ~~bit-for-bit~~ was too strong: on macOS CPython 3.11.5 two artifacts of the **superseded** generation differed in a few last-bit floating-point values. The current A-9 generation has not been re-measured on that platform, and no count is claimed for it. Check with `research/verify_reproduction.py`.
+Every recorded result stores its seeds. Reruns with identical seeds must reproduce **numerically at published precision**, and byte-identically **within a fixed runtime** (A-8 / D-041). ~~bit-for-bit~~ was too strong: byte equality does not hold across runtimes. Measured on the **current A-9 generation** by an independent audit run (macOS 26.0 arm64, CPython 3.11.5, NumPy 2.2.6): `baseline_v3` differs in **11** last-bit leaves (worst relative difference `5.351e-15`) and `baseline_equalcost_v2` in **3** (`1.532e-16`); the two closure artifacts and `validation_v2` are byte-identical — **3/5 byte-identical, 5/5 numerically equal** at relative tolerance `1e-9`. On Linux/aarch64 CPython 3.10.12 all five are byte-identical. Check with `research/verify_reproduction.py`.
 
 ---
 
