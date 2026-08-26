@@ -7,6 +7,8 @@ import math
 import pytest
 
 from financing_engine import (
+    effective_apr,
+    irr_upper_bound,
     revenue_metrics,
     financing_structure,
     scenario_analysis,
@@ -379,3 +381,106 @@ def test_end_to_end_analysis_applies_the_submitted_return_rate():
     s = build_financing_analysis(features, "Low Risk")["structure"]
     assert s["return_rate_applied"] == 0.10
     assert s["periodic_remittance"] == 10_800_000
+
+
+# ── A-9: the IRR definition, domain and conditioning ─────────────────────────
+# These assert what the rate MEANS, which is precisely what no test asserted
+# when the defect shipped. The product mirrors the corrected research engine
+# (research/rbf_sim/contracts.py::solve_apr, post-A-9).
+
+def test_a9_domain_includes_losses_so_a_shortfall_is_a_rate_not_undefined():
+    """A contract recovering less than it advanced has a negative rate. The
+    pre-A-9 bracket started above zero and returned None, publishing an adverse
+    result as 'undefined' — a word that reads like a technicality."""
+    # 333,000,000 advanced; six collections of 14,385,600 = 86,313,600 back.
+    apr = effective_apr(333_000_000, [14_385_600] * 6)
+    assert apr is not None, "a shortfall must report its rate, not None"
+    assert apr < 0, "recovering a quarter of the advance is a negative return"
+    assert apr == pytest.approx(-0.983, abs=5e-3)
+
+
+def test_a9_internal_zero_months_keep_their_position():
+    """Compressing the vector moves later payments earlier in calendar time and
+    overstates the rate. The same 150 paid in month 4 is worth far less than in
+    month 1, and the two must not evaluate alike."""
+    delayed = effective_apr(100.0, [0.0, 0.0, 0.0, 150.0])
+    immediate = effective_apr(100.0, [150.0])
+    assert delayed is not None and immediate is not None
+    assert delayed < immediate
+    # Not a rounding difference: compression inflated this case ~54-fold.
+    assert immediate > delayed * 10
+
+
+def test_a9_trailing_zeros_are_immaterial():
+    """Position matters; padding the tail does not. A stream that has finished
+    paying is the same contract however long the observation window runs."""
+    base = effective_apr(100.0, [60.0, 60.0])
+    padded = effective_apr(100.0, [60.0, 60.0, 0.0, 0.0, 0.0])
+    assert base == pytest.approx(padded, abs=1e-9)
+
+
+def test_a9_none_only_when_no_payment_is_positive():
+    """The single case where no rate satisfies the equation. Everything else —
+    including a near-total loss — has a root."""
+    assert effective_apr(100.0, [0.0, 0.0]) is None
+    assert effective_apr(100.0, []) is None
+    assert effective_apr(100.0, [0.01]) is not None   # a root exists, however bad
+
+
+def test_closure_scenario_reports_its_observed_window_return():
+    """The closure row carries the provider's realised rate BESIDE the
+    unrecovered balance — never instead of it. An observed-window figure on an
+    incomplete path is not a lifetime return, and the row says so."""
+    st = financing_structure(185_000_000, "Low Risk", return_rate=0.028)
+    closure = [s for s in scenario_analysis(185_000_000, 0.22, st, return_rate=0.028)
+               if s["case"] == "closure"][0]
+    assert closure["observed_apr_to_closure"] < 0
+    assert closure["amount_unrecovered"] > 0          # reported beside, not instead
+    assert "observed-window" in closure["apr_basis"]
+
+
+# ── IRR solver completeness (research spec A-9, plus the bracket completion) ──
+def test_irr_bracket_is_analytic_not_an_arbitrary_ceiling():
+    """A fixed upper bracket is a silent correctness bug: a stream repaying 12x
+    the advance in one month has a unique monthly IRR of 11, and the earlier
+    hard ceiling of 10.0 reported it as "no rate exists" — indistinguishable
+    from a genuine absence. The bound is derivable: i* <= S/P - 1."""
+    assert irr_upper_bound(100, [1200]) == 11.0
+    assert effective_apr(100, [1200]) is not None
+
+    # S < P: the root is negative and 0 brackets it from above.
+    assert irr_upper_bound(100, [50]) == 0.0
+
+
+def test_a_root_on_the_bracket_endpoint_is_still_a_root():
+    """With the analytic bound the single-payment case lands exactly on the
+    endpoint by construction, so requiring a strict sign change would report
+    the most ordinary case of all as undefined."""
+    assert effective_apr(100, [1100]) is not None      # monthly IRR exactly 10
+    # The ordinary case, and the one that exposed an exact `== 0.0` endpoint
+    # test: S/P - 1 is not exactly representable here, so the residual is a
+    # tiny POSITIVE and a strict test reports no rate for a plain single
+    # payment. Reachable in product whenever a small requested amount makes the
+    # cap smaller than one month's remittance.
+    assert effective_apr(100, [115]) is not None
+
+
+def test_apr_is_none_only_when_no_payment_is_positive():
+    """`None` must mean "no rate satisfies the equation", not "our search
+    window was too small" — the distinction the ceiling erased."""
+    assert effective_apr(100, [0.0, 0.0]) is None
+    assert effective_apr(100, []) is None
+    assert effective_apr(333_000_000, [14_385_600] * 6) < 0   # a loss has a rate
+
+
+def test_the_repayment_cap_keeps_product_returns_far_inside_the_bracket():
+    """Why the bound is not load-bearing *here*, recorded so nobody mistakes
+    the solver's generality for a live risk: collection stops at the cap, so
+    total collected never exceeds 1.30x the advance and the monthly IRR cannot
+    exceed 0.30 even if the whole cap arrived in month one. The completeness
+    fix is adopted for parity with the research method this module claims to
+    mirror, not because the product can reach the old ceiling."""
+    for tier in ("Low Risk", "Medium Risk"):
+        s = financing_structure(150_000_000, tier)
+        advance, cap = s["amount_used_for_structure"], s["repayment_cap"]
+        assert irr_upper_bound(advance, [cap]) <= 0.30 + 1e-9   # 1.30x, float-exact

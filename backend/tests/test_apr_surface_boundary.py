@@ -65,11 +65,29 @@ def test_product_surface_labels_its_apr_as_a_base_case():
     assert re.search(r"APR \(base case\)|base[- ]case", html, re.I), (
         "the product APR must be labelled as a base case, not as 'the APR'"
     )
-    # And must not borrow the research vocabulary.
-    for research_only in ("observed-window", "rate-defined", "simulated paths",
-                          "Monte Carlo"):
-        assert research_only not in html, (
-            f"product page uses research-only APR vocabulary: {research_only!r}"
+    # What must not cross over is POPULATION vocabulary. The product describes
+    # one contract; it has no distribution, no path count and no denominator.
+    #
+    # "observed-window" is deliberately NOT in this list, and an earlier version
+    # of this test wrongly banned it. A-9 (iv) defines that phrase for any rate
+    # measured on an incomplete, non-absorbing path -- which is exactly what the
+    # product's closure row reports. Shared vocabulary for a shared concept is
+    # correct; what would be wrong is shared vocabulary for a distribution the
+    # product does not have.
+    for population_only in ("rate-defined", "simulated paths", "Monte Carlo",
+                            "500 paths", "across paths", "apr_defined"):
+        assert population_only not in html, (
+            f"product page borrows research POPULATION vocabulary: "
+            f"{population_only!r} -- it describes one schedule, not a "
+            f"distribution over generated paths"
+        )
+
+    # Where the product does use the shared phrase, it must scope it to the one
+    # path it is describing rather than implying a summary statistic.
+    if "observed window" in html or "observed-window" in html:
+        assert re.search(r"on this path|not a lifetime return", html, re.I), (
+            "the product's observed-window rate must be scoped to the single "
+            "path it describes"
         )
 
 

@@ -8,6 +8,7 @@ one here and delete it; nothing is committed.
 import json
 import os
 import sys
+import warnings
 
 import pytest
 
@@ -240,3 +241,86 @@ def test_model_status_endpoint_exposes_artifact_state():
     # The suite runs with an empty model dir, so this must be the honest answer.
     assert art["available"] is False
     assert art["reason"] == "artifacts_absent"
+
+
+# ── the load filter must reject version hazards, not every warning ──────────
+def _train_valid_artifacts(tmp_path):
+    """A genuinely usable artifact set, written to `tmp_path`."""
+    pytest.importorskip("sklearn")
+    import numpy as np
+    import pandas as pd
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler
+    import joblib
+
+    rng = np.random.default_rng(20260824)
+    X = pd.DataFrame(rng.normal(size=(80, len(ml_engine.FEATURES))),
+                     columns=ml_engine.FEATURES)
+    y = (rng.random(80) < 0.3).astype(int)
+    y[0], y[1] = 0, 1
+
+    scaler = StandardScaler().fit(X)
+    rf = RandomForestClassifier(n_estimators=5, random_state=0).fit(X, y)
+    lr = LogisticRegression(max_iter=200).fit(scaler.transform(X), y)
+
+    joblib.dump(rf, tmp_path / ml_engine.MODEL_FILES["rf"])
+    joblib.dump(lr, tmp_path / ml_engine.MODEL_FILES["lr"])
+    joblib.dump(scaler, tmp_path / ml_engine.MODEL_FILES["scaler"])
+
+
+def test_a_benign_dependency_deprecation_does_not_discard_a_usable_artifact(
+        tmp_path, monkeypatch):
+    """Production regression, 2026-08-24.
+
+    Training succeeded on every boot and the artifact was written, but the load
+    filter was `simplefilter("error")` — every warning, not just version ones.
+    NumPy 2.5 emits a DeprecationWarning ("Setting the shape on a NumPy array
+    has been deprecated") from inside unpickling, so a perfectly usable model
+    was reported as `artifact_unreadable` and the live site silently served the
+    heuristic fallback. The `2>/dev/null` on the start command hid the message
+    that would have said so.
+
+    A dependency's internal deprecation is not evidence about this artifact.
+    Usability is decided by the smoke test, which runs after the load.
+    """
+    import warnings as _w
+    import joblib
+
+    _train_valid_artifacts(tmp_path)
+
+    real_load = joblib.load
+
+    def noisy_load(*a, **kw):
+        _w.warn("Setting the shape on a NumPy array has been deprecated in "
+                "NumPy 2.5.", DeprecationWarning)
+        return real_load(*a, **kw)
+
+    monkeypatch.setattr(joblib, "load", noisy_load)
+
+    assert ml_engine.load_models(str(tmp_path)) is True, (
+        "a benign dependency deprecation must not be read as a corrupt artifact")
+    assert ml_engine.model_status()["scoring_path"] == "ensemble"
+
+
+def test_a_genuine_version_mismatch_is_still_rejected(tmp_path, monkeypatch):
+    """The narrowing must not disarm the check it was there for: a pickle
+    written by a different scikit-learn must still be refused at load."""
+    import joblib
+    from ml_engine import InconsistentVersionWarning
+
+    _train_valid_artifacts(tmp_path)
+
+    real_load = joblib.load
+
+    def mismatched_load(*a, **kw):
+        warnings.warn(InconsistentVersionWarning(
+            estimator_name="RandomForestClassifier",
+            current_sklearn_version="9.9.9",
+            original_sklearn_version="0.0.1"))
+        return real_load(*a, **kw)
+
+    monkeypatch.setattr(joblib, "load", mismatched_load)
+
+    assert ml_engine.load_models(str(tmp_path)) is False
+    assert ml_engine.model_status()["reason"] == "artifact_unreadable"
