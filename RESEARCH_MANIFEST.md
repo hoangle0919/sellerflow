@@ -66,7 +66,7 @@
 | `baseline_equalcost_v2_canonical.json` | Current cost-matched track. SHA-256 `b3ebfe6a…`. |
 | `baseline_closure_v2_canonical.json` | Current closure track, illustrative `f`. SHA-256 `21b8e207…`. |
 | `baseline_closure_equalcost_v2_canonical.json` | Current closure track, `f*`. SHA-256 `e1e6d81b…`. |
-| `validation_v2_canonical.json` | Current validation battery. SHA-256 `4f26f04e…`. |
+| `validation_v2_canonical.json` | Current validation battery. SHA-256 `7d9b9d0f…`. |
 | `baseline_v2_canonical.json` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte** as the record of what was published before 2026-08-20. Never cited as current, never regenerated, never deleted. Original note follows. **Former baseline.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
 | `baseline_v2_provenance.json` | **Superseded, preserved.** Execution record for the superseded artifact above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |

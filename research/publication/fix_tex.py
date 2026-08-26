@@ -67,7 +67,15 @@ def breakable(inner: str) -> str:
         if inner.startswith("\\_", i):          # escaped underscore
             out.append("\\_\\allowbreak{}")
             i += 2
-        elif inner[i] in "/.-":                  # path, dot and hyphen breaks
+        elif inner[i] in "/.":                   # path and dot breaks only
+            # NOT "-". A break after a hyphen renders correctly on the page but
+            # copies out with the hyphen missing: PDF text extractors treat a
+            # trailing hyphen as line-end hyphenation and de-hyphenate when
+            # rejoining. §2b already avoids this in URLs; it was still live for
+            # inline code, where it silently corrupted a NUMBER —
+            # `5.351e-15` extracted as `5.351e15`, thirty orders of magnitude
+            # out, in a reproducibility claim. A period is safe because no
+            # extractor de-periods.
             out.append(inner[i] + "\\allowbreak{}")
             i += 1
         elif inner[i] == "\\":                   # any other control sequence

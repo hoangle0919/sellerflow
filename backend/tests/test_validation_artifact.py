@@ -149,7 +149,7 @@ CURRENT_CHECKSUMS = {
     "baseline_closure_equalcost_v2_canonical.json":
         "e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665",
     "validation_v2_canonical.json":
-        "4f26f04e3e0f16b14eea8b9bfcd46c05b3cfc86af8ae8e388c8d22d7f9c6dd94",
+        "7d9b9d0f9b0fd0fea7011625026a7a5da28c1d4fab009e9a2bf2bd7639af52cc",
 }
 
 

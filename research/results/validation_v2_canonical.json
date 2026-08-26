@@ -1,7 +1,7 @@
 {
   "canonical": {
     "determinism": "Identical code, configuration and seeds reproduce this file NUMERICALLY at published precision on every platform tested. BYTE equality holds within a fixed runtime and is NOT claimed across platforms. Wall-clock time, git commit and environment are recorded in the provenance sidecar.",
-    "generator_fingerprint": "eede99ca1886b27950e3ba70dda2c2dfa0531d47e058557c00a2b4a1f634b10e",
+    "generator_fingerprint": "247db5f47ecc9060244a367fa21cf59b6bca343f5cecb191e3b38fc9d5d9e7c7",
     "scenario_config_hash": "04bfa4f8460f8159b529cc1f78978a0e88675d3cfe82986be2a5f5d98b449578",
     "schema_version": "2.0",
     "spec_version": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9"

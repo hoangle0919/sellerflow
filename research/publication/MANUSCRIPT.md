@@ -366,7 +366,7 @@ All entries verified against a publisher deposit, DOI resolution, or the issuing
 | `baseline_equalcost_v2_canonical.json` | `b3ebfe6a5a7e7f48726d7e501295b02f84258a3fe9ee4e048875125b1270e0ee` |
 | `baseline_closure_v2_canonical.json` | `21b8e207ff2db9ac866b8cb2bab47c8c2e434d2bff03d802eb6f53a66fdcea4b` |
 | `baseline_closure_equalcost_v2_canonical.json` | `e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665` |
-| `validation_v2_canonical.json` | `4f26f04e3e0f16b14eea8b9bfcd46c05b3cfc86af8ae8e388c8d22d7f9c6dd94` |
+| `validation_v2_canonical.json` | `7d9b9d0f9b0fd0fea7011625026a7a5da28c1d4fab009e9a2bf2bd7639af52cc` |
 
 **Superseded by A-9 (D-049), preserved byte-for-byte.** Every figure published
 before 2026-08-20 was computed from these files, so the record of what was
