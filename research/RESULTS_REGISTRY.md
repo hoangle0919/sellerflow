@@ -29,7 +29,7 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 | `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
 | `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f* = 1.0945 (D-032). |
 | `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
-| `results/validation_v1_provenance.json` | *(varies by run)* | Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
+| `results/validation_v1_provenance.json` | *(varies by run)* | **Superseded, preserved.** Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
 | `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Frozen historical evidence.** The pre-canonicalization source, retained unmodified. Re-running the whole battery reproduces it with exactly one difference — `_meta.date` — and zero numeric drift. |
 
 Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v3_canonical.json`
@@ -169,7 +169,7 @@ F-5's surviving null concerns the hardship **floor only**: ~~F-5 means the guard
 | **Exact scenario** | (a) convergence at 500/2,000/5,000/10,000 paths on sustained −40%; (b) cap sweep `f ∈ [1.05, 1.30]` on the stable reference; (c) reference-path cost-matched cap solve (JSON key `pricing.equal_cost`); (d) 12-probe recovery-boundary search; (e) RBF-G breakpoint scan over 36,000 month-observations; (f) remittance-basis sweep |
 | **Parameters** | `R₀ = 185,000,000` · `A = 185,000,000` · `r = 0.10` · `f = 1.20` · `T = 24` · basis `net_sales` · Benchmark B `j = 18%`, `N_B = 12`. All illustrative or derived — none externally sourced |
 | **Simulation version** | `rbf_sim` v1.0.0 + spec amendments A-1…A-5 · seeds 20260803 / 90210 |
-| **Code** | `run_validation.py`, `conv_step.py` → `results/validation_v1.json`; `run_baseline.py` → `results/baseline_v2.json` |
+| **Code** | `run_validation.py`, `conv_step.py` → `results/validation_v1.json`; `run_baseline.py` → `results/baseline_v2.json` *(the superseded generation this dated entry describes; current runs write `validation_v2.json` and `baseline_v3_canonical.json`)* |
 | **Type** | **Confirmatory** for convergence, pricing, breakpoint, revenue definition. **Exploratory** for the boundary probes (a search, not a pre-specified test) |
 | **Public-safe** | ⚠️ **Conditional** — simulated label, parameter set, and assumption classification must appear with any quoted figure |
 | **Status** | ✅ 2026-08-03 · 169 simulation tests + 47 backend tests passing |
@@ -268,7 +268,9 @@ and are asserted unchanged by `backend/tests/test_validation_artifact.py`.
 | `baseline_equalcost_v1` → `v2` | 862 → 1022 | 20 | 160 | 0 |
 | `baseline_closure_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |
 | `baseline_closure_equalcost_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |
-| `validation_v1` → `v2` | 189 → 190 | 1 | 1 | 0 |
+| `validation_v1` → `v2` | 189 → 190 | 1 | 1 (see note) | 0 |
+
+*Note on validation's single added leaf.* It is **`/convergence/converged`**, not a denominator key. That flag has been emitted by `run_validation.py` since `42b7b1e`, long before A-9; the superseded `validation_v1_canonical` lacked it because it was canonicalized from a raw file produced by an older revision of the script — the artifact predated its own generator. Its appearance in `validation_v2` closes that gap and is **not an A-9 result change**.
 
 Burden, recovery, duration, settlement, scenario inputs and seeds are unchanged.
 

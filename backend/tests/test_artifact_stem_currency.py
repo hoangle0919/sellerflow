@@ -21,10 +21,18 @@ import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Bare stems too, not only the `_canonical` form. `validation_v1.json` and
+# `baseline_v2.json` are the raw pre-canonicalization files, and a reproduction
+# command or generator docstring pointing at one of them sends a reader to a
+# superseded input just as effectively as a checksum row would. The `_canonical`
+# suffix was where the last sweep stopped, which is why `lab.manifest()` went on
+# reporting `validation_v1.json` while loading `validation_v2`.
 SUPERSEDED = re.compile(
-    r"baseline_v2_canonical|baseline_v2_provenance"
+    r"baseline_v2_canonical|baseline_v2_provenance|baseline_v2\.json"
     r"|baseline_equalcost_v1|baseline_closure_v1"
-    r"|baseline_closure_equalcost_v1|validation_v1_canonical")
+    r"|baseline_closure_equalcost_v1"
+    r"|validation_v1_canonical|validation_v1_provenance|validation_v1\.json"
+    r"|\bbaseline_v2\b|\bvalidation_v1\b")
 
 CURRENT = ("baseline_v3", "baseline_equalcost_v2", "baseline_closure_v2",
            "baseline_closure_equalcost_v2", "validation_v2")
@@ -44,6 +52,14 @@ ACTIVE_SURFACES = (
     "RESEARCH_MANIFEST.md",
     "research/CLAIM_LEDGER.md",
     "research/RESULTS_REGISTRY.md",
+    # Active generator documentation. A docstring naming a superseded output is
+    # read as instruction by the next person to run the script.
+    "research/run_baseline.py",
+    "research/run_equal_cost_baseline.py",
+    "research/run_closure_baseline.py",
+    "research/run_validation.py",
+    "research/rbf_sim/README.md",
+    "research/rbf_sim/canonical.py",
 )
 
 #: A line, or the heading above it, that puts a citation in historical context.

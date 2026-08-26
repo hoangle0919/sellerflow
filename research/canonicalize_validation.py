@@ -3,7 +3,7 @@
     python3 canonicalize_validation.py          # verify only, writes nothing
     python3 canonicalize_validation.py --write  # write the canonical/provenance pair
 
-WHY THIS EXISTS. `validation_v1.json` is the only registered result file with no
+WHY THIS EXISTS (historical). The superseded `validation_v1.json` was the only registered result file with no
 checksummed canonical form. It is also the source of the two numbers most likely
 to be quoted in a write-up: the reference-path cost-matched cap `f* = 1.0945`
 and Benchmark B's 19.5618% APR. Quoting a figure that cannot be checked against

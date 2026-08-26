@@ -246,7 +246,13 @@ def manifest() -> dict:
     return {
         "artifacts": out,
         "pricing_reference": {
-            "artifact": "validation_v1.json",
+            # Names the artifact actually loaded. This previously said the
+            # superseded validation_v1.json
+            # while _load() read validation_v2 -- the page reported provenance
+            # for a file it was not using.
+            "artifact": "validation_v2_canonical.json",
+            "sha256": _checksum("validation_v2"),
+            "spec_version": ((val or {}).get("canonical") or {}).get("spec_version"),
             "equal_cost": (val or {}).get("pricing", {}).get("equal_cost"),
             "benchmark_b_apr": (val or {}).get("pricing", {}).get("benchmark_b_apr"),
             "note": "The cost-matched cap factor was solved on the reference "
@@ -814,19 +820,35 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
             "cost of a completed contract." if partial else "")
 
         if same_rate_population:
+            # Where the two rates COINCIDE there is no difference to attribute,
+            # and saying the cap factor caused one would be an explanation of
+            # nothing. At closure_m7 neither cap binds before revenue stops, so
+            # the payment streams are identical and so are the rates -- the
+            # targets differ but never become reachable.
+            rates_equal = abs(eq["effective_apr"] - ill["effective_apr"]) < 5e-5
+            if rates_equal:
+                body = (f"Both cap factors give the same mean simulated rate of "
+                        f"{ill['effective_apr']:.2%} in the {label} scenario. "
+                        f"Neither cap binds before revenue stops, so the two "
+                        f"contracts make identical payments and their "
+                        f"observed-window rates coincide despite different "
+                        f"contractual targets. There is no price effect here to "
+                        f"attribute — the difference the cap factor makes "
+                        f"elsewhere requires the cap to be reachable.")
+            else:
+                body = (f"Price and structure are separable. The same "
+                        f"revenue-share structure priced at the reference-path "
+                        f"cost-matched factor shows a mean simulated rate of "
+                        f"{eq['effective_apr']:.2%} in the {label} scenario, "
+                        f"against {ill['effective_apr']:.2%} at the illustrative "
+                        f"1.20 factor. Both means are taken over the same share "
+                        f"of paths — {eq_defined:.1%} have a defined rate under "
+                        f"each — so the rate comparison is like-for-like and the "
+                        f"difference is a property of the chosen cap factor, not "
+                        f"of revenue-based repayment.")
             out.append({
                 "classification": "sensitivity_result",
-                "text": (f"Price and structure are separable. The same "
-                         f"revenue-share structure priced at the reference-path "
-                         f"cost-matched factor shows a mean simulated rate of "
-                         f"{eq['effective_apr']:.2%} in the {label} scenario, "
-                         f"against {ill['effective_apr']:.2%} at the illustrative "
-                         f"1.20 factor. Both means are taken over the same share "
-                         f"of paths — {eq_defined:.1%} have a defined rate under "
-                         f"each — so the rate comparison is like-for-like and the "
-                         f"difference is a property of the chosen cap factor, not "
-                         f"of revenue-based repayment. {completion_note}"
-                         f"{window_note}"),
+                "text": f"{body} {completion_note}{window_note}",
                 "source": eq["source_artifact"]})
         else:
             out.append({
@@ -863,10 +885,15 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                 "revenue falls. The burden displayed here uses a different "
                 "denominator — payment ÷ GMV — so it is constant only while the "
                 "net-sales/GMV ratio is fixed, and it varies when returns vary. "
-                "The price of the revenue-contingent structure is a longer and "
-                "more variable recovery period. Which side of that trade is "
-                "worth taking is a commercial judgement this study does not "
-                "make.",
+                "The price of the revenue-contingent structure is a MORE "
+                "VARIABLE recovery period whose direction depends on the "
+                "realised path: under P4 revenue-contingent recovery leads a "
+                "cost-matched fixed schedule when the realised mean eligible "
+                "base clears B* = P/r and lags when it does not, and both "
+                "occur in the registered scenarios. Calling it uniformly "
+                "longer would state one scenario's direction as a property "
+                "of the structure. Which side of that trade is worth taking "
+                "is a commercial judgement this study does not make.",
         "source": "author"})
     out.append({
         "classification": "open_real_world_question",

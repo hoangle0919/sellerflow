@@ -7,7 +7,7 @@
     python3 run_validation.py 6   # revenue-definition sensitivity
 
 Results accumulate in results/validation_v2.json.
-ALL OUTPUT IS SIMULATED under METHODOLOGY_SPEC.md v1.0 + amendments A-1..A-3.
+ALL OUTPUT IS SIMULATED under METHODOLOGY_SPEC.md v1.0 + amendments A-1..A-9.
 """
 import json, os, sys
 from datetime import date

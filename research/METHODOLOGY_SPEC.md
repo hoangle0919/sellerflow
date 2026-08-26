@@ -279,7 +279,7 @@ Reported as a paired table and a scatter of `Δn_HPB` against `ΔRR(12)`.
 | Bootstrap resampling | `BOOTSTRAP_SEED = 90210`, independent stream |
 | Parameter sweeps | Seeds held **fixed** across arms and parameter values, so differences are structural, not sampling artifacts |
 
-Every recorded result stores its seeds. Reruns with identical seeds must reproduce **numerically at published precision**, and byte-identically **within a fixed runtime** (A-8 / D-041). ~~bit-for-bit~~ was too strong: on macOS CPython 3.11.5 two artifacts differ in 9 and 2 last-bit floating-point values. Check with `research/verify_reproduction.py`.
+Every recorded result stores its seeds. Reruns with identical seeds must reproduce **numerically at published precision**, and byte-identically **within a fixed runtime** (A-8 / D-041). ~~bit-for-bit~~ was too strong: on macOS CPython 3.11.5 two artifacts of the **superseded** generation differed in a few last-bit floating-point values. The current A-9 generation has not been re-measured on that platform, and no count is claimed for it. Check with `research/verify_reproduction.py`.
 
 ---
 

@@ -56,11 +56,21 @@ tree. **Byte equality is platform-dependent and is not claimed across platforms.
 
 | Artifact | Bytes (Linux 3.10.12) | Bytes (macOS 3.11.5) | Numeric leaves |
 |---|---|---|---|
-| `baseline_v3` | identical | **9 last-bit float differences** | equal |
-| `baseline_equalcost_v2` | identical | **2 last-bit float differences** | equal |
-| `baseline_closure_v2` | identical | identical | equal |
-| `baseline_closure_equalcost_v2` | identical | identical | equal |
-| `validation_v2` | identical | identical | equal |
+| `baseline_v3` | identical | **not measured** | equal |
+| `baseline_equalcost_v2` | identical | **not measured** | equal |
+| `baseline_closure_v2` | identical | **not measured** | equal |
+| `baseline_closure_equalcost_v2` | identical | **not measured** | equal |
+| `validation_v2` | identical | **not measured** | equal |
+
+**On the macOS column.** It previously carried "9 last-bit float differences"
+for the baseline and "2" for the cost-matched track. Those are real
+measurements — of the **superseded** `baseline_v2` / `baseline_equalcost_v1`
+generation, on commit `68b8c3d`. They were carried across to the A-9 artifacts
+when the rows were renamed, which asserts a measurement nobody took: the
+current generation has never been regenerated on macOS. The counts are removed
+rather than guessed. Re-measure with `./verify_native_macos.sh` and record what
+it reports. The superseded figures remain in `RESULTS_REGISTRY.md`, labelled as
+measurements of the generation they describe.
 
 Verify with `python3 research/verify_reproduction.py`, which regenerates into a
 scratch tree and reports the two columns separately. The registered artifacts
@@ -80,7 +90,7 @@ The rest of the qualifier is *class-dependent*, and flattening it would misstate
 §1 in the opposite direction from the usual error:
 
 - **§1 rows (M-\*) are not simulation output.** They are theorems, proved in `DERIVATIONS.md` and asserted against the engine by `test_derivations.py`. They hold for any revenue path, independent of the simulation, the parameter choices and any distributional assumption. Calling them "simulation output under stated assumptions" would under-claim them and mislabel their warrant. Their limitation is different: they describe the **contract**, and a contract is not a market.
-- **§2–§3 rows (S-\*, P-\*) are simulation output** under `METHODOLOGY_SPEC.md` v1.0 + A-1..A-8, for the stated scenarios, seeds and parameters. These are the rows the simulated-output disclaimer is about.
+- **§2–§3 rows (S-\*, P-\*) are simulation output** under `METHODOLOGY_SPEC.md` v1.0 + A-1..A-9, for the stated scenarios, seeds and parameters. These are the rows the simulated-output disclaimer is about.
 - **§4 rows (I-\*) are judgements** the author draws from the two above. Not measurements.
 
 Where a row mixes classes, it is split rather than labelled with the stronger of

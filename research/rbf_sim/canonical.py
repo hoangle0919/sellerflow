@@ -1,6 +1,6 @@
 """Canonical artifact serialization — deterministic, checksummable output.
 
-THE PROBLEM THIS SOLVES. `results/baseline_v2.json` embedded `date.today()`.
+THE PROBLEM THIS SOLVES (found historically in the superseded `results/baseline_v2.json`, which embedded `date.today()`).
 Every quantity in it was reproducible bit-for-bit, but the file was not: two
 runs of identical code, configuration and seeds produced two different
 checksums. A result you cannot checksum cannot be cited by checksum, and
@@ -10,8 +10,12 @@ THE SPLIT. Two files, and the distinction is the whole point:
 
   CANONICAL   (`*_canonical.json`) — the analytical result. Contains ONLY
       quantities and metadata that are a deterministic function of the code,
-      the configuration and the seeds. Identical inputs MUST produce a
-      byte-identical file. This is the artifact to cite, checksum, and diff.
+      the configuration and the seeds. Identical inputs reproduce it
+      NUMERICALLY at published precision on every platform tested, and
+      byte-identically within a fixed runtime. ~~MUST produce a
+      byte-identical file~~ was withdrawn by D-041: byte equality is a
+      property of a serialization on one platform, not of the result. This
+      is the artifact to cite, checksum, and diff.
 
   PROVENANCE  (`*_provenance.json`) — the execution record. Wall-clock time,
       git commit, interpreter and library versions, platform, and the checksum

@@ -2,9 +2,10 @@
 
     python3 run_closure_baseline.py
 
-WHY THIS RUN EXISTS. `baseline_v2` and `baseline_equalcost_v1` contain ten
+WHY THIS RUN EXISTS. The superseded `baseline_v2` and `baseline_equalcost_v1`, in
+which this gap was found, contain ten
 scenarios, none of which reaches zero revenue. Closure appears in the project
-only inside `validation_v1.recovery_boundary`, as single-probe boundary search
+only inside the superseded `validation_v1.recovery_boundary`, as single-probe boundary search
 output — not as a full scenario with seller-burden and provider-recovery
 aggregates.
 

@@ -99,7 +99,7 @@ python3 -m pytest rbf_sim/tests/ -q
 #    tests 5 -> 9, no skips). Where Playwright or Chromium is absent they
 #    skip, and pytest may report one skipped module or nine skipped cases
 #    depending on which of the two is missing — this sandbox reports
-#    "401 passed, 9 skipped". Skips are never counted as passes.
+#    a skipped module or nine skipped cases. Skips are never counted as passes.
 python3 -m pytest ../backend/tests -q
 #    Reproducibility (byte vs numeric equality, reported separately — D-041)
 python3 verify_reproduction.py
@@ -153,7 +153,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 643 (629 + 14 IRR-definition guards, A-9) | `pytest rbf_sim/tests/ -q` |
-| Non-browser tests passing | **1,080 — 437 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on what is installed — the current sandbox reports `403 passed, 9 skipped`. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Non-browser tests passing | **1,080 — 437 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. They **passed in the earlier browser-capable run recorded at D-036** (browser tests 5 → 9, no skips). In environments lacking Playwright or Chromium they skip, and pytest may report one skipped module or nine skipped cases depending on which of the two is missing. Skips are never counted as passes. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `818c145ad557ea1f95311fe80d311252103464ba7a7ecac602aab67374ae8308` | `results/baseline_v3_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v3` |
 | Benchmark A implied APR | 37.87% | `baseline_v3` |

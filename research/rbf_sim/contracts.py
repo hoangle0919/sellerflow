@@ -116,9 +116,25 @@ def fix_b_payments(terms: ContractTerms, T: int) -> List[float]:
 
 
 #: Lower end of the economically valid monthly-rate domain. `i = -1` is the
-#: singularity of `(1+i)^-t`, so the bracket opens just above it. A monthly rate
-#: at this bound is a near-total loss; nothing below it has meaning.
-IRR_MIN_MONTHLY = -1.0 + 1e-9
+#: singularity of `(1+i)^-t`, so the bracket opens at the closest representable
+#: float above it.
+#:
+#: This was `-1.0 + 1e-9`, a floor seven orders of magnitude coarser than the
+#: format allows, chosen for no reason beyond looking safe. It excluded real
+#: roots: `solve_apr(1_000_000, [1e-6])` and `solve_apr(10_000_000_000, [1])`
+#: both returned `None` -- reported as "no rate exists" for streams that pay
+#: something, which is precisely the confusion A-9 was written to remove. A
+#: near-total loss is a number, not an absence.
+#:
+#: `nextafter` states the limit as what it actually is: the resolution of the
+#: format, not a preference. Where a mathematical root falls below even this,
+#: the solver returns this correctly rounded boundary rather than `None`, since
+#: `None` is reserved for a stream with no positive payment.
+IRR_MIN_MONTHLY = math.nextafter(-1.0, 0.0)
+
+#: Endpoint acceptance, relative to the principal. See the discussion in
+#: `solve_apr`; the product layer mirrors this constant.
+IRR_ENDPOINT_REL_TOL = 1e-9
 
 
 def irr_upper_bound(principal: float, flows: List[float]) -> float:
@@ -215,15 +231,42 @@ def solve_apr(principal: float, flows: List[float], iters: int = 400) -> Optiona
     lo, hi = IRR_MIN_MONTHLY, irr_upper_bound(principal, flows)
     f_lo, f_hi = npv(lo), npv(hi)
 
-    # A root sitting exactly on a bracket endpoint is still a root. The previous
-    # version required a strict sign change, so `solve_apr(100, [1100])` --
-    # monthly IRR exactly 10.0, the old hard ceiling -- was reported as having
-    # no rate. With the analytic bound above, the single-payment case lands on
-    # the endpoint by construction, so this is the common case rather than a
-    # curiosity.
-    if f_hi == 0.0:
-        return _annualise(hi)
-    if f_lo == 0.0:
+    # A root sitting on a bracket endpoint is still a root, and the test for it
+    # cannot be exact.
+    #
+    # Analytically NPV(bound) <= 0, with equality exactly in the single-payment
+    # case. But `S/P - 1` is not always exactly representable. `(100, [115])`
+    # leaves a residual of ~1.4e-14, so an exact `== 0.0` test passed for
+    # `(100, [1200])` and failed for the far more ordinary `(100, [115])` --
+    # which then reported no rate at all, while `(10_000_000, [11_500_000])`,
+    # the same contract at a larger scale, resolved normally. The same financial
+    # contract giving a rate or "no rate" depending on how the money was
+    # expressed is worse than a consistent failure, because nothing about the
+    # input looks wrong. Found downstream in the product layer (206cb48) and
+    # ported here, where it originated.
+    #
+    # TOLERANCE. `abs(principal) * IRR_ENDPOINT_REL_TOL`, i.e. relative to the
+    # magnitude being discounted, because NPV is denominated in the same units
+    # as the principal and float error scales with it. 1e-9 is roughly seven
+    # orders of magnitude above the ~1e-16 relative resolution of float64, so it
+    # absorbs accumulated rounding across a 24-term sum while staying far below
+    # any economically meaningful residual: on a 185,000,000 VND advance the
+    # tolerance is 0.185 VND.
+    #
+    # A residual ABOVE the tolerance is not float error -- it means the analytic
+    # bound is wrong -- and must not be silently annualised.
+    endpoint_tol = abs(principal) * IRR_ENDPOINT_REL_TOL
+    if f_hi >= 0.0:
+        if f_hi <= endpoint_tol:
+            return _annualise(hi)
+        return None
+
+    # The lower end is the closest representable float above -1, so a root below
+    # it cannot be expressed. Report the correctly rounded boundary rather than
+    # `None`: under A-9, `None` means "the equation has no root", and a
+    # near-total loss has one. Saying "undefined" there would reintroduce the
+    # exact defect A-9 removed.
+    if f_lo <= 0.0:
         return _annualise(lo)
 
     # With one negative advance followed by non-negative payments, NPV is

@@ -152,7 +152,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 
 ### §15 Reproducibility statement
 - Five canonical artifacts with SHA-256 **[CLAIM_LEDGER §0]**.
-- **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 3/5 byte-identical on macOS CPython 3.11.5 (9 and 2 last-bit float differences), 5/5 on Linux 3.10.12 **[D-041, D-043]**. **Never claim cross-platform byte determinism.**
+- **Numeric** reproducibility at published precision on every platform tested; **byte** reproducibility within a fixed runtime — 5/5 on Linux 3.10.12; macOS not measured for the current generation, and the superseded generation's counts are not carried across **[D-041, D-043, D-051]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
 - Test counts: **1,080 non-browser tests pass — 437 backend and 643 simulation.** Nine browser checks are defined and excluded from that total; they passed in the earlier browser-capable run recorded at D-036, and skip where Playwright or Chromium is absent. Skips are never reported as passes.
