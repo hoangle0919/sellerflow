@@ -134,3 +134,41 @@ def test_the_two_scoring_paths_disagree_on_tier_in_practice():
             os.environ["RBF_MODEL_DIR"] = original
         importlib.reload(ml_engine)
         ml_engine.load_models()
+
+
+# ── A-9: a rate must carry its basis to the reader (research handoff §7.2) ──
+
+def test_engine_emits_a_basis_whenever_it_emits_a_rate():
+    low = fe.financing_structure(185_000_000, "Low Risk", return_rate=0.028)
+    assert low["effective_apr_base_case"] is not None
+    assert low["apr_basis"], "a rate was produced without a basis"
+    assert "base-case" in low["apr_basis"].lower()
+
+
+def test_the_main_surface_actually_renders_the_apr_basis():
+    """The engine produced `apr_basis` and index.html dropped it, so a reader saw
+    'Effective APR (base case) 13.2%' with nothing stating what the base case
+    assumes or which way a decline moves it. The Lab carries its duration basis;
+    the main surface must carry the rate's.
+
+    Asserted on the source because this string is assembled in JS at render time;
+    the browser-level equivalent lives in the Lab suite.
+    """
+    idx = os.path.join(REPO, "frontend", "index.html")
+    src = open(idx, encoding="utf-8").read()
+    assert "structure.apr_basis" in src, "index.html never reads structure.apr_basis"
+    # and it must not be confined to a branch that other notes can displace
+    assert "noteTxt=(noteTxt?noteTxt+' ':'')+structure.apr_basis" in src, (
+        "apr_basis must be appended to whichever note branch fired, not placed "
+        "inside one of them — a merchant with outstanding information "
+        "requirements would otherwise see the rate with no basis at all"
+    )
+
+
+def test_the_closure_return_is_labelled_observed_window():
+    """A-9: on a path that never completes, the rate is an observed-window figure
+    and must not read as a lifetime return."""
+    idx = os.path.join(REPO, "frontend", "index.html")
+    src = open(idx, encoding="utf-8").read()
+    assert "observed_apr_to_closure" in src
+    assert "observed window, not a lifetime return" in src
