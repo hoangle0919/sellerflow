@@ -263,6 +263,17 @@ def test_censored_arm_shows_both_denominators_separately(server, browser):
     pg.evaluate("document.querySelector('#scn-groups button[data-k=closure_m13]').click()")
     pg.wait_for_timeout(900)
 
+    # ---- what a reader sees WITHOUT opening anything -----------------------
+    #
+    # This split matters and the first version of this test missed it. The two
+    # basis blocks live inside `<details><summary>What this contract is`, which
+    # has no `open` attribute, so `inner_text` — which returns RENDERED text —
+    # cannot see them. Asserting on them here failed against a page that
+    # implements them correctly, and the failure looked like a missing feature.
+    #
+    # Reading it that way would have been a real mistake: the suggested remedy
+    # was to weaken the assertion or restate the page's disclosure, when the
+    # page was right and the test was reaching into a collapsed widget.
     arms_text = pg.inner_text("#arms")
 
     # Both denominators are on the card, labelled as different quantities.
@@ -276,10 +287,23 @@ def test_censored_arm_shows_both_denominators_separately(server, browser):
     assert "Mean duration among completed paths" in arms_text
     assert "Mean APR among completed paths" not in arms_text
 
-    # Both bases are spelled out, and the rate's carries the window caveat.
-    assert "How the rate is computed" in arms_text
-    assert "How the duration mean is computed" in arms_text
-    assert "observed" in arms_text and "window" in arms_text
+    # The observed-window caveat sits beside the rate at a glance. This one is
+    # NOT behind a disclosure, deliberately: a rate that covers part of a
+    # contract must say so without the reader having to go looking.
+    assert "Observed-window rate" in arms_text
+
+    # ---- what the disclosure holds ----------------------------------------
+    # Both bases are spelled out once the reader opens "What this contract is".
+    # Asserted after opening, so this proves the text is REACHABLE, not merely
+    # present in the DOM — `text_content()` would pass even on `display:none`.
+    pg.evaluate("document.querySelectorAll('#arms details')"
+                ".forEach(function(d){ d.open = true; })")
+    pg.wait_for_timeout(150)
+    disclosed = pg.inner_text("#arms")
+
+    assert "How the rate is computed" in disclosed
+    assert "How the duration mean is computed" in disclosed
+    assert "observed" in disclosed and "window" in disclosed
 
     table = pg.inner_text("#dur-table")
     assert "completed paths only" in table
