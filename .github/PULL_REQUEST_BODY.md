@@ -1,4 +1,6 @@
-Publication package for the revenue-contingent financing study, plus the runtime-disclosure corrections found while preparing it. Branch `publication-final`, based on `f652b94`.
+Publication package for the revenue-contingent financing study, plus the runtime-disclosure corrections found while preparing it. Branch `publication-final`.
+
+*No base commit is named here.* This branch has merged `main` four times during its life, so any base hash written down goes stale at the next merge — `f652b94` sat in this line for weeks after it stopped being the merge base. GitHub computes and displays the real one; a hand-maintained copy can only disagree with it.
 
 **This PR changes one result layer, deliberately, and preserves the old one.** An independent audit demonstrated three implementation defects in the effective-rate calculation. Spec amendment **A-9** corrects them; five new canonical artifacts are registered and the five superseded ones are preserved byte-for-byte as the record of what was published. Burden, recovery, duration, settlement arithmetic, scenario inputs and seeds are unchanged — verified leaf-by-leaf. Everything else in this PR is documentation catching up to what the code does.
 
@@ -8,7 +10,7 @@ Publication package for the revenue-contingent financing study, plus the runtime
 
 | Artifact | State |
 |---|---|
-| `research/publication/MANUSCRIPT.md` / `.pdf` | ~8,400 words, 15 sections + Appendix A. PDF is 17 pages, built by `build_pdf.sh`, gated by `check_pdf_bounds.py` at zero text outside the media box |
+| `research/publication/MANUSCRIPT.md` / `.pdf` | ~8,400 words, 15 sections + Appendix A. PDF is 18 pages, built by `build_pdf.sh`, gated by `check_pdf_bounds.py` at zero text outside the media box |
 | `research/publication/RBF_DECK.pptx` | 13 slides with speaker notes; `[Sources]` blocks on the slides carrying externally sourced claims. Built by `build_deck.js` |
 | `research/publication/LITERATURE_MATRIX.md` | 44 verified sources, 6 evidence gaps stated explicitly |
 | `research/publication/PAPER_OUTLINE.md` | Every figure bound to a ledger ID and artifact path |
@@ -58,7 +60,7 @@ Three families were corrected across every tracked surface rather than at the re
 
 ## 6. Decision log
 
-`D-047` records the scoring-path disclosure and the three-family sweep. `D-048` records this final publication-integrity reconciliation. Dated records are not rewritten: earlier decision entries keep their contemporaneous counts, `CORRECTED_CLAIMS.md` is marked as a 2026-08-03 snapshot with pointers to current state, and `evidence/2026-08-07-native-macos-verification.md` keeps its incorrect closing note under a dated addendum — an evidence record edited after the fact cannot be relied on.
+`D-047` records the scoring-path disclosure and the three-family sweep; `D-048` the publication-integrity reconciliation. `D-049` and `D-050` cover spec amendment **A-9** — the corrected IRR definition, domain and conditioning — and the controlled migration to the five current artifacts. `D-051` and `D-052` close the convergence work: one IRR solver across the product and research layers, a reproduction verifier that genuinely regenerates the validation battery, artifact-lineage drift, and the Lab's pricing provenance. `D-053` and `D-054` record the browser gate executing — first at `dcbfc3b` with the carry-forward argued, then directly on the merged tip. `D-055` records two release-metadata statements that outlived their facts. Dated records are not rewritten: earlier decision entries keep their contemporaneous counts, `CORRECTED_CLAIMS.md` is marked as a 2026-08-03 snapshot with pointers to current state, and `evidence/2026-08-07-native-macos-verification.md` keeps its incorrect closing note under a dated addendum — an evidence record edited after the fact cannot be relied on.
 
 ---
 

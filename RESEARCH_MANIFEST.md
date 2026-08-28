@@ -189,7 +189,7 @@ Spot-check any reproduction against these:
 | Literature matrix | `research/publication/LITERATURE_MATRIX.md` — 44 verified sources, 6 evidence gaps stated |
 | Paper outline | `research/publication/PAPER_OUTLINE.md` — every figure mapped to a ledger ID |
 | Manuscript | `research/publication/MANUSCRIPT.md`, ~8,400 words, 15 sections + Appendix A |
-| Manuscript PDF | `research/publication/MANUSCRIPT.pdf`, 17 pages. Built by `build_pdf.sh`; gated by `check_pdf_bounds.py` at zero text outside the media box |
+| Manuscript PDF | `research/publication/MANUSCRIPT.pdf`, 18 pages. Built by `build_pdf.sh`; gated by `check_pdf_bounds.py` at zero text outside the media box |
 | Deck | `research/publication/RBF_DECK.pptx`, 13 slides with speaker notes. Built by `build_deck.js` |
 | Career package | `research/publication/CAREER_PACKAGE.md` |
 | Poster | **not started** — no longer planned; the deck supersedes it |

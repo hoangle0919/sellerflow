@@ -1744,3 +1744,58 @@ only remaining references are inside D-053, where they belong. All ten
 registered checksums unchanged, nothing under `research/results/` changed, and
 no backend, frontend, simulation or financing-engine code touched. The PDF and
 deck were rebuilt for the changed sentences alone.
+
+---
+
+## D-055 — Two release-metadata statements outlived their facts
+
+**Date:** 2026-08-27 · **Branch:** `publication-final` · **Follows:** D-054
+
+**Documentation only.** No code, registered result, checksum, publication binary
+or research figure is touched. Earlier entries are unchanged.
+
+Found by reading the PR description end to end after the branch was pushed —
+the one artifact nobody had read as a document, because it is assembled rather
+than authored and had only ever been checked in pieces.
+
+### 1. A base-commit hash, four merges stale
+
+`.github/PULL_REQUEST_BODY.md` opened with "Branch `publication-final`, based on
+`f652b94`". True when written. The branch has since merged `main` four times and
+the merge base is now `ff59333`.
+
+**Not corrected to `ff59333`.** That would have restarted the same clock: the
+next merge invalidates it again, and a base hash in prose is a fact with a
+half-life measured in merges. The line now states the branch name only and
+explains why no base is named. GitHub computes the real merge base and shows it
+on the PR; a hand-maintained copy can only ever disagree with it.
+
+### 2. A page count that a formatting fix moved
+
+Both the PR body and `RESEARCH_MANIFEST.md` said the manuscript PDF was **17**
+pages. It has been **18** since the page-bounds and break-opportunity work.
+`pdfinfo` reports 18; both surfaces now say 18.
+
+### 3. A decision-log summary that stopped at D-048
+
+The PR's §6 described `D-047` and `D-048` and nothing after — so a reviewer
+reading it would have seen the scoring-path disclosure and the publication
+reconciliation, and no mention of **A-9**, the artifact migration, the solver
+unification, the reproduction repair, or the browser gate. That is the entire
+substantive arc of this branch, absent from the document written to introduce
+it. Now summarised through D-055.
+
+### What these three have in common
+
+Each is a statement *about the release* rather than about the research, and none
+is covered by any of the guards built during this project. The claim ledger
+binds research figures to artifacts; the currency tests catch superseded artifact
+stems; the copy scanners catch retracted phrasings. A page count and a base hash
+are outside all of them, so they aged silently while the figures they sit beside
+were checked repeatedly.
+
+Worth stating plainly: the verification effort concentrated where the risk was
+believed to be, and the two errors that survived to the final review were both
+in the packaging. Neither changes a result. Both are exactly the kind of thing a
+reader encounters first, and reasonably reads as evidence about the care taken
+with everything after it.
