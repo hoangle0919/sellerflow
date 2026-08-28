@@ -22,10 +22,13 @@ Two kinds of test here, deliberately:
 `conftest.py` points RBF_MODEL_DIR at an empty directory, so the suite never
 depends on a developer's untracked .pkl files.
 """
+import importlib
 import json
 import os
+import random
 import re
 import sys
+import tempfile
 
 import pytest
 
@@ -34,6 +37,14 @@ import financing_engine  # noqa: E402
 import ml_engine  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+#: Added by the ff59333 merge. The `main` workstream computed the same two
+#: directories under different names; keeping one definition of each avoids
+#: two constants that could drift apart while looking authoritative.
+BACKEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+assert REPO == os.path.dirname(BACKEND), (
+    "REPO and BACKEND disagree about the repo root; one of the two merged definitions is wrong")
+fe = financing_engine          # `main`'s tests below use the short alias
 
 BASE_MERCHANT = {
     "monthly_revenue": 200_000_000, "revenue_growth": 0.10, "order_volume": 500,
@@ -361,9 +372,208 @@ def test_the_invariance_scanner_can_actually_fail():
 
 
 def test_readme_states_the_tier_dependency():
-    """The disclosure must be present, not merely un-contradicted."""
-    text = open(os.path.join(REPO, "README.md"), encoding="utf-8").read()
-    assert "deterministic once a risk tier is supplied" in text
-    assert re.search(r"can change the assigned tier", text), (
-        "README must say the active scoring path can change the tier"
+    """The disclosure must be present, not merely un-contradicted.
+
+    Matched on emphasis-stripped text. The ff59333 merge italicised *once a
+    risk tier is supplied* — the correct thing to emphasise, since it is the
+    qualifier the retracted claim dropped — and a literal substring match
+    failed on its own asterisks. Pinning prose to its markdown punctuation
+    makes the guard fire on formatting and teaches the next person to weaken
+    it; pinning the words does not.
+    """
+    raw = open(os.path.join(REPO, "README.md"), encoding="utf-8").read()
+    text = re.sub(r"[*_`]", "", raw)
+
+    assert "deterministic once a risk tier is supplied" in text, (
+        "README must keep the determinism-GIVEN-A-TIER qualifier; dropping it "
+        "is how the retracted claim was stated in the first place")
+
+    # The path→tier link, in either branch's phrasing. Both are accepted
+    # because both are true and neither is weaker than the assertion was.
+    link = re.search(r"can change the assigned tier"
+                     r"|scorer is what assigns that tier"
+                     r"|active scoring path changes the result", text, re.I)
+    assert link, "README must tie the active scoring path to the assigned tier"
+
+    # And the empirical strength ff59333 added, which the earlier wording
+    # lacked: not merely that the paths *can* differ, but that they *do*.
+    assert re.search(r"disagree on the tier", text, re.I), (
+        "README must state that the two paths actually disagree in practice, "
+        "not only that they could")
+    assert "414,000,000" in text and "249,600,000" in text, (
+        "the worked tier-to-cap figures must survive; they are what make the "
+        "disclosure checkable rather than assertable")
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Merged from `origin/main` ff59333 (product workstream).
+#
+# Both branches independently created a file at this path, so this was an
+# add/add conflict with no shared ancestor. The two sets are complementary
+# and neither is weakened here:
+#
+#   above   this branch's structural proofs that the tier drives every
+#           term, the fail-closed hero badge, the health-endpoint fields,
+#           and a scanner that must itself be shown capable of failing.
+#   below   `main`'s EMPIRICAL demonstration that the two paths actually
+#           disagree on a cohort, its copy tripwire, and the A-9 checks
+#           that the main assessment surface renders `apr_basis` and
+#           labels the closure rate as an observed window.
+#
+# The overlap is only in subject matter. There are no duplicated test
+# names, and the structural and empirical arguments answer different
+# objections: one shows the mechanism exists, the other that it fires.
+# ══════════════════════════════════════════════════════════════════════
+
+PUBLIC_COPY = [
+    os.path.join(REPO, "README.md"),
+    os.path.join(REPO, "frontend", "index.html"),
+]
+
+
+def test_the_public_copy_paths_actually_exist():
+    """A skip is not a pass. The copy guard below silently skipped when this
+    module computed the repo root one level too shallow; assert the fixtures
+    resolve so the guard can never quietly stop guarding."""
+    for path in PUBLIC_COPY:
+        assert os.path.exists(path), f"public copy fixture missing: {path}"
+
+# The sentence that retracts the claim is allowed to quote it; an active
+# assertion of it is not. A line is exempt only if it also carries retraction
+# language, which keeps the guard from being defeated by paraphrase.
+RETRACTION_MARKERS = ("retract", "was wrong", "no longer", "superseded", "earlier version")
+BANNED = re.compile(
+    r"identical either way"
+    r"|numbers\s+(shown\s+)?are\s+identical"
+    r"|same\s+numbers\s+either\s+way"
+    r"|(unchanged|identical)\s+(whether|regardless of)\s+(the\s+)?(scoring|model|path)",
+    re.I,
+)
+
+
+@pytest.mark.parametrize("path", PUBLIC_COPY)
+def test_public_copy_does_not_assert_the_retracted_equivalence(path):
+    if not os.path.exists(path):
+        pytest.skip(f"{path} not present")
+    offenders = []
+    for n, line in enumerate(open(path, encoding="utf-8"), 1):
+        if BANNED.search(line) and not any(m in line.lower() for m in RETRACTION_MARKERS):
+            offenders.append(f"{os.path.basename(path)}:{n}: {line.strip()[:140]}")
+    assert not offenders, (
+        "Public copy asserts the retracted claim that the scoring path does not "
+        "change the numbers:\n  " + "\n  ".join(offenders)
     )
+
+
+def test_the_tier_actually_moves_every_contractual_term():
+    """The reason the claim is false: terms key off the tier, so a tier change
+    is a term change. Hand-checked at 200M monthly revenue."""
+    low = fe.financing_structure(200_000_000, "Low Risk")
+    med = fe.financing_structure(200_000_000, "Medium Risk")
+    high = fe.financing_structure(200_000_000, "High Risk")
+
+    assert low["repayment_cap"] == 414_000_000
+    assert med["repayment_cap"] == 249_600_000
+    assert high["recommended_amount"] == 0          # High Risk declines outright
+
+    assert low["remittance_pct"] != med["remittance_pct"]
+    assert low["factor_rate"] != med["factor_rate"]
+    assert low["recommended_amount"] > med["recommended_amount"]
+
+
+def test_the_two_scoring_paths_disagree_on_tier_in_practice():
+    """Not a theoretical difference. Scored both ways over a fixed pseudo-random
+    cohort, the paths assign different tiers for a substantial share of
+    profiles — including profiles that one path approves and the other declines.
+
+    Skips (rather than fails) when no ensemble artifact is present, because a
+    clean checkout has none and that is a legitimate state.
+    """
+    import ml_engine
+
+    def tiers_under(model_dir):
+        os.environ["RBF_MODEL_DIR"] = model_dir
+        importlib.reload(ml_engine)
+        ml_engine.load_models()
+        return (
+            ml_engine.model_status()["scoring_path"],
+            [ml_engine.score(p)["risk_tier"] for p in COHORT],
+        )
+
+    rng = random.Random(11)
+    COHORT = [
+        dict(
+            monthly_revenue=rng.uniform(20e6, 500e6), revenue_growth=rng.uniform(-0.25, 0.5),
+            order_volume=rng.randint(60, 900), avg_order_value=rng.uniform(150e3, 900e3),
+            return_rate=rng.uniform(0.005, 0.25), rating=rng.uniform(3.2, 5.0),
+            days_active=rng.randint(40, 1300), inventory_turnover=rng.uniform(2, 10),
+            previous_loans=rng.randint(0, 4), late_ship_rate=rng.uniform(0.005, 0.2),
+        )
+        for _ in range(200)
+    ]
+
+    original = os.environ.get("RBF_MODEL_DIR")
+    try:
+        path_a, tiers_a = tiers_under(tempfile.mkdtemp())          # no artifact -> heuristic
+        path_b, tiers_b = tiers_under(os.path.join(BACKEND, "models"))
+        if path_a == path_b:
+            pytest.skip("no ensemble artifact available; cannot compare two paths")
+        assert path_a == "heuristic" and path_b == "ensemble"
+
+        disagreements = sum(1 for a, b in zip(tiers_a, tiers_b) if a != b)
+        assert disagreements > 0, (
+            "The scoring paths agreed on every profile. If this ever becomes "
+            "genuinely true, the retracted claim would deserve revisiting — but "
+            "verify it deliberately rather than assuming it."
+        )
+        # And the strong form: at least one profile flips between fundable and not.
+        flips = sum(
+            1 for a, b in zip(tiers_a, tiers_b)
+            if (a == "High Risk") != (b == "High Risk")
+        )
+        assert flips > 0, "expected at least one approve/decline flip between paths"
+    finally:
+        if original is None:
+            os.environ.pop("RBF_MODEL_DIR", None)
+        else:
+            os.environ["RBF_MODEL_DIR"] = original
+        importlib.reload(ml_engine)
+        ml_engine.load_models()
+
+
+# ── A-9: a rate must carry its basis to the reader (research handoff §7.2) ──
+
+def test_engine_emits_a_basis_whenever_it_emits_a_rate():
+    low = fe.financing_structure(185_000_000, "Low Risk", return_rate=0.028)
+    assert low["effective_apr_base_case"] is not None
+    assert low["apr_basis"], "a rate was produced without a basis"
+    assert "base-case" in low["apr_basis"].lower()
+
+
+def test_the_main_surface_actually_renders_the_apr_basis():
+    """The engine produced `apr_basis` and index.html dropped it, so a reader saw
+    'Effective APR (base case) 13.2%' with nothing stating what the base case
+    assumes or which way a decline moves it. The Lab carries its duration basis;
+    the main surface must carry the rate's.
+
+    Asserted on the source because this string is assembled in JS at render time;
+    the browser-level equivalent lives in the Lab suite.
+    """
+    idx = os.path.join(REPO, "frontend", "index.html")
+    src = open(idx, encoding="utf-8").read()
+    assert "structure.apr_basis" in src, "index.html never reads structure.apr_basis"
+    # and it must not be confined to a branch that other notes can displace
+    assert "noteTxt=(noteTxt?noteTxt+' ':'')+structure.apr_basis" in src, (
+        "apr_basis must be appended to whichever note branch fired, not placed "
+        "inside one of them — a merchant with outstanding information "
+        "requirements would otherwise see the rate with no basis at all"
+    )
+
+
+def test_the_closure_return_is_labelled_observed_window():
+    """A-9: on a path that never completes, the rate is an observed-window figure
+    and must not read as a lifetime return."""
+    idx = os.path.join(REPO, "frontend", "index.html")
+    src = open(idx, encoding="utf-8").read()
+    assert "observed_apr_to_closure" in src
+    assert "observed window, not a lifetime return" in src

@@ -1260,9 +1260,20 @@ function renderStructure(structure, financing){
   rows.push(['Data completeness', financing.data_completeness_pct!=null?financing.data_completeness_pct+'%':'—']);
   document.getElementById('structure-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
   const note=document.getElementById('structure-note');
-  if(structure.note){ note.textContent=structure.note; }
-  else if((financing.information_needed||[]).length){ note.textContent='Information still required: '+financing.information_needed[0]+(financing.information_needed.length>1?` (+${financing.information_needed.length-1} more below)`:''); }
-  else { note.textContent='Base case assumes revenue holds at the reported level; downside cases apply a persistent revenue decline.'; }
+  let noteTxt;
+  if(structure.note){ noteTxt=structure.note; }
+  else if((financing.information_needed||[]).length){ noteTxt='Information still required: '+financing.information_needed[0]+(financing.information_needed.length>1?` (+${financing.information_needed.length-1} more below)`:''); }
+  else { noteTxt='Base case assumes revenue holds at the reported level; downside cases apply a persistent revenue decline.'; }
+  // A-9: a rate must carry its basis. `apr_basis` was computed by the engine and
+  // dropped here, so a reader saw "Effective APR (base case) 13.2%" with nothing
+  // saying what the base case assumes or which way a decline moves it. Appended
+  // rather than placed in the else-branch, because the branches above displace
+  // each other — a merchant with outstanding information requirements would
+  // otherwise see the rate with no basis at all.
+  if(structure.effective_apr_base_case!=null&&structure.apr_basis){
+    noteTxt=(noteTxt?noteTxt+' ':'')+structure.apr_basis;
+  }
+  note.textContent=noteTxt;
 }
 function renderScenarios(scenarios){
   const body=document.getElementById('scenario-body');
