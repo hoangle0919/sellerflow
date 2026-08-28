@@ -54,7 +54,7 @@ Three families were corrected across every tracked surface rather than at the re
 
 ## 5. Tests
 
-**1,145 non-browser tests pass: 502 backend and 643 simulation.** Nine browser checks are defined and excluded from that total. Nine Playwright browser checks are defined and are **excluded from that total**. They **executed and passed, 9/9, in 21.55s** — an independent run on macOS 26.0 arm64, Python 3.11.5, Playwright Chromium, against a local server at commit `dcbfc3b`. The subsequent merge of `ff59333` changed only `README.md`, `frontend/index.html` and one product test file; all nine checks load `/lab` only, and every input they exercise — `frontend/lab.html`, `backend/lab.py`, `backend/main.py` and `research/results/` — is byte-identical to `dcbfc3b`. Where Chromium is absent they skip, and pytest may report one skipped module or nine skipped cases depending on which of Playwright and Chromium is missing. A skip is never counted as a pass.
+**1,145 non-browser tests pass: 502 backend and 643 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.
 
 ## 6. Decision log
 

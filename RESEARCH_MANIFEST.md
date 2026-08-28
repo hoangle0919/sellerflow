@@ -95,14 +95,14 @@ pip install pytest numpy          # only dependencies
 python3 -m pytest rbf_sim/tests/ -q
 #    Backend suite (expect: 502 passed, 10 skipped). The suite also contains
 #    9 Playwright browser checks, EXCLUDED from that figure. They EXECUTED
-#    AND PASSED 9/9 in 21.55s in an independent run on macOS 26.0 arm64 /
-#    Python 3.11.5 / Playwright Chromium at commit dcbfc3b; every input they
-#    exercise is byte-identical at HEAD. Where Playwright or Chromium is
-#    absent they skip, and pytest may report one skipped module or nine
-#    skipped cases depending on which of the two is missing. Skips are never
-#    counted as passes. Of the 10 skips above, 9 are the browser module and
-#    1 is the two-scoring-path cohort comparison, which needs an ensemble
-#    artifact a clean checkout does not have.
+#    AND PASSED 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and
+#    Playwright 1.62.0 with Chromium, against a local server at commit
+#    c8261c6. When Chromium is unavailable the checks skip, and pytest may
+#    report one skipped module or nine skipped cases depending on which of
+#    Playwright and Chromium is missing. A skip is never counted as a pass.
+#    Of the 10 skips above, 9 are the browser module and 1 is the
+#    two-scoring-path cohort comparison, which needs an ensemble artifact a
+#    clean checkout does not have.
 python3 -m pytest ../backend/tests -q
 #    Reproducibility (byte vs numeric equality, reported separately — D-041)
 python3 verify_reproduction.py
@@ -157,7 +157,7 @@ Spot-check any reproduction against these:
 | Quantity | Value | Source |
 |---|---|---|
 | Simulation tests passing | 643 (629 + 14 IRR-definition guards, A-9) | `pytest rbf_sim/tests/ -q` |
-| Non-browser tests passing | **1,145 — 502 backend and 643 simulation.** Nine Playwright browser checks are defined and are **excluded from that total**. Nine Playwright browser checks are defined and are **excluded from that total**. They **executed and passed, 9/9, in 21.55s** — an independent run on macOS 26.0 arm64, Python 3.11.5, Playwright Chromium, against a local server at commit `dcbfc3b`. The subsequent merge of `ff59333` changed only `README.md`, `frontend/index.html` and one product test file; all nine checks load `/lab` only, and every input they exercise — `frontend/lab.html`, `backend/lab.py`, `backend/main.py` and `research/results/` — is byte-identical to `dcbfc3b`. Where Chromium is absent they skip, and pytest may report one skipped module or nine skipped cases depending on which of Playwright and Chromium is missing. A skip is never counted as a pass. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Non-browser tests passing | **1,145 — 502 backend and 643 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` | `results/baseline_v3_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v3` |
 | Benchmark A implied APR | 37.87% | `baseline_v3` |

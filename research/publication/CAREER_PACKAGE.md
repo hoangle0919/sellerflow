@@ -83,7 +83,7 @@ A paired simulation supplying the counterfactual by construction, plus the infra
 | `research/CLAIM_LEDGER.md` | Every registered quantitative claim with its class, artifact, JSON path, checksum and required qualifier |
 | `research/verify_reproduction.py` | Clean-copy regeneration reporting byte and numeric equality separately |
 | Simulation Lab | Web surface rendering every simulation result from checksummed artifacts, with no financial arithmetic in the frontend |
-| 1,145 non-browser tests passing | 502 backend and 643 simulation. Nine browser checks are defined and excluded from that total. They **executed and passed, 9/9, in 21.55s** — an independent run on macOS 26.0 arm64, Python 3.11.5, Playwright Chromium, at commit `dcbfc3b`; every input they exercise is byte-identical at HEAD. Where Chromium is absent they skip, and a skip is never counted as a pass. Includes a named-regression tripwire for known retracted phrasings — a tripwire, not a semantic proof, so adversarial review covers the paraphrases it cannot catch |
+| 1,145 non-browser tests passing | 502 backend and 643 simulation. The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass. Includes a named-regression tripwire for known retracted phrasings — a tripwire, not a semantic proof, so adversarial review covers the paraphrases it cannot catch |
 
 ### What I found
 
@@ -167,6 +167,6 @@ Kept explicit because these are the claims that would be tempting.
 | f\* = 1.0945, residual ≈0.02416pp | `validation_v2_canonical.json` → `/pricing` · ledger P-1, P-2 |
 | 100%, 76.2%, ≈214.3M, ≈98.3M | closure artifacts → `/scenarios/*/RBF` · ledger S-3, S-4, I-3 |
 | 0.9098 vs 0.9182 | `research/analysis/00_audit_evidence.py` · registry R-000 |
-| 1,042 non-browser tests — 403 backend, 639 simulation | test run. Nine browser checks defined and excluded from the total; passed in the browser-capable run at D-036 (see DECISION_LOG); skip where Playwright or Chromium is absent, never counted as passes |
+| 1,145 non-browser tests — 502 backend, 643 simulation | Test run. The nine Playwright browser checks are excluded from the total; 9/9 passed in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. Where Chromium is unavailable they skip; a skip is never counted as a pass. |
 | Five artifacts, byte vs numeric | `research/verify_reproduction.py` · decision log D-041, D-043 |
 | Retractions | decision log D-015 (2.3×), D-040 (RBF-G null), D-041 (reproducibility), D-042/D-046 (incomplete corrections) |

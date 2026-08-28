@@ -1674,3 +1674,73 @@ now records the 9/9 run with its environment and commit: `RESEARCH_MANIFEST.md`,
 rebuilt **only** because those statements changed. All ten registered checksums
 — five current, five superseded — are unchanged, and the reproduction verifier
 still reports 5/5 byte-identical and 5/5 numerically equal.
+
+---
+
+## D-054 — The browser gate ran on the merged tip
+
+**Date:** 2026-08-27 · **Branch:** `publication-final` · **Follows:** D-053
+
+**Documentation only.** This entry changes no Lab input, research result, model,
+financing logic or registered artifact.
+
+### The evidence is now direct
+
+D-053 recorded a 9/9 run at `dcbfc3b` and then had to *argue* that it carried
+forward past the `ff59333` merge: all nine checks load `/lab`, and every input
+they exercise was verified byte-identical to `dcbfc3b`. That argument was sound
+and it was checkable, which is why it was written out rather than asserted. It
+was still an inference.
+
+An independent run has now executed the suite against the merged tip:
+
+```
+9 passed in 23.55s
+```
+
+macOS 26.0 arm64, Python 3.11.5, Playwright 1.62.0 with Chromium, local server,
+at commit `c8261c6`.
+
+Active publication surfaces now cite that run. **They no longer need the
+carry-forward argument, so it has been removed from them** — a reader should not
+have to reason about byte-identity across a merge to learn whether the tests
+passed. Six surfaces state the same substance:
+`.github/PULL_REQUEST_BODY.md`, `RESEARCH_MANIFEST.md`, `MANUSCRIPT.md`,
+`PAPER_OUTLINE.md`, `CAREER_PACKAGE.md`, `build_deck.js`.
+
+Once each, with one deliberate exception: `RESEARCH_MANIFEST.md` carries it in
+**two** places, because it serves two readers. The status table answers "what is
+the current state of this project", and the reproduction-recipe comment block
+answers "what should I expect when I run this command" — someone following the
+recipe never reads the table. Duplication across *files* would be a
+maintenance hazard; these two are the same fact addressed to two different
+questions, and collapsing them would leave one of the two readers without it.
+
+`CAREER_PACKAGE.md` carries it twice for a different reason: once in the source
+index at the foot of the file, and once inside the résumé and LinkedIn text,
+where it appears as a short parenthetical rather than the full statement.
+
+**D-053 is untouched.** It is the dated record of what was known when the merge
+was made, and the inference it contains was correct at the time. Rewriting it to
+match what is known now would destroy exactly the thing this log exists for.
+
+### The editorial defect this pass fixes
+
+D-053's reconciliation replaced only the *tail* of the browser sentence on four
+surfaces, leaving the original lead-in in place. The result was the sentence
+"Nine browser checks are defined and excluded from that total" immediately
+followed by "Nine Playwright browser checks are defined and are excluded from
+that total" — visible as a doubled line on page 17 of the PDF.
+
+A regex that matched from mid-sentence rather than from the start of the claim.
+Not a research defect, and it changed no figure, but it is the kind of thing a
+reader notices first and reasonably reads as carelessness about the surrounding
+numbers. Removed from all four.
+
+### Verification
+
+Zero duplicated browser sentences. No active surface references `dcbfc3b`; the
+only remaining references are inside D-053, where they belong. All ten
+registered checksums unchanged, nothing under `research/results/` changed, and
+no backend, frontend, simulation or financing-engine code touched. The PDF and
+deck were rebuilt for the changed sentences alone.
