@@ -1572,3 +1572,105 @@ skip is not a pass. Browser execution is an open external gate and is now
 described that way on every surface, including the deck note that previously
 credited them to the D-036 run. That credit no longer holds: the assertions
 those checks make today did not exist when D-036 ran.
+
+---
+
+## D-053 — The browser gate executed, and `main` came back with two corrections
+
+**Date:** 2026-08-27 · **Branch:** `publication-final` · **Merges:** `origin/main` `ff59333`
+
+Two independent events, both external to this workstream, and both of which
+changed what may be written down. **No research figure, formula, scenario input,
+seed or registered artifact is touched by this entry.**
+
+### 1. The gate ran
+
+D-052 recorded nine browser checks as defined, rewritten, and **never
+executed** — Chromium is unavailable in the environment that runs these suites,
+and a skip is not a pass. That was the honest state and it was also useless: it
+is indistinguishable from nine checks that would fail.
+
+They have now been run:
+
+```
+python3 -m pytest backend/tests/test_lab_browser.py -q
+......... [100%]
+9 passed in 21.55s
+```
+
+macOS 26.0 arm64, Python 3.11.5, Playwright Chromium, local HTTP server, at
+commit `dcbfc3b`. Independent of this workstream.
+
+**Why the result carries across the subsequent merge, argued rather than
+assumed.** `ff59333` changed `README.md`, `frontend/index.html` and one product
+test file. All nine checks load `/lab` and nothing else, and every input they
+exercise — `frontend/lab.html`, `backend/lab.py`, `backend/main.py` and
+`research/results/` — is **byte-identical** to `dcbfc3b`, verified per file. The
+evidence therefore describes the current Lab surface. It does not describe a
+post-merge execution, and no surface claims one.
+
+**A defect the run exposed, in the test rather than the page.** The failing
+assertion before this run was `"How the rate is computed" in arms_text`. That
+string is at `frontend/lab.html:589` and renders correctly; it sits inside
+`<details><summary>What this contract is`, which carries no `open` attribute, so
+`page.inner_text()` — rendered text — cannot see it. The reported diagnosis was
+that the heading "was never implemented" and the proposed remedies were to add
+it or amend the assertion, escalated as a disclosure decision. Both rested on
+the string being absent; `origin/main` carries the pre-A-9 file, which is where
+that grep landed. Fixed in `dcbfc3b` by splitting the assertion: what a reader
+sees unprompted (both denominators, both labels, and the observed-window caveat)
+before opening, and the two basis blocks after setting `d.open = true` — which
+proves the text is *reachable*, where `text_content()` would have passed on
+`display:none`.
+
+Recorded because a plausible diagnosis attached to a real failure is how a
+correct page gets "fixed" into a worse one.
+
+### 2. `main` corrected two things this branch had wrong or missing
+
+**The scoring-path claim was worse than this branch had documented.** D-047
+corrected "the numbers shown are identical either way" to a statement that the
+active path *can* change the assigned tier. `main` established that it *does*,
+on a 200-profile cohort, for a majority of profiles — including profiles one
+path approves and the other declines. Worked case: heuristic **APPROVED
+212,238,000₫**, ensemble **REJECTED**. The consequence `main` draws is the
+uncomfortable one: the model-load repair in `00f6b37`, which this branch merged
+and described as neutral, **changed live assessment outcomes**. Merged in full,
+including the worked cap figures that make the disclosure checkable.
+
+**`apr_basis` was computed and thrown away on the main surface.** The §7.2 item
+in the handoff was flagged as unaudited, and it turned out to be a real instance
+of the A-9 family: `financing_engine.py` emitted the basis and `index.html`
+rendered it zero times, so the rate appeared with nothing stating what the base
+case assumes. `main`'s fix also handles the sharper form — the structure note
+has three competing branches, and a merchant with outstanding information
+requirements previously saw the rate with **no** basis at all, on the branch
+where rates run highest. Merged.
+
+**One thing this branch did not take.** `main`'s "Financing structure" bullet
+ends "The extension is the provider's cost" — the universal formulation P4
+withdrew. This branch's conditional wording is kept. Merging it would have
+reintroduced a corrected claim family through a merge, which is the quietest way
+a correction gets undone.
+
+**One test amended, not weakened.** `test_readme_states_the_tier_dependency`
+matched a literal string that the merge italicised — correctly, that being the
+qualifier the retracted claim dropped. It now strips emphasis before matching,
+and gained two assertions `main`'s wording earns: that the README says the paths
+*do* disagree, not merely that they could, and that the worked cap figures
+survive.
+
+### Consequence
+
+Backend 495 → **502 passed, 10 skipped**; simulation 643; **1,145 non-browser**.
+The tenth skip is `main`'s two-path cohort comparison, which needs an ensemble
+artifact a clean checkout does not have — reported as a skip, not a pass, and
+named as such in the manifest.
+
+Every surface that described the browser checks as unexecuted or an open gate
+now records the 9/9 run with its environment and commit: `RESEARCH_MANIFEST.md`,
+`.github/PULL_REQUEST_BODY.md`, `MANUSCRIPT.md`, `PAPER_OUTLINE.md`,
+`CAREER_PACKAGE.md`, `build_deck.js`. `MANUSCRIPT.pdf` and `RBF_DECK.pptx` are
+rebuilt **only** because those statements changed. All ten registered checksums
+— five current, five superseded — are unchanged, and the reproduction verifier
+still reports 5/5 byte-identical and 5/5 numerically equal.

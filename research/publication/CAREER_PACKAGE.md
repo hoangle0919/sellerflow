@@ -22,13 +22,13 @@
 > - Established the study's central methodological result: **financing price and payment structure are separable questions**, and conflating them produces false conclusions — demonstrated by repricing an identical payment rule at a second cap factor and showing the cost comparison reverses while the rule is unchanged.
 > - **Formally derived and engine-tested seven contract properties** characterising behaviour independent of the simulation, each asserted numerically against the implementation, including an exact finite-time completion criterion that corrected a boundary error in an earlier draft.
 > - Built a **reproducibility pipeline**: five checksummed canonical artifacts, byte-versus-numeric equality reported separately across platforms, and a clean-copy regeneration verifier — after discovering that a previous "verification" step had re-hashed a committed file rather than regenerating it.
-> - Wrote and enforced a **claim ledger** binding every registered quantitative claim to an artifact, a derivation, or a cited source, backed by **1,138 non-browser tests passing — 495 backend and 643 simulation, with nine browser checks defined and excluded from that total** — including a regression tripwire for known retracted phrasings, supplemented by adversarial review for the paraphrases a string test cannot catch.
+> - Wrote and enforced a **claim ledger** binding every registered quantitative claim to an artifact, a derivation, or a cited source, backed by **1,145 non-browser tests passing — 502 backend and 643 simulation, with nine browser checks defined and excluded from that total** — including a regression tripwire for known retracted phrasings, supplemented by adversarial review for the paraphrases a string test cannot catch.
 > - **Retracted several claims from earlier internal drafts** — a 2.3× cost ratio, an unqualified byte-reproducibility claim, and a false null result about a guardrail arm — and documented each retraction with the evidence that overturned it.
 
 ### Short form (three lines, for a general CV)
 
 > **Revenue-Contingent Financing Under Volatile Sales** — independent research, 2026
-> Paired simulation study (10 scenarios × 4 contract arms on identical paths, one cost-matched pair, 500 paths) separating financing *price* from payment *structure*; seven formally derived and engine-tested contract properties; five checksummed reproducible artifacts; 1,138 non-browser tests passing — 495 backend and 643 simulation, with nine browser checks defined and excluded from that total. Produced a working paper, a claim ledger binding every registered quantitative claim to its source, and a documented record of my own retracted claims.
+> Paired simulation study (10 scenarios × 4 contract arms on identical paths, one cost-matched pair, 500 paths) separating financing *price* from payment *structure*; seven formally derived and engine-tested contract properties; five checksummed reproducible artifacts; 1,145 non-browser tests passing — 502 backend and 643 simulation, with nine browser checks defined and excluded from that total. Produced a working paper, a claim ledger binding every registered quantitative claim to its source, and a documented record of my own retracted claims.
 
 ### Single bullet (for a crowded CV)
 
@@ -54,7 +54,7 @@
 >
 > **Reporting failure honestly is harder than finding it.** The contract does not always reach its contractual repayment target. Where a business closes permanently before the cap is reached, recovery genuinely fails — closure from month 7 leaves every simulated path incomplete under both cap factors. But a 76.2% incomplete-recovery rate is *not* a 76.2% loss rate, and I had to build the distinction explicitly so the headline number couldn't be misread.
 >
-> The study is a simulation, not evidence about real sellers. It has no observed revenue, no repayment outcomes, and makes no predictive or affordability claim. What it does have is a claim ledger binding every registered simulation result to a checksummed artifact, and 1,138 non-browser tests passing — 495 backend and 643 simulation, with nine browser checks defined and excluded from that total — including guards that fail if a known retracted phrase reappears.
+> The study is a simulation, not evidence about real sellers. It has no observed revenue, no repayment outcomes, and makes no predictive or affordability claim. What it does have is a claim ledger binding every registered simulation result to a checksummed artifact, and 1,145 non-browser tests passing — 502 backend and 643 simulation, with nine browser checks defined and excluded from that total — including guards that fail if a known retracted phrase reappears.
 
 ### Short post
 
@@ -83,7 +83,7 @@ A paired simulation supplying the counterfactual by construction, plus the infra
 | `research/CLAIM_LEDGER.md` | Every registered quantitative claim with its class, artifact, JSON path, checksum and required qualifier |
 | `research/verify_reproduction.py` | Clean-copy regeneration reporting byte and numeric equality separately |
 | Simulation Lab | Web surface rendering every simulation result from checksummed artifacts, with no financial arithmetic in the frontend |
-| 1,138 non-browser tests passing | 495 backend and 643 simulation. Nine browser checks are defined and excluded from that total. They were REWRITTEN in this pass — the closure-scenario assertions now pin the corrected rate/completion denominators — and have not executed since, because Chromium is unavailable in the environment that ran the suites. They skip; pytest may report one skipped module or nine skipped cases depending on what is installed. A skip is not a pass, and browser execution remains an open external gate. Includes a named-regression tripwire for known retracted phrasings — a tripwire, not a semantic proof, so adversarial review covers the paraphrases it cannot catch |
+| 1,145 non-browser tests passing | 502 backend and 643 simulation. Nine browser checks are defined and excluded from that total. They **executed and passed, 9/9, in 21.55s** — an independent run on macOS 26.0 arm64, Python 3.11.5, Playwright Chromium, at commit `dcbfc3b`; every input they exercise is byte-identical at HEAD. Where Chromium is absent they skip, and a skip is never counted as a pass. Includes a named-regression tripwire for known retracted phrasings — a tripwire, not a semantic proof, so adversarial review covers the paraphrases it cannot catch |
 
 ### What I found
 
