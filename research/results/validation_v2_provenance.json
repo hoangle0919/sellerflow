@@ -1,0 +1,15 @@
+{
+  "artifact": "validation_v2_canonical.json",
+  "canonical_sha256": "7d9b9d0f9b0fd0fea7011625026a7a5da28c1d4fab009e9a2bf2bd7639af52cc",
+  "note": "Execution record only. No number here participates in the analytical result; the canonical artifact is what to cite. `original_run_date` is the date stamped by the battery when it first ran; it was the only non-deterministic field in the source.",
+  "numpy": "2.2.6",
+  "original_run_date": "2026-08-26",
+  "original_source": "validation_v2.json",
+  "platform": "Linux-6.8.0-136-generic-aarch64-with-glibc2.35",
+  "python": "3.10.12",
+  "run_utc": "2026-08-26T14:58:09+00:00",
+  "source_commit": "16d10e671c66712f1819cd117896747db894d100",
+  "source_dirty_paths": null,
+  "source_state_scope": "Tracked source outside research/results/. Generated artifacts are outputs, not source, and are excluded.",
+  "source_tree_dirty": false
+}

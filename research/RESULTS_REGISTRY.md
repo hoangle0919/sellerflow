@@ -16,18 +16,23 @@ Results are cited by **checksum**, from the canonical artifact. Canonical files 
 
 | Artifact | SHA-256 | Status |
 |---|---|---|
-| `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **Canonical.** Cite this. |
+| `results/baseline_v3_canonical.json` | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` | **Canonical (A-9). Cite this.** See R-014. |
+| `results/baseline_equalcost_v2_canonical.json` | `b3ebfe6a5a7e7f48726d7e501295b02f84258a3fe9ee4e048875125b1270e0ee` | **Canonical (A-9).** Cost-matched track. |
+| `results/baseline_closure_v2_canonical.json` | `21b8e207ff2db9ac866b8cb2bab47c8c2e434d2bff03d802eb6f53a66fdcea4b` | **Canonical (A-9).** Closure track, `f = 1.20`. |
+| `results/baseline_closure_equalcost_v2_canonical.json` | `e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665` | **Canonical (A-9).** Closure track, `f* = 1.0945`. |
+| `results/validation_v2_canonical.json` | `7d9b9d0f9b0fd0fea7011625026a7a5da28c1d4fab009e9a2bf2bd7639af52cc` | **Canonical (A-9).** Cite this for validation figures. |
+| `results/baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | **SUPERSEDED by A-9 (D-049).** Preserved byte-for-byte; the record of what was published before 2026-08-20. Do not cite as current. |
 | `results/baseline_v2_provenance.json` | *(varies by run — that is its purpose)* | Execution record for the above |
 | `results/baseline_v2.json` | `b09ae1f7ec3a92c6b751222f639cc562ee793d71c453298612a5d30e6da356e0` | **Frozen historical evidence.** Not rewritten. Numerically identical to the canonical artifact (0 differing leaves); differs only by an embedded run date. |
-| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **Canonical.** Reference-path cost-matched pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
-| `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the above |
-| `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **Canonical.** Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
-| `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **Canonical.** Closure / zero-revenue at f* = 1.0945 (D-032). |
-| `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **Canonical.** Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
-| `results/validation_v1_provenance.json` | *(varies by run)* | Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
+| `results/baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Reference-path cost-matched pricing, f\* = 1.0945 (D-031). Same scenarios, seeds and generator as `baseline_v2`; only the cap factor differs. |
+| `results/baseline_equalcost_v1_provenance.json` | *(varies by run)* | Execution record for the superseded artifact above |
+| `results/baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f = 1.20 (D-032). The cases where incomplete recovery is real. |
+| `results/baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Closure / zero-revenue at f* = 1.0945 (D-032). |
+| `results/validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** ~~Canonical.~~ Cite this for validation figures (D-038). Produced by `canonicalize_validation.py`, which re-expresses the source without recomputing: all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `results/validation_v1_provenance.json` | *(varies by run)* | **Superseded, preserved.** Execution record, including `original_run_date` = 2026-08-04 — the one non-deterministic field in the source. |
 | `results/validation_v1.json` | `a1b439c2427e0cbc44a3ec325bb6ddaae7d7043fec2fae0af1b315fc675dde07` | **Frozen historical evidence.** The pre-canonicalization source, retained unmodified. Re-running the whole battery reproduces it with exactly one difference — `_meta.date` — and zero numeric drift. |
 
-Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v2_canonical.json`
+Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;print(checksum(json.load(open(sys.argv[1]))))" results/baseline_v3_canonical.json`
 
 > ### ⚠️ Embedded metadata field `canonical.determinism` is SUPERSEDED — not corrected in place (D-043)
 >
@@ -40,6 +45,8 @@ Verify: `python3 -c "import json,sys;from rbf_sim.canonical import checksum;prin
 > **It has NOT been changed, deliberately.** Editing it means editing `rbf_sim/canonical.py` and regenerating all five artifacts, which changes all five registered checksums — invalidating the reproducibility record in order to correct a sentence *about* reproducibility. That trade is not worth making without explicit approval, and this correction pass is not authorised to make it.
 >
 > **Status of the field:** superseded by the measured table above. The current claim is *numeric* reproducibility at published precision on every platform tested, and *byte* reproducibility within a fixed runtime. **No public surface renders `canonical.determinism`** — asserted by `test_no_public_surface_renders_the_superseded_determinism_field`. Anyone reading the raw JSON should read this note instead.
+>
+> > **SUPERSEDED BY D-049 (2026-08-20).** The trade this paragraph declined — regenerating five artifacts to correct a sentence — was reopened when an independent audit demonstrated a genuine implementation defect in the effective-rate calculation. Regeneration then had to happen for a substantive reason, so the embedded `determinism` string was corrected in the same pass at no additional cost. The **new** artifacts carry the accurate wording; the superseded five keep the old string and are preserved unchanged. The decision below was correct for its moment and is retained for the audit trail.
 >
 > **DECISION — FINAL (D-044).** The five registered artifacts are **not** regenerated. Their checksums and their embedded historical metadata stand as written. The embedded sentence is **superseded by D-041 and D-043**, and the corrected reproduction claim — numeric equality at published precision everywhere, byte equality within a fixed runtime — is the only one that may appear in the paper, the API, the Lab, the README or any provenance description. This is not deferred; there is nothing further to decide.
 
@@ -138,8 +145,8 @@ Under a −40% sustained decline, distress-month counts (T-0):
 ### Interpretation
 
 - **F-1 — trade-off quantified.** Severe downturn: RBF removes 6.24 [6.19, 6.28] high-burden months (θ=0.15) at a cost of 32.5pp [32.3, 32.8] lower 12-month recovery and duration 12.0 → 18.3 months. Benefit and cost both scale with shock severity.
-- **F-2 ⚠️ against the product — ~~"costs ~2.3× the interest of a conventional loan"~~ SUPERSEDED (D-015, `CORRECTED_CLAIMS.md` #2, `DERIVATIONS.md` P6).** The arithmetic stands: Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. The *interpretation* does not. P6 shows total cost is proportional to `f` and that APR is jointly determined by `f` and the revenue path, so a ratio computed at the illustrative `f = 1.20` is a **pricing** result, not a property of revenue-based repayment. Correct framing: at the illustrative 1.20× cap the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at the reference-path cost-matched `f* = 1.0945` it is not. **Do not quote the 2.3× ratio.**
-- **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
+- **F-2 ⚠️ against the product — ~~"costs ~2.3× the interest of a conventional loan"~~ SUPERSEDED (D-015, `CORRECTED_CLAIMS.md` #2, `DERIVATIONS.md` P6).** The arithmetic stands: Benchmark A implies **41.30% APR**; Benchmark B (18% nominal) repays 203.6M vs 222.0M. The *interpretation* does not. P6 shows the contractual repayment **target** `A·f` is proportional to `f` — realised repayment equals that target only upon completion — and that APR is jointly determined by `f` and the revenue path, so a ratio computed at the illustrative `f = 1.20` is a **pricing** result, not a property of revenue-based repayment. Correct framing: at the illustrative 1.20× cap the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at the reference-path cost-matched `f* = 1.0945` it is not. **Do not quote the 2.3× ratio.**
+- **F-3 ⚠️ null — HORIZON- AND SCENARIO-BOUNDED; the failure region has since been located (D-032).** *(figures below are from the superseded `baseline_v2` generation, retained as the record of what was published.)* Incomplete recovery 0.0% in all ten scenarios; total repaid identical at 222,000,000 — but none of those ten reaches zero revenue. `baseline_closure_v1` supplies the missing cases: at `f = 1.20`, `closure_m7` is **100.0%** incomplete and `closure_m13` **76.2%**. **F-3 must not be presented as "RBF recovers in full" or "provider exposure is duration risk, not principal loss" without qualification** — that holds only for the ten non-closure scenarios inside `T = 24`.
 - **F-4 ⚠️ against the product.** `RR(12) ≈ ω` to within 0.2pp. Fixed payments are invariant to underreporting because they never read revenue. ~~a genuine structural advantage~~ → **superseded (A-8, D-043): this is contractual schedule invariance, not a demonstrated advantage.** The model assumes fixed payments are made in full and on time, so it cannot compare *realized* collection between the arms. Original wording follows for the audit trail: a genuine structural advantage of FIX.
 - **F-5 ⚠️ null — ~~"bit-identical to RBF in all ten scenarios"~~ SUPERSEDED (D-040).** The **floor** never binds — 0 of 36,000 month-observations, provably unreachable since `μ = 0.25 < h = 0.50`. The **ceiling** does bind — 6,009 of 36,000 month-observations in the breakpoint scan — in 6 of 10 baseline scenarios, and those are exactly the 6 where RBF-G differs numerically from RBF. By field: `apr_mean` in 6, `burden_mean` in 6, `recovery_ratio` in 3, `duration_mean` in 1. Present the surviving null as *"the hardship floor never activates by construction"*, never as *"the guardrails never bind"*.
 
@@ -162,7 +169,7 @@ F-5's surviving null concerns the hardship **floor only**: ~~F-5 means the guard
 | **Exact scenario** | (a) convergence at 500/2,000/5,000/10,000 paths on sustained −40%; (b) cap sweep `f ∈ [1.05, 1.30]` on the stable reference; (c) reference-path cost-matched cap solve (JSON key `pricing.equal_cost`); (d) 12-probe recovery-boundary search; (e) RBF-G breakpoint scan over 36,000 month-observations; (f) remittance-basis sweep |
 | **Parameters** | `R₀ = 185,000,000` · `A = 185,000,000` · `r = 0.10` · `f = 1.20` · `T = 24` · basis `net_sales` · Benchmark B `j = 18%`, `N_B = 12`. All illustrative or derived — none externally sourced |
 | **Simulation version** | `rbf_sim` v1.0.0 + spec amendments A-1…A-5 · seeds 20260803 / 90210 |
-| **Code** | `run_validation.py`, `conv_step.py` → `results/validation_v1.json`; `run_baseline.py` → `results/baseline_v2.json` |
+| **Code** | `run_validation.py`, `conv_step.py` → `results/validation_v1.json`; `run_baseline.py` → `results/baseline_v2.json` *(the superseded generation this dated entry describes; current runs write `validation_v2.json` and `baseline_v3_canonical.json`)* |
 | **Type** | **Confirmatory** for convergence, pricing, breakpoint, revenue definition. **Exploratory** for the boundary probes (a search, not a pre-specified test) |
 | **Public-safe** | ⚠️ **Conditional** — simulated label, parameter set, and assumption classification must appear with any quoted figure |
 | **Status** | ✅ 2026-08-03 · 169 simulation tests + 47 backend tests passing |
@@ -229,3 +236,54 @@ the frozen metric definitions (backlog R-02) per decision D-004.
 4. **Null and unfavorable results get entries too.** A result that contradicts a hypothesis is registered and reported, not quietly dropped.
 5. **Public-safe is a deliberate decision, not a default.** Mark ❌ or ⚠️ freely; R-001 is the worked example.
 6. **Re-run before shipping.** Phase 5 V-03 regenerates every ✅ entry from committed code.
+
+
+---
+
+## R-014 — A-9 artifact generation: corrected IRR definition, domain and conditioning
+**Date:** 2026-08-20 · **Decision:** D-049 · **Spec:** v1.0 + A-1…A-9
+
+**Registered, current:**
+
+| Artifact | SHA-256 |
+|---|---|
+| `baseline_v3_canonical.json` | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` |
+| `baseline_equalcost_v2_canonical.json` | `b3ebfe6a5a7e7f48726d7e501295b02f84258a3fe9ee4e048875125b1270e0ee` |
+| `baseline_closure_v2_canonical.json` | `21b8e207ff2db9ac866b8cb2bab47c8c2e434d2bff03d802eb6f53a66fdcea4b` |
+| `baseline_closure_equalcost_v2_canonical.json` | `e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665` |
+| `validation_v2_canonical.json` | `7d9b9d0f9b0fd0fea7011625026a7a5da28c1d4fab009e9a2bf2bd7639af52cc` |
+
+**Superseded, preserved byte-for-byte:** `baseline_v2`, `baseline_equalcost_v1`,
+`baseline_closure_v1`, `baseline_closure_equalcost_v1`, `validation_v1`. These
+are the files every figure published before 2026-08-20 came from. They are
+retained so the published record stays verifiable, are never cited as current,
+and are asserted unchanged by `backend/tests/test_validation_artifact.py`.
+
+**What moved, and only what moved.** Compared leaf-by-leaf before registration:
+
+| Pair | Leaves | APR fields moved | New denominator keys | Unexpected |
+|---|---|---|---|---|
+| *(superseded → current; every row below names a preserved, historical artifact)* | | | | |
+| `baseline_v2` → `v3` | 1105 → 1285 | 25 | 180 | 0 |
+| `baseline_equalcost_v1` → `v2` | 862 → 1022 | 20 | 160 | 0 |
+| `baseline_closure_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |
+| `baseline_closure_equalcost_v1` → `v2` | 273 → 321 | 6 | 48 | 0 |
+| `validation_v1` → `v2` | 189 → 190 | 1 | 1 (see note) | 0 |
+
+*Note on validation's single added leaf.* It is **`/convergence/converged`**, not a denominator key. That flag has been emitted by `run_validation.py` since `42b7b1e`, long before A-9; the superseded `validation_v1_canonical` lacked it because it was canonicalized from a raw file produced by an older revision of the script — the artifact predated its own generator. Its appearance in `validation_v2` closes that gap and is **not an A-9 result change**.
+
+Burden, recovery, duration, settlement, scenario inputs and seeds are unchanged.
+
+**Headline movements.**
+
+| Figure | Before | After | Cause |
+|---|---|---|---|
+| `temp_closure` `apr_mean`, `f = 1.20` | 29.1869% | **24.1407%** | internal zero months no longer deleted |
+| `temp_closure` `apr_mean`, `f* = 1.0945` | 14.9885% | **12.4321%** | same |
+| `closure_m7` `apr_mean`, both `f` | *undefined* | **−86.5129%** | solver now spans `i > −1` |
+| `closure_m13` denominators, `f = 1.20` | one qualifier | **119 completed / 500 rate-defined** | published separately |
+
+**Public-safety classification.** Quotable with the A-9 qualifiers: name the
+scenario; pair any horizon-limited rate with its incomplete-recovery figure;
+never share one qualifier between `duration_mean` (completion-conditioned) and
+`apr_mean` (IRR-conditioned).

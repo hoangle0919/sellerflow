@@ -55,7 +55,14 @@ MIN_MEANINGFUL_GROWTH = 0.05  # floor used only to keep the "growth case" distin
 # loss-making contract has a representable rate: a bracket starting at 0 cannot
 # express "recovered less than was advanced" and returns undefined instead,
 # which hides an adverse result behind a word that reads like a technicality.
-IRR_MIN_MONTHLY = -1.0 + 1e-9
+# The closest representable float above -1, not a coarse hand-picked floor.
+# `-1.0 + 1e-9` excluded real roots: a stream repaying a token amount on a
+# large advance has a rate near -100%, and reporting it as 'no rate' is the
+# confusion A-9 exists to remove. Mirrors research/rbf_sim/contracts.py.
+IRR_MIN_MONTHLY = math.nextafter(-1.0, 0.0)
+
+#: Endpoint acceptance relative to the principal. Mirrors the research layer.
+IRR_ENDPOINT_REL_TOL = 1e-9
 
 
 def irr_upper_bound(principal: float, flows: List[float]) -> float:
@@ -155,10 +162,13 @@ def effective_apr(principal: float, flows: List[float], iters: int = 400) -> Opt
     # be float error means the bound itself is wrong, and that must not be
     # silently annualised.
     if f_hi >= 0.0:
-        if f_hi <= abs(principal) * 1e-9:
+        if f_hi <= abs(principal) * IRR_ENDPOINT_REL_TOL:
             return _annualise(hi)
         return None
-    if f_lo == 0.0:
+    # A root below the lowest representable rate cannot be expressed; report
+    # the correctly rounded boundary rather than `None`, which under A-9 means
+    # the equation has no root. Mirrors the research layer.
+    if f_lo <= 0.0:
         return _annualise(lo)
 
     if not (f_lo > 0 > f_hi):

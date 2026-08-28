@@ -1,29 +1,24 @@
 # Revenue-Contingent Financing Under Volatile Sales: Separating Price from Structure in a Paired Simulation Study
 
-**Draft — Phase B.** Gate A frozen at `af2fc2d`. No Gate A document is amended by this manuscript.
+**Le Huu Hoang**\
+Independent research · August 2026\
+lehuuhoang1909@gmail.com · https://sellerflow-production.up.railway.app
 
-> **Source-note convention — type-appropriate.** A single note format cannot serve four different kinds of claim, and an earlier draft promised one that it could not satisfy for external statistics or analytical constants. The rule is:
+> **What this study is, stated once up front.** Reported simulated magnitudes are **simulation output under modelled assumptions**. No observed seller revenue, repayment, or default outcome exists anywhere in this study. The analytical propositions in §7 are **not** simulation output and are not covered by that qualifier.
 >
-> | Claim type | Note format |
-> |---|---|
-> | External fact or finding | **(L-nn)** — entry in `research/publication/LITERATURE_MATRIX.md` |
-> | Analytical claim or constant | proposition reference in `research/DERIVATIONS.md`, and a ledger **M-n** where one exists |
-> | Simulated magnitude | **[artifact → JSON path]**, plus a ledger ID (S-, P-, I-) where one exists |
-> | Test count, checksum, reproducibility | reproducibility evidence, §15 |
+> Every quantitative statement carries a source note identifying its type and origin; the convention is set out in **Appendix A**, and the artifacts and checksums behind the simulated figures in **§15**.
 >
-> A quantitative statement without the note appropriate to its type is a defect, not a stylistic choice. **Ledger IDs are never invented to fill the slot** — where no ledger row exists, the artifact path stands alone.
->
-> **Reported simulated magnitudes are simulation output under modelled assumptions.** No observed seller revenue, repayment, or default outcome exists anywhere in this study. The analytical propositions in §7 are **not** simulation output and are not covered by that qualifier.
+> The accompanying software at the address above is a **demonstration**. It holds no capital and makes no credit decisions. **As of August 2026, no external merchant data were used in this study; the public deployment is a demonstration, not a lending service.**
 
 ---
 
 ## Abstract
 
-Revenue-contingent financing makes each repayment a fixed share of realised revenue rather than a fixed instalment. The intuitive case for it is that the seller's payment falls when revenue falls. The intuitive case against it is that the financier waits longer to be repaid. Both are correct, and they are the same mechanism observed from opposite sides of the contract; reporting either alone misstates the product.
+Revenue-contingent financing makes each repayment a fixed share of realised revenue rather than a fixed instalment. The seller-side effect is mechanical: the payment falls when eligible revenue falls. The provider-side effect is conditional: recovery may **lead or lag** a cost-matched fixed schedule depending on the realised revenue path, by the exact condition of Proposition 4, and both directions occur in this scenario library. In the severe-downturn scenario it lags. The two effects are the same mechanism observed from opposite sides of the contract, and reporting either alone misstates the product — but the provider side must be reported with its scenario named, because it has no uniform direction.
 
-This paper separates two questions that are routinely conflated: the **price** of a revenue-contingent contract, set by its cap factor, and its **structure**, meaning how payments respond to revenue. Using a paired simulation in which a revenue-contingent contract and a cost-matched fixed instalment are applied to identical generated revenue paths, we find that at the illustrative cap factor `f = 1.20` the revenue-contingent arm removes **6.85** months above a burden threshold of 15% in a severe-downturn scenario, while recovering **65.46%** of its contractual target by month 12 against the fixed arm's **92.31%** **[S-1 | `baseline_v2_canonical.json` → `/scenarios/severe_downturn`]**. **These are simulated magnitudes, not observations.** The 15% threshold is an illustrative reporting band chosen for this study, not a validated hardship cutoff; burden is measured as payment ÷ GMV; and the fixed arm's recovery is *scheduled* recovery under the modelling assumption that every instalment is paid in full and on time, so it is an optimistic benchmark. Repricing at the nearest reference-path grid match `f* = 1.0945` changes the cost comparison entirely **[P-1, P-2 | `validation_v1_canonical.json` → `/pricing`]**. The **pre-cap payment rule is unchanged** — each payment remains the same fixed share of net sales — but the cap factor sets the contractual target and therefore moves completion timing, terminal clipping and the realised payment stream. Pricing and the revenue-contingent payment rule are **analytically separable**, yet **jointly determine realised outcomes**; which is why a cost ratio quoted at a single cap factor is a pricing result and not a property of revenue-contingent repayment as such.
+This paper separates two questions that are routinely conflated: the **price** of a revenue-contingent contract, set by its cap factor, and its **structure**, meaning how payments respond to revenue. Using a paired simulation in which a revenue-contingent contract and a cost-matched fixed instalment are applied to identical generated revenue paths, we find that at the illustrative cap factor `f = 1.20` the revenue-contingent arm removes **6.85** months above a burden threshold of 15% in a severe-downturn scenario, while recovering **65.46%** of its contractual target by month 12 against the fixed arm's **92.31%** **[S-1 | `baseline_v3_canonical.json` → `/scenarios/severe_downturn`]**. **These are simulated magnitudes, not observations.** The 15% threshold is an illustrative reporting band chosen for this study, not a validated hardship cutoff; burden is measured as payment ÷ GMV; and the fixed arm's recovery is *scheduled* recovery under the modelling assumption that every instalment is paid in full and on time, so it is an optimistic benchmark. Repricing at the nearest reference-path grid match `f* = 1.0945` changes the cost comparison entirely **[P-1, P-2 | `validation_v2_canonical.json` → `/pricing`]**. The **pre-cap payment rule is unchanged** — each payment remains the same fixed share of net sales — but the cap factor sets the contractual target and therefore moves completion timing, terminal clipping and the realised payment stream. Pricing and the revenue-contingent payment rule are **analytically separable**, yet **jointly determine realised outcomes**; which is why a cost ratio quoted at a single cap factor is a pricing result and not a property of revenue-contingent repayment as such.
 
-We further characterise incomplete recovery exactly. Completion requires that some **finite** month `t ≤ H` satisfy `S_t ≥ f·A/r`; for a finite horizon this reduces to the terminal condition, but for an unbounded lifetime it does not, and equality of the lifetime sum is insufficient unless a finite partial sum attains the threshold. Where permanent revenue cessation precedes completion while a balance is outstanding, recovery genuinely fails: closure from month 7 leaves **100.0%** of simulated paths incomplete at both registered cap factors **[S-3, S-4 | `baseline_closure_v1_canonical.json` and `baseline_closure_equalcost_v1_canonical.json` → `/scenarios/closure_m7/RBF/incomplete_recovery_rate`]**. Incomplete recovery is not equivalent to principal loss, and we distinguish them.
+We further characterise incomplete recovery exactly. Completion requires that some **finite** month `t ≤ H` satisfy `S_t ≥ f·A/r`; for a finite horizon this reduces to the terminal condition, but for an unbounded lifetime it does not, and equality of the lifetime sum is insufficient unless a finite partial sum attains the threshold. Where permanent revenue cessation precedes completion while a balance is outstanding, recovery genuinely fails: closure from month 7 leaves **100.0%** of simulated paths incomplete at both registered cap factors **[S-3, S-4 | `baseline_closure_v2_canonical.json` and `baseline_closure_equalcost_v2_canonical.json` → `/scenarios/closure_m7/RBF/incomplete_recovery_rate`]**. Incomplete recovery is not equivalent to principal loss, and we distinguish them.
 
 We make no predictive, causal, affordability or default-prevention claim. The propositions are proved and hold for any revenue path; the magnitudes are illustrations under parameters we chose.
 
@@ -35,7 +30,7 @@ Access to finance is a persistent constraint on small enterprises in developing 
 
 The motivating application setting for this study is small e-commerce sellers in Vietnam, a policy-salient digital and e-commerce economy (L-02). **The availability of transaction records to a financier is a modelling premise of this study, not something L-02 or any other source we reviewed establishes.** We make no claim that Vietnamese platforms grant financiers access to seller revenue, returns, orders or fulfilment data, and no claim about seller-level observability in that market. **This study is Vietnam-motivated and illustratively parameterised, not Vietnam-calibrated.** No parameter in the specification was estimated from Vietnamese data, and we make no claim about the prevalence of thin credit-bureau files among Vietnamese sellers; we found no source that would support one.
 
-Continuously recorded revenue makes a particular contract mechanically possible: repayment as a fixed percentage of revenue, continuing until a contractual cap is reached. The question this paper addresses is what that contract does — to the seller, and to the financier — relative to a fixed instalment of the same contractual cost, under the same revenue path.
+Continuously recorded revenue makes a particular contract mechanically possible: repayment as a fixed percentage of revenue, continuing until a contractual cap is reached. The question this paper addresses is what that contract does — to the seller, and to the financier — relative to a fixed instalment with the same contractual repayment target on the reference path, under the same revenue path.
 
 ---
 
@@ -67,7 +62,7 @@ Two firm-side and household-side sources bear on the mechanism but test differen
 
 ## 4. Research question and contribution
 
-**Question.** Under identical revenue paths, how do seller payment burden and provider recovery move together when repayment is revenue-contingent rather than fixed, holding contractual cost constant?
+**Question.** Under identical revenue paths, how do seller payment burden and provider recovery move together when repayment is revenue-contingent rather than fixed, holding the contractual repayment target constant on the reference path?
 
 **Contribution**, in order of what we think carries weight:
 
@@ -88,7 +83,7 @@ Let `B_t` be the remittance base in month `t` (contractually, net sales), `S_k =
 
 **Fixed arm, external reference (FIX-B).** An illustrative 18% nominal, 12-month amortizing schedule. The 18% is an assumption chosen for this study — **not a market rate**, and not observed or externally sourced anywhere in this project (spec amendment A-8).
 
-At the illustrative cap factor `f = 1.20`, matching on the reference path gives a term of **13 months**, a payment of **17,076,923 VND** and an implied APR of **37.8694%** **[`baseline_v2_canonical.json` → `/match_benchmark_a`]**. At `f* = 1.0945` the matched term is **12 months**, payment **16,873,542 VND**, APR **18.3980%** **[`baseline_equalcost_v1_canonical.json` → `/match_benchmark_a`]**.
+At the illustrative cap factor `f = 1.20`, matching on the reference path gives a term of **13 months**, a payment of **17,076,923 VND** and an implied APR of **37.8694%** **[`baseline_v3_canonical.json` → `/match_benchmark_a`]**. At `f* = 1.0945` the matched term is **12 months**, payment **16,873,542 VND**, APR **18.3980%** **[`baseline_equalcost_v2_canonical.json` → `/match_benchmark_a`]**.
 
 **A comparability limit, stated wherever the arms appear together.** An APR loan prices time; a factor-rate cap prices a multiple regardless of time. The two are not commensurable without conversion, and financial regulators have said so: New York's 23 NYCRR 600 requires standardised disclosure including APR for commercial financing under $2.5m (L-23), and California's disclosure regime identifies describing price as an "X% fee rate" or "Y% factor rate" — particularly where those diverge materially from APR — as a confusing representation (L-24). We report both, and we never quote one as the other.
 
@@ -98,7 +93,7 @@ At the illustrative cap factor `f = 1.20`, matching on the reference path gives 
 
 Simulation is an established method for comparing contingent against fixed repayment designs: Chapman and Lounkaew (2010) compare income-contingent and mortgage-type loan designs by simulation, and this study's paired design follows that precedent (L-14). The specification was frozen before any outcome analysis; amendments are logged with the result visible at the time. This matters because researcher degrees of freedom in choosing a data-generating mechanism and performance measures allow spurious claims of superiority for essentially any method (L-31). We follow simulation-reporting practice in pre-specifying and reporting the design, the number of replications, and how it was chosen (L-27), and adopt the standard separation of parameter, stochastic, heterogeneity and structural uncertainty (L-30).
 
-Monthly revenue is generated multiplicatively from a baseline level with deterministic trend, a fixed seasonal multiplier, a shock multiplier and lognormal idiosyncratic noise. Operational variables are **derived through accounting identities rather than sampled independently** — `orders = R/AOV`, returns and fees as deductions — correcting an independence defect in the project's original generator. Each run applies all arms to the same path; 500 paths per scenario, base seed 20260803 **[`baseline_v2_canonical.json` → `/n_paths`, `/base_seed`]**.
+Monthly revenue is generated multiplicatively from a baseline level with deterministic trend, a fixed seasonal multiplier, a shock multiplier and lognormal idiosyncratic noise. Operational variables are **derived through accounting identities rather than sampled independently** — `orders = R/AOV`, returns and fees as deductions — correcting an independence defect in the project's original generator. Each run applies all arms to the same path; 500 paths per scenario, base seed 20260803 **[`baseline_v3_canonical.json` → `/n_paths`, `/base_seed`]**.
 
 ### 6.1 Parameters and scenarios, in one place
 
@@ -107,10 +102,10 @@ All values are taken from the frozen specification and the registered artifacts.
 | Item | Value | Source |
 |---|---|---|
 | Baseline monthly revenue `R₀` | 185,000,000 VND | spec §4 |
-| Advance `A` | 185,000,000 VND | `baseline_v2_canonical.json` → `/terms/A` |
+| Advance `A` | 185,000,000 VND | `baseline_v3_canonical.json` → `/terms/A` |
 | Remittance rate `r` | 0.10 | `/terms/r` |
 | Cap factor — illustrative | `f = 1.20` → cap 222,000,000 VND | `/terms/f`, `/terms/cap` |
-| Cap factor — reference-path grid match | `f* = 1.0945` → cap 202,482,500 VND | `baseline_equalcost_v1_canonical.json` → `/terms` |
+| Cap factor — reference-path grid match | `f* = 1.0945` → cap 202,482,500 VND | `baseline_equalcost_v2_canonical.json` → `/terms` |
 | Horizon `T` | 24 months; recovery checkpoints at 12, 18, 24 | spec §3 |
 | Paths per scenario | 500 | `/n_paths` |
 | Base seed | 20260803 | `/base_seed` |
@@ -133,7 +128,7 @@ All values are taken from the frozen specification and the registered artifacts.
 
 *First, intervals.* Every interval reported in the underlying artifacts is a **Monte Carlo interval over simulated paths**. It measures whether enough paths were run for a number to be stable under our chosen generative parameters. It is **not** a confidence interval and says nothing about real sellers; running more paths narrows it without adding a single fact about the world. We could find no single source stating this prohibition, and we present it as synthesis: Monte Carlo error is a distinct quantity from inferential uncertainty (L-28); Monte Carlo standard error quantifies uncertainty arising from finite repetitions (L-27); and international measurement standards deliberately use "coverage interval" rather than "confidence interval" for precisely this distinction (L-29).
 
-*Second, convergence.* We checked convergence for **two estimators on one scenario**: the paired differences `Δn_HPB(θ = 0.15)` and `ΔRR(12)` under a sustained −40% decline, which move **0.0027 months** and **0.042 percentage points** between 5,000 and 10,000 paths **[P-3 | `validation_v1_canonical.json` → `/convergence`]**. This does not establish that every estimator in the study is converged, and we do not claim it.
+*Second, convergence.* We checked convergence for **two estimators on one scenario**: the paired differences `Δn_HPB(θ = 0.15)` and `ΔRR(12)` under a sustained −40% decline, which move **0.0027 months** and **0.042 percentage points** between 5,000 and 10,000 paths **[P-3 | `validation_v2_canonical.json` → `/convergence`]**. This does not establish that every estimator in the study is converged, and we do not claim it.
 
 **A disclosure about the burden denominator.** The contract charges its share on **net sales**; the burden statistic we display uses **GMV** as its denominator. The identity `burden = r·(1 − return rate)` therefore holds only under three conditions, all of which must be stated: **(i)** before the final clipped payment, since the last payment is `min(r·B_t, remaining)` and can be lower than `r·B_t`; **(ii)** where net sales relate to GMV in that form, i.e. net sales = GMV × (1 − return rate); and **(iii)** subject to operational integer-VND rounding, which perturbs the ratio at the đồng level. Within those conditions the displayed burden is constant only where the net-sales/GMV ratio is fixed — most registered scenarios hold it fixed, and `returns_spike` is the explicit exception where it varies.
 
@@ -155,7 +150,7 @@ This section is an **analytical verification layer**, not a set of claimed novel
 
 **P5 — Under-reporting.** If the provider observes `ω·B_t`, cumulative recovery scales exactly by ω and the required cumulative base rises by `1/ω`. **Duration does not scale by `1/ω`** — the threshold does, and duration is first passage to it. Only **uncapped** payments rescale; the final payment is clipped to the remaining balance and need not scale. Invariance of the total is conditional on the cap still being reached.
 
-**P6 — Cost and rate.** (a) `A·f` is the contractual repayment **target**, path-independent; realised total repayment equals it **only upon completion**. (b) Effective APR is not a well-defined property of the contract: two sellers on identical terms face different APRs purely because revenue arrives at different speeds.
+**P6 — Cost and rate.** (a) `A·f` is the contractual repayment **target**, path-independent; realised total repayment equals it **only upon completion**. (b) Effective APR is not a well-defined property of the contract: **among paths whose payment stream admits an internal rate of return**, two sellers on identical terms face different APRs purely because revenue arrives at different speeds. Existence is a separate question from completion: a path that never reaches the contractual target still has a defined return on the payments it made, and the rate is undefined only where **no payment occurs at all**, so the equation has no root (A-9). Where the target is not reached, the figure is an **observed-window** rate over the horizon rather than the cost of a repaid contract, and must be read beside the incomplete-recovery rate.
 
 **P7 — Completion, exactly.** The contract completes over horizon `H` **iff there exists a finite `t ≤ H` with `S_t ≥ Θ`**, where `Θ = f·A/r`. For a **finite** `H` this reduces to `S_H ≥ Θ`, since `S_k` is non-decreasing. For an unbounded lifetime it does not reduce: the limit is not a partial sum. Writing `S_∞` for the lifetime sum, `S_∞ > Θ` strictly implies completion, `S_∞ < Θ` precludes it at any horizon, and `S_∞ = Θ` completes only if a finite partial sum **attains** `Θ` — which a strictly positive infinite series never does. Under geometric decline the condition is `ρ > ρ*` **strictly**, where `ρ* = 1 − r·B₀/(f·A)`: **11/12 ≈ 0.9167 at `f = 1.20` and 0.9086 at `f* = 1.0945`** **[M-6]**. The threshold moves with the price, so 11/12 must never be quoted as *the* threshold.
 
@@ -165,11 +160,11 @@ Routes to incomplete recovery include zero revenue, a binding maturity or write-
 
 ## 8. Results
 
-Across the ten non-closure scenarios, all figures below are means across 500 simulated paths **[`baseline_v2_canonical.json` → `/scenarios`]**.
+Across the ten non-closure scenarios, all figures below are means across 500 simulated paths **[`baseline_v3_canonical.json` → `/scenarios`]**.
 
-**Stable scenario** **[`baseline_v2_canonical.json` → `/scenarios/stable`]**. The revenue-contingent arm runs **12.86** months mean duration with mean displayed burden **0.0933** and recovers **96.56%** of its target by month 12. FIX-A runs 13 months, burden **0.0943**, RR(12) **92.31%**. FIX-B runs 12 months, burden **0.0936**, RR(12) **100%**.
+**Stable scenario** **[`baseline_v3_canonical.json` → `/scenarios/stable`]**. The revenue-contingent arm runs **12.86** months mean duration with mean displayed burden **0.0933** and recovers **96.56%** of its target by month 12. FIX-A runs 13 months, burden **0.0943**, RR(12) **92.31%**. FIX-B runs 12 months, burden **0.0936**, RR(12) **100%**.
 
-The revenue-contingent arm leads FIX-A on twelve-month recovery by **4.25 percentage points** at exactly baseline revenue **[I-3 | `baseline_v2_canonical.json` → `/scenarios/stable/{RBF,FIX-A}/recovery_ratio/12`]**. **This is an artifact of integer rounding in the matching rule, not an economic finding** — P4's corollary: `C/(r·B̄) = 12.37` rounds to 13, giving `B* ≈ 0.951·B̄`. We report it as an artifact because reporting it as a result would be the kind of thing this paper argues against.
+The revenue-contingent arm leads FIX-A on twelve-month recovery by **4.25 percentage points** at exactly baseline revenue **[I-3 | `baseline_v3_canonical.json` → `/scenarios/stable/{RBF,FIX-A}/recovery_ratio/12`]**. **This is an artifact of integer rounding in the matching rule, not an economic finding** — P4's corollary: `C/(r·B̄) = 12.37` rounds to 13, giving `B* ≈ 0.951·B̄`. We report it as an artifact because reporting it as a result would be the kind of thing this paper argues against.
 
 **Severe downturn.** The trade-off appears in full **[S-1 | `/scenarios/severe_downturn`]**:
 
@@ -179,9 +174,9 @@ The revenue-contingent arm leads FIX-A on twelve-month recovery by **4.25 percen
 | **FIX-A** | 13.0 | **0.1636** | **6.85** | **92.31%** |
 | FIX-B | 12.0 | 0.1606 | 5.906 | 100% |
 
-The revenue-contingent arm removes **6.85** months above the 15% threshold and holds mean burden essentially at its stable-scenario level — a rise of **1.14%** against stable — while the fixed arm's burden rises by **73.5%** **[S-1 | `baseline_v2_canonical.json` → `/scenarios/{stable,severe_downturn}/{RBF,FIX-A}/burden_mean`, `/n_high_burden/0.15`]**. The same mechanism costs the provider **26.85 percentage points** of twelve-month recovery and extends mean duration by **5.718 months**.
+The revenue-contingent arm removes **6.85** months above the 15% threshold and holds mean burden essentially at its stable-scenario level — a rise of **1.14%** against stable — while the fixed arm's burden rises by **73.5%** **[S-1 | `baseline_v3_canonical.json` → `/scenarios/{stable,severe_downturn}/{RBF,FIX-A}/burden_mean`, `/n_high_burden/0.15`]**. The same mechanism costs the provider **26.85 percentage points** of twelve-month recovery and extends mean duration by **5.718 months**.
 
-**Neither column may be reported without the other.** The burden reduction and the recovery delay are one mechanism, and a chart showing only the first is a misrepresentation of the second.
+**Neither column may be reported without the other.** In this scenario the burden reduction and the recovery delay are one mechanism, and a chart showing only the first is a misrepresentation of the second. The pairing rule is general; the *direction* of the recovery effect is not, and is stated per scenario under P4.
 
 The pattern is monotone in shock severity across the stress scenarios: gradual decline (RBF duration 16.148, RR(12) 84.21%; FIX-A 0.894 high-burden months), sustained decline (17.952, 76.04%; FIX-A 3.1), severe downturn as above **[`/scenarios/*`]**.
 
@@ -197,15 +192,15 @@ At the illustrative cap factor `f = 1.20`, the simulated revenue-contingent cont
 
 It would therefore be wrong to say repricing leaves "structural behaviour unchanged". What it leaves unchanged is the rule; what it changes is when that rule stops applying. Whatever one concludes about *cost* is nonetheless a conclusion about the price, not about revenue-contingent repayment as a structure.
 
-`f* = 1.0945` is the **nearest match on the swept cap-factor grid** to the reference path's effective APR, not an exact solution: **19.537656%** against **19.561817%**, a residual of approximately **0.02416 percentage points** **[P-1 | `validation_v1_canonical.json` → `/pricing/equal_cost`, `/pricing/benchmark_b_apr`]**. An exact match is not generally attainable, because duration is integer-valued and the achievable APRs therefore form a discrete set. We report the residual rather than smoothing it away.
+`f* = 1.0945` is the **nearest match on the swept cap-factor grid** to the reference path's effective APR, not an exact solution: **19.537656%** against **19.561817%**, a residual of approximately **0.02416 percentage points** **[P-1 | `validation_v2_canonical.json` → `/pricing/equal_cost`, `/pricing/benchmark_b_apr`]**. An exact match is not generally attainable, because duration is integer-valued and the achievable APRs therefore form a discrete set. We report the residual rather than smoothing it away.
 
-Repricing under the identical payment rule **[`baseline_equalcost_v1_canonical.json` → `/scenarios`]** shortens duration in every scenario — stable **11.784**, sustained decline **16.01**, severe downturn **17.504** — precisely because a lower cap is a nearer threshold. This is the point: the payment rule did not move, the stopping condition did, and the realised outcomes moved with it.
+Repricing under the identical payment rule **[`baseline_equalcost_v2_canonical.json` → `/scenarios`]** shortens duration in every scenario — stable **11.784**, sustained decline **16.01**, severe downturn **17.504** — precisely because a lower cap is a nearer threshold. This is the point: the payment rule did not move, the stopping condition did, and the realised outcomes moved with it.
 
 ### 9.1 A retraction, reported as part of the result
 
-An earlier version of this project stated that "RBF costs approximately 2.3× the interest of a conventional loan." **That claim is withdrawn**, and the reason is the argument of this section. It was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic, when P6(a) shows total contractual cost is proportional to `f`; and it quoted a single effective APR as though it were a contract property, when P6(b) shows APR is jointly determined by the price and the revenue path.
+An earlier version of this project stated that "RBF costs approximately 2.3× the interest of a conventional loan." **That claim is withdrawn**, and the reason is the argument of this section. It was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic, when P6(a) shows the **contractual repayment target `A·f` is proportional to `f`** — and realised repayment equals that target **only when the contract completes**, so even the target is not a realised cost on every path; and it quoted a single effective APR as though it were a contract property, when P6(b) shows that **among paths admitting an internal rate of return** the APR is jointly determined by the price and the revenue path. Non-completing paths are not excluded from that set: `closure_m7` reaches the target on no path and still has a defined mean rate of **−86.5129%** **[S-3 | `baseline_closure_v2_canonical.json` → `/scenarios/closure_m7/RBF/apr_mean`]**.
 
-We report the retraction rather than quietly correcting it because it is the concrete instance of the conflation this paper argues against, produced by authors who were actively trying to avoid it. That it survived several drafts is the useful part of the anecdote.
+We report the retraction rather than quietly correcting it because it is the concrete instance of the conflation this paper argues against, produced by this project while actively trying to avoid it. That it survived several earlier drafts is the useful part of the anecdote.
 
 Two external observations support treating price and structure separately as a matter of course.
 
@@ -219,13 +214,13 @@ Second, contingency **can** command a premium where it transfers risk to the fin
 
 ### 10.1 The null result, and its boundaries
 
-Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid is identical at the cap **[S-2 | `baseline_v2_canonical.json` → `/scenarios/*/RBF/incomplete_recovery_rate`, `/total_repaid_mean`]**.
+Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid is identical at the cap **[S-2 | `baseline_v3_canonical.json` → `/scenarios/*/RBF/incomplete_recovery_rate`, `/total_repaid_mean`]**.
 
 This is **horizon- and scenario-bounded**, and stating it alone would be misleading: none of those ten scenarios reaches zero revenue, and the horizon is 24 months against a 13-month matched base term. An earlier version of this project reported this null as evidence that provider exposure was "duration risk, not principal loss". That framing is withdrawn.
 
 ### 10.2 Where recovery actually fails
 
-Permanent closure occurring **before completion, while a contractual balance remains outstanding**, is the case where recovery genuinely fails. Both halves of the table below carry their own source: the `f = 1.20` columns are **[S-3 | `baseline_closure_v1_canonical.json` → `/scenarios/*/RBF/incomplete_recovery_rate`, `/recovery_ratio/24`]** and the `f* = 1.0945` columns are **[S-4 | `baseline_closure_equalcost_v1_canonical.json` → same paths]**.
+Permanent closure occurring **before completion, while a contractual balance remains outstanding**, is the case where recovery genuinely fails. Both halves of the table below carry their own source: the `f = 1.20` columns are **[S-3 | `baseline_closure_v2_canonical.json` → `/scenarios/*/RBF/incomplete_recovery_rate`, `/recovery_ratio/24`]** and the `f* = 1.0945` columns are **[S-4 | `baseline_closure_equalcost_v2_canonical.json` → same paths]**.
 
 | Scenario | Incomplete recovery, `f = 1.20` | RR(24) | Incomplete recovery, `f* = 1.0945` | RR(24) |
 |---|---|---|---|---|
@@ -237,17 +232,23 @@ Three things in this table deserve emphasis.
 
 **Timing decides it, not zero revenue as such.** A temporary three-month cessation leaves only 2.0% of paths incomplete at `f = 1.20` and none at `f*`. Closure at month 7 — before the matched 13-month term — leaves every path incomplete. It is not the presence of zero-revenue months that prevents completion; it is permanent cessation before the threshold is crossed while a balance remains.
 
-**Price moves the failure rate by an order of magnitude.** `closure_m13` incomplete recovery falls from 76.2% to 7.6% on the cap factor alone **[S-4 | `baseline_closure_equalcost_v1_canonical.json`]**. This is P6(a) made visible: a lower cap is a nearer threshold.
+**Price moves the failure rate by an order of magnitude.** `closure_m13` incomplete recovery falls from 76.2% to 7.6% on the cap factor alone **[S-4 | `baseline_closure_equalcost_v2_canonical.json`]**. This is P6(a) made visible: a lower cap is a nearer threshold.
 
-**Incomplete recovery is not principal loss.** `closure_m13` recovers approximately **214.3M VND** against a **185M** advance — the principal is covered despite 76.2% of paths failing to reach the contractual target. Only `closure_m7` shows a principal shortfall, recovering approximately **98.3M**, and it recovers the **same absolute amount at both cap factors** because that path is revenue-limited rather than cap-limited **[I-3 | recovered amount computed as `/scenarios/*/RBF/recovery_ratio/24` × `/terms/cap`, from `baseline_closure_v1_canonical.json` and `baseline_closure_equalcost_v1_canonical.json`; advance from `/terms/A`]**. A 76.2% incomplete-recovery rate is not a 76.2% loss rate, and we are careful not to let the first number stand in for the second.
+**Incomplete recovery is not principal loss.** `closure_m13` recovers approximately **214.3M VND** against a **185M** advance — the principal is covered despite 76.2% of paths failing to reach the contractual target. Only `closure_m7` shows a principal shortfall, recovering approximately **98.3M**, and it recovers the **same absolute amount at both cap factors** because that path is revenue-limited rather than cap-limited **[I-3 | recovered amount computed as `/scenarios/*/RBF/recovery_ratio/24` × `/terms/cap`, from `baseline_closure_v2_canonical.json` and `baseline_closure_equalcost_v2_canonical.json`; advance from `/terms/A`]**. A 76.2% incomplete-recovery rate is not a 76.2% loss rate, and we are careful not to let the first number stand in for the second.
 
 ### 10.3 Censoring, and what our own statistics omit
 
-Mean duration and mean effective APR are computed **only over paths that reached the repayment target within the window**. They are survivor statistics: they estimate `E[T | completion occurs by horizon H]`, not `E[T]`, and they describe the contracts that finished, not the portfolio. (We avoid writing the conditioning event as `T ≤ C`: in this paper `C` already denotes the VND contractual cap, and reusing it as a censoring time would be ambiguous.)
+Mean duration and mean effective APR are conditioned, but **not on the same event**, and an earlier version of this paper described them as though they were.
+
+**Mean duration is a survivor statistic.** It is computed only over paths that reached the repayment target within the window, so it estimates `E[T | completion occurs by horizon H]`, not `E[T]`, and it describes the contracts that finished rather than the portfolio. (We avoid writing the conditioning event as `T ≤ C`: in this paper `C` already denotes the VND contractual cap, and reusing it as a censoring time would be ambiguous.)
+
+**Mean effective APR is conditioned on the existence of an internal rate of return, which is a different and generally larger set.** A path can miss the contractual target and still have a well-defined return on the payments it did make; the rate is undefined only where no payment occurs at all, so the equation has no root (A-9). In `closure_m13` at `f = 1.20`, **119 of 500** paths complete while **all 500** have a defined rate — 381 paths are simultaneously incomplete and rate-defined **[`baseline_closure_v2_canonical.json` → `/scenarios/closure_m13/RBF/completed_count`, `/apr_defined_count`]**. Averaging over the rate-defined set gives **30.33%**; averaging over the completed set alone gives **39.37%**. Reporting the first under the second's label understated the completed-path figure by roughly nine percentage points. The artifacts now publish `completed_count`, `completed_rate`, `apr_defined_count` and `apr_defined_rate` so that neither denominator has to be inferred.
+
+**Where a rate is reported for an incomplete, non-absorbing path it is an observed-window figure** — the return on payments made within the 24-month horizon, not a final lifetime return — and it must be read beside the incomplete-recovery rate.
 
 Timing here is a cost in the sense the fixed-income literature gives it — duration as the weighted-average timing of cash flows (L-20) — and lender-side recovery ratios have been compared across contingent and fixed scheme designs before, though in student lending rather than business finance (L-22). The censoring framing is standard sample selection: computing a statistic on a non-randomly selected subsample is a specification error (L-36), and conditioning on completion is conditioning on a common effect (L-37). The machinery is standard right-censoring (L-32, L-33), and in an economics setting the duration-data treatment (L-34, L-35) is the appropriate reference. We found no dedicated source quantifying this particular bias, and we do not cite one; the direction follows immediately from the definition.
 
-The practical consequence is a reading rule. **A scenario with a short mean duration and a high incomplete-recovery rate is not a fast contract — it is one where the slow paths were dropped rather than counted.** `closure_m13` at `f = 1.20` reports a mean duration of **11.99** months alongside **76.2%** incomplete recovery **[`baseline_closure_v1_canonical.json` → `/scenarios/closure_m13/RBF/duration_mean`, `/incomplete_recovery_rate`]**; reporting the first without the second would invert the finding.
+The practical consequence is a reading rule. **A scenario with a short mean duration and a high incomplete-recovery rate is not a fast contract — it is one where the slow paths were dropped rather than counted.** `closure_m13` at `f = 1.20` reports a mean duration of **11.99** months alongside **76.2%** incomplete recovery **[`baseline_closure_v2_canonical.json` → `/scenarios/closure_m13/RBF/duration_mean`, `/incomplete_recovery_rate`]**; reporting the first without the second would invert the finding.
 
 ---
 
@@ -259,7 +260,7 @@ These are judgements we draw, not measurements.
 
 **Provider exposure has two distinct forms.** Duration risk in ordinary downturns, and an unrecovered contractual balance where permanent closure precedes completion. Both belong in a term sheet, and the second cannot be inferred from ten scenarios that never reach zero revenue.
 
-**The guardrail result, both halves.** The design includes a hardship payment floor and a payment ceiling. The **floor never activates on any path** — **0 of 36,000** month-observations — because the floor multiplier is below the hardship threshold (`μ = 0.25 < h = 0.50`), making it dead by construction **[`validation_v1_canonical.json` → `/rbf_g_breakpoint/pmin0.25_hard0.5/floor_months`, `/total`; registry null N-2′]**. The **ceiling does bind**: 6,009 of 36,000 observations in the breakpoint scan, and in the baseline it changes results in **6 of 10** scenarios — mean APR in 6, mean burden in 6, recovery ratio in 3, mean duration in 1 **[`baseline_v2_canonical.json` → `/scenarios/*/RBF-G`]**. The differences fall below display precision, which is why they went unnoticed through several reviews. **Invisible at display precision is not identical**, and presenting the floor null alone would read as a whole-arm null, which is false. As specified, the floor is decoration; the ceiling is not.
+**The guardrail result, both halves.** The design includes a hardship payment floor and a payment ceiling. The **floor never activates on any path** — **0 of 36,000** month-observations — because the floor multiplier is below the hardship threshold (`μ = 0.25 < h = 0.50`), making it dead by construction **[`validation_v2_canonical.json` → `/rbf_g_breakpoint/pmin0.25_hard0.5/floor_months`, `/total`; registry null N-2′]**. The **ceiling does bind**: 6,009 of 36,000 observations in the breakpoint scan, and in the baseline it changes results in **6 of 10** scenarios — mean APR in 6, mean burden in 6, recovery ratio in 3, mean duration in 1 **[`baseline_v3_canonical.json` → `/scenarios/*/RBF-G`]**. The differences fall below display precision, which is why they went unnoticed through several reviews. **Invisible at display precision is not identical**, and presenting the floor null alone would read as a whole-arm null, which is false. As specified, the floor is decoration; the ceiling is not.
 
 **No predictive-validity claim, and a worked reason.** The demonstration product includes a machine-learning risk score. It is trained on synthetic data whose default label was generated by a hand-written weighted formula over the same features the model consumes — so the model was scored on its ability to rediscover that formula. Our own reproducible evidence: the AUC of the generating function against its own label is **0.9098**, against the reported ensemble AUC of **0.9182** **[R-000 | `research/analysis/00_audit_evidence.py`]**. The reported figure measured the chosen noise variance, not predictive skill, and is **withdrawn**; we cite it here only to explain the withdrawal. The general mechanism — leakage inflating apparent performance — is documented across 294 papers in 17 fields (L-38). We found no source stating the specific circularity result, and argue it from our own evidence rather than attaching a citation that does not establish it.
 
@@ -293,9 +294,9 @@ These are judgements we draw, not measurements.
 
 Revenue-contingent repayment and fixed instalment repayment differ in *when* money moves, and that difference has two faces.
 
-In the simulated scenarios examined here, the revenue-contingent contract holds the seller's **displayed** payment burden roughly flat under adverse revenue paths — a statement that holds for scenarios in which the net-sales/GMV ratio is fixed, and for periods before the final clipped payment — while the fixed contract's burden rises in inverse proportion to revenue. The same mechanism delays the provider's recovery and, where permanent closure precedes completion, leaves a contractual balance unrecovered.
+In the simulated scenarios examined here, the revenue-contingent contract holds the seller's **displayed** payment burden roughly flat under adverse revenue paths — a statement that holds for scenarios in which the net-sales/GMV ratio is fixed, and for periods before the final clipped payment — while the fixed contract's burden rises in inverse proportion to revenue. The same mechanism moves the provider's recovery, and where permanent closure precedes completion it leaves a contractual balance unrecovered.
 
-Two qualifications travel with that sentence. **Provider recovery ordering is scenario-dependent**, not uniform: it follows the exact P4 condition on realised mean eligible base against `B* = P/r`, and both directions occur in this scenario library. And **the fixed arm is an optimistic scheduled-recovery benchmark**, since every instalment is assumed paid in full and on time. Reporting either face alone misstates the contract.
+**In which direction it moves recovery is scenario-dependent, not uniform.** It follows the exact P4 condition on realised mean eligible base against `B* = P/r`, and both directions occur in this scenario library: recovery lags in the severe-downturn scenario and leads at exactly baseline revenue. A summary that states a direction without naming a scenario is not supported by these results. One further qualification travels with the sentence above: **the fixed arm is an optimistic scheduled-recovery benchmark**, since every instalment is assumed paid in full and on time. Reporting either face alone misstates the contract.
 
 The price of the contract is a separate question from its payment rule, and the two are easy to conflate — an earlier project draft stated the conflation, and it was withdrawn before any external publication. At one cap factor the revenue-contingent arm looks expensive; at another it does not; the structure is identical in both. Any cost comparison that does not name its cap factor is uninterpretable.
 
@@ -361,18 +362,49 @@ All entries verified against a publisher deposit, DOI resolution, or the issuing
 
 | Artifact | SHA-256 |
 |---|---|
+| `baseline_v3_canonical.json` | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` |
+| `baseline_equalcost_v2_canonical.json` | `b3ebfe6a5a7e7f48726d7e501295b02f84258a3fe9ee4e048875125b1270e0ee` |
+| `baseline_closure_v2_canonical.json` | `21b8e207ff2db9ac866b8cb2bab47c8c2e434d2bff03d802eb6f53a66fdcea4b` |
+| `baseline_closure_equalcost_v2_canonical.json` | `e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665` |
+| `validation_v2_canonical.json` | `7d9b9d0f9b0fd0fea7011625026a7a5da28c1d4fab009e9a2bf2bd7639af52cc` |
+
+**Superseded by A-9 (D-049), preserved byte-for-byte.** Every figure published
+before 2026-08-20 was computed from these files, so the record of what was
+published stays independently verifiable. They are historical evidence: never
+cited as current, never regenerated, never deleted. Their integrity is asserted
+by `backend/tests/test_validation_artifact.py`.
+
+| Superseded artifact | SHA-256 |
+|---|---|
 | `baseline_v2_canonical.json` | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` |
 | `baseline_equalcost_v1_canonical.json` | `6f9c71b111400aea1b2ea5c06527404f849fa390de0eef47e22b75a552da68e7` |
 | `baseline_closure_v1_canonical.json` | `0fe503d7f96b4c21d68b2fb812e0e9645ac21bdb6308208be4182cdef6179470` |
 | `baseline_closure_equalcost_v1_canonical.json` | `49b6f8ef19c81eebe1288d0d090c858a64b30f35cd5263afd6f4a971696b15f9` |
 | `validation_v1_canonical.json` | `f89fd2baab7f5628f9aed7e7a6be7ae40e0e72919b0f9f41e20875946c67ddb4` |
 
-**Reproducibility, stated at the strength the measurement supports.** All five artifacts reproduce **numerically at published precision** from a clean tree on every platform tested. **Byte equality is platform-dependent and is not claimed across platforms:** on Linux/aarch64 CPython 3.10.12 all five regenerate byte-identically; on macOS CPython 3.11.5, `baseline_v2` differs in 9 last-bit floating-point values and `baseline_equalcost_v1` in 2, while the other three are byte-identical. Verify with `python3 research/verify_reproduction.py`, which regenerates into a scratch tree and reports byte equality and numeric-leaf equality as separate columns.
+**Reproducibility, stated at the strength the measurement supports.** All five artifacts reproduce **numerically at published precision** from a clean tree on every platform tested — 5/5 numerically equal at relative tolerance `1e-9`. **Byte equality is platform-dependent and is not claimed across platforms:** on Linux/aarch64 CPython 3.10.12 all five regenerate byte-identically; on macOS 26.0 arm64 / CPython 3.11.5 / NumPy 2.2.6, **3 of 5** do, with `baseline_v3` differing in 11 last-bit floating-point leaves (worst relative difference `5.351e-15`) and `baseline_equalcost_v2` in 3 (`1.532e-16`). The macOS column is the result of an **independent audit run** of the verification script against the current artifacts, not a figure carried over from the superseded generation — those files were measured separately at 9 and 2 differences, and quoting them for these would have been wrong in both rows. Verify with `python3 research/verify_reproduction.py`, which regenerates into a scratch tree and reports byte equality and numeric-leaf equality as separate columns.
 
 An earlier version of this project claimed byte-for-byte reproducibility without qualification, on the basis of an evidence step that re-hashed the committed file rather than regenerating it. That step could not have failed for any reason connected to determinism. Both the claim and the evidence are corrected.
 
-**A disclosed inconsistency.** Each artifact embeds a metadata field `canonical.determinism` carrying the superseded unqualified claim. The artifacts were **not** regenerated to correct it, because doing so would change all five registered checksums in order to fix a sentence about reproducibility. The field is marked superseded in `research/RESULTS_REGISTRY.md`, and a regression test asserts that no public surface renders it.
+**A resolved inconsistency, and where it survives.** The five **superseded** artifacts each embed a metadata field `canonical.determinism` carrying an unqualified byte-identity claim that D-041 withdrew. They were deliberately not rewritten: correcting a sentence *about* reproducibility by regenerating the files whose checksums record it would have destroyed the evidence in order to tidy it. That trade was reopened only when A-9 demonstrated a genuine defect in the rate layer, at which point regeneration had to happen anyway — so the **current** artifacts carry the corrected wording: numeric equality at published precision across tested platforms, byte equality only within a fixed runtime. The superseded files keep the old string, are preserved byte-for-byte as the record of what was published, and a regression test asserts that no public surface renders the field (D-043, D-044, D-049).
 
-**Tests.** 629 simulation tests and 379 backend tests pass. Nine browser tests **skip** where no chromium build is available; they are reported as skips and are not counted as passes.
+**Tests.** **1,145 non-browser tests pass: 502 backend and 643 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.
 
-**Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
+**Governing documents.** `research/METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-9 (frozen specification); `research/DERIVATIONS.md` (propositions and proofs); `research/CLAIM_LEDGER.md` (what may be claimed, with required qualifiers); `research/RESULTS_REGISTRY.md` (every registered result); `research/DECISION_LOG.md` (every decision and supersession, including our own retracted claims).
+
+---
+
+## Appendix A. Source-note convention
+
+Quantitative statements in this manuscript are of four different kinds, and a single note format cannot serve all four. An earlier draft promised one that it could not satisfy for external statistics or analytical constants. The rule adopted here is type-appropriate:
+
+| Claim type | Note format |
+|---|---|
+| External fact or finding | **(L-nn)** — entry in `research/publication/LITERATURE_MATRIX.md` |
+| Analytical claim or constant | proposition reference in `research/DERIVATIONS.md`, and a ledger **M-n** where one exists |
+| Simulated magnitude | **[artifact → JSON path]**, plus a ledger ID (S-, P-, I-) where one exists |
+| Test count, checksum, reproducibility | reproducibility evidence, §15 |
+
+A quantitative statement without the note appropriate to its type is a defect, not a stylistic choice. **Ledger IDs are never invented to fill the slot** — where no ledger row exists, the artifact path stands alone.
+
+A reader wanting to check any figure in this paper can therefore go directly to its source: literature entries resolve to `LITERATURE_MATRIX.md`, analytical constants to the proof in `DERIVATIONS.md`, and every simulated magnitude to a JSON path inside one of the five checksummed artifacts listed in §15.

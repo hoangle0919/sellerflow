@@ -1,16 +1,34 @@
 """Regenerate every artifact in a clean copy and report byte and numeric equality SEPARATELY.
 
+WHAT THIS ACTUALLY EXECUTES, stated precisely because the previous version's
+claim was broader than its behaviour. In a throwaway copy of `research/`, for
+each generator: delete the outputs it owns, run it, require them to reappear,
+then compare against the committed originals. The validation battery is run in
+full -- `run_validation.py` sections 1, 2, 4, 5 and 6 -- and only then
+canonicalized. It used to skip straight to canonicalization over the raw file
+the copy inherited, so `run_validation.py` never ran and a broken battery would
+have verified clean.
+
     python3 verify_reproduction.py            # regenerate in a temp tree, compare, report
     python3 verify_reproduction.py --keep     # keep the temp tree for inspection
 
 WHY THE TWO ARE REPORTED SEPARATELY. Until D-041 this project claimed its
 artifacts "reproduce byte-for-byte". That claim was made on Linux and is not
-true everywhere: an independent regeneration on macOS / CPython 3.11.5 produced
-9 last-bit floating-point differences in `baseline_v2` and 2 in
-`baseline_equalcost_v1`. Byte equality is a statement about a *serialization* on
-one platform; numeric equality at published precision is the statement a reader
-actually needs. Collapsing them hid a real cross-platform limitation behind a
-stronger-sounding word.
+true everywhere. Measured on the CURRENT A-9 generation by an independent audit
+run of this script (macOS 26.0 arm64, CPython 3.11.5, NumPy 2.2.6):
+
+    baseline_v3_canonical.json                    11 last-bit leaves  5.351e-15
+    baseline_equalcost_v2_canonical.json           3 last-bit leaves  1.532e-16
+    baseline_closure_v2_canonical.json             byte-identical
+    baseline_closure_equalcost_v2_canonical.json   byte-identical
+    validation_v2_canonical.json                   byte-identical
+    -> 3/5 byte-identical, 5/5 numerically equal at rel tol 1e-9
+
+On Linux/aarch64 CPython 3.10.12 all five are byte-identical. The finding is
+about the platform, not the research. Byte equality is a statement about a
+*serialization* on one runtime; numeric equality at published precision is the
+statement a reader actually needs. Collapsing them hid a real cross-platform
+limitation behind a stronger-sounding word.
 
 WHAT THIS SCRIPT WILL NOT DO. It never rewrites a registered artifact. Chasing
 byte equality by regenerating the committed files on whichever machine happens
@@ -43,34 +61,49 @@ RESULTS = os.path.join(HERE, "results")
 #: `canonicalize_validation.py`, whose `--write` path re-verifies the four
 #: registered baseline checksums after writing and therefore requires them to
 #: exist — so on any machine where a baseline did not regenerate byte-identically
-#: (which is the case on macOS: 9 and 2 last-bit float differences), the run
-#: aborted instead of reporting the difference it exists to report.
+#: (which is the case on macOS for the superseded generation AND, as the audit
+#: run above confirms, for the current one), the run aborted instead of
+#: reporting the difference it exists to report.
 #:
 #: Now each generator's own output is deleted immediately before that generator
 #: runs, and recreation is confirmed. Nothing else is touched.
 GENERATORS = (
-    ("run_baseline.py", (), ("baseline_v2_canonical.json",
-                             "baseline_v2_provenance.json")),
-    ("run_equal_cost_baseline.py", (), ("baseline_equalcost_v1_canonical.json",
-                                        "baseline_equalcost_v1_provenance.json")),
-    ("run_closure_baseline.py", (), ("baseline_closure_v1_canonical.json",
-                                     "baseline_closure_v1_provenance.json",
-                                     "baseline_closure_equalcost_v1_canonical.json",
-                                     "baseline_closure_equalcost_v1_provenance.json")),
+    ("run_baseline.py", (), ("baseline_v3_canonical.json",
+                             "baseline_v3_provenance.json")),
+    ("run_equal_cost_baseline.py", (), ("baseline_equalcost_v2_canonical.json",
+                                        "baseline_equalcost_v2_provenance.json")),
+    ("run_closure_baseline.py", (), ("baseline_closure_v2_canonical.json",
+                                     "baseline_closure_v2_provenance.json",
+                                     "baseline_closure_equalcost_v2_canonical.json",
+                                     "baseline_closure_equalcost_v2_provenance.json")),
+    # VALIDATION IS A TWO-STAGE REGENERATION, and treating it as one was a hole
+    # in this verifier.
+    #
+    # `canonicalize_validation.py` re-expresses `results/validation_v2.json`; it
+    # computes nothing. Because the scratch tree is a `copytree` of the real one,
+    # that raw file arrived already written, so the step "regenerated" the
+    # canonical form from a committed input and `run_validation.py` never ran at
+    # all. A completely broken validation battery would have passed this check.
+    #
+    # The raw file is therefore deleted with the canonical pair, and the battery
+    # is re-run section by section first. `run_validation.py` accumulates into
+    # one file across five invocations, hence the tuple of argv.
+    ("run_validation.py", (("1",), ("2",), ("4",), ("5",), ("6",)),
+     ("validation_v2.json",)),
     # `--no-registered-check`: inside this scratch tree the baselines were just
     # regenerated, so re-checking them against the registered checksums would
     # abort the run on exactly the platform whose difference we are trying to
     # measure. See the flag's rationale in `canonicalize_validation.py`.
     ("canonicalize_validation.py", ("--write", "--no-registered-check"),
-     ("validation_v1_canonical.json", "validation_v1_provenance.json")),
+     ("validation_v2_canonical.json", "validation_v2_provenance.json")),
 )
 
 ARTIFACTS = (
-    "baseline_v2_canonical.json",
-    "baseline_equalcost_v1_canonical.json",
-    "baseline_closure_v1_canonical.json",
-    "baseline_closure_equalcost_v1_canonical.json",
-    "validation_v1_canonical.json",
+    "baseline_v3_canonical.json",
+    "baseline_equalcost_v2_canonical.json",
+    "baseline_closure_v2_canonical.json",
+    "baseline_closure_equalcost_v2_canonical.json",
+    "validation_v2_canonical.json",
 )
 
 #: Distinguishes "key absent" from "key present with value null". `None` cannot
@@ -176,12 +209,17 @@ def _run(tmp, args):
             if os.path.exists(p):
                 os.remove(p)
 
-        r = subprocess.run([sys.executable, script, *argv], cwd=work,
-                           capture_output=True, text=True)
-        if r.returncode:
-            print(f"  FAILED {script}")
-            print((r.stderr or r.stdout)[-800:])
-            return 2
+        # A generator may need several invocations that accumulate into one
+        # output — `run_validation.py` takes a section number and appends.
+        invocations = argv if argv and isinstance(argv[0], tuple) else (argv,)
+        for call in invocations:
+            r = subprocess.run([sys.executable, script, *call], cwd=work,
+                               capture_output=True, text=True)
+            if r.returncode:
+                suffix = f" {' '.join(call)}" if call else ""
+                print(f"  FAILED {script}{suffix}")
+                print((r.stderr or r.stdout)[-800:])
+                return 2
 
         # Confirm recreation, rather than assuming a zero exit means it wrote.
         absent = [o for o in outputs
@@ -190,7 +228,8 @@ def _run(tmp, args):
             print(f"  FAILED {script} — exited 0 but did not recreate: "
                   f"{', '.join(absent)}")
             return 2
-        print(f"  ran {script}  →  recreated {len(outputs)} file(s)")
+        label = script if len(invocations) == 1 else f"{script} x{len(invocations)}"
+        print(f"  ran {label}  →  recreated {len(outputs)} file(s)")
 
     print()
     print(f"  {'artifact':<46}{'bytes':<9}{'leaves':<9}{'numeric':<10}{'worst rel'}")

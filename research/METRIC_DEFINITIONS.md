@@ -2,10 +2,15 @@
 
 > ## ⚠️ SUPERSEDED DOCUMENT — v0.1, retained for audit trail
 >
-> `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8 is authoritative. Two families of claim in this file are **specifically superseded and must not be quoted** (D-043):
+> `METHODOLOGY_SPEC.md` v1.0 + amendments **A-1…A-9** is authoritative. Read the current specification through its latest amendment, not through this file.
 >
+> Three families of claim here are **specifically superseded and must not be quoted**:
+>
+> - **Effective APR conditioning.** Superseded by **A-9** (D-049). Anything here treating the mean effective rate as an average over paths that *completed* is withdrawn. Completion and the existence of an internal rate of return are separate events: a path that stopped short of the contractual cap but made payments has a well-defined rate over the **observed window**. `duration_mean` is conditioned on completion; `apr_mean` is conditioned on IRR existence; neither is automatically a portfolio-wide outcome.
 > - **Affordability.** Anything here describing an arm as "affordable", or a hypothesis predicting "affordability", is superseded by A-8. The supportable statement is only whether a simulated path clears the **illustrative burden bands (10/15/20/25% of revenue)** chosen for this study. Those are reporting thresholds, not validated hardship cutoffs, and burden is measured against revenue rather than against what the seller retains after costs.
 > - **Fixed-payment "advantage".** Superseded by A-8. The supportable statement is **contractual schedule invariance**: `q_t = P` contains no revenue term, so the schedule does not respond to reported revenue. It is not a collection claim — the model assumes fixed payments are made in full and on time, and so provides an **optimistic scheduled-recovery benchmark**.
+>
+> The two superseded families above were recorded under D-043, when the specification ran to A-8. This banner said "A-1…A-8" until A-9 was added, which meant a reader following it landed one amendment short of the current definition of the very metric this file names.
 
 **Project:** Revenue-Contingent Financing Under Volatile Sales: A Model-Based and Simulation Study Motivated by Vietnamese E-commerce Sellers
 **Status:** 🔒 **FROZEN 2026-08-03, before any comparison-engine run.**

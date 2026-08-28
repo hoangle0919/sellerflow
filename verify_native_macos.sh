@@ -218,8 +218,11 @@ PY
   echo
   echo '> The underwriting ensemble is synthetic and **unvalidated**: its 0.92 AUC'
   echo '> benchmark was withdrawn as circular (D-026). Any `sellers_assessed` count'
-  echo '> above is seeded demo data. Nothing downstream of the risk score depends on'
-  echo '> the model.'
+  echo '> above is seeded demo data. The financing formulas are deterministic once'
+  echo '> a risk tier is supplied; however, the active scoring path can change the'
+  echo '> assigned tier and therefore the advance, remittance rate, cap factor,'
+  echo '> repayment amounts and eligibility. `GET /api/health` reports which path'
+  echo '> is active.'
 } > "$REPORT"
 
 # Belt and braces: strip any absolute path that slipped through, so the report

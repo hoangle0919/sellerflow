@@ -5,6 +5,18 @@ are excluded by policy; see `evidence/README.md`.
 
 **Result: PASS.**
 
+> **Addendum, 2026-08-20 (D-047). One statement in this record was later found
+> to be wrong, and is left in place because an evidence record that gets edited
+> after the fact cannot be relied on.** The closing note below says "Nothing
+> downstream of the risk score depends on the model". The risk **tier** does:
+> the score is thresholded into Low / Medium / High Risk, and the tier sets the
+> advance percentage, remittance rate, cap factor and whether financing is
+> offered at all. The correct statement is that the financing formulas are
+> deterministic *once a risk tier is supplied*, while the active scoring path
+> can change that tier and therefore the displayed figures. Everything else in
+> this record — the pinned-environment verification it exists to document — is
+> unaffected. `verify_native_macos.sh` no longer emits the old wording.
+
 ## What this closes
 
 The pre-UI hardening gate ran in a Linux sandbox on Python 3.10, where

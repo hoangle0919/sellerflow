@@ -153,7 +153,7 @@ def test_benchmark_b_zero_rate_is_straight_line():
 def test_apr_recovers_the_input_rate_of_an_annuity():
     """Round trip: build an 18% annuity, solve for its APR, get 18% back
     (as an effective annual rate: 1.015^12 - 1 = 19.56%)."""
-    p = [x for x in fix_b_payments(terms(), T) if x > 0]
+    p = fix_b_payments(terms(), T)          # A-9: full vector, zeros included
     apr = solve_apr(100_000_000.0, p)
     assert math.isclose(apr, (1.015 ** 12) - 1, rel_tol=1e-3)
 

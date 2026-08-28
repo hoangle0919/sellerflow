@@ -7,12 +7,33 @@ Answers the four questions raised at the pre-UI hardening gate (D-028).
 It trains its own, at deploy time. `railway.toml`:
 
 ```
-startCommand = "cd backend && python train_model.py --skip-if-exists 2>/dev/null; \
-                python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+startCommand = "bash backend/start_railway.sh"
 ```
 
 `train_model.py` builds the ensemble from `generate_data.py` — synthetic data
 generated in-process — and writes four `.pkl` files to `backend/models/`.
+
+**Superseded form, and why.** Until 2026-08-20 the start command was inline:
+
+```
+cd backend && python train_model.py --skip-if-exists 2>/dev/null; \
+python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+Both halves were wrong. `2>/dev/null` discarded the only evidence of why
+training failed, and the bare `;` started the service regardless — so entering
+the fallback was silent and indistinguishable from success. The live demo ran
+on the heuristic for an unknown period with nothing in the logs saying so; it
+was noticed only because `/api/health` reports `scoring_path`.
+`start_railway.sh` keeps the fallback — it is a supported path — but logs the
+failure, states the consequence, and continues deliberately rather than through
+shell punctuation.
+
+**The fallback is not output-neutral.** `scoring_path` sets `pd_score`, which
+selects the risk tier, which sets the advance percentage, the remittance rate,
+the cap factor and whether financing is offered at all. A README revision once
+claimed the displayed numbers were "identical either way"; that claim is
+withdrawn, and `tests/test_scoring_path_disclosure.py` fails if it returns.
 
 **No model artifact is in the repository.** `.gitignore` line 4 excludes `*.pkl`.
 A clean checkout has no model, by design. The consequence is that the artifact
@@ -81,9 +102,23 @@ research layer (`research/rbf_sim/`) has no dependency on the backend at all
 and does not import scikit-learn.
 
 Concretely, with no model artifact present: the API serves, `/api/health`
-returns `operational`, assessments are produced via the heuristic, the
-financing structure and scenarios are unchanged, and the full backend and
-simulation suites pass. Asserted by `tests/test_model_artifacts.py`.
+returns `operational`, assessments are produced via the heuristic, and the full
+backend and simulation suites pass. Asserted by `tests/test_model_artifacts.py`.
+
+**What is *not* unchanged.** An earlier version of this paragraph said the
+financing structure and scenarios were unchanged without the ensemble. They are
+unchanged *as formulas*, and that is all. The formulas are keyed to a risk
+tier, and the tier is produced by whichever scorer is active:
+
+```
+scoring_path → pd_score → risk tier → advance %, remittance %,
+                                      cap factor, eligibility
+```
+
+The two paths read different features and can assign different tiers to the
+same merchant; High Risk zeroes the advance, the remittance rate and the cap,
+so no offer is shown at all. `tests/test_scoring_path_disclosure.py` fails if
+any public surface claims otherwise.
 
 ## Rebuilding the model locally
 

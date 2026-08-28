@@ -1,4 +1,16 @@
-"""The claim ledger must stay true to the artifacts it cites.
+"""CURRENT-CLAIM checks read the CURRENT artifacts.
+
+These assertions are about what the project may say today, so they must read
+the A-9 generation -- baseline_v3, baseline_equalcost_v2, the two closure v2
+tracks and validation_v2. They previously read the superseded v1/v2 files,
+which meant every headline figure was being validated against the artifacts
+the publication no longer cites.
+
+Preservation of the superseded artifacts is a separate concern with its own
+test: `test_validation_artifact.py::test_superseded_artifacts_are_preserved_byte_for_byte`.
+Those files must never change; these claims must never come from them.
+
+The claim ledger must stay true to the artifacts it cites.
 
 A ledger is only worth having if it fails when it drifts. These tests read
 `research/CLAIM_LEDGER.md` as data: every checksum it prints must match the file
@@ -51,10 +63,10 @@ def test_claim_ids_are_unique():
 
 def test_headline_figures_still_match_their_artifacts():
     """Spot-checks the numbers most likely to be quoted in the paper."""
-    v = _artifact("validation_v1")
-    b = _artifact("baseline_v2")
-    c = _artifact("baseline_closure_v1")
-    ce = _artifact("baseline_closure_equalcost_v1")
+    v = _artifact("validation_v2")
+    b = _artifact("baseline_v3")
+    c = _artifact("baseline_closure_v2")
+    ce = _artifact("baseline_closure_equalcost_v2")
     txt = _text()
 
     cases = [
@@ -79,7 +91,7 @@ def test_closure_falsifies_the_default_prevention_claim():
     Asserted at BOTH registered cap factors, because a reader's first instinct
     is that the illustrative price is what causes the failure. It is not.
     """
-    for stem in ("baseline_closure_v1", "baseline_closure_equalcost_v1"):
+    for stem in ("baseline_closure_v2", "baseline_closure_equalcost_v2"):
         rate = _artifact(stem)["scenarios"]["closure_m7"]["RBF"]["incomplete_recovery_rate"]
         assert rate == 1.0, f"{stem}: closure_m7 incomplete rate is {rate}, expected 1.0"
 
@@ -87,7 +99,7 @@ def test_closure_falsifies_the_default_prevention_claim():
 def test_f_star_is_presented_as_a_grid_match_with_its_residual():
     """P-1. `f*` is the nearest point on the swept cap-factor grid, not an
     exact cost match. Stating it without the residual implies equality."""
-    v = _artifact("validation_v1")
+    v = _artifact("validation_v2")
     residual = abs(v["pricing"]["equal_cost"]["apr"]
                    - v["pricing"]["benchmark_b_apr"]) * 100
     assert round(residual, 5) == pytest.approx(0.02416, abs=5e-5), \
@@ -102,13 +114,13 @@ def test_rbf_g_floor_never_binds_but_the_ceiling_does():
     """S-6. The first draft of the ledger said RBF-G was 'bit-identical to RBF
     in all ten scenarios' and credited the floor. The artifact it cited says
     otherwise, and no test checked it — so the false claim shipped."""
-    bp = _artifact("validation_v1")["rbf_g_breakpoint"]["pmin0.25_hard0.5"]
+    bp = _artifact("validation_v2")["rbf_g_breakpoint"]["pmin0.25_hard0.5"]
     assert bp["floor_months"] == 0, "the floor is claimed never to bind"
     assert bp["reachable"] is False, "the registered setting is claimed unreachable"
     assert bp["ceiling_months"] == 6009, (
         f"ledger S-6 cites 6,009 ceiling months, artifact says {bp['ceiling_months']}")
 
-    scen = _artifact("baseline_v2")["scenarios"]
+    scen = _artifact("baseline_v3")["scenarios"]
     differing = [s for s, arms in scen.items()
                  if "RBF-G" in arms and arms["RBF-G"] != arms["RBF"]]
     assert len(differing) == 6, (

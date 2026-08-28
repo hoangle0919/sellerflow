@@ -1,6 +1,12 @@
 # `rbf_sim` — reproducible simulation package
 
-Implements **`METHODOLOGY_SPEC.md` v1.0** (frozen 2026-08-03, before any outcome run).
+Implements **`METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-9** (v1.0 frozen 2026-08-03, before any outcome run).
+
+**A-9 is the one amendment that changed a computed value.** The effective-rate
+calculation now takes the complete monthly payment vector including internal
+zero months, solves over `i > −1` so a loss is a negative rate rather than
+"undefined", and reports its denominator: `apr_mean` is conditioned on IRR
+existence, `duration_mean` on completion. Those are different sets.
 
 > ⚠️ Everything this package produces is **simulated**. No observed seller revenue,
 > repayment, or default outcome exists in this study. See spec §15 for binding
@@ -9,11 +15,11 @@ Implements **`METHODOLOGY_SPEC.md` v1.0** (frozen 2026-08-03, before any outcome
 ## Run
 
 ```bash
-python3 -m pytest rbf_sim/tests/ -q     # 629 tests
-python3 run_baseline.py                 # -> results/baseline_v2_canonical.json
+python3 -m pytest rbf_sim/tests/ -q     # 643 tests
+python3 run_baseline.py                 # -> results/baseline_v3_canonical.json
 ```
 
-Deterministic: identical seeds reproduce **numerically at published precision**, and byte-identically **within a fixed runtime**. ~~bit-for-bit~~ withdrawn (D-041): on macOS CPython 3.11.5, `baseline_v2` differs in 9 last-bit float values and `baseline_equalcost_v1` in 2. Verify with `research/verify_reproduction.py`.
+Deterministic: identical seeds reproduce **numerically at published precision**, and byte-identically **within a fixed runtime**. ~~bit-for-bit~~ withdrawn (D-041). Current generation, measured by an independent audit run on macOS 26.0 arm64 / CPython 3.11.5 / NumPy 2.2.6: `baseline_v3` **11** last-bit leaves (worst rel. diff `5.351e-15`), `baseline_equalcost_v2` **3** (`1.532e-16`), the two closure artifacts and `validation_v2` byte-identical — **3/5 byte-identical, 5/5 numerically equal**. All five are byte-identical on Linux/aarch64 CPython 3.10.12. Verify with `research/verify_reproduction.py`, which runs the full validation battery as well as the baselines.
 
 ## Modules
 
@@ -44,5 +50,12 @@ Identities are **computed, never sampled**, and enforced by
 - **High-payment-burden month** — computed from revenue alone. The primary metric.
 - **Distress month** — requires `m` and `F` assumptions. Secondary, always labelled.
 - **Incomplete recovery within horizon** — **never** called a default rate.
-- RBF burden is constant at `r` **by construction**. Direction is definitional;
-  magnitude and the duration trade-off are measured.
+- RBF **contractual** burden is constant at `r` **by construction**, on the
+  contractual base (net sales). The burden this package *reports* uses GMV as
+  its denominator, so it equals `r·(1 − return rate)` and moves when returns
+  move — constant only where the net-sales/GMV ratio is fixed, and before the
+  final clipped payment. Direction is definitional; magnitude and the duration
+  trade-off are measured.
+- Provider recovery ordering is **not** definitional: under P4 it may lead or
+  lag the cost-matched fixed arm depending on the realised path. Report it per
+  scenario, never as a property of the structure.

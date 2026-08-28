@@ -2,14 +2,23 @@
 builder = "NIXPACKS"
 
 [deploy]
-# Model training is best-effort: the financing arithmetic is deterministic and
-# never calls the ensemble, so a training failure must not stop the service.
-# But it was previously silenced with `2>/dev/null`, which is why nobody noticed
-# the ensemble had stopped building at all — the deploy looked identical whether
-# training succeeded or failed. Errors now reach the deploy log, and the
-# fallback is announced rather than assumed. `/api/health` reports the scorer
-# actually in use.
-startCommand = "cd backend && { python train_model.py --skip-if-exists || echo \"[startup] model training FAILED (see the error above) — serving with the deterministic heuristic fallback\"; } ; python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+# Deployment entrypoint lives in backend/start_railway.sh, not inline here.
+#
+# Both branches of this merge fixed the same defect -- stderr redirection to
+# the null device on the training step, which made a failed deploy
+# indistinguishable from a successful one and is why the live site could serve
+# the heuristic fallback in silence.
+# The script form is kept because it does the same job with room to explain
+# itself: it preserves training stderr, announces the fallback explicitly,
+# states the consequence (the active scorer sets the tier, and the tier sets the
+# advance, remittance rate, cap factor and whether an offer appears at all), and
+# is exercised by tests rather than only by a deploy.
+#
+# The inline form is discarded. Its comment read "the financing arithmetic is
+# deterministic and never calls the ensemble, so a training failure must not
+# stop the service" -- the second half is right and the first half implies the
+# fallback is output-neutral, which is precisely the claim D-047 withdrew.
+startCommand = "bash backend/start_railway.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"

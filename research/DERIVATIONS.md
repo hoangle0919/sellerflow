@@ -145,9 +145,9 @@ IRR(p)  >  IRR(p′)
 
 **Proof.** Write `NPV(i) = Σ_t p_t·v^t` with `v = 1/(1+i) ∈ (0,1)`. By Abel summation, `NPV(i) = Σ_k (Σ_{t≤k} p_t)(v^k − v^{k+1}) + (Σ_t p_t)·v^{T+1}`. Since `v^k − v^{k+1} > 0` and the totals agree, dominance of partial sums gives `NPV_p(i) > NPV_{p′}(i)` for every `i > 0`. Both are strictly decreasing in `i` with the same limits, so the root of `NPV(i) = A` is strictly larger for `p`. ∎
 
-**Consequence — "the APR of RBF" is not well defined as a contract property.** Two sellers on *identical terms* `(A, r, f)` face different effective APRs purely because their revenue arrives at different speeds. Faster revenue → earlier payments → same total, higher APR.
+**Consequence — "the APR of RBF" is not well defined as a contract property.** **Among paths whose payment stream admits an internal rate of return**, two sellers on *identical terms* `(A, r, f)` face different effective APRs purely because their revenue arrives at different speeds. **Existence is independent of completion (A-9):** a path that never reaches the contractual target still has a well-defined return on the payments it made — `closure_m7` completes on no path and its mean rate is −86.5129%. The rate is undefined only where **no payment occurs at all**, leaving the equation without a root. Where the target is unreached the figure is an observed-window rate over the horizon, not the cost of a repaid contract. Faster revenue → earlier payments → same total, higher APR.
 
-This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan" was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic (P6a shows cost is proportional to `f`), and it quoted a single APR as though it were a contract property (P6b shows APR is jointly determined by `f` and the path).
+This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan" was wrong on two counts: it fixed `f = 1.20` as though it were intrinsic (P6a shows the **contractual repayment target `A·f`** is proportional to `f`, and realised repayment equals that target **only upon completion** — so "cost" is proportional to `f` only on paths that complete), and it quoted a single APR as though it were a contract property (P6b: among completed, IRR-defined paths the APR is jointly determined by `f` and the path; undefined only where no payment occurs, not merely where a path fails to complete).
 
 **Nearest-grid-match pricing — two different statements, kept apart (D-044).**
 
@@ -316,7 +316,9 @@ Every statement the project makes falls into exactly one of these five classes. 
 - **P7** Completion iff some **finite** `t ≤ H` has `r·S_t ≥ f·A`. On the lifetime sum `S_∞` against the target `Θ = f·A/r`: `S_∞ > Θ` **strictly** implies completion; `S_∞ < Θ` precludes it at any horizon; at `S_∞ = Θ` completion holds **only if a finite partial sum attains `Θ`**, which a strictly positive infinite series never does. Routes to incomplete recovery **include** — this list is illustrative, not exhaustive — zero revenue, maturity/write-off, finite horizon, and a strictly positive but fast-decaying path with inadequate lifetime cumulative sales. Bounded-away-from-zero is sufficient, not necessary; positive is not sufficient. For geometric decay the condition is `ρ > ρ*` **strictly** (D-022), the same boundary logic in a special case.
 
 ### B. Simulation results — illustrate A under stated illustrative parameters
-Magnitudes in `baseline_v2.json` and `validation_v1.json`. **Not estimates for Vietnamese sellers.** Example: "under the illustrative severe-downturn scenario, RBF removes 6.85 high-burden months at θ=0.15" — a property of that scenario specification, nothing more.
+Magnitudes in `baseline_v3_canonical.json` and `validation_v2_canonical.json` — the current registered artifacts (A-9). **Not estimates for Vietnamese sellers.** Example: "under the illustrative severe-downturn scenario, RBF removes 6.85 high-burden months at θ=0.15" — a property of that scenario specification, nothing more.
+
+> *Superseded pointer.* This paragraph previously sent readers to `baseline_v2.json` and `validation_v1.json`. Those files are frozen historical evidence: they were produced before the IRR definition was corrected, are preserved byte-for-byte, and must not be used to source a current magnitude. See D-049 and R-014.
 
 ### C. Sensitivity results — how B moves across the parameter grid
 S-1…S-16. Where a sign reverses, the claim is demoted to condition-dependent (spec §12).

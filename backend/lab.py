@@ -143,8 +143,8 @@ SCENARIOS: Dict[str, dict] = {
 
 #: A scenario is looked up in its track, first artifact that has it.
 TRACKS = {
-    "illustrative": ["baseline_v2", "baseline_closure_v1"],
-    "cost_matched": ["baseline_equalcost_v1", "baseline_closure_equalcost_v1"],
+    "illustrative": ["baseline_v3", "baseline_closure_v2"],
+    "cost_matched": ["baseline_equalcost_v2", "baseline_closure_equalcost_v2"],
 }
 
 ARMS = [
@@ -170,17 +170,22 @@ ARMS = [
     {"id": "RBF-EQ", "track": "cost_matched", "arm": "RBF", "palette": "rbf-ref",
      "name": "Reference-path cost-matched RBF",
      "short": "Revenue-based, cost-matched",
-     "chart_label": "Revenue-based 1.0945×",
+     # Built from the artifact's own cap factor. It used to read "1.0945×",
+     # hand-typed, which would have gone stale silently if a sweep ever moved.
+     "chart_label_fmt": "Revenue-based {f}×",
      "kind": "rbf",
-     "note": "The cap factor was chosen so this contract's cost matches the "
-             "amortizing loan ON THE REFERENCE PATH — a flat, shock-free path "
-             "used once at pricing time. On simulated paths the realised rate "
-             "differs, because duration moves with revenue. The name describes "
-             "how the price was set, not an outcome guaranteed on any path."},
+     # Prefixed at request time with the grid-residual sentence, so the exactness
+     # of the match is stated from the artifact rather than asserted.
+     "note_grid": True,
+     "note": "The cap factor was chosen on THE REFERENCE PATH — a flat, "
+             "shock-free path used once at pricing time. On simulated paths the "
+             "realised rate differs again, because duration moves with revenue. "
+             "The name describes how the price was set, not an outcome "
+             "guaranteed on any path."},
     {"id": "RBF-ILL", "track": "illustrative", "arm": "RBF", "palette": "rbf-ill",
      "name": "Illustrative RBF (cap factor 1.20)",
      "short": "Revenue-based, illustrative",
-     "chart_label": "Revenue-based 1.20×",
+     "chart_label_fmt": "Revenue-based {f}×",
      "kind": "rbf",
      "note": "An ILLUSTRATIVE cap factor, not a recommended or market price. "
              "Its higher cost is a property of choosing 1.20, not of "
@@ -206,6 +211,55 @@ def _checksum(stem: str) -> Optional[str]:
     return prov.get("canonical_sha256") if prov else None
 
 
+def _grid_pricing() -> dict:
+    """Reference-path pricing, read from the CANONICAL validation artifact.
+
+    `f*` is not solved analytically. `run_validation.py` sweeps a cap-factor
+    grid and keeps the point whose reference-path effective rate lands closest
+    to the amortizing loan's. Duration is an integer, so cost moves in steps and
+    an exact match is not generally attainable — the script has always said so
+    in its own output. The Lab said "equals", which promised an exact match the
+    method cannot deliver and the artifact does not record.
+
+    Every number here is READ FROM THE ARTIFACT. None is hand-typed, so the
+    residual cannot drift away from the file it describes, and if a future sweep
+    lands exactly on target the wording follows automatically.
+    """
+    body = _load("validation_v2_canonical") or {}
+    pricing = body.get("pricing") or {}
+    ec = pricing.get("equal_cost") or {}
+    achieved, target = ec.get("apr"), pricing.get("benchmark_b_apr")
+    exact = (achieved is not None and target is not None and achieved == target)
+    return {
+        "f_star": ec.get("f_star"),
+        "achieved_apr": achieved,
+        "benchmark_apr": target,
+        "residual_pp": (None if achieved is None or target is None
+                        else abs(target - achieved) * 100.0),
+        "exact_match": exact,
+        "basis": "nearest point on the swept cap-factor grid",
+    }
+
+
+def _grid_pricing_sentence() -> str:
+    """One sentence, built from the artifact, stating the residual honestly."""
+    p = _grid_pricing()
+    a, t, r = p["achieved_apr"], p["benchmark_apr"], p["residual_pp"]
+    if a is None or t is None:
+        return ("The cost-matched cap factor is the nearest point on the swept "
+                "cap-factor grid, not an exact solution; the pricing artifact "
+                "needed to quote the residual is not loaded.")
+    if p["exact_match"]:
+        return (f"The cost-matched cap factor is the nearest point on the swept "
+                f"cap-factor grid. On this sweep that point happens to land "
+                f"exactly on the benchmark's {t:.6%}.")
+    return (f"The cost-matched cap factor is the NEAREST POINT ON THE SWEPT "
+            f"cap-factor grid, not an exact match: it prices at {a:.6%} against "
+            f"the amortizing loan's {t:.6%}, a residual of about {r:.5f} "
+            f"percentage points. Duration is an integer, so cost moves in steps "
+            f"and an exact match is not generally attainable.")
+
+
 def _resolve(track: str, scenario: str):
     """First artifact in the track containing this scenario."""
     for stem in TRACKS[track]:
@@ -216,15 +270,15 @@ def _resolve(track: str, scenario: str):
 
 
 def artifacts_available() -> bool:
-    return _load("baseline_v2_canonical") is not None
+    return _load("baseline_v3_canonical") is not None
 
 
 def manifest() -> dict:
     roles = {
-        "baseline_v2": "Illustrative pricing (cap factor 1.20) — ten scenarios",
-        "baseline_equalcost_v1": "Reference-path cost-matched pricing — ten scenarios",
-        "baseline_closure_v1": "Illustrative pricing — closure / zero-revenue",
-        "baseline_closure_equalcost_v1": "Reference-path cost-matched — closure / zero-revenue",
+        "baseline_v3": "Illustrative pricing (cap factor 1.20) — ten scenarios",
+        "baseline_equalcost_v2": "Reference-path cost-matched pricing — ten scenarios",
+        "baseline_closure_v2": "Illustrative pricing — closure / zero-revenue",
+        "baseline_closure_equalcost_v2": "Reference-path cost-matched — closure / zero-revenue",
     }
     out = []
     for stem, role in roles.items():
@@ -242,16 +296,30 @@ def manifest() -> dict:
             "n_paths": body.get("n_paths"),
             "base_seed": body.get("base_seed"),
         })
-    val = _load("validation_v1")
+    # Load the CANONICAL validation artifact, because that is the file this
+    # block names and checksums.
+    #
+    # Two defects have now been fixed here. The first was that the block named
+    # the superseded validation_v1.json while reading validation_v2. The second
+    # survived that fix: the name and the checksum moved to
+    # validation_v2_canonical.json but the READ stayed on the raw
+    # validation_v2.json. The raw file carries no `canonical` block, so
+    # `spec_version` came back null while a canonical checksum sat beside it —
+    # a record that described one file with the contents of another. Reading
+    # the canonical file makes the name, the checksum, the spec version and the
+    # values all refer to the same bytes.
+    val = _load("validation_v2_canonical")
     return {
         "artifacts": out,
         "pricing_reference": {
-            "artifact": "validation_v1.json",
+            "artifact": "validation_v2_canonical.json",
+            "sha256": _checksum("validation_v2"),
+            "spec_version": ((val or {}).get("canonical") or {}).get("spec_version"),
             "equal_cost": (val or {}).get("pricing", {}).get("equal_cost"),
             "benchmark_b_apr": (val or {}).get("pricing", {}).get("benchmark_b_apr"),
-            "note": "The cost-matched cap factor was solved on the reference "
-                    "path so that its effective rate equals the amortizing "
-                    "loan's. Rates realised on simulated paths differ.",
+            "grid_pricing": _grid_pricing(),
+            "note": _grid_pricing_sentence() + " Rates realised on simulated "
+                    "paths differ again, because duration moves with revenue.",
         },
         "claim_taxonomy": CLAIM_TAXONOMY,
         "glossary": GLOSSARY,
@@ -285,54 +353,102 @@ def scenarios() -> List[dict]:
     return sorted(out, key=lambda s: s["order"])
 
 
+def _fmt_factor(f: float) -> str:
+    """Cap factor as it reads on a chart: at least 2 decimals, at most 4, no
+    trailing-zero noise. 1.2 -> "1.20", 1.0945 -> "1.0945"."""
+    frac = len(f"{f:.4f}".rstrip("0").split(".")[1])
+    return f"{f:.{max(2, frac)}f}"
+
+
 def _fmt_money(x) -> dict:
     v = to_vnd(x)
     return {"vnd": v, "display": f"{v:,} ₫"}
 
 
 def _censoring(a: dict) -> dict:
-    """Duration and rate are SURVIVOR STATISTICS. Say so when it matters.
+    """Duration and rate have DIFFERENT denominators. Report both separately.
 
-    `engine.run_scenario` averages duration over `[r.duration for r in rs if
-    r.duration is not None]` and the rate over paths where an IRR exists — both
-    exclude paths that never reached the repayment target. Where every path
-    completes, the distinction is empty. Where some do not, presenting these as
-    unconditional means describes the survivors and silently drops the failures,
-    which is the same error class as the withdrawn AUC: a number labelled as
-    something it is not.
+    This function used to derive one qualifier from `incomplete_recovery_rate`
+    and attach it to the duration *and* the rate. That was wrong, and A-9
+    corrected it:
 
-    At `closure_m13` the illustrative arm shows ~12 months and ~30% — computed
-    over the 24% of paths that finished, while 76% never did.
+      * `duration_mean` averages paths that COMPLETED within the horizon.
+      * `apr_mean` averages paths where an IRR EXISTS, which is a different and
+        usually larger set. A path can fail to reach the contractual target and
+        still have a perfectly well-defined return on the payments it made.
+
+    At `closure_m13`, f = 1.20: 119 of 500 paths complete, but all 500 have a
+    defined IRR. Labelling the rate "among completed paths" described 500 paths
+    as 119 and understated the completed-path figure by about nine points.
+
+    The artifacts now report `completed_rate` and `apr_defined_rate` explicitly,
+    so neither denominator is inferred here. Older artifacts lack those fields;
+    the fallbacks keep the Lab working against them without pretending to a
+    precision they cannot supply.
     """
     incomplete = a.get("incomplete_recovery_rate") or 0.0
-    partial = 0.0 < incomplete < 1.0
-    completed = max(0.0, 1.0 - incomplete)
-    if partial:
-        note = (f"Averaged over the {completed:.1%} of simulated paths that "
-                f"reached the repayment target within 24 months. The remaining "
-                f"{incomplete:.1%} never did and are excluded from this figure, "
-                f"not counted as long or expensive.")
-        return {
-            "censored": True,
-            "completed_share": completed,
-            "apr_label": "Mean APR among completed paths",
-            "duration_label": "Mean duration among completed paths",
-            "apr_basis": note,
-            "duration_basis": note,
-        }
+    completed = a.get("completed_rate")
+    if completed is None:                       # pre-A-9 artifact
+        completed = max(0.0, 1.0 - incomplete)
+    apr_defined = a.get("apr_defined_rate")
+    if apr_defined is None:                     # pre-A-9 artifact
+        apr_defined = 1.0 if a.get("apr_mean") is not None else 0.0
+
+    # ---- duration: conditioned on completion ------------------------------
+    if 0.0 < completed < 1.0:
+        duration_label = "Mean duration among completed paths"
+        duration_basis = (
+            f"Averaged over the {completed:.1%} of simulated paths that reached "
+            f"the repayment target within 24 months. The remaining "
+            f"{1.0 - completed:.1%} did not and are excluded from this figure, "
+            f"not counted as long.")
+    elif completed >= 1.0:
+        duration_label = "Mean duration"
+        duration_basis = ("Mean across simulated paths for this scenario. Every "
+                          "path reached the repayment target.")
+    else:
+        duration_label = "Mean duration"
+        duration_basis = "No path reached the repayment target within 24 months."
+
+    # ---- rate: conditioned on IRR existence, NOT on completion ------------
+    if apr_defined <= 0.0:
+        apr_label = "Effective APR"
+        apr_basis = ("No payment was made on any simulated path, so the rate "
+                     "equation has no root and no APR is defined.")
+    elif completed >= 1.0:
+        apr_label = "Mean simulated APR"
+        apr_basis = ("Mean across simulated paths for this scenario. Every path "
+                     "has a defined rate and every path reached the repayment "
+                     "target.")
+    else:
+        apr_label = "Mean simulated APR among rate-defined paths"
+        apr_basis = (
+            f"Averaged over the {apr_defined:.1%} of simulated paths with a "
+            f"defined internal rate of return — a different set from the "
+            f"{completed:.1%} that reached the repayment target. A path can "
+            f"miss the target and still have a rate on the payments it made. "
+            f"Where the target is not reached this is the rate over the "
+            f"observed 24-month window, not a final lifetime return; read it "
+            f"beside the incomplete-recovery figure.")
+
     return {
-        "censored": False,
+        # `censored` is keyed to duration, which is what it always meant -- but
+        # it previously read `0 < completed < 1`, so a scenario where NOTHING
+        # completed reported `censored: False`. That is the most censored case
+        # there is, and the flag gates whether the page shows its basis text at
+        # all: at closure_m7 the reader saw a rate and a blank duration with no
+        # explanation of either. Any incompleteness is now censoring, and the
+        # total case is flagged separately rather than folded into "not
+        # censored".
+        "censored": completed < 1.0,
+        "fully_censored": completed == 0.0,
         "completed_share": completed,
-        "apr_label": "Mean simulated APR",
-        "duration_label": "Mean duration",
-        "apr_basis": "Mean across simulated paths for this scenario. Every path "
-                     "reached the repayment target, so no path is excluded."
-                     if incomplete == 0.0 else
-                     "No path reached the repayment target, so no rate is defined.",
-        "duration_basis": "Mean across simulated paths for this scenario. Every "
-                          "path reached the repayment target."
-                          if incomplete == 0.0 else
-                          "No path reached the repayment target within 24 months.",
+        "apr_defined_share": apr_defined,
+        "denominators_differ": abs(apr_defined - completed) > 1e-12,
+        "apr_label": apr_label,
+        "duration_label": duration_label,
+        "apr_basis": apr_basis,
+        "duration_basis": duration_basis,
     }
 
 
@@ -367,14 +483,27 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
                   "the schedule itself defines the total."),
     }
 
+    # Chart labels carrying a cap factor are formatted from the artifact's own
+    # terms, so the number on the chart and the number in the file cannot
+    # disagree. Only arms without a cap factor keep a fixed label.
+    f = terms.get("f")
+    if spec.get("chart_label_fmt") and f is not None:
+        chart_label = spec["chart_label_fmt"].format(f=_fmt_factor(f))
+    else:
+        chart_label = spec.get("chart_label") or spec["short"]
+
+    note = spec["note"]
+    if spec.get("note_grid"):
+        note = _grid_pricing_sentence() + " " + note
+
     return {
         "id": spec["id"],
         "name": spec["name"],
         "short": spec["short"],
-        "chart_label": spec["chart_label"],
+        "chart_label": chart_label,
         "kind": spec["kind"],
         "palette": spec["palette"],
-        "note": spec["note"],
+        "note": note,
         "source_artifact": f"{stem}_canonical.json",
         "source_sha256": _checksum(stem),
         "cap_factor": terms.get("f") if has_cap else None,
@@ -384,8 +513,13 @@ def _arm_block(spec: dict, scenario: str) -> Optional[dict]:
         "cap_basis": target["basis"],
         "total_repaid_mean": _fmt_money(total or 0),
         "effective_apr": a.get("apr_mean"),
+        # A-9: undefined means the rate equation has no root -- i.e. no payment
+        # was made at all. It does NOT mean the contract failed to complete;
+        # closure_m7 misses the target on every path and still returns roughly
+        # -86.5%, which is a result, not an absence.
         "apr_undefined_reason": (None if a.get("apr_mean") is not None else
-                                 "repayment incomplete"),
+                                 "no payment was made, so the rate equation "
+                                 "has no root"),
         **_censoring(a),
         "burden": {
             "mean": a.get("burden_mean"),
@@ -416,7 +550,7 @@ def comparison(scenario: str) -> Optional[dict]:
         "metric_definitions": METRIC_DEFINITIONS,
         "findings": _findings(scenario, arms),
         "assumptions": ASSUMPTIONS,
-        "caveats": CAVEATS,
+        "caveats": caveats(),
         "summary": _summary(scenario, arms),
     }
 
@@ -428,7 +562,7 @@ def underreporting() -> Optional[dict]:
     only ω of true revenue. Listing it beside 'severe downturn' would imply it
     is a revenue path, which it is not.
     """
-    body = _load("baseline_v2_canonical")
+    body = _load("baseline_v3_canonical")
     if not body or "underreporting" not in body:
         return None
     rows = []
@@ -466,8 +600,8 @@ def underreporting() -> Optional[dict]:
 
     return {
         "rows": rows,
-        "source_artifact": "baseline_v2_canonical.json",
-        "source_sha256": _checksum("baseline_v2"),
+        "source_artifact": "baseline_v3_canonical.json",
+        "source_sha256": _checksum("baseline_v3"),
         "why_not_a_scenario": "This is a parameter sweep, not a revenue path. ω "
                               "is the share of true revenue the provider "
                               "observes; the underlying revenue shape is held "
@@ -494,7 +628,7 @@ def underreporting() -> Optional[dict]:
             {
                 "classification": "simulation_result",
                 "text": observed,
-                "source": "research/results/baseline_v2_canonical.json",
+                "source": "research/results/baseline_v3_canonical.json",
             },
         ],
     }
@@ -536,11 +670,15 @@ METRIC_DEFINITIONS = {
                       "excluded from this mean and reported separately as "
                       "incomplete recovery.",
         "why": "Revenue-based repayment extends the term when revenue falls, "
-               "rather than holding the payment fixed. The extension is the "
-               "provider's cost. Extension is NOT the same as preventing "
-               "default: where revenue reaches zero the cap may never be "
-               "reached at all, which is exactly what the closure scenarios "
-               "show. Read this beside the incomplete-recovery rate.",
+               "rather than holding the payment fixed. In the scenarios where "
+               "the term extends, that extension is the provider's cost. "
+               "Extension is NOT the same as preventing default: where revenue "
+               "stops PERMANENTLY BEFORE COMPLETION while a contractual "
+               "balance remains, no further payment occurs and the cap is "
+               "never reached. A temporary zero-revenue spell is a different "
+               "case and usually still completes -- temp_closure leaves 2.0% "
+               "of paths incomplete at f = 1.20 and none at f*. Read this "
+               "beside the incomplete-recovery rate.",
         "caveat": "Where any path fails to complete, this is a SURVIVOR "
                   "statistic. It describes the contracts that finished, not the "
                   "portfolio. A scenario with a short mean duration and a high "
@@ -554,8 +692,12 @@ METRIC_DEFINITIONS = {
                       "cost-matched fixed arms the denominator is the "
                       "contractual cap; for the amortizing loan, which has no "
                       "cap, it is scheduled total repayment.",
-        "why": "The other side of the trade-off. Slower recovery is a real cost "
-               "to the financier even when the full amount is eventually repaid.",
+        "why": "The other side of the trade-off. Where recovery is slower it is "
+               "a real cost to the financier even when the full amount is "
+               "eventually repaid — but the direction is not universal. "
+               "Revenue-contingent recovery may lead or lag the cost-matched "
+               "fixed arm depending on the realised path (P4), and both occur "
+               "in the registered scenarios. Read the direction per scenario.",
         "caveat": "Denominators differ by arm, so read each arm against its own "
                   "target rather than comparing absolute amounts recovered.",
     },
@@ -570,19 +712,35 @@ METRIC_DEFINITIONS = {
     "effective_apr": {
         "label": "Effective APR",
         "definition": "Annualised internal rate of return of the payment stream "
-                      "against the advance, averaged ONLY over paths where a "
-                      "rate exists. A path that never repays has no internal "
-                      "rate of return and is excluded.",
+                      "against the advance, averaged over the paths where a "
+                      "rate EXISTS. Existence is the only condition: the mean "
+                      "is NOT restricted to paths that reached the repayment "
+                      "target. A path that stopped short of the cap but made "
+                      "payments still has a well-defined rate over the observed "
+                      "window, and it is counted here. Only a path that repays "
+                      "nothing at all has no rate and is excluded.",
         "why": "Puts a revenue share and a fixed instalment on one axis.",
-        "caveat": "Two conditions apply. This is the MEAN ACROSS SIMULATED "
-                  "PATHS for the selected scenario, not the reference-path rate "
-                  "the cost-matched contract was priced on. And where any path "
-                  "fails to complete it is a SURVIVOR statistic — the "
-                  "non-completing paths are absent from it, so it understates "
-                  "the cost of the scenario to the provider rather than "
-                  "summarising it. Those paths are not 'unprofitable' — "
-                  "profitability is computed nowhere in this project; they "
-                  "simply did not reach the cap inside the horizon.",
+        # A-9. This caveat previously said the rate excluded every path that did
+        # not complete. That was the pre-A-9 reading, withdrawn because the two
+        # events are separate: completion is reaching the contractual target,
+        # existence of an IRR is a sign condition on the cash-flow vector. They
+        # coincide often enough to have hidden the error, and come apart sharply
+        # at closure_m13 and closure_m7.
+        "caveat": "Read the two denominators separately. DURATION is averaged "
+                  "over completing paths only. THIS RATE is averaged over paths "
+                  "with a defined internal rate of return, which is a different "
+                  "and usually larger set — an incomplete path that made "
+                  "payments has a defined rate over the OBSERVED WINDOW, and "
+                  "that is a window figure, not a final lifetime return. "
+                  "Neither conditional mean is automatically a portfolio-wide "
+                  "outcome: each describes the subset it is computed over, so "
+                  "read both beside the incomplete-recovery rate rather than "
+                  "treating either as the scenario's result. Paths that fall "
+                  "short are not 'unprofitable' — profitability is computed "
+                  "nowhere in this project; they simply did not reach the cap "
+                  "inside the horizon. Separately, this is the MEAN ACROSS "
+                  "SIMULATED PATHS, not the reference-path rate the "
+                  "cost-matched contract was priced on.",
     },
 }
 
@@ -618,16 +776,22 @@ CAVEATS = [
              "over simulated paths. They are not population confidence intervals "
              "and say nothing about real sellers.",
      "classification": "open_real_world_question"},
-    {"text": "The cost-matched cap factor was solved on the reference path. "
-             "Across simulated paths the realised rate differs, because duration "
-             "varies with revenue and a longer duration lowers the annualised "
-             "rate for the same total. The label describes how the price was "
-             "chosen, not an outcome guaranteed on any path.",
+    {"text": "{grid} The label describes how the price was chosen, not an "
+             "outcome guaranteed on any path: across simulated paths the "
+             "realised rate differs again, because duration varies with revenue "
+             "and a longer duration lowers the annualised rate for the same "
+             "total.",
      "classification": "sensitivity_result"},
-    {"text": "Mean duration and mean rate are computed only over paths that "
-             "reached the repayment target. Where recovery is incomplete they "
-             "describe the contracts that finished and exclude those that did "
-             "not, so they must not be read as portfolio averages.",
+    # A-9. The withdrawn version of this caveat put duration and rate under one
+    # denominator. They have never had one.
+    {"text": "Mean duration and mean rate have DIFFERENT denominators and must "
+             "be read separately. Mean duration covers only paths that reached "
+             "the repayment target. Mean rate covers paths with a defined "
+             "internal rate of return — a larger set, because an incomplete "
+             "path that made payments still has a rate over the observed "
+             "window. Neither is automatically a portfolio-wide outcome; each "
+             "describes the subset it was computed over, and both should be "
+             "read beside the incomplete-recovery rate.",
      "classification": "simulation_result"},
     {"text": "Payment burden is measured against revenue, not against what the "
              "seller retains. Margins, operating costs, reserves and other debts "
@@ -635,6 +799,18 @@ CAVEATS = [
              "that a contract is affordable.",
      "classification": "open_real_world_question"},
 ]
+
+
+def caveats() -> List[dict]:
+    """CAVEATS with artifact-sourced values substituted.
+
+    The pricing caveat quotes a residual, and a quoted number must come from the
+    file it describes. `{grid}` is filled from the canonical validation artifact
+    at request time rather than baked into the constant, so the caveat cannot
+    outlive the sweep it is describing.
+    """
+    grid = _grid_pricing_sentence()
+    return [{**c, "text": c["text"].replace("{grid}", grid)} for c in CAVEATS]
 
 
 def _summary(scenario: str, arms: List[dict]) -> dict:
@@ -727,45 +903,92 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                 "source": ill["source_artifact"]})
 
     if eq and ill and eq["effective_apr"] is not None and ill["effective_apr"] is not None:
-        if eq["censored"] or ill["censored"]:
-            # The two rates are averaged over DIFFERENTLY SELECTED subsets of
-            # paths. At closure_m13 the cost-matched arm completes 92.4% and the
-            # illustrative arm 23.8%, so the gap between their survivor rates
-            # mixes the cap factor with selection. Calling that a pricing effect
-            # would be the survivorship error stated as a finding.
+        # A-9 / D-050. This comparison is between two RATES, so the question is
+        # whether the two rates were averaged over comparably selected sets --
+        # which means comparing their APR-DEFINED shares, not their completion
+        # shares. The previous version branched on `censored`, a duration
+        # property, and then quoted completion shares as though they were the
+        # rate's denominator. At closure_m7 that produced the worst possible
+        # output: `censored` is False because *nothing* completed, so the page
+        # asserted "every path completed under both" over 0/500.
+        eq_defined = eq.get("apr_defined_share", 1.0)
+        ill_defined = ill.get("apr_defined_share", 1.0)
+        same_rate_population = abs(eq_defined - ill_defined) < 1e-9
+        partial = min(eq["completed_share"], ill["completed_share"]) < 1.0
+
+        # Completion is reported on its own, always, and never inferred from
+        # the rate. It is a separate sentence because it is a separate fact.
+        completion_note = (
+            f"Completion is reported separately and differs between them: "
+            f"{eq['completed_share']:.1%} of the cost-matched arm's paths and "
+            f"{ill['completed_share']:.1%} of the illustrative arm's reached "
+            f"the repayment target."
+            if abs(eq["completed_share"] - ill["completed_share"]) > 1e-9 else
+            f"Completion is reported separately: {eq['completed_share']:.1%} of "
+            f"paths reached the repayment target under both.")
+
+        # Where the target is not reached, the rate is an observed-window
+        # figure over the 24-month horizon -- not the cost of a repaid
+        # contract. It must never be read as a completed-contract price.
+        window_note = (
+            " Where the target is not reached the rate is an observed-window "
+            "IRR over the payments made inside the 24-month horizon, not the "
+            "cost of a completed contract." if partial else "")
+
+        if same_rate_population:
+            # Where the two rates COINCIDE there is no difference to attribute,
+            # and saying the cap factor caused one would be an explanation of
+            # nothing. At closure_m7 neither cap binds before revenue stops, so
+            # the payment streams are identical and so are the rates -- the
+            # targets differ but never become reachable.
+            rates_equal = abs(eq["effective_apr"] - ill["effective_apr"]) < 5e-5
+            if rates_equal:
+                body = (f"Both cap factors give the same mean simulated rate of "
+                        f"{ill['effective_apr']:.2%} in the {label} scenario. "
+                        f"Neither cap binds before revenue stops, so the two "
+                        f"contracts make identical payments and their "
+                        f"observed-window rates coincide despite different "
+                        f"contractual targets. There is no price effect here to "
+                        f"attribute — the difference the cap factor makes "
+                        f"elsewhere requires the cap to be reachable.")
+            else:
+                body = (f"Price and structure are separable. The same "
+                        f"revenue-share structure priced at the reference-path "
+                        f"cost-matched factor shows a mean simulated rate of "
+                        f"{eq['effective_apr']:.2%} in the {label} scenario, "
+                        f"against {ill['effective_apr']:.2%} at the illustrative "
+                        f"1.20 factor. Both means are taken over the same share "
+                        f"of paths — {eq_defined:.1%} have a defined rate under "
+                        f"each — so the rate comparison is like-for-like and the "
+                        f"difference is a property of the chosen cap factor, not "
+                        f"of revenue-based repayment.")
+            out.append({
+                "classification": "sensitivity_result",
+                "text": f"{body} {completion_note}{window_note}",
+                "source": eq["source_artifact"]})
+        else:
             out.append({
                 "classification": "simulation_result",
                 "text": (f"In the {label} scenario these two revenue-based arms "
                          f"cannot be compared on rate alone. The cost-matched arm "
                          f"shows {eq['effective_apr']:.2%}, averaged over the "
-                         f"{eq['completed_share']:.1%} of its paths that reached "
-                         f"the repayment target; the illustrative arm shows "
-                         f"{ill['effective_apr']:.2%} over the "
-                         f"{ill['completed_share']:.1%} of its paths that did. "
-                         f"Those are different subsets, so the difference between "
-                         f"them combines the cap factor with differing selection "
-                         f"and is not a like-for-like price comparison. The "
-                         f"pricing claim holds only where both arms complete."),
-                "source": eq["source_artifact"]})
-        else:
-            out.append({
-                "classification": "sensitivity_result",
-                "text": (f"Price and structure are separable. The same "
-                         f"revenue-share structure priced at the reference-path "
-                         f"cost-matched factor shows a mean simulated rate of "
-                         f"{eq['effective_apr']:.2%} in the {label} scenario, "
-                         f"against {ill['effective_apr']:.2%} at the illustrative "
-                         f"1.20 factor. Every path completed under both, so this "
-                         f"is a like-for-like comparison: the higher figure is a "
-                         f"property of the chosen cap factor, not of "
-                         f"revenue-based repayment."),
+                         f"{eq_defined:.1%} of its paths with a defined rate; the "
+                         f"illustrative arm shows {ill['effective_apr']:.2%} over "
+                         f"{ill_defined:.1%} of its paths. Those are differently "
+                         f"selected sets, so the difference between them combines "
+                         f"the cap factor with differing selection and no "
+                         f"like-for-like price conclusion is drawn. "
+                         f"{completion_note}{window_note}"),
                 "source": eq["source_artifact"]})
     elif ill and ill["effective_apr"] is None:
         out.append({
             "classification": "mathematical_property",
             "text": ("Effective rate is UNDEFINED for the revenue-based arm in "
-                     "this scenario. When revenue stops, the payment stream never "
-                     "repays the advance, so no discount rate sets its present "
+                     "this scenario — not because repayment was incomplete, but "
+                     "because no payment was made at all, so the rate equation "
+                     "has no root. An incomplete contract that paid something "
+                     "does have a rate, and it is reported. Here no discount "
+                     "rate sets its present "
                      "value equal to the amount lent. The study reports this as "
                      "undefined rather than substituting a number "
                      "(specification §13, exclusion E-3)."),
@@ -778,10 +1001,15 @@ def _findings(scenario: str, arms: List[dict]) -> List[dict]:
                 "revenue falls. The burden displayed here uses a different "
                 "denominator — payment ÷ GMV — so it is constant only while the "
                 "net-sales/GMV ratio is fixed, and it varies when returns vary. "
-                "The price of the revenue-contingent structure is a longer and "
-                "more variable recovery period. Which side of that trade is "
-                "worth taking is a commercial judgement this study does not "
-                "make.",
+                "The price of the revenue-contingent structure is a MORE "
+                "VARIABLE recovery period whose direction depends on the "
+                "realised path: under P4 revenue-contingent recovery leads a "
+                "cost-matched fixed schedule when the realised mean eligible "
+                "base clears B* = P/r and lags when it does not, and both "
+                "occur in the registered scenarios. Calling it uniformly "
+                "longer would state one scenario's direction as a property "
+                "of the structure. Which side of that trade is worth taking "
+                "is a commercial judgement this study does not make.",
         "source": "author"})
     out.append({
         "classification": "open_real_world_question",

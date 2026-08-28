@@ -345,7 +345,7 @@ def test_equal_cost_label_does_not_overclaim_on_stochastic_paths():
     note = eq["note"].lower()
     assert "reference path" in note and "differs" in note
     caveats = " ".join(c["text"].lower() for c in d["caveats"])
-    assert "solved on the reference path" in caveats
+    assert "the label describes how the price was chosen" in caveats
 
 
 # ── refinement pass (D-033): terminology, scenarios, states, palette ────────
@@ -364,14 +364,26 @@ def test_closure_shows_genuine_incomplete_recovery():
     assert rbf["recovery_ratio"]["24"] < 1.0
 
 
-def test_undefined_apr_is_reported_not_substituted():
-    """When revenue stops the payment stream never repays, so no IRR exists.
-    Spec 13 E-3 requires reporting undefined rather than inventing a number."""
+def test_early_closure_reports_a_negative_rate_not_undefined():
+    """A-9: failing to complete is not the same as having no rate.
+
+    This test previously asserted `effective_apr is None` for closure_m7, which
+    encoded the solver defect rather than a fact about the contract. The stream
+    pays for six months and recovers about 98.3M against a 185M advance; the
+    annualised IRR is roughly -86.5%. Publishing that as "undefined" hid an
+    adverse result behind a word that reads like a technicality. Undefined is
+    now reserved for the one case where the equation has no root: no payment at
+    all.
+    """
     d = client.get("/api/lab/comparison/closure_m7").json()
     rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
-    assert rbf["effective_apr"] is None
-    txt = " ".join(f["text"].lower() for f in d["findings"])
-    assert "undefined" in txt
+    assert rbf["effective_apr"] is not None
+    assert rbf["effective_apr"] < -0.5, "an early closure is a substantial loss"
+    assert rbf["apr_undefined_reason"] is None
+    assert rbf["incomplete_recovery_rate"] == 1.0, (
+        "no path completes here -- which is exactly why the rate must still be "
+        "reported rather than suppressed"
+    )
 
 
 def test_every_rate_declares_its_basis():
@@ -656,13 +668,21 @@ def test_amortizing_loan_reports_its_scheduled_total_not_no_cap():
 
 
 def test_incomplete_closure_contracts_use_the_agreed_wording():
+    """Duration may be undefined where nothing completes; the rate is not.
+
+    A-9 split these. "Not completed within 24 months" is still correct for
+    duration. The old APR string "Undefined — repayment incomplete" asserted a
+    causal link that does not exist and must not come back.
+    """
     html = open(LAB_HTML, encoding="utf-8").read()
-    assert "Undefined — repayment incomplete" in html
     assert "Not completed within 24 months" in html
+    assert "Undefined — repayment incomplete" not in html, (
+        "incomplete recovery does not make the rate undefined"
+    )
     d = client.get("/api/lab/comparison/closure_m7").json()
     rbf = next(a for a in d["arms"] if a["id"] == "RBF-ILL")
-    assert rbf["effective_apr"] is None
-    assert rbf["apr_undefined_reason"] == "repayment incomplete"
+    assert rbf["duration_months_mean"] is None      # nothing completed
+    assert rbf["effective_apr"] is not None         # but payments were made
 
 
 def test_network_failure_has_its_own_message():
@@ -729,15 +749,27 @@ def test_footer_default_is_not_overwritten_by_an_empty_spec():
     ("closure_m13", "RBF-EQ"),       # partially censored cost-matched arm
     ("temp_closure", "RBF-ILL"),     # lightly censored
 ])
-def test_partially_censored_arms_are_labelled_as_completed_path_only(scenario, arm):
+def test_partially_censored_arms_separate_the_two_denominators(scenario, arm):
+    """Duration is completion-conditioned; the rate is IRR-conditioned.
+
+    Previously both labels read "among completed paths", which described the
+    rate's denominator as the duration's. They are different sets, and in
+    closure_m13 they differ by 381 of 500 paths.
+    """
     a = next(x for x in client.get(f"/api/lab/comparison/{scenario}").json()["arms"]
              if x["id"] == arm)
     assert 0.0 < a["incomplete_recovery_rate"] < 1.0, "fixture is not partially censored"
     assert a["censored"] is True
-    assert a["apr_label"] == "Mean APR among completed paths"
     assert a["duration_label"] == "Mean duration among completed paths"
-    assert "excluded" in a["apr_basis"] and "excluded" in a["duration_basis"]
+    assert "excluded" in a["duration_basis"]
+    assert a["apr_label"] != "Mean APR among completed paths", (
+        "the retired conflation must not return"
+    )
+    assert "rate-defined" in a["apr_label"]
     assert 0.0 < a["completed_share"] < 1.0
+    assert a["apr_defined_share"] >= a["completed_share"]
+    # A horizon-limited rate must be shown beside the recovery shortfall.
+    assert "observed 24-month window" in a["apr_basis"]
 
 
 def test_closure_m13_illustrative_is_pinned():
@@ -749,26 +781,40 @@ def test_closure_m13_illustrative_is_pinned():
     assert a["censored"] is True
     assert 11.0 < a["duration_months_mean"] < 13.0
     assert 0.28 < a["effective_apr"] < 0.32
-    assert "completed paths" in a["apr_label"]
+    # The two denominators are visibly different here: ~23.8% completed,
+    # 100% rate-defined. That gap is the whole reason for A-9.
+    assert a["denominators_differ"] is True
+    assert a["apr_defined_share"] > a["completed_share"]
+    assert "rate-defined" in a["apr_label"]
 
 
 def test_uncensored_arms_are_not_mislabelled_as_conditional():
     for a in client.get("/api/lab/comparison/stable").json()["arms"]:
         assert a["incomplete_recovery_rate"] == 0.0
         assert a["censored"] is False
+        assert a["fully_censored"] is False
         assert a["apr_label"] == "Mean simulated APR"
-        assert "no path is excluded" in a["apr_basis"]
+        assert "every path reached the repayment target" in a["apr_basis"].lower()
+        assert a["denominators_differ"] is False
 
 
-def test_fully_incomplete_arms_keep_the_undefined_wording():
+def test_fully_incomplete_arms_report_duration_undefined_but_keep_their_rate():
+    """Nothing completed, so there is no duration. Payments were still made."""
     for a in client.get("/api/lab/comparison/closure_m7").json()["arms"]:
         if a["incomplete_recovery_rate"] == 1.0:
-            assert a["censored"] is False       # nothing survived to condition on
-            assert a["effective_apr"] is None
+            # Nothing completed. That is total censoring, not the absence of
+            # it -- the old flag said False here and the page then hid the
+            # basis text entirely.
+            assert a["censored"] is True
+            assert a["fully_censored"] is True
+            assert a["completed_share"] == 0.0
             assert a["duration_months_mean"] is None
+            assert a["effective_apr"] is not None, (
+                "A-9: an incomplete contract that paid something has a rate"
+            )
     html = open(LAB_HTML, encoding="utf-8").read()
-    assert "Undefined — repayment incomplete" in html
     assert "Not completed within 24 months" in html
+    assert "Undefined — repayment incomplete" not in html
 
 
 def test_the_page_renders_the_api_supplied_labels_not_fixed_ones():
@@ -777,14 +823,35 @@ def test_the_page_renders_the_api_supplied_labels_not_fixed_ones():
     assert 'kv("Mean simulated APR"' not in html
 
 
-def test_metric_definitions_disclose_the_survivor_conditioning():
+def test_metric_definitions_disclose_the_conditioning_of_each_mean():
+    """Duration and rate are conditioned differently, and the page must say so
+    in both places.
+
+    This test used to require the word "survivor" on the RATE as well as the
+    duration. That was the pre-A-9 reading: it treated a path that missed the
+    cap as having no rate, when a path that made payments has a perfectly good
+    rate over the observed window. Requiring the wrong word is how the wrong
+    claim survived a green suite, so the assertion now pins the corrected
+    conditioning instead.
+    """
     d = client.get("/api/lab/comparison/closure_m13").json()["metric_definitions"]
-    assert "excluded" in d["duration_months_mean"]["definition"].lower()
-    assert "survivor" in d["duration_months_mean"]["caveat"].lower()
-    assert "survivor" in d["effective_apr"]["caveat"].lower()
+    dur, apr = d["duration_months_mean"], d["effective_apr"]
+
+    # Duration genuinely IS a survivor statistic.
+    assert "excluded" in dur["definition"].lower()
+    assert "survivor" in dur["caveat"].lower()
+
+    # The rate is conditioned on existence, not completion.
+    apr_text = (apr["definition"] + " " + apr["caveat"]).lower()
+    assert "not restricted to paths that reached the repayment target" in apr_text
+    assert "defined internal rate of return" in apr_text
+    assert "observed window" in apr_text
+    assert "portfolio" in apr_text
+
     caveats = " ".join(c["text"].lower()
                        for c in client.get("/api/lab/comparison/stable").json()["caveats"])
-    assert "only over paths that reached the repayment target" in caveats
+    assert "different denominators" in caveats
+    assert "only over paths that reached the repayment target" not in caveats
 
 
 # ── closing gate (D-036): exception paths and survivor presentation ────────
@@ -850,33 +917,63 @@ def test_settlement_table_qualifies_the_duration_cell_per_row():
 
 
 def test_arm_disclosure_carries_the_api_supplied_basis():
+    """Both bases, separately labelled — they explain different denominators.
+
+    The page used to render `duration_basis` under one heading covering "these
+    averages", which left the rate's basis unrendered entirely.
+    """
     js = open(LAB_HTML, encoding="utf-8").read()
-    assert "a.duration_basis" in js
-    assert "How these averages are computed" in js
+    assert "a.duration_basis" in js and "a.apr_basis" in js
+    assert "How the duration mean is computed" in js
+    assert "How the rate is computed" in js
+    assert "How these averages are computed" not in js, (
+        "one heading over two different denominators is the conflation A-9 removed"
+    )
 
 
 @pytest.mark.parametrize("scenario", ["closure_m13", "temp_closure"])
 def test_censored_scenarios_do_not_claim_a_pure_pricing_effect(scenario):
+    """A-9 / D-050: the rate comparison is governed by the RATE's denominator.
+
+    This test used to gate on `censored`, which is a duration property, and so
+    suppressed a legitimate rate comparison whenever completion was partial. A
+    rate averaged over 100% of paths under both arms IS like-for-like; what
+    must never happen is quoting completion shares as though they were the
+    rate's denominator, or omitting completion entirely.
+    """
     d = client.get(f"/api/lab/comparison/{scenario}").json()
     by = {a["id"]: a for a in d["arms"]}
-    if not (by["RBF-EQ"]["censored"] or by["RBF-ILL"]["censored"]):
+    eq, ill = by["RBF-EQ"], by["RBF-ILL"]
+    if not (eq["censored"] or ill["censored"]):
         pytest.skip("fixture is not censored")
     txt = " ".join(f["text"] for f in d["findings"])
-    assert "cannot be compared on rate alone" in txt
-    assert "not a like-for-like price comparison" in txt
-    assert "property of the chosen cap factor" not in txt, \
-        "pricing claim made across differently-selected subsets"
+
+    if abs(eq["apr_defined_share"] - ill["apr_defined_share"]) < 1e-9:
+        # Same rate population -> a like-for-like rate conclusion is allowed,
+        # but completion must still be stated separately, and the
+        # observed-window caveat must travel with it.
+        assert "Both means are taken over the same share of paths" in txt
+        assert "Completion is reported separately" in txt
+        assert "observed-window IRR" in txt
+    else:
+        assert "cannot be compared on rate alone" in txt
+        assert "differently selected sets" in txt
+        assert "property of the chosen cap factor" not in txt
+
+    # Never, under any branch, the retired conflation.
+    assert "Every path completed under both" not in txt
 
 
 def test_closure_m13_discloses_both_completion_shares_in_the_finding():
-    """Pinned: cost-matched completes 92.4%, illustrative 23.8%. The page must
-    not compare their survivor rates without saying so."""
+    """Pinned: completion differs (92.4% / 23.8%), rate population does not."""
     d = client.get("/api/lab/comparison/closure_m13").json()
     by = {a["id"]: a for a in d["arms"]}
     assert round(by["RBF-EQ"]["completed_share"], 3) == 0.924
     assert round(by["RBF-ILL"]["completed_share"], 3) == 0.238
+    assert by["RBF-EQ"]["apr_defined_share"] == 1.0
+    assert by["RBF-ILL"]["apr_defined_share"] == 1.0
     txt = " ".join(f["text"] for f in d["findings"])
-    assert "92.4%" in txt and "23.8%" in txt
+    assert "92.4%" in txt and "23.8%" in txt, "both completion shares must appear"
     assert f"{by['RBF-EQ']['effective_apr']:.2%}" in txt
     assert f"{by['RBF-ILL']['effective_apr']:.2%}" in txt
 
@@ -885,15 +982,46 @@ def test_uncensored_scenarios_keep_the_pricing_finding():
     d = client.get("/api/lab/comparison/stable").json()
     txt = " ".join(f["text"] for f in d["findings"])
     assert "property of the chosen cap factor" in txt
-    assert "Every path completed under both" in txt
     assert "cannot be compared on rate alone" not in txt
+    # Completion is stated from the completion share, never inferred from the
+    # rate being defined. The retired sentence asserted the former from the
+    # latter and printed it over closure_m7, where nothing completed at all.
+    assert "Every path completed under both" not in txt
+    assert "Completion is reported separately" in txt
 
 
-def test_fully_incomplete_scenario_keeps_its_wording():
+def test_closure_m7_never_claims_completion():
+    """The worst output of the old logic, pinned so it cannot return.
+
+    0 of 500 paths complete. `censored` was False because the old flag meant
+    "partially censored", so the page took the else-branch and asserted every
+    path completed.
+    """
+    d = client.get("/api/lab/comparison/closure_m7").json()
+    by = {a["id"]: a for a in d["arms"]}
+    for arm in ("RBF-EQ", "RBF-ILL"):
+        assert by[arm]["completed_share"] == 0.0
+        assert by[arm]["apr_defined_share"] == 1.0
+        assert by[arm]["censored"] is True
+        assert by[arm]["fully_censored"] is True
+    txt = " ".join(f["text"] for f in d["findings"])
+    for banned in ("Every path completed", "every path completed",
+                   "all paths completed"):
+        assert banned not in txt, f"closure_m7 finding claims completion: {banned!r}"
+    assert "Completion is reported separately: 0.0%" in txt
+
+
+def test_fully_incomplete_scenario_reports_a_rate_and_no_duration():
+    """A-9 split what this test used to assert as one thing.
+
+    Every path misses the target, so there is no duration to report. Every path
+    made six months of payments, so there is a rate — a large negative one. The
+    findings must not describe the rate as undefined.
+    """
     d = client.get("/api/lab/comparison/closure_m7").json()
     for a in d["arms"]:
         if a["incomplete_recovery_rate"] == 1.0:
-            assert a["effective_apr"] is None and a["duration_months_mean"] is None
+            assert a["duration_months_mean"] is None
+            assert a["effective_apr"] is not None
     txt = " ".join(f["text"] for f in d["findings"])
     assert "cannot be compared on rate alone" not in txt
-    assert "undefined" in txt.lower()

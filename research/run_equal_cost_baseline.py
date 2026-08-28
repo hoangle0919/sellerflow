@@ -1,12 +1,12 @@
 """Baseline at the EQUAL-EFFECTIVE-COST cap factor f* = 1.0945 (D-031).
 
-    python3 run_equal_cost_baseline.py     # -> results/baseline_equalcost_v1_canonical.json
+    python3 run_equal_cost_baseline.py     # -> results/baseline_equalcost_v2_canonical.json
 
-WHY THIS RUN EXISTS. `baseline_v2` runs every scenario at the **illustrative**
+WHY THIS RUN EXISTS. `baseline_v3` runs every scenario at the **illustrative**
 cap factor f = 1.20. The equal-effective-cost factor f* = 1.0945 — the price at
 which the RBF contract costs the seller about the same as the 18%-nominal
 amortizing benchmark — exists only as a *pricing* result computed on the single
-deterministic reference path (`validation_v1.pricing.equal_cost`).
+deterministic reference path (`validation_v2.pricing.equal_cost`).
 
 Presenting seller burden and provider recovery for the equal-cost arm therefore
 had no artifact to draw on. Charting the reference-path pricing number beside
@@ -15,7 +15,7 @@ exactly the error this project exists to avoid. This run produces the missing
 one: the same ten scenarios, the same seeds, the same generator, priced at f*.
 
 WHAT IS AND IS NOT NEW. Nothing in the model changes. `rbf_sim` is untouched;
-`run_baseline.py` is untouched (its bytes are inside `baseline_v2`'s generator
+`run_baseline.py` is untouched (its bytes are inside `baseline_v3`'s generator
 fingerprint, so editing it would invalidate a registered checksum). The scenario
 list, path count and base seed are imported from `run_baseline` rather than
 retyped, so the two runs cannot silently diverge. The single difference is the
@@ -39,7 +39,10 @@ from rbf_sim.generator import PathParams
 # Imported, never retyped: the two baselines must share scenarios and seeds.
 from run_baseline import N_PATHS, R0, SCENARIOS, TERMS as BASE_TERMS
 
-#: The equal-effective-cost cap factor, from validation_v1.pricing.equal_cost.
+#: The equal-effective-cost cap factor, from validation_v2.pricing.equal_cost.
+#: Its numeric value was first solved in the superseded validation_v1 and is
+#: unchanged since; `f_star_origin` in the payload records that lineage so a
+#: current source is never labelled with a superseded artifact's name.
 #: Not a recommendation — the price at which RBF's effective APR matches
 #: Benchmark B's 19.5618%.
 F_STAR = 1.0945
@@ -55,7 +58,7 @@ W = 78
 def main() -> None:
     print("=" * W)
     print("  EQUAL-EFFECTIVE-COST BASELINE  (f* = 1.0945)")
-    print("  Simulation output under METHODOLOGY_SPEC.md v1.0 + A-1..A-7")
+    print("  Simulation output under METHODOLOGY_SPEC.md v1.0 + A-1..A-9")
     print("=" * W)
     print(f"  R0={R0:,.0f} VND | A={TERMS.A:,.0f} | r={TERMS.r} | f={TERMS.f} "
           f"| cap={TERMS.cap:,.0f}")
@@ -74,15 +77,20 @@ def main() -> None:
           f"payment {m['payment']:,.0f} VND | APR {m['apr']:.2%}")
 
     payload = {
-        "run": "baseline_equalcost_v1",
-        "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+        "run": "baseline_equalcost_v2",
+        "spec": "METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
         "provenance": "SIMULATED — no observed seller data",
         "purpose": "Seller burden and provider recovery at the equal-effective-cost "
                    "cap factor f* = 1.0945, for like-for-like comparison against "
-                   "baseline_v2 (illustrative f = 1.20). Same scenarios, same "
+                   "baseline_v3 (illustrative f = 1.20). Same scenarios, same "
                    "seeds, same generator; only the cap factor differs.",
         "n_paths": N_PATHS, "base_seed": BASE_SEED,
-        "f_star_source": "validation_v1.pricing.equal_cost.f_star",
+        "f_star_source": "validation_v2.pricing.equal_cost.f_star",
+        # Where the value was FIRST derived, kept distinct from where it is
+        # sourced now. Labelling a current source with the superseded
+        # "validation_v1" name made the
+        # artifact cite a superseded file as its live input.
+        "f_star_origin": "first solved in the superseded validation_v1; numerically unchanged through A-9",
         "terms": {"A": TERMS.A, "r": TERMS.r, "f": TERMS.f, "cap": TERMS.cap,
                   "j": TERMS.j, "N_B": TERMS.N_B},
         "match_benchmark_a": m,
@@ -91,17 +99,17 @@ def main() -> None:
 
     written = write_canonical_pair(
         payload,
-        stem="baseline_equalcost_v1",
+        stem="baseline_equalcost_v2",
         scenario_config={"scenarios": SCENARIOS, "n_paths": N_PATHS,
                          "base_seed": BASE_SEED,
                          "terms": {"A": TERMS.A, "r": TERMS.r, "f": TERMS.f,
                                    "j": TERMS.j, "N_B": TERMS.N_B}},
-        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-7",
+        spec_version="METHODOLOGY_SPEC.md v1.0 (frozen 2026-08-03) + A-1..A-9",
         extra_sources=("run_equal_cost_baseline.py",),
     )
     print("\n" + "=" * W)
-    print("  Written: results/baseline_equalcost_v1_canonical.json")
-    print("           results/baseline_equalcost_v1_provenance.json")
+    print("  Written: results/baseline_equalcost_v2_canonical.json")
+    print("           results/baseline_equalcost_v2_provenance.json")
     print(f"  SHA-256: {written['sha256']}")
     print("=" * W)
 

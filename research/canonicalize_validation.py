@@ -3,7 +3,7 @@
     python3 canonicalize_validation.py          # verify only, writes nothing
     python3 canonicalize_validation.py --write  # write the canonical/provenance pair
 
-WHY THIS EXISTS. `validation_v1.json` is the only registered result file with no
+WHY THIS EXISTS (historical). The superseded `validation_v1.json` was the only registered result file with no
 checksummed canonical form. It is also the source of the two numbers most likely
 to be quoted in a write-up: the reference-path cost-matched cap `f* = 1.0945`
 and Benchmark B's 19.5618% APR. Quoting a figure that cannot be checked against
@@ -45,19 +45,49 @@ from rbf_sim.canonical import (canonical_bytes, generator_fingerprint,
                                write_canonical_pair)
 
 RESULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
-SOURCE = os.path.join(RESULTS, "validation_v1.json")
-STEM = "validation_v1"
+SOURCE = os.path.join(RESULTS, "validation_v2.json")
+STEM = "validation_v2"
 
-#: Sources that produced the battery. Both, because the convergence ladder comes
-#: from `conv_step.py` and the remaining sections from `run_validation.py`.
-EXTRA_SOURCES = ("run_validation.py", "conv_step.py")
+#: Sources that produced the CURRENT battery.
+#:
+#: `run_validation.py` alone. Its section 1 computes the convergence ladder and
+#: sections 2/4/5/6 the rest; every key in `validation_v2.json` is written by
+#: that one script.
+#:
+#: HISTORICAL: `conv_step.py` was listed here as well, and the comment said the
+#: convergence ladder came from it. That was true of the SUPERSEDED
+#: `validation_v1.json`, where the ladder was assembled from four separate
+#: invocations. It has never been true of `validation_v2.json`. Keeping the
+#: retired script in this tuple fingerprinted the current artifact against a
+#: file that contributes nothing to it — so editing a retired script would have
+#: changed the current checksum, and a reader tracing provenance would have been
+#: sent to code that never ran. `conv_step.py` is now retired and fails closed;
+#: see DECISION_LOG D-052.
+EXTRA_SOURCES = ("run_validation.py",)
 
 #: Execution facts inside `_meta`. Everything else there is configuration.
 META_PROVENANCE_KEYS = ("date",)
 
-#: The four registered baselines. Re-checked after any write, because this
-#: script imports the same writer they were produced by.
+#: The CURRENT registered baselines (A-9 generation). Re-checked after any
+#: write, because this script imports the same writer they were produced by.
+#: The superseded v1/v2 generation is checked separately in
+#: backend/tests/test_validation_artifact.py -- those files are preserved as
+#: historical evidence and must never move, but they are not what this script
+#: can now reproduce.
 REGISTERED = {
+    "baseline_v3_canonical.json":
+        "363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55",
+    "baseline_equalcost_v2_canonical.json":
+        "b3ebfe6a5a7e7f48726d7e501295b02f84258a3fe9ee4e048875125b1270e0ee",
+    "baseline_closure_v2_canonical.json":
+        "21b8e207ff2db9ac866b8cb2bab47c8c2e434d2bff03d802eb6f53a66fdcea4b",
+    "baseline_closure_equalcost_v2_canonical.json":
+        "e1e6d81bbeeb60f0e923c27a8df44d26674f4b8ad788c6c9796c17ef40622665",
+}
+
+#: Superseded by A-9, preserved byte-for-byte. Kept here only so the names are
+#: discoverable from the canonicalizer; their integrity is asserted by test.
+SUPERSEDED = {
     "baseline_v2_canonical.json":
         "264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849",
     "baseline_equalcost_v1_canonical.json":
@@ -123,9 +153,9 @@ def main():
     payload, facts = split_payload(raw)
 
     print("=" * W)
-    print("  CANONICALIZE validation_v1 — additive, zero numeric change")
+    print("  CANONICALIZE validation_v2 — additive, zero numeric change")
     print("=" * W)
-    print(f"  source            : results/validation_v1.json (left untouched)")
+    print(f"  source            : results/validation_v2.json (left untouched)")
     print(f"  moved to provenance: {facts or 'nothing'}")
 
     # The load-bearing check: every scalar in the source must survive, by path
@@ -173,7 +203,7 @@ def main():
         with open(written["provenance"], encoding="utf-8") as fh:
             prov = json.load(fh)
         prov["original_run_date"] = facts["date"]
-        prov["original_source"] = "validation_v1.json"
+        prov["original_source"] = "validation_v2.json"
         prov["note"] = (prov.get("note", "") + " `original_run_date` is the "
                         "date stamped by the battery when it first ran; it was "
                         "the only non-deterministic field in the source.")

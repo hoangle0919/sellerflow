@@ -1,7 +1,24 @@
 # Corrected Claims & Validation Results
 
-**Date:** 2026-08-03 · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-3
-**Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests at the time of this document:** 169 passing *(historical; the suites now stand at 629 simulation + 379 backend, 9 skipped — see `RESEARCH_MANIFEST.md`)*
+> **This document is a dated snapshot, not a live status page.** Everything
+> below records what was true on **2026-08-03**. Figures, spec version and test
+> counts are preserved as written on that date and are deliberately not
+> updated; a corrections record that gets edited later cannot be audited. For
+> current state see `RESEARCH_MANIFEST.md`, and for the authoritative list of
+> what may be claimed see `CLAIM_LEDGER.md`.
+>
+> Two pointers, because the values below have since moved:
+> **Specification** — this snapshot was taken against `METHODOLOGY_SPEC.md`
+> v1.0 + amendments **A-1…A-3**. The specification now stands at **A-1…A-9**;
+> A-4…A-9 postdate this document and are recorded in the spec and the decision
+> log. A-9 in particular changed how the effective APR is computed and
+> conditioned, so any rate quoted below is a pre-A-9 figure. **Runs** — the
+> files named below are frozen, superseded artifacts; current magnitudes come
+> from `baseline_v3_canonical.json` and `validation_v2_canonical.json`.
+> **Tests** — 169 passing here; see the manifest for the current figure.
+
+**Date:** 2026-08-03 · **Spec at the time:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-3 *(now A-1…A-9 — see above)*
+**Runs:** `results/baseline_v2.json` · `results/validation_v1.json` · **Tests at the time of this document:** 169 passing
 
 > All figures are **reproducible simulation output under modeled assumptions**. No observed seller revenue, repayment, or default outcome exists in this study.
 

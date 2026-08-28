@@ -4,11 +4,11 @@
 
 > ✅ **This repository is the source of truth.** The research lives at `research/` in the `sellerflow` repository (`https://github.com/hoangle0919/sellerflow.git`), integrated from bundle v5 on 2026-08-06. The earlier bundle copies — including the one that sat inside an unrelated Excel research folder because it was the only writable location at the time — are **historical backups only**. They are not authoritative and must not be edited, read from, or depended upon. Nothing in this project depends on, reads, or relates to any Excel file.
 
-**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-8
+**Created:** 2026-08-03 · **Integrated into this repository:** 2026-08-06 (from bundle v5, SHA-256 `6b86194a…f606811`, verified at integration) · **Spec:** `METHODOLOGY_SPEC.md` v1.0 + amendments A-1…A-9
 
 > Everything needed to reproduce every number in the project is in this repository.
 >
-> ⚠️ All quantitative output is **simulation under modeled assumptions**. No observed seller revenue, repayment, or default outcome exists in this project.
+> ⚠️ All reported **simulated magnitudes** are simulation output under modeled assumptions. No observed seller revenue, repayment, or default outcome exists in this project. The seven propositions in `DERIVATIONS.md` are derivation-backed, not simulation output.
 
 ---
 
@@ -54,19 +54,24 @@
 
 | File | Purpose |
 |---|---|
-| `run_baseline.py` | 10 scenarios × 4 contracts × 500 paths → `results/baseline_v2.json` |
-| `run_validation.py` | Sections 1/2/4/5/6 → `results/validation_v1.json` |
-| `conv_step.py` | Single-N convergence step (large N split to avoid timeouts) |
+| `run_baseline.py` | 10 scenarios × 4 contracts × 500 paths → `results/baseline_v3_canonical.json` |
+| `run_validation.py` | Sections 1/2/4/5/6 → `results/validation_v2.json`, canonicalized to `validation_v2_canonical.json`. Section 1 is the convergence ladder. |
+| `conv_step.py` | **RETIRED — historical, fails closed.** Wrote single convergence steps into `results/validation_v1.json`, which is now frozen evidence. Running it would have rewritten a checksum-registered superseded artifact. Section 1 of `run_validation.py` computes the same ladder into the current raw file. |
 
 ### `research/results/` — versioned outputs
 
 | File | Purpose |
 |---|---|
-| `baseline_v2_canonical.json` | **Current baseline — cite this.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
-| `baseline_v2_provenance.json` | Execution record for the above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
+| `baseline_v3_canonical.json` | **Current baseline — cite this (A-9).** Regenerated 2026-08-20 under the corrected IRR definition; adds `apr_defined_count/rate` and `completed_count/rate`. SHA-256 `36372901…`. |
+| `baseline_equalcost_v2_canonical.json` | Current cost-matched track. SHA-256 `b3ebfe6a…`. |
+| `baseline_closure_v2_canonical.json` | Current closure track, illustrative `f`. SHA-256 `21b8e207…`. |
+| `baseline_closure_equalcost_v2_canonical.json` | Current closure track, `f*`. SHA-256 `e1e6d81b…`. |
+| `validation_v2_canonical.json` | Current validation battery. SHA-256 `7d9b9d0f…`. |
+| `baseline_v2_canonical.json` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte** as the record of what was published before 2026-08-20. Never cited as current, never regenerated, never deleted. Original note follows. **Former baseline.** Deterministic and checksummable (D-027): identical code, config and seeds reproduce it **numerically at published precision on every platform tested**, and byte-identically within a fixed runtime (D-041 — 9 last-bit float differences on macOS CPython 3.11.5). SHA-256 `264d319b…ac5a7849`. |
+| `baseline_v2_provenance.json` | **Superseded, preserved.** Execution record for the superseded artifact above — wall-clock, git commit, interpreter/library versions, and the canonical checksum. Expected to differ between runs. |
 | `baseline_v2.json` | **Frozen historical evidence.** The pre-canonicalization baseline, `net_sales` remittance basis. Numerically identical to the canonical artifact; retained unmodified and no longer written by `run_baseline.py`. |
 | `baseline_v1.json` | Superseded (`gmv` basis). Audit trail. |
-| `validation_v1_canonical.json` | **Cite this for validation figures.** Checksummed canonical form (D-038), `f89fd2ba…`. Numerically identical to `validation_v1.json` — all 174 scalars preserved, verified by `test_validation_artifact.py`. |
+| `validation_v1_canonical.json` | **SUPERSEDED by A-9 (D-049), preserved byte-for-byte.** Original note follows. ~~Cite this for validation figures.~~ Checksummed canonical form (D-038), `f89fd2ba…`. Numerically identical to `validation_v1.json` — all 174 scalars preserved, verified by `test_validation_artifact.py`. |
 | `validation_v1_provenance.json` | Execution record for the above, including `original_run_date` (2026-08-04), the one non-deterministic field in the source. |
 | `validation_v1.json` | Convergence, pricing, reference-path cost-matched cap (JSON key `pricing.equal_cost`), recovery boundary, RBF-G breakpoint, revenue definition. Retained unmodified as the pre-canonicalization source. |
 | `baseline_v2_log.txt` | Full console output of the baseline run. |
@@ -86,31 +91,39 @@
 cd research                       # from the repository root
 pip install pytest numpy          # only dependencies
 
-# 1. Simulation suite  (expect: 629 passed)
+# 1. Simulation suite  (expect: 643 passed)
 python3 -m pytest rbf_sim/tests/ -q
-#    Backend suite (expect: 379 passed, 9 skipped). The 9 skips are the
-#    Playwright browser tests; they skip unless a chromium build is present
-#    and are NOT counted as passes.
+#    Backend suite (expect: 502 passed, 10 skipped). The suite also contains
+#    9 Playwright browser checks, EXCLUDED from that figure. They EXECUTED
+#    AND PASSED 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and
+#    Playwright 1.62.0 with Chromium, against a local server at commit
+#    c8261c6. When Chromium is unavailable the checks skip, and pytest may
+#    report one skipped module or nine skipped cases depending on which of
+#    Playwright and Chromium is missing. A skip is never counted as a pass.
+#    Of the 10 skips above, 9 are the browser module and 1 is the
+#    two-scoring-path cohort comparison, which needs an ensemble artifact a
+#    clean checkout does not have.
 python3 -m pytest ../backend/tests -q
 #    Reproducibility (byte vs numeric equality, reported separately — D-041)
 python3 verify_reproduction.py
 
 # 2. Baseline — 10 scenarios x 4 contracts x 500 paths
-#    -> results/baseline_v2_canonical.json   (deterministic; checksum it)
-#    -> results/baseline_v2_provenance.json  (execution record)
+#    -> results/baseline_v3_canonical.json   (checksum it)
+#    -> results/baseline_v3_provenance.json  (execution record)
 python3 run_baseline.py
 
-# 3. Validation battery
+# 3. Validation battery — all five sections write results/validation_v2.json
+#    Section 1 is the Monte Carlo convergence ladder (500/2,000/5,000/10,000
+#    paths, ~45s). It used to be split across conv_step.py invocations; that
+#    script wrote into the FROZEN results/validation_v1.json and is retired.
+python3 run_validation.py 1                 # Monte Carlo convergence ladder
 python3 run_validation.py 2                 # pricing + reference-path cost-matched cap
 python3 run_validation.py 4                 # incomplete-recovery boundary
 python3 run_validation.py 5                 # RBF-G breakpoint
 python3 run_validation.py 6                 # revenue-definition sensitivity
 
-# 4. Monte Carlo convergence (run separately; 10k paths takes ~45s)
-python3 conv_step.py 500
-python3 conv_step.py 2000
-python3 conv_step.py 5000
-python3 conv_step.py 10000
+# 4. Register the battery (canonical form + provenance sidecar)
+python3 canonicalize_validation.py --write
 
 # 5. Audit evidence — run from backend/ so its modules are importable
 cd ../backend
@@ -124,7 +137,7 @@ python3 ../research/analysis/00_audit_evidence.py
 
 **Determinism.** Base seed `20260803`, bootstrap seed `90210`.
 
-> ~~Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.~~ **Corrected (D-041).** Identical seeds reproduce **numerically at published precision on every platform tested**. **Byte** equality holds within a fixed runtime, not across runtimes: on Linux/aarch64 CPython 3.10.12 all five canonical artifacts are byte-identical; on macOS CPython 3.11.5, `baseline_v2` differs in **9** last-bit floating-point values and `baseline_equalcost_v1` in **2**. That is IEEE-754 serialization, not variance in the model — but it is not bit-for-bit, and the stronger word was withdrawn rather than defended. Check with `python3 research/verify_reproduction.py`, which reports byte equality and numeric-leaf equality separately and fails only on numeric drift.
+> ~~Identical seeds reproduce bit-for-bit. Any run that does not reproduce is a bug, not variance.~~ **Corrected (D-041).** Identical seeds reproduce **numerically at published precision on every platform tested**. **Byte** equality holds within a fixed runtime, not across runtimes. On Linux/aarch64 CPython 3.10.12 all five current canonical artifacts are byte-identical. On macOS 26.0 arm64 / CPython 3.11.5 / NumPy 2.2.6 — measured on the **current A-9 generation** by an independent audit run — `baseline_v3` differs in **11** last-bit floating-point leaves (worst relative difference `5.351e-15`) and `baseline_equalcost_v2` in **3** (`1.532e-16`), while both closure artifacts and `validation_v2` are byte-identical: **3/5 byte-identical, 5/5 numerically equal** at relative tolerance `1e-9`. (The **superseded** generation was measured separately at 9 and 2; those counts describe those files and are retained in `RESULTS_REGISTRY.md`.) That is IEEE-754 serialization, not variance in the model — but it is not bit-for-bit, and the stronger word was withdrawn rather than defended. Check with `python3 research/verify_reproduction.py`, which reports byte equality and numeric-leaf equality separately and fails only on numeric drift.
 
 ### Applying the README patch
 
@@ -143,14 +156,14 @@ Spot-check any reproduction against these:
 
 | Quantity | Value | Source |
 |---|---|---|
-| Simulation tests passing | 629 (461 inherited + 143 settlement + 25 canonical) | `pytest rbf_sim/tests/ -q` |
-| Backend tests passing | **379 passed, 9 skipped** (the 9 are the Playwright browser tests, which skip unless a chromium build is present and are **not** counted as passes). Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
-| Canonical baseline SHA-256 | `264d319be6854533b4a51a7114c34dbffb0728d9ed3bfd50973b6ab4ac5a7849` | `results/baseline_v2_canonical.json` |
-| Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v2` |
-| Benchmark A implied APR | 37.87% | `baseline_v2` |
-| Benchmark B effective APR | 19.5618% | `validation_v1` |
-| **Reference-path cost-matched cap `f*`** | **1.0945** (19.5377% APR) | `validation_v1_canonical` |
-| Convergence Δ 5,000→10,000 | 0.0027 months, 0.042pp | `validation_v1` |
+| Simulation tests passing | 643 (629 + 14 IRR-definition guards, A-9) | `pytest rbf_sim/tests/ -q` |
+| Non-browser tests passing | **1,145 — 502 backend and 643 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Canonical baseline SHA-256 | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` | `results/baseline_v3_canonical.json` |
+| Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v3` |
+| Benchmark A implied APR | 37.87% | `baseline_v3` |
+| Benchmark B effective APR | 19.5618% | `validation_v2` |
+| **Reference-path cost-matched cap `f*`** | **1.0945** (19.5377% APR) | `validation_v2_canonical` |
+| Convergence Δ 5,000→10,000 | 0.0027 months, 0.042pp | `validation_v2` |
 | Accounting-identity violations | 0 of ~2,400 rows | `test_cohort_wide_identity_holds_for_every_row` |
 | Circular-AUC evidence | 0.9098 generating fn vs 0.9182 model | `00_audit_evidence.py` |
 | Geometric completion threshold `ρ*` | 11/12 ≈ 0.9167 | `test_P7_geometric_threshold_rho_star_is_one_minus_r_B0_over_FA` |
@@ -169,8 +182,21 @@ Spot-check any reproduction against these:
 
 **Also complete since this line was last accurate:** product integration — the Simulation Lab (`frontend/lab.html` + `backend/lab.py`) renders every figure from the canonical artifacts and merged to `main` in PR #2; the centralized monetary policy (`backend/money.py`, D-030); the closure baselines (D-032); `validation_v1` canonicalization (D-038); and the claim ledger with its enforcement tests (D-037…D-041).
 
-**Not started:** paper · poster · deck · deployment.
+**Publication phase — complete as of 2026-08-20, on branch `publication-final`:**
 
-**Gate:** the publication phase is gated on the Gate A claim audit, not on the baseline commit.
+| Deliverable | State |
+|---|---|
+| Literature matrix | `research/publication/LITERATURE_MATRIX.md` — 44 verified sources, 6 evidence gaps stated |
+| Paper outline | `research/publication/PAPER_OUTLINE.md` — every figure mapped to a ledger ID |
+| Manuscript | `research/publication/MANUSCRIPT.md`, ~8,400 words, 15 sections + Appendix A |
+| Manuscript PDF | `research/publication/MANUSCRIPT.pdf`, 18 pages. Built by `build_pdf.sh`; gated by `check_pdf_bounds.py` at zero text outside the media box |
+| Deck | `research/publication/RBF_DECK.pptx`, 13 slides with speaker notes. Built by `build_deck.js` |
+| Career package | `research/publication/CAREER_PACKAGE.md` |
+| Poster | **not started** — no longer planned; the deck supersedes it |
+| Deployment | live demonstration at `sellerflow-production.up.railway.app`. It holds no capital and makes no credit decisions. The deploy in production predates this branch, so the corrections on `publication-final` are **not yet deployed** |
+
+**Gate:** the publication phase was gated on the Gate A claim audit, which passed
+at `af2fc2d` and is frozen. `publication-final` is unpushed at the time of
+writing; the branch is five-plus commits ahead of `origin/main`.
 
 **Not in this project:** Excel. Removed entirely per instruction 2026-08-03 — no dependency, assumption, deliverable, blocker, or reconciliation task remains.

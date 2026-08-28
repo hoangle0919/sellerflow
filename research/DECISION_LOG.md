@@ -952,3 +952,850 @@ The underlying cause is that `financing_engine.py` sizes the advance off revenue
 **Reason:** They are correctly never used as model inputs, but they are stored alongside the assessment, exported to CSV, and presented inside the credit-application flow on the live form. They serve no research purpose. Collecting identifiable personal data in an underwriting submission is indefensible under scrutiny regardless of downstream use.
 
 **Consequence:** `models.py`, the form, DB writes, and CSV export change. Privacy notice is rewritten. Removes a whole category of hostile question.
+
+---
+
+## D-047 — Scoring-path disclosure, claim-family sweep, and publication reconciliation
+**Date:** 2026-08-20 · **Branch:** `publication-final` (unpushed at time of writing)
+
+**Decision: state the scorer→tier→terms dependency on every active surface, and
+correct three claim families that had drifted apart across documents.**
+
+**Trigger.** A README revision (`f652b94`) stated that when scoring falls back
+from the ensemble to the heuristic "the numbers shown are identical either
+way". Verified false against the code: `ml_engine.score()` computes `pd_score`
+differently on each path and thresholds it into Low / Medium / High Risk;
+`financing_engine.RATES` keys every term off that tier. At 200M monthly
+revenue the repayment cap is 414,000,000 at Low Risk against 249,600,000 at
+Medium, and High Risk zeroes the advance, remittance rate and cap so no offer
+appears. The same false or ambiguous claim was live in four further places:
+`ml_engine.py`'s docstring and `model_status()` note, `ENVIRONMENT.md`,
+`.github/PULL_REQUEST_BODY.md` and the generator in `verify_native_macos.sh`.
+
+**Alternatives considered:** correct the README only (rejected — leaves the
+repository self-contradictory, which is how the claim survived); drop the
+fallback so the question cannot arise (rejected — the fallback is the honest
+behaviour and removing it would trade a documentation defect for an outage);
+state the dependency everywhere and make entering the fallback observable
+← **chosen**.
+
+**Three claim families swept repo-wide, not instance by instance.** The
+recurring failure in this project has been fixing the instance in front of us
+and missing the family, so each was searched across every tracked surface:
+
+1. **Recovery ordering.** Universal formulations ("the financier waits longer",
+   "the same mechanism delays recovery") contradicted P4, which makes the
+   ordering conditional on realised mean eligible base against `B* = P/r`. Both
+   directions occur in the registered scenarios. Corrected in the manuscript
+   abstract, results and conclusion, deck slides 2 and 5, the career package
+   and `backend/lab.py`. Scenario-specific statements are retained where the
+   scenario is named. This had already been recorded at D-042 and never
+   propagated — the reason it is being recorded again.
+2. **Cost proportional to `f`.** Only the contractual repayment *target* `A·f`
+   is proportional to `f`; realised repayment equals it only upon completion.
+   Corrected in `DERIVATIONS.md`, `CLAIM_LEDGER.md`, `RESULTS_REGISTRY.md`,
+   `PAPER_OUTLINE.md`, the manuscript, deck slide 7 and the copy scanner's
+   documentation.
+3. **Time-sensitive negatives.** "Has never received an external submission" is
+   a claim about the present that expires the moment anyone visits the site.
+   Replaced everywhere with the dated form: "As of August 2026, no external
+   merchant data were used in this study; the public deployment is a
+   demonstration, not a lending service."
+
+**Consequence.**
+- `railway.toml` now runs `backend/start_railway.sh`, which never discards
+  training stderr and enters the fallback deliberately rather than through a
+  bare `;`. The previous inline command hid the failure and started the service
+  regardless, so the live demo ran on the heuristic for an unknown period with
+  nothing in the logs saying so.
+- `/api/health` exposes `sklearn_runtime` alongside `scoring_path`. The startup
+  warning had told operators to read a field that did not exist.
+- `frontend/index.html` reads the active path from `/api/health` and fails
+  closed; the hero badge was previously the literal string "RF+LR ENSEMBLE
+  v1.0" whether or not the ensemble had loaded.
+- `tests/test_scoring_path_disclosure.py` (22 tests) proves the tier drives the
+  output, proves the heuristic is blind to `revenue_growth` — the ensemble's
+  highest-importance feature — so the paths cannot be output-equivalent, and
+  holds each removed statement as a fixture asserted to trip the scanner.
+- Backend suite 379 → 401 passing. The nine browser checks still skip here;
+  `RESEARCH_MANIFEST.md` now states that the skip count is environment-
+  dependent rather than a fixed expectation.
+
+**Not done, deliberately.** Dated records are not rewritten. `DECISION_LOG.md`
+entries D-042 and D-046 keep their contemporaneous counts;
+`CORRECTED_CLAIMS.md` is marked as a 2026-08-03 snapshot with pointers to
+current state rather than edited in place; and
+`evidence/2026-08-07-native-macos-verification.md` keeps its incorrect closing
+note with a dated addendum above it. An evidence record that is edited after
+the fact cannot be relied on.
+
+**Underlying training failure: not reproduced, not diagnosed.** Training
+succeeds in the development sandbox (exit 0, 1.53s, 153MB peak). The mechanism
+that allows a silent failure is established — `train_model.py` imports
+scikit-learn at module top while `ml_engine` imports it only inside a guarded
+helper, so the service boots in an image without scikit-learn and only training
+fails — but the production cause is not. `ENVIRONMENT.md` records Python 3.10
+as a known gap where scikit-learn 1.9 cannot install, and there is no
+interpreter pin for the builder. That is a candidate, not a finding. The next
+deploy's logs and `sklearn_runtime` will settle it.
+
+---
+
+## D-048 — Final publication-integrity reconciliation
+**Date:** 2026-08-20 · **Branch:** `publication-final` (unpushed at time of writing)
+**Raised by:** an independent read-only gate that passed the branch on engineering
+and visual grounds and failed it on claim consistency and stale provenance.
+
+**Decision: correct seven wording/provenance families and one factual error of
+my own before the branch is publishable.** No formula, generator, settlement
+routine or registered artifact changes; all five canonical checksums are
+unchanged and `research/results/` is untouched.
+
+**1. A factual error I introduced, corrected.** D-047 and the manifest stated
+that in every environment this project has run in, neither Playwright nor
+Chromium was available. **That is false.** D-036 records "browser tests 5 → 9
+with no skips" — the nine browser checks *passed* in a browser-capable run. The
+agreed wording now used everywhere: *1,030 non-browser tests pass — 401 backend
+and 629 simulation. Nine browser checks are defined and excluded from that
+total. They passed in the earlier browser-capable run recorded at D-036. In
+environments lacking Playwright or Chromium they skip; pytest may report one
+skipped module or nine skipped cases depending on what is installed.* Three
+things were being conflated: passing tests, browser checks defined, and a skip
+count that is a property of the machine rather than of the suite.
+
+**2. The PR body was an obsolete hardening description.** It carried six claims
+that are no longer true — 0.92 "purged from the API", 5/5 cross-platform byte
+identity, the whole RBF-G guardrail never activating, `validation_v1` not
+canonicalized, 196 tests, the Simulation Lab as future work — plus a stale
+commit range. Replaced with a current description of the publication package,
+the runtime disclosure, and the actual reproducibility position: byte equality
+is platform-dependent and not claimed across platforms, and only the narrower
+N-2′ floor null survives while the ceiling binds 6,009 of 36,000.
+
+**3. `PAPER_OUTLINE.md` claimed Gate A was untouched.** Its header said "nothing
+here amends a Gate A document" and its checklist asserted "No Gate A document
+edited", while D-047 had in fact made editorial corrections to Gate-A prose in
+`DERIVATIONS.md`, `CLAIM_LEDGER.md` and `RESULTS_REGISTRY.md`. The header now
+states that those corrections happened, are logged here, and changed no formula,
+generator or registered artifact. The opening argument also carried the
+forbidden "structural behaviour unchanged" phrasing as an assertion — removed,
+along with "that flexibility is not free" and "it is not insurance", both of
+which smuggle in a universal provider-side direction that P4 forbids. The two
+surviving occurrences of the phrase are prohibitions against writing it.
+
+**4. Unconditional scorer descriptions.** `README.md` and `index.html` described
+the RF+LR ensemble as the scoring path without qualification, which misdescribes
+any deploy running the heuristic — including, on present evidence, the live one.
+All now name the **active scorer** and state that neither path has measured
+predictive validity. `README.md` also claimed RBF "turns platform data" into an
+analysis; the prototype connects to no platform API, so this is now
+merchant-submitted operational data with direct integration named as design
+intent, not shipped.
+
+**5. Target versus realised cost, and APR without completion.** Two remaining
+instances of "contractual cost" meant the contractual repayment *target*, and
+P6(b) asserted that identical terms produce different APRs without saying among
+what. Both families were searched rather than patched at the reported instances:
+P6(b) and its §9.1 restatement are now qualified to **completed paths with
+IRR-defined payment streams**, with the further point that on a non-completing
+path no realised total exists to discount and the APR is *undefined*, not merely
+different. Corrected in the manuscript, `DERIVATIONS.md` and the outline.
+
+**6. Deck.** Slide 2 said any revenue stop leaves a balance unrecovered, which
+`temp_closure` contradicts — 2.0% incomplete at `f = 1.20` and 0.0% at `f*`.
+Replaced with the precise condition: permanent cessation *before completion
+while a contractual balance remains*. Slide 13's calibration-versus-causal-
+identification statement now carries a `[Sources]` block naming it as this
+project's own methodological inference and pointing at `MANUSCRIPT.md` §13 — no
+external citation was invented for it, because none supports it.
+
+**7. Tests strengthened without changing the count.** The four parametrized
+stale-statement fixtures became one test looping over six, freeing room for
+three new checks at a constant 22: `/api/health` must expose `scoring_path`,
+`sklearn_runtime` and `scoring_path_note` with the note naming the tier and the
+affected terms and leaking no credentials; the hero badge must retain its
+fail-closed `ACTIVE SCORER — UNKNOWN` path and must not ship asserting a scorer;
+and public scorer copy must be conditional. A fixture list that grows on every
+retraction should not make the suite's headline count drift for reasons
+unrelated to coverage.
+
+**Consequence.** Backend 401 passed / 9 skipped, simulation 629 passed — counts
+unchanged by this pass, so no downstream figure needed republishing.
+`MANUSCRIPT.pdf` 17 pages, zero text outside the media box, four metadata fields
+set. `RBF_DECK.pptx` 13 slides, 13 notes slides, `[Sources]` on 12 of 13 — slide
+1 is the title and states no externally sourced claim. Five canonical checksums
+verified unchanged.
+
+**Left alone deliberately.** The California SB 362 citation is unchanged; it has
+been independently confirmed against the official chaptered text. Dated records
+are still not rewritten.
+
+---
+
+## D-049 — A-9: the IRR was wrong, and the artifacts are regenerated
+**Date:** 2026-08-20 · **Branch:** `publication-final` (unpushed at time of writing)
+**Raised by:** an independent audit that reproduced the engine's effective-rate
+calculation against the registered artifacts.
+**Status:** APPLIED. Supersedes the APR passages of **D-034**, **D-036** and
+**D-048**, and reopens the deferral in **D-044**. Those entries are dated
+records and are not rewritten.
+
+**This is the first change in this project to alter a registered result.** Every
+earlier correction pass moved words. This one moves numbers, because the numbers
+were wrong.
+
+**Three defects, reproduced before any edit was made.**
+
+1. **Calendar time was collapsed.** `engine.run_path` passed
+   `[x for x in p if x > 0]` to `solve_apr`, deleting zero-payment months from
+   the middle of a stream. Every later payment was then discounted as though it
+   had arrived earlier. Trailing zeros are immaterial at any position, so this
+   bound exactly where a scenario contained an *internal* zero-revenue spell:
+   `temp_closure` moved 29.1869% → **24.1407%** at `f = 1.20`, and 14.9885% →
+   **12.4321%** at `f*`.
+
+2. **The solver could not express a loss.** The bracket was `[1e-12, 2.0]`.
+   A contract recovering less than it advanced produced no sign change,
+   returned `None`, and was published as *undefined*. `closure_m7` recovers
+   about 98.3M against a 185M advance; its annualised IRR is **−86.5129%**.
+   "Undefined" reads like a technicality and was concealing an adverse result.
+
+3. **Two denominators were reported as one.** `duration_mean` is conditioned on
+   completion. `apr_mean` is conditioned on IRR existence — a different and
+   generally larger set, because a path can miss the contractual target and
+   still have a well-defined return on the payments it made. In `closure_m13`
+   at `f = 1.20`: **119 of 500** complete, **500 of 500** are rate-defined, so
+   **381** paths are simultaneously incomplete and rate-defined. The published
+   30.33% averaged all 500 while the surrounding prose said "among completed
+   paths", where the completed-only figure is **39.37%**.
+
+**Alternatives considered.** (a) Correct the prose and leave the numbers —
+rejected: the numbers are wrong, not merely mislabelled. (b) Regenerate in
+place, overwriting the five registered artifacts — rejected: that destroys the
+record of what was published, and this project's own audit trail depends on
+being able to check a superseded figure against the file it came from.
+(c) **Amend the specification, regenerate under new stems, preserve the old
+five byte-for-byte** ← chosen.
+
+**Specification.** Amendment **A-9** defines the IRR over the complete monthly
+vector including internal zeros; solves over `i > −1`; states existence and
+uniqueness under the project's one-negative-then-non-negative sign pattern;
+separates completion from IRR existence; and adds the observed-window caveat
+for incomplete non-absorbing paths.
+
+**Migration.** New: `baseline_v3`, `baseline_equalcost_v2`,
+`baseline_closure_v2`, `baseline_closure_equalcost_v2`, `validation_v2`, with
+provenance sidecars, registered at R-014. Superseded: the previous five,
+preserved byte-for-byte and asserted unchanged by test. Canonical schema
+1.0 → 2.0; aggregates gained `apr_defined_count`, `apr_defined_rate`,
+`completed_count` and `completed_rate` so no denominator has to be inferred.
+
+**The leaf gate earned its place.** Before registration, old and new artifacts
+were compared leaf-by-leaf with an allow-list of rate fields, new denominator
+keys and identity metadata. It failed on the first attempt: removing the
+`x > 0` filter in `run_validation.sec2` also broke a `len(pay)` that was doing
+double duty as the count of paying months, turning every reported pricing
+duration into the 24-month horizon. Caught, fixed, re-run clean — 0 unexpected
+leaves across all five pairs. Burden, recovery, duration, settlement, scenario
+inputs and seeds are unchanged.
+
+**A latent inconsistency surfaced.** `validation_v1_canonical.json` could not
+have been regenerated from the committed `run_validation.py`: the raw
+`validation_v1.json` predates a `convergence.converged` key added in `42b7b1e`.
+The registered artifact was canonicalized from a raw file produced by an older
+script. Nothing was published from that key, and `validation_v2` is generated
+from the current code, so the inconsistency is closed rather than carried.
+
+**D-044 reopened.** That entry declined to regenerate five artifacts in order to
+correct an embedded sentence about reproducibility, on the ground that the trade
+was not worth it. Correct at the time. Regeneration now had to happen for a
+substantive reason, so the `canonical.determinism` string was corrected in the
+same pass at no extra cost: numeric equality at published precision across
+tested platforms, byte equality only within a fixed runtime.
+
+**Consequence for public surfaces.** The Lab's `_censoring` helper derived one
+qualifier from `incomplete_recovery_rate` and attached it to both the duration
+and the rate; it now reports the two denominators separately and labels a
+horizon-limited rate as an observed-window figure. `frontend/lab.html` no longer
+prints "Undefined — repayment incomplete", which asserted a causal link that
+does not exist. Four Lab tests that encoded the old semantics were rewritten
+rather than deleted, and now assert the corrected behaviour.
+
+**Not claimed.** A-9 changes what the rate *means* and how it is computed. It
+does not make the rate evidence about real sellers, and it does not change the
+paper's argument: price and structure remain separable, the burden and recovery
+findings are untouched, and the product's financing arithmetic never used this
+layer at all.
+
+**Suites:** 403 backend passed / 9 skipped, 639 simulation passed.
+
+---
+
+## D-050 — A-9 round 2: the engine was right, everything around it was not
+**Date:** 2026-08-24 · **Branch:** `publication-final` (unpushed at time of writing)
+**Raised by:** an independent audit of the A-9 migration.
+**Status:** APPLIED. D-049 is preserved as dated history; the APR passages of
+D-034, D-036, D-044 and D-048 remain superseded as recorded there.
+
+**The mathematics of A-9 was sound and its headline figures never moved.** All
+six registered closure rates are bit-identical before and after this pass, and a
+leaf comparison of the round-1 artifacts against the round-2 ones shows **zero
+data leaves changed** — only spec identifiers and generator fingerprints. What
+failed was synchronisation: the engine was corrected and the documents, the Lab,
+the artifact identity and the verifier went on describing the old rule.
+
+**Nine defects, each reproduced before it was touched.**
+
+**1–2. The solver had a ceiling I chose rather than derived.** `IRR_MAX_MONTHLY
+= 10.0` made `solve_apr(100, [1200])` return `None`, though its unique monthly
+IRR is 11 — the same failure A-9 exists to remove, relocated from the lower
+bound to the upper one. And a root sitting exactly on an endpoint was discarded,
+because the code demanded a strict sign change: `solve_apr(100, [1100])` has
+monthly IRR exactly 10.0. Replaced with an analytic bound `i* ≤ S/P − 1`, valid
+for `i > 0`; the inequality **reverses** below zero, which cost one iteration to
+notice — for `S < P` the root is negative and `NPV(0) = S − P < 0` brackets it
+directly. Endpoint roots are recognised. The single documented numerical limit
+is float64 overflow in annualisation above roughly `i = 1.4e25`.
+
+**3–5. The Lab confused completion with rate-definition.** `censored` meant
+`0 < completed < 1`, so `closure_m7` — where **0 of 500** paths complete —
+reported `censored: False`, took the uncensored branch, and printed *"Every path
+completed under both."* The same flag gates the page's basis text, so a reader
+saw a −86.51% rate and a blank duration with no explanation of either. The
+cross-arm rate comparison branched on that duration flag and then quoted
+completion shares as the rate's denominator.
+
+Now: `censored` is any incompleteness, `fully_censored` marks the total case,
+the rate comparison branches on the **APR-defined** shares, completion is
+reported separately and never inferred, and where the target is unreached the
+figure is labelled an observed-window IRR and paired with the completion share.
+
+**A further defect surfaced while fixing it:** `lab.html` rendered
+`duration_basis` under a single heading covering "these averages" and **never
+rendered `apr_basis` at all** — so the denominator and the observed-window
+caveat, the entire point of A-9, stopped at the API boundary and never reached a
+reader. Both bases are now rendered under separate headings.
+
+**6. The verifier asked for files that no longer exist.** Every entry paired a
+current canonical with a superseded provenance stem. Repaired and pinned.
+
+**7. Provenance measured its own contamination.** `build_provenance` sampled
+`git status` *after* writing the canonical file, so every sidecar recorded
+`source_tree_dirty: true` caused by its own output — destroying the one question
+provenance answers. Two further defects in the fix, both found by regenerating
+and reading the sidecars rather than trusting the change: a fixed `[3:]` slice
+cut the first character off every path so the exclusion never matched, and
+`_git()` returns `None` both on failure and on empty output — which is exactly
+what a clean tree produces, so the cleanest possible result was reported as
+"unknown". `results/` is now excluded as a category, because it holds outputs
+and the question is about source.
+
+The round-1 sidecars also recorded `source_commit: b91d2796`, a commit **amended
+away** and unreachable from the branch — an artifact claiming descent from
+something that does not exist. All five now record `a58e696`, reachable, with a
+clean source tree.
+
+**8. Artifacts disagreed with themselves about their own specification.**
+Top-level `spec` read v1.0 with no amendments in `baseline_v3`, `A-1..A-7` in
+three others and `A-1..A-3` in `validation_v2`, while `canonical.spec_version`
+said `A-1..A-9`.
+
+**9. A claim I wrote in round 1 contradicted A-9.** P6(b) and its restatements
+said *"on a path that never completes there is no realised total to discount,
+and no effective APR is defined at all"* — written in the same pass that
+introduced A-9, whose central example is `closure_m7`: completes on no path,
+defined rate of −86.5129%. Corrected in `DERIVATIONS.md`, `MANUSCRIPT.md` and
+`PAPER_OUTLINE.md`.
+
+**Terminology boundary, new in this pass.** `b047cc8` put an effective APR on
+the product surface. It is the annualised IRR of one deterministic base-case
+schedule for one merchant. The Lab's APR is a mean observed-window IRR across
+the rate-defined paths of a registered scenario. Same words, different
+calculation, different data, different evidentiary weight.
+`tests/test_apr_surface_boundary.py` asserts each surface keeps saying which one
+it is and that neither claims the other validates it. The incoming product
+formulas were not reopened.
+
+**Artifacts regenerated a third time**, from a clean committed tree, so
+provenance could honestly record what produced them. Superseded five unchanged
+throughout. New stem-currency scanner (`test_artifact_stem_currency.py`) is
+contextual rather than a blanket ban: a superseded name inside a marked
+historical block is the audit trail, and only an unmarked one is a defect. It
+carries the deck's slide-8 footer — two artifacts joined by "and", which no
+suffix-based sweep matched — as a fixture.
+
+**Consequence.** Backend 403 → 437 passing, simulation 639 → 643. Verifier runs
+from a clean temporary checkout at exit 0, 5/5 byte-identical and 5/5
+numerically equal. Manuscript 17 → 18 pages. Deck unchanged at 13 slides.
+
+---
+
+## D-051 — Convergence: one IRR, one reproduction, one lineage
+**Date:** 2026-08-24 · **Branch:** `publication-final` (unpushed at time of writing)
+**Status:** APPLIED. D-050 preserved as dated history.
+
+**No research finding changed.** Compared leaf-by-leaf against the previous A-9
+generation: **zero numeric leaves moved**. What moved was three generator
+fingerprints, three lineage-metadata strings and one new lineage field.
+
+**1. Two implementations of one equation had drifted three times.** The product
+mirrored `solve_apr` before A-9 corrected it; A-9 fixed the research side and
+the product kept the old ceiling; the product then fixed the ceiling and found
+an endpoint defect the research side still had. Every drift was caught by a
+person reading both files.
+`backend/tests/test_irr_cross_layer_parity.py` now runs thirteen identical cash
+flows through both and compares them, including every case where they
+previously disagreed. A rate quoted to a merchant and a rate published in the
+paper must not differ on the same stream.
+
+**2. An exact float comparison made the solver scale-dependent.** `f_hi == 0.0`
+assumed the analytic bound `S/P − 1` is exactly representable. It is not:
+`solve_apr(100, [115])` leaves a residual of ~1.4e-14 and returned `None`, while
+`(10_000_000, [11_500_000])` — the same contract at a larger scale — returned
+4.35. **A financial contract yielding a rate or "no rate" depending on how the
+money was expressed is worse than a consistent failure**, because nothing about
+the input looks wrong. Found downstream in `206cb48` by the product chat and
+ported here, where it originated. Tolerance is `abs(principal) × 1e-9`:
+relative, because NPV carries the principal's units; seven orders above
+float64's ~1e-16 resolution; 0.185 VND on a 185,000,000 advance. A residual
+above it still returns `None`, because that means the bound is wrong rather
+than that rounding occurred.
+
+**3. The lower floor was a guess, not a limit.** `-1.0 + 1e-9` is seven orders
+coarser than the format allows and excluded real roots —
+`solve_apr(1_000_000, [1e-6])` and `solve_apr(10_000_000_000, [1])` both
+returned `None`, reporting "no rate exists" for streams that pay something.
+That is the precise confusion A-9 was written to remove, surviving in the
+opposite corner of the domain. Now `math.nextafter(-1.0, 0.0)` in both layers,
+with the correctly rounded boundary returned where a root falls below it.
+`None` means only what A-9 says it means: no positive payment.
+
+**4. The verifier was not verifying validation.** `canonicalize_validation.py`
+re-expresses `results/validation_v2.json`; it computes nothing. The scratch
+tree is a `copytree`, so that raw file arrived already written and the step
+rebuilt a canonical form from a committed input — **`run_validation.py` never
+ran, and a completely broken battery would have verified clean.** The raw file
+is now a declared output, deleted with the pair, and the battery runs sections
+1, 2, 4, 5 and 6 first. Three tests cover the ordering, the dependency, and an
+end-to-end break. Writing the third exposed a flaw in my own first attempt: the
+injected failure was appended, so it fired *after* the section had already
+written its output, and the battery "failed" while still producing a file.
+
+**5. Lineage.** `run_equal_cost_baseline` embedded `f_star_source =
+validation_v1` and a comparison against `baseline_v2` in its **current** output;
+`f_star_origin` now records where the value was first derived, kept separate
+from where it is sourced. `lab.manifest()` reported
+`artifact: validation_v1.json` while loading `validation_v2` — provenance for a
+file it was not using. `test_claim_ledger` validated today's headline figures
+against the superseded artifacts. The stem scanner now covers bare stems and
+generator docstrings, not only the `_canonical` suffix where the last sweep
+stopped.
+
+**6. Measurements nobody took are no longer quoted.** The macOS byte-difference
+counts — 9 and 2 — are real measurements of the **superseded** generation on
+commit `68b8c3d`. They were carried across when rows were renamed, asserting a
+measurement of files that have never been regenerated on that platform. Removed
+from every current-generation claim rather than guessed, with the method for
+obtaining them recorded. The superseded figures stay where they belong.
+
+**7. `railway.toml`, resolved.** Both branches fixed the same silent-error
+defect, inline versus script. The script entrypoint is kept: it preserves
+training stderr, announces the fallback, and states its consequence. The
+incoming inline comment said the financing arithmetic never calls the ensemble
+"so a training failure must not stop the service" — the second half is right
+and the first half implies output-neutrality, the claim D-047 withdrew.
+
+**Two incoming fixes worth recording as theirs.** `206cb48` found the endpoint
+defect described above. `00f6b37` diagnosed the production failure I could not:
+`warnings.simplefilter("error")` around unpickling promoted a benign NumPy 2.5
+DeprecationWarning raised inside a dependency, so a good artifact was rejected
+as unreadable and the site pinned itself to the heuristic while training
+succeeded every boot. Across three passes I established the mechanism and
+reported honestly that I could not reproduce the cause. That was the cause.
+
+**Consequence.** Backend 480 passed / 9 skipped, simulation 643 passed.
+Reproduction verifier from a clean temporary checkout: exit 0, 5/5
+byte-identical, 5/5 numerically equal — the first run in which the validation
+battery genuinely executed. Five artifacts regenerated from clean committed
+source `9c2f460`, all sidecars clean and reachable.
+
+---
+
+## D-052 — Release closure: a page that describes the file it names
+
+**Date:** 2026-08-26 · **Branch:** `publication-final` · **Preceded by:** D-051
+
+The hard correction was A-9 and it is not reopened here. This entry records a
+consistency pass: five places where a surface said something the files behind it
+did not support. **No finding, formula, scenario input, seed or numerical result
+changed.** One checksum moved, for a reason recorded below.
+
+### 1. The pricing block described one file with the contents of another
+
+`lab.manifest()` published a block labelled `validation_v2_canonical.json`,
+carrying that file's SHA-256, while reading its **values** out of the raw
+`validation_v2.json`. The raw file has no `canonical` key, so `spec_version`
+came back `null` sitting directly beside a canonical checksum.
+
+This is the second time the same block has been wrong, and the sequence is worth
+recording because the first fix is what set up the second. Originally it named
+the superseded `validation_v1.json` while reading `validation_v2`. That fix
+corrected the **name and the hash** and left the **read** where it was. The
+label became right, the data stayed wrong, and the null `spec_version` — the one
+visible symptom — was in the payload the whole time.
+
+A reader who checksummed the named file would have verified bytes that never
+produced the numbers displayed next to them. Fixed by reading the canonical
+artifact, so name, hash, spec version and values all refer to the same bytes.
+
+### 2. "Equals" was never true
+
+The same block said the cost-matched cap factor was solved "so that its
+effective rate **equals** the amortizing loan's". It does not. `f*` is chosen by
+`min(grid, key=gap)` over an 800-point sweep; duration is an integer, so cost
+moves in steps and an exact match is not generally attainable. The correct
+statement — nearest point on the swept grid, `19.537656%` against `19.561817%`,
+a residual of about `0.02416` percentage points — was in `run_validation.py`'s
+own printed output from the beginning. Only the Lab dropped it.
+
+Corrected in the pricing note, the RBF-EQ arm note and the pricing caveat. The
+three numbers are **computed from the canonical artifact at request time**, not
+typed in: a residual quoted as a literal is a residual that outlives the sweep
+it describes. The wording is derived too — if a future sweep lands exactly on
+target, the page says so without an edit, and a test pins that branch. The
+`1.0945×` chart label, previously hand-typed, now formats the artifact's own
+cap factor.
+
+### 3. The rate was still conditioned on completion in the copy
+
+A-9 separated completion from IRR existence in the **artifacts** and in
+`_censoring()`. Two prose surfaces did not follow:
+`METRIC_DEFINITIONS["effective_apr"]["caveat"]` and the corresponding entry in
+`CAVEATS` both still said the mean rate excluded non-completing paths. Both now
+state the two denominators separately — `duration_mean` over completing paths,
+`apr_mean` over paths with a defined IRR, an incomplete path that made payments
+having a defined observed-window rate, and neither conditional mean being
+automatically a portfolio-wide outcome.
+
+**A test was holding the wrong claim in place.**
+`test_metric_definitions_disclose_the_survivor_conditioning` asserted the word
+"survivor" appeared in the **rate's** caveat. That is the pre-A-9 reading, so
+correcting the prose broke a green test — the suite was pinning the defect. The
+assertion now pins the corrected conditioning. Duration keeps "survivor",
+because duration genuinely is one.
+
+The nine browser checks had the same problem at a second remove: they required
+`"Mean APR among completed paths"` and a `closure_m13` finding saying the arms
+"cannot be compared on rate alone". Both `closure_m13` arms are **100%**
+rate-defined while completing at 92.4% and 23.8%, so the rates are comparable
+and what differs is coverage. Rewritten to pin both denominators, the
+observed-window note, and the absence of the withdrawn finding.
+
+### 4. The documented reproduction recipe corrupted frozen evidence
+
+`RESEARCH_MANIFEST.md` told the reader to run `conv_step.py` four times. That
+script's last statement was an unconditional `json.dump` into
+`results/validation_v1.json` — now frozen, superseded, and carrying a registered
+checksum quoted in the manuscript, the deck and the registry. **Following the
+documented steps would have rewritten registered evidence in place.** Nothing in
+the script asked whether its target was still writable.
+
+It was also redundant: `run_validation.py 1` computes the same
+500/2,000/5,000/10,000 ladder in one pass into the current raw file. The split
+existed to dodge a timeout that no longer applies.
+
+`conv_step.py` now fails closed — before importing the simulation package,
+before reading anything, before opening any file — and names its replacement.
+The recipe runs sections 1/2/4/5/6 and then the canonicalizer. A test invokes
+the retired script both documented ways and asserts the frozen file's bytes
+**and mtime** are unchanged; mtime, because a rewrite with identical content
+still means the file was opened for writing.
+
+`conv_step.py` was also listed in `canonicalize_validation.py`'s
+`EXTRA_SOURCES`, with a comment claiming the convergence ladder came from it.
+True of `validation_v1`; never true of `validation_v2`. Editing a retired script
+would have moved a current artifact's fingerprint, and a reader tracing
+provenance would have been sent to code that never ran. Removed.
+
+**This changes `validation_v2_canonical.json`'s generator fingerprint, and
+therefore its checksum.** That is the intended consequence of correcting a
+provenance record. The regeneration is a separate commit, made from clean
+committed source, and is verified to move metadata only — zero numeric leaves.
+
+### 5. Two documentation pointers aimed at superseded files
+
+`DERIVATIONS.md`'s claim taxonomy sent readers to `baseline_v2.json` and
+`validation_v1.json` for **current** simulation magnitudes. `METRIC_DEFINITIONS.md`'s
+superseded banner said the authoritative spec ran to **A-8** — one amendment
+short of A-9, which redefines the very metric that file is named for. Both now
+point at the current artifacts and the current amendment. Dated historical
+passages keep their original stems; `CORRECTED_CLAIMS.md` remains a 2026-08-03
+snapshot, with its forward pointers updated.
+
+### 6. The macOS reproducibility row is now a measurement
+
+D-051 removed the macOS byte-difference counts rather than guess them: the 9 and
+2 figures measured the **superseded** generation on `68b8c3d` and had been
+carried across when the rows were renamed. The column read "not measured",
+which was honest and useless.
+
+An independent audit has now run `research/verify_reproduction.py` against
+current HEAD on **macOS 26.0 arm64, CPython 3.11.5, NumPy 2.2.6**:
+
+| Artifact | Bytes | Last-bit leaves | Worst rel. diff |
+|---|---|---|---|
+| `baseline_v3_canonical.json` | differ | 11 | `5.351e-15` |
+| `baseline_equalcost_v2_canonical.json` | differ | 3 | `1.532e-16` |
+| `baseline_closure_v2_canonical.json` | identical | 0 | `0` |
+| `baseline_closure_equalcost_v2_canonical.json` | identical | 0 | `0` |
+| `validation_v2_canonical.json` | identical | 0 | `0` |
+
+**3/5 byte-identical, 5/5 numerically equal** at relative tolerance `1e-9`.
+
+**The counts are 11 and 3, not 9 and 2.** Had the old figures been carried
+across, both rows would have been wrong. That is the case for removing an
+unverified number rather than letting it ride, and it is why this is recorded as
+an **independent audit run** on a platform this project has no access to, rather
+than as something run here.
+
+The deck already carried "3 of 5 byte-identical on macOS" — a figure that
+happened to be right while being unsupported and while every other current
+surface said "not measured". It is retained now that the evidence sits behind
+it, with the environment and the audit provenance attached.
+
+### Consequence
+
+Backend 480 → 495 (13 pricing-provenance tests, 2 retired-script tests);
+simulation 643 unchanged; **1,138 non-browser**. Nine browser checks defined,
+**rewritten in this pass, zero executed** — Chromium is unavailable here and a
+skip is not a pass. Browser execution is an open external gate and is now
+described that way on every surface, including the deck note that previously
+credited them to the D-036 run. That credit no longer holds: the assertions
+those checks make today did not exist when D-036 ran.
+
+---
+
+## D-053 — The browser gate executed, and `main` came back with two corrections
+
+**Date:** 2026-08-27 · **Branch:** `publication-final` · **Merges:** `origin/main` `ff59333`
+
+Two independent events, both external to this workstream, and both of which
+changed what may be written down. **No research figure, formula, scenario input,
+seed or registered artifact is touched by this entry.**
+
+### 1. The gate ran
+
+D-052 recorded nine browser checks as defined, rewritten, and **never
+executed** — Chromium is unavailable in the environment that runs these suites,
+and a skip is not a pass. That was the honest state and it was also useless: it
+is indistinguishable from nine checks that would fail.
+
+They have now been run:
+
+```
+python3 -m pytest backend/tests/test_lab_browser.py -q
+......... [100%]
+9 passed in 21.55s
+```
+
+macOS 26.0 arm64, Python 3.11.5, Playwright Chromium, local HTTP server, at
+commit `dcbfc3b`. Independent of this workstream.
+
+**Why the result carries across the subsequent merge, argued rather than
+assumed.** `ff59333` changed `README.md`, `frontend/index.html` and one product
+test file. All nine checks load `/lab` and nothing else, and every input they
+exercise — `frontend/lab.html`, `backend/lab.py`, `backend/main.py` and
+`research/results/` — is **byte-identical** to `dcbfc3b`, verified per file. The
+evidence therefore describes the current Lab surface. It does not describe a
+post-merge execution, and no surface claims one.
+
+**A defect the run exposed, in the test rather than the page.** The failing
+assertion before this run was `"How the rate is computed" in arms_text`. That
+string is at `frontend/lab.html:589` and renders correctly; it sits inside
+`<details><summary>What this contract is`, which carries no `open` attribute, so
+`page.inner_text()` — rendered text — cannot see it. The reported diagnosis was
+that the heading "was never implemented" and the proposed remedies were to add
+it or amend the assertion, escalated as a disclosure decision. Both rested on
+the string being absent; `origin/main` carries the pre-A-9 file, which is where
+that grep landed. Fixed in `dcbfc3b` by splitting the assertion: what a reader
+sees unprompted (both denominators, both labels, and the observed-window caveat)
+before opening, and the two basis blocks after setting `d.open = true` — which
+proves the text is *reachable*, where `text_content()` would have passed on
+`display:none`.
+
+Recorded because a plausible diagnosis attached to a real failure is how a
+correct page gets "fixed" into a worse one.
+
+### 2. `main` corrected two things this branch had wrong or missing
+
+**The scoring-path claim was worse than this branch had documented.** D-047
+corrected "the numbers shown are identical either way" to a statement that the
+active path *can* change the assigned tier. `main` established that it *does*,
+on a 200-profile cohort, for a majority of profiles — including profiles one
+path approves and the other declines. Worked case: heuristic **APPROVED
+212,238,000₫**, ensemble **REJECTED**. The consequence `main` draws is the
+uncomfortable one: the model-load repair in `00f6b37`, which this branch merged
+and described as neutral, **changed live assessment outcomes**. Merged in full,
+including the worked cap figures that make the disclosure checkable.
+
+**`apr_basis` was computed and thrown away on the main surface.** The §7.2 item
+in the handoff was flagged as unaudited, and it turned out to be a real instance
+of the A-9 family: `financing_engine.py` emitted the basis and `index.html`
+rendered it zero times, so the rate appeared with nothing stating what the base
+case assumes. `main`'s fix also handles the sharper form — the structure note
+has three competing branches, and a merchant with outstanding information
+requirements previously saw the rate with **no** basis at all, on the branch
+where rates run highest. Merged.
+
+**One thing this branch did not take.** `main`'s "Financing structure" bullet
+ends "The extension is the provider's cost" — the universal formulation P4
+withdrew. This branch's conditional wording is kept. Merging it would have
+reintroduced a corrected claim family through a merge, which is the quietest way
+a correction gets undone.
+
+**One test amended, not weakened.** `test_readme_states_the_tier_dependency`
+matched a literal string that the merge italicised — correctly, that being the
+qualifier the retracted claim dropped. It now strips emphasis before matching,
+and gained two assertions `main`'s wording earns: that the README says the paths
+*do* disagree, not merely that they could, and that the worked cap figures
+survive.
+
+### Consequence
+
+Backend 495 → **502 passed, 10 skipped**; simulation 643; **1,145 non-browser**.
+The tenth skip is `main`'s two-path cohort comparison, which needs an ensemble
+artifact a clean checkout does not have — reported as a skip, not a pass, and
+named as such in the manifest.
+
+Every surface that described the browser checks as unexecuted or an open gate
+now records the 9/9 run with its environment and commit: `RESEARCH_MANIFEST.md`,
+`.github/PULL_REQUEST_BODY.md`, `MANUSCRIPT.md`, `PAPER_OUTLINE.md`,
+`CAREER_PACKAGE.md`, `build_deck.js`. `MANUSCRIPT.pdf` and `RBF_DECK.pptx` are
+rebuilt **only** because those statements changed. All ten registered checksums
+— five current, five superseded — are unchanged, and the reproduction verifier
+still reports 5/5 byte-identical and 5/5 numerically equal.
+
+---
+
+## D-054 — The browser gate ran on the merged tip
+
+**Date:** 2026-08-27 · **Branch:** `publication-final` · **Follows:** D-053
+
+**Documentation only.** This entry changes no Lab input, research result, model,
+financing logic or registered artifact.
+
+### The evidence is now direct
+
+D-053 recorded a 9/9 run at `dcbfc3b` and then had to *argue* that it carried
+forward past the `ff59333` merge: all nine checks load `/lab`, and every input
+they exercise was verified byte-identical to `dcbfc3b`. That argument was sound
+and it was checkable, which is why it was written out rather than asserted. It
+was still an inference.
+
+An independent run has now executed the suite against the merged tip:
+
+```
+9 passed in 23.55s
+```
+
+macOS 26.0 arm64, Python 3.11.5, Playwright 1.62.0 with Chromium, local server,
+at commit `c8261c6`.
+
+Active publication surfaces now cite that run. **They no longer need the
+carry-forward argument, so it has been removed from them** — a reader should not
+have to reason about byte-identity across a merge to learn whether the tests
+passed. Six surfaces state the same substance:
+`.github/PULL_REQUEST_BODY.md`, `RESEARCH_MANIFEST.md`, `MANUSCRIPT.md`,
+`PAPER_OUTLINE.md`, `CAREER_PACKAGE.md`, `build_deck.js`.
+
+Once each, with one deliberate exception: `RESEARCH_MANIFEST.md` carries it in
+**two** places, because it serves two readers. The status table answers "what is
+the current state of this project", and the reproduction-recipe comment block
+answers "what should I expect when I run this command" — someone following the
+recipe never reads the table. Duplication across *files* would be a
+maintenance hazard; these two are the same fact addressed to two different
+questions, and collapsing them would leave one of the two readers without it.
+
+`CAREER_PACKAGE.md` carries it twice for a different reason: once in the source
+index at the foot of the file, and once inside the résumé and LinkedIn text,
+where it appears as a short parenthetical rather than the full statement.
+
+**D-053 is untouched.** It is the dated record of what was known when the merge
+was made, and the inference it contains was correct at the time. Rewriting it to
+match what is known now would destroy exactly the thing this log exists for.
+
+### The editorial defect this pass fixes
+
+D-053's reconciliation replaced only the *tail* of the browser sentence on four
+surfaces, leaving the original lead-in in place. The result was the sentence
+"Nine browser checks are defined and excluded from that total" immediately
+followed by "Nine Playwright browser checks are defined and are excluded from
+that total" — visible as a doubled line on page 17 of the PDF.
+
+A regex that matched from mid-sentence rather than from the start of the claim.
+Not a research defect, and it changed no figure, but it is the kind of thing a
+reader notices first and reasonably reads as carelessness about the surrounding
+numbers. Removed from all four.
+
+### Verification
+
+Zero duplicated browser sentences. No active surface references `dcbfc3b`; the
+only remaining references are inside D-053, where they belong. All ten
+registered checksums unchanged, nothing under `research/results/` changed, and
+no backend, frontend, simulation or financing-engine code touched. The PDF and
+deck were rebuilt for the changed sentences alone.
+
+---
+
+## D-055 — Two release-metadata statements outlived their facts
+
+**Date:** 2026-08-27 · **Branch:** `publication-final` · **Follows:** D-054
+
+**Documentation only.** No code, registered result, checksum, publication binary
+or research figure is touched. Earlier entries are unchanged.
+
+Found by reading the PR description end to end after the branch was pushed —
+the one artifact nobody had read as a document, because it is assembled rather
+than authored and had only ever been checked in pieces.
+
+### 1. A base-commit hash, four merges stale
+
+`.github/PULL_REQUEST_BODY.md` opened with "Branch `publication-final`, based on
+`f652b94`". True when written. The branch has since merged `main` four times and
+the merge base is now `ff59333`.
+
+**Not corrected to `ff59333`.** That would have restarted the same clock: the
+next merge invalidates it again, and a base hash in prose is a fact with a
+half-life measured in merges. The line now states the branch name only and
+explains why no base is named. GitHub computes the real merge base and shows it
+on the PR; a hand-maintained copy can only ever disagree with it.
+
+### 2. A page count that a formatting fix moved
+
+Both the PR body and `RESEARCH_MANIFEST.md` said the manuscript PDF was **17**
+pages. It has been **18** since the page-bounds and break-opportunity work.
+`pdfinfo` reports 18; both surfaces now say 18.
+
+### 3. A decision-log summary that stopped at D-048
+
+The PR's §6 described `D-047` and `D-048` and nothing after — so a reviewer
+reading it would have seen the scoring-path disclosure and the publication
+reconciliation, and no mention of **A-9**, the artifact migration, the solver
+unification, the reproduction repair, or the browser gate. That is the entire
+substantive arc of this branch, absent from the document written to introduce
+it. Now summarised through D-055.
+
+### What these three have in common
+
+Each is a statement *about the release* rather than about the research, and none
+is covered by any of the guards built during this project. The claim ledger
+binds research figures to artifacts; the currency tests catch superseded artifact
+stems; the copy scanners catch retracted phrasings. A page count and a base hash
+are outside all of them, so they aged silently while the figures they sit beside
+were checked repeatedly.
+
+Worth stating plainly: the verification effort concentrated where the risk was
+believed to be, and the two errors that survived to the final review were both
+in the packaging. Neither changes a result. Both are exactly the kind of thing a
+reader encounters first, and reasonably reads as evidence about the care taken
+with everything after it.
