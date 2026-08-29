@@ -26,3 +26,12 @@ rbf-research-bundle-v4.zip
 .venv/
 .cache/
 NATIVE_VERIFICATION.md
+
+# Private handoff notes. Untracked by intent, ignored so that intent survives a
+# `git add -A`. This repo has a PUBLIC remote, so "nobody has staged it yet" is
+# not a control -- it is an absence of accidents.
+#
+# The file carries no credentials (verified by scan), but it does carry internal
+# working notes: open defects, undiagnosed failures, and surfaces flagged as
+# unaudited. Useful to whoever is working on this; misleading out of context.
+HANDOFF.md
