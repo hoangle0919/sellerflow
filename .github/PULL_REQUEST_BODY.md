@@ -10,7 +10,7 @@ Publication package for the revenue-contingent financing study, plus the runtime
 
 | Artifact | State |
 |---|---|
-| `research/publication/MANUSCRIPT.md` / `.pdf` | ~8,400 words, 15 sections + Appendix A. PDF is 18 pages, built by `build_pdf.sh`, gated by `check_pdf_bounds.py` at zero text outside the media box |
+| `research/publication/MANUSCRIPT.md` / `.pdf` | ~9,600 words, 15 sections plus data-availability, declarations and Appendix A. PDF is 19 pages, built by `build_pdf.sh`, gated by `check_pdf_bounds.py` at zero text outside the media box |
 | `research/publication/RBF_DECK.pptx` | 13 slides with speaker notes; `[Sources]` blocks on the slides carrying externally sourced claims. Built by `build_deck.js` |
 | `research/publication/LITERATURE_MATRIX.md` | 44 verified sources, 6 evidence gaps stated explicitly |
 | `research/publication/PAPER_OUTLINE.md` | Every figure bound to a ledger ID and artifact path |
@@ -33,7 +33,11 @@ Corrected in `README.md`, `frontend/index.html`, `backend/ml_engine.py`, `backen
 
 **Observability.** `railway.toml` previously ran `python train_model.py --skip-if-exists 2>/dev/null; python -m uvicorn ...`. The redirect discarded the only evidence of why training failed and the bare `;` started the service regardless, so entering the fallback was silent and indistinguishable from success. `backend/start_railway.sh` keeps the fallback — it is supported and documented — but never discards stderr, logs the failure and its consequence, and continues deliberately. `/api/health` now exposes `sklearn_runtime` alongside `scoring_path`; the startup message previously told operators to read a field that did not exist. The landing page reads the active path from `/api/health` and **fails closed**: unreachable means "ACTIVE SCORER — UNKNOWN", never "ensemble".
 
-**The underlying training failure is not diagnosed.** Training succeeds in the development sandbox (exit 0, 1.53s, 153MB peak), so the production cause is not reproduced here and no cause is asserted. The mechanism that permits a silent failure is established: `train_model.py` imports scikit-learn at module top, while `ml_engine` imports it only inside a guarded helper, so the service boots in an image without scikit-learn and only training fails. `ENVIRONMENT.md` records Python 3.10 as a known gap where scikit-learn 1.9 cannot install, and there is no interpreter pin for the builder. That is a candidate, not a finding.
+**The underlying failure is now diagnosed, and the candidate offered here was wrong.** This paragraph previously proposed that scikit-learn was absent from the production image, so the service booted and only *training* failed. Deploy logs disprove it: training **succeeded** and wrote the artifact. The load discarded it. `ml_engine` wrapped the load in `warnings.simplefilter("error")`, which promoted a benign NumPy `DeprecationWarning` raised inside a dependency into an exception, so a usable model was thrown away and scoring fell back to the heuristic. `00f6b37` narrows the filter to `InconsistentVersionWarning` — the only warning that signals a real version hazard.
+
+This matters beyond the bug. That same commit flipped production from heuristic to ensemble, and the two paths assign different risk tiers for a majority of profiles, so it **changed live assessment outcomes** rather than being the neutral repair it was described as. The defect and the outcome change are one event seen from two sides.
+
+Worth recording how the wrong candidate survived: `00f6b37` was already in this branch's history, and its commit message — *"Stop discarding a usable model over a dependency's deprecation"* — states the answer outright. It was written up as undiagnosed because nobody re-read it.
 
 ## 3. Claim families swept repo-wide
 
