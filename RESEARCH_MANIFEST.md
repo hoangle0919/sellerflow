@@ -188,8 +188,12 @@ Spot-check any reproduction against these:
 |---|---|
 | Literature matrix | `research/publication/LITERATURE_MATRIX.md` — 44 verified sources, 6 evidence gaps stated |
 | Paper outline | `research/publication/PAPER_OUTLINE.md` — every figure mapped to a ledger ID |
-| Manuscript | `research/publication/MANUSCRIPT.md`, ~8,400 words, 15 sections + Appendix A |
-| Manuscript PDF | `research/publication/MANUSCRIPT.pdf`, 19 pages. Built by `build_pdf.sh`; gated by `check_pdf_bounds.py` at zero text outside the media box |
+| **Paper, English** | `research/publication/reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf` — **current reader edition**, 14 Letter pages. JEL G23, G32, C63, O16, L81. Built by `reader_editions/build_professional_paper.py` from `academic_paper_template.html`; the builder verifies four registered artifact checksums before rendering |
+| **Paper, Vietnamese** | `research/publication/reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf` — **current reader edition**, 14 Letter pages. An independently written Vietnamese scholarly paper, not a translation. Built by `build_professional_paper_vi.py` |
+| **Reproducibility supplement** | `research/publication/REPRODUCIBILITY_SUPPLEMENT.md` — checksums, claim-to-artifact and JSON-path map, reproduction commands, tested environments, correction history. The verifier's companion to the papers |
+| **Publication index** | `research/publication/PUBLICATION_INDEX.md` — **authoritative for document status.** Which paper is current, which is historical, and why |
+| Historical technical manuscript | `research/publication/MANUSCRIPT.md` / `.pdf`, 19 pages. The full-apparatus version, **superseded as the public paper** and retained byte-for-byte for provenance. Its apparatus was harvested into the supplement. Never cited as current |
+| Superseded Vietnamese overview | `research/publication/TONG_QUAN_VI.md` / `.pdf`, 5 pages. A short summary predating the Vietnamese scholarly edition. Retained as dated history; **not** the Vietnamese academic paper |
 | Deck | `research/publication/RBF_DECK.pptx`, 13 slides with speaker notes. Built by `build_deck.js` |
 | Career package | `research/publication/CAREER_PACKAGE.md` |
 | Poster | **not started** — no longer planned; the deck supersedes it |

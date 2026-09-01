@@ -10,7 +10,10 @@ Publication package for the revenue-contingent financing study, plus the runtime
 
 | Artifact | State |
 |---|---|
-| `research/publication/MANUSCRIPT.md` / `.pdf` | ~9,600 words, 15 sections plus data-availability, declarations and Appendix A. PDF is 19 pages, built by `build_pdf.sh`, gated by `check_pdf_bounds.py` at zero text outside the media box |
+| `research/publication/reader_editions/papers/` | **Current reader editions** — English and Vietnamese academic papers, 14 Letter pages each, with editable HTML sources and portable builders that verify registered artifact checksums before rendering |
+| `research/publication/REPRODUCIBILITY_SUPPLEMENT.md` | Checksums, claim-to-artifact map, reproduction commands, tested environments, correction history |
+| `research/publication/PUBLICATION_INDEX.md` | Authoritative document status: current, historical, superseded |
+| `research/publication/MANUSCRIPT.md` / `.pdf` | **Historical technical manuscript**, 19 pages, preserved byte-for-byte. Superseded as the public paper; apparatus harvested into the supplement |
 | `research/publication/RBF_DECK.pptx` | 13 slides with speaker notes; `[Sources]` blocks on the slides carrying externally sourced claims. Built by `build_deck.js` |
 | `research/publication/LITERATURE_MATRIX.md` | 44 verified sources, 6 evidence gaps stated explicitly |
 | `research/publication/PAPER_OUTLINE.md` | Every figure bound to a ledger ID and artifact path |

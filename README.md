@@ -41,6 +41,17 @@ The risk score comes from **whichever scorer is active** and is an **unvalidated
 - **Integrity screen** (`backend/integrity_engine.py`): five rule-based checks run in parallel with the credit assessment — revenue reconciliation (claimed revenue vs orders × AOV), quality/consistency, exposure velocity (advance stacking vs tenure), growth plausibility, and resubmission divergence (same merchant reporting different numbers across submissions). This is RBF's answer to the *fraud* half of "unify credit and fraud": one assessment returns both a credit view and an integrity view. When the integrity level is elevated, the result page **marks the demonstration assessment for review** rather than presenting it as a completed recommendation. RBF holds no capital and funds nothing, so it cannot hold funding; the earlier wording implied an authority the product does not have. It is deterministic and self-reported-data-only by design; a supervised fraud model on device/behavioral signals is roadmap, not shipped.
 - **Learning loop** (`POST /api/sellers/{id}/outcome`, `GET /api/model/status`): the only way a ground-truth label enters the system is a lender recording an adjudicated repayment outcome — never inferred by the model. `model/status` reports real-world validation (rank AUC) computed from those recorded outcomes once enough exist. The synthetic training baseline it used to report alongside is **withdrawn** — that tier now returns `auc: null` with `validation_status: "withdrawn"` and the reason, rather than a number. `backend/demo_learning_loop.py` exercises the full pipeline on an explicitly-labeled *simulated* cohort to demonstrate the wiring without presenting a real result.
 
+## Research papers
+
+| Document | |
+|---|---|
+| [English paper](research/publication/reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf) | 14 pages. *Revenue-Contingent Financing under Volatile Sales: A Paired Simulation of Seller Burden and Provider Recovery* |
+| [Vietnamese paper](research/publication/reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf) | 14 pages. An independently written Vietnamese scholarly edition |
+| [Reproducibility supplement](research/publication/REPRODUCIBILITY_SUPPLEMENT.md) | Checksums, artifact and JSON-path map, reproduction commands, correction history |
+| [Publication index](research/publication/PUBLICATION_INDEX.md) | Authoritative document status — which paper is current, which is historical |
+
+All magnitudes in both papers are simulation output under stated assumptions. No observed seller revenue, repayment or default outcome exists in this project.
+
 ## Data provenance
 
 Every value RBF returns is one of: **user-entered fact**, **system-derived metric**, or **assumption** — and the API response says which. The current submission form collects a single current-period revenue figure plus a reported growth rate, not a monthly time series, so volatility, seasonality, and drawdown metrics are honestly reported as `null` with a `missing_data_note` rather than invented from one data point. Submitting monthly revenue history (`backend/financing_engine.py::revenue_metrics`) unlocks them.

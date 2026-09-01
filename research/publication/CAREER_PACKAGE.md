@@ -2,6 +2,8 @@
 
 **Purpose.** Résumé, LinkedIn and portfolio text for this project, plus interview preparation. Every claim below is traceable to `research/CLAIM_LEDGER.md`, a canonical artifact, or the decision log.
 
+**The deliverables to attach.** The current papers are the 14-page editions at `reader_editions/papers/` — English for international applications, Vietnamese for Vietnamese readers. The 19-page `MANUSCRIPT.pdf` is the historical technical manuscript and is **not** the paper to send. Verifiers get `REPRODUCIBILITY_SUPPLEMENT.md`. See `PUBLICATION_INDEX.md`.
+
 **The rule that governs this file.** A CV is where research overclaiming usually happens, because nobody audits a résumé bullet. So the same constraints apply here as in the paper:
 
 - **No predictive-validity claim.** The model is a demonstration trained on synthetic data with a circular label.

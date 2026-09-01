@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Revenue-Contingent Financing under Volatile Sales: A Paired Simulation of Seller Burden and Provider Recovery</title>
+<meta name="author" content="Le Huu Hoang">
+<style>
+  @page { size: Letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #000; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.46; }
+  .page {
+    position: relative; width: 8.5in; height: 11in; margin: 0 auto;
+    padding: 0.78in 0.88in 0.65in; overflow: hidden; page-break-after: always; background: #fff;
+  }
+  .page:last-child { page-break-after: auto; }
+  .running {
+    position: absolute; top: 0.30in; left: 0.88in; right: 0.88in;
+    padding-bottom: 3px; border-bottom: 0.7px solid #333;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: "Times New Roman", Times, serif; font-size: 8.5pt; color: #333;
+  }
+  h1 { font-size: 19pt; line-height: 1.12; text-align: center; margin: 0; font-weight: 700; }
+  .subtitle { font-size: 12.5pt; text-align: center; margin-top: 7pt; }
+  .author { text-align: center; margin-top: 15pt; font-size: 10.5pt; line-height: 1.45; }
+  h2.major { font-size: 12.5pt; line-height: 1.2; text-align: center; margin: 0 0 11pt; font-weight: 700; }
+  h3 { font-size: 11.2pt; line-height: 1.25; margin: 10pt 0 4pt; font-weight: 700; }
+  p { margin: 0 0 7.5pt; text-align: justify; hyphens: auto; }
+  .lead { font-size: 11.2pt; }
+  .abstract-heading { text-align: center; font-size: 10.7pt; margin: 23pt 0 5pt; font-weight: 700; }
+  .abstract { font-size: 10pt; line-height: 1.42; margin: 0 13pt; }
+  .keywords { font-size: 9.3pt; margin: 9pt 13pt 0; }
+  .author-note {
+    position: absolute; left: .88in; right: .88in; bottom: .50in;
+    border-top: .6px solid #777; padding-top: 6pt; font-size: 8.2pt; line-height: 1.3;
+  }
+  .rq { margin: 9pt 18pt; font-style: italic; text-align: left; }
+  ol, ul { margin: 4pt 0 8pt 21pt; padding: 0; }
+  li { margin-bottom: 4pt; }
+  .equation { display: grid; grid-template-columns: 1fr auto; align-items: center; margin: 10pt 13pt; font-size: 12pt; }
+  .equation .formula { text-align: center; }
+  .equation .number { text-align: right; font-size: 10pt; }
+  .table-title, .figure-title { text-align: center; font-size: 9.8pt; font-weight: 700; margin: 9pt 0 3pt; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3pt; font-size: 8.8pt; line-height: 1.28; }
+  th { text-align: left; border-top: 1.2px solid #111; border-bottom: .7px solid #111; padding: 4px 5px; font-weight: 700; }
+  td { padding: 4px 5px; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 1.2px solid #111; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .notes { font-size: 8.2pt; line-height: 1.30; margin: 3pt 0 8pt; text-align: left; }
+  figure { margin: 9pt 0 7pt; }
+  figure img { display: block; width: 100%; height: auto; }
+  figcaption { margin-top: 3pt; font-size: 8.4pt; line-height: 1.30; text-align: left; }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24pt; }
+  .small { font-size: 9.3pt; line-height: 1.36; }
+  .ref { font-size: 8.9pt; line-height: 1.34; margin: 0 0 6.3pt; text-align: left; padding-left: 16pt; text-indent: -16pt; }
+  .ref a { color: #000; text-decoration: none; }
+  .availability { margin-top: 18pt; }
+  code { font-family: "Courier New", monospace; font-size: 8.3pt; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<section class="page">
+  <div style="margin-top:.42in">
+    <h1 style="font-size:18pt">Revenue-Contingent Financing under Volatile Sales: A Paired Simulation of Seller Burden and Provider Recovery</h1>
+    <div class="author"><strong>Le Huu Hoang</strong><br>Independent Research<br>August 2026</div>
+
+    <div class="abstract-heading">Abstract</div>
+    <p class="abstract">This paper compares revenue-contingent and fixed-payment financing on identical simulated sales paths. In a severe downturn, the revenue-contingent arm eliminates 6.85 months above an illustrative 15 percent payment-to-sales threshold, but recovers 65.46 percent of its target by month 12 versus 92.31 percent for a cost-matched fixed arm. Across scenarios, recovery can lead or lag depending on realized sales. The cap factor determines price, while the remittance rule determines how payments respond to sales. Permanent closure shows that the contractual target may remain unrecovered. The results describe contract mechanics under stated assumptions, not observed seller behavior or portfolio performance.</p>
+    <p class="keywords"><strong>Keywords:</strong> revenue-based financing; contingent repayment; payment burden; provider recovery; paired simulation; small-business finance<br><strong>JEL classification:</strong> G23, G32, C63, O16, L81</p>
+
+    <div style="margin-top:24pt">
+      <h2 class="major">I. Introduction</h2>
+      <p class="lead">A small seller can appear healthy in an average month and still face a financing problem in a weak one. A fixed instalment does not change when sales fall, so it consumes a larger share of that month's revenue. A revenue-contingent payment moves with sales instead. That flexibility may reduce payment pressure for the seller, but it changes the timing and, in some cases, the completeness of the provider's recovery.</p>
+      <p>Access to finance remains a persistent constraint for smaller firms in emerging markets. The 2017 <em>MSME Finance Gap</em> study estimated a substantial unmet financing need among formal micro, small, and medium enterprises, while the World Bank's <em>Digital Vietnam</em> report places digital commerce at the center of Vietnam's economic transition (International Finance Corporation and SME Finance Forum 2017; World Bank 2021). These sources motivate the setting. They do not calibrate the seller, contract, or revenue process used below.</p>
+    </div>
+  </div>
+  <div class="author-note">Author email: lehuuhoang1909@gmail.com. No external funding supported this study. All quantitative results are simulation output. No observed merchant repayment outcome is used, and the parameters are illustrative rather than calibrated to Vietnamese sellers.</div>
+</section>
+
+<!-- PAGE 2 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>2</span></div>
+  <h3 style="margin-top:0">A. Research question and contribution</h3>
+  <p>The contract examined here is straightforward. A provider advances capital, and the seller remits a fixed percentage of eligible sales until a predetermined repayment target is reached. A fixed-payment contract instead requires the same scheduled amount each month. The first structure absorbs part of a sales shock through the payment rule; the second leaves the scheduled payment unchanged. The economic question is therefore two-sided: how much payment pressure is reduced for the seller, and what happens to recovery speed for the provider?</p>
+  <p class="rq"><strong>Research question.</strong> Under identical simulated revenue paths, how do seller payment burden and provider recovery change when repayment is revenue-contingent rather than fixed?</p>
+  <p>The paper answers this question with a paired simulation. Every contract is evaluated on the same generated monthly revenue path. The resulting differences are therefore within-path comparisons rather than comparisons between different simulated sellers. The primary fixed benchmark matches the revenue-contingent contract's advance, repayment target, and reference-path term. A second, illustrative 18 percent nominal amortizing schedule provides a familiar price reference.</p>
+  <p>The analysis makes three contributions. First, it separates price from payment structure. The cap factor determines the contractual target; the remittance rule determines how the monthly payment responds to sales. Second, it reports seller burden and provider recovery together, because they are two consequences of the same rule. Third, it keeps failure and censoring visible by adding closure scenarios and identifying which statistics are calculated only among completing paths.</p>
+  <p>The question is narrow by design. The paper does not predict which sellers will default, establish whether a contract is affordable, or estimate how a real portfolio will perform. It asks what follows mechanically from specified contract terms when sales paths are held constant across alternatives.</p>
+
+  <h3>B. Why a paired simulation?</h3>
+  <p>An empirical comparison would ideally observe the same seller under both contracts and the same realized sales path. That counterfactual is unavailable because a seller can receive at most one contract. A paired simulation supplies it by construction: all arms are evaluated on each path before results are averaged. This improves internal comparability while sacrificing external validity. The simulated revenue process is chosen, not estimated.</p>
+  <p>Simulation studies can be useful for contract design when their data-generating processes, outcomes, replications, and uncertainty statements are explicit (Morris, White, and Crowther 2019). They are also vulnerable to researcher degrees of freedom and to confusing Monte Carlo precision with evidence about a population (Koehler, Brown, and Haneuse 2009; Pawel, Kook, and Reeve 2024). The protocol and outcomes were frozen in the public repository before the current versioned result files were generated, and the limitations of the chosen process are stated in Section VII.</p>
+
+  <h3>C. Principal findings</h3>
+  <p>In the severe downturn, the contingent arm avoids 6.85 high-burden months but trails the matched fixed arm's month-12 recovery by 26.85 percentage points. Across the broader scenario set, the recovery ordering is conditional: the contingent arm lags on weak paths and can lead on stronger paths. Repricing changes cost without changing the pre-target remittance rule, while permanent closure shows that the repayment target is not guaranteed to be reached.</p>
+</section>
+
+<!-- PAGE 3 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>3</span></div>
+  <h2 class="major">II. Related Literature</h2>
+  <h3>A. Contingent repayment</h3>
+  <p>The broad logic of contingent repayment is most developed in income-contingent lending. Payments that scale with realized income can smooth the borrower's cash obligation while transferring timing and selection risk to the financier (Chapman, Higgins, and Stiglitz 2014; Nerlove 1975). Those models concern education finance rather than firms, but the contractual mechanism transfers: when the payment base changes, the payment changes with it.</p>
+  <p>The closest empirical work is Russel, Shi, and Clarke's (2025) working paper on revenue-based financing through a South African payments platform. Their contract automatically deducts a share of platform revenue until a set amount is repaid, and the authors document behavioral revenue diversion after financing. This paper does not model that response. Cordaro et al. (2022) experimentally compare performance-contingent contracts for Kenyan micro-distributors, but their equity-like and hybrid designs are not percentage-of-revenue contracts. The studies establish relevance, not a transferable estimate for the contract analyzed here.</p>
+
+  <h3>B. Payment burden and flexibility</h3>
+  <p>Repayment burden is commonly defined as the payment required relative to current income. In the student-loan literature, fixed schedules concentrate burden in low-income states, whereas income-linked payments adjust automatically (Chapman and Dearden 2017; Barr et al. 2019). Firm and household evidence also emphasizes timing. A randomized repayment-deferral option changed risk-taking and default among borrowers in Bangladesh, while mortgage evidence shows that reducing near-term payments can matter more than reducing the total obligation (Battaglia, Gulesci, and Madestam 2024; Ganong and Noel 2020). These instruments and settings differ from revenue-based financing, so this study transfers the concept rather than their estimated magnitudes.</p>
+
+  <h3>C. Provider recovery and price</h3>
+  <p>A contingent contract cannot be evaluated from the borrower side alone. Recovery rate and timing matter to the provider, and contingent instruments may require a premium where they transfer risk or invite selection (Shen and Ziderman 2009; Herbst and Hendren 2024). Commercial-financing disclosure rules in New York and California also recognize that a factor rate and an annual percentage rate are not directly comparable without conversion (New York State Department of Financial Services 2023; California Legislature 2025).</p>
+  <p>The literature reviewed does not provide a head-to-head, price-controlled comparison of seller payment burden and provider recovery for a percentage-of-revenue SME contract. This paper supplies that comparison as a transparent simulation. It does not treat the result as evidence of real-world treatment effects.</p>
+</section>
+
+<!-- PAGE 4 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>4</span></div>
+  <h2 class="major">III. Contract Model</h2>
+  <p>Let <em>A</em> denote the advance, <em>f</em> the cap factor, <em>r</em> the remittance rate, and <em>B<sub>t</sub></em> eligible net sales in month <em>t</em>. The contractual repayment target is <em>C = Af</em>. Before the target is reached, the revenue-contingent payment equals a fixed share of eligible sales. The final payment is limited to the unpaid balance:</p>
+  <div class="equation"><div class="formula"><em>p<sub>t</sub></em> = min{<em>rB<sub>t</sub></em>, <em>C</em> - &Sigma;<sub><em>s</em>&lt;<em>t</em></sub><em>p<sub>s</sub></em>}.</div><div class="number">(1)</div></div>
+  <p>The matched fixed arm pays a constant amount <em>P</em> for <em>N</em> months, where the reference-path matching rule sets the same advance, target, and term:</p>
+  <div class="equation"><div class="formula"><em>q<sub>t</sub></em> = <em>P</em> for <em>t</em> &le; <em>N</em>, &nbsp; and &nbsp; <em>NP = C</em>.</div><div class="number">(2)</div></div>
+  <p>Equations (1) and (2) separate price from structure. The remittance rule <em>rB<sub>t</sub></em> determines how payment responds to sales. The factor <em>f</em> determines the target and therefore the stopping point. Changing <em>f</em> does not change the pre-target percentage, but it changes duration, the final clipped payment, and the realized cash-flow sequence.</p>
+  <p>For brevity, the revenue-contingent arm is labeled RBF in tables and figures.</p>
+  <figure style="margin-top:6pt;margin-bottom:5pt">
+    <img src="{{FIGURE_1}}" alt="Illustration of revenue and monthly payments" style="width:83%;margin:0 auto">
+    <figcaption><strong>Figure 1. Worked illustration of the payment rules.</strong> The fixed instalment remains level while the revenue-contingent payment moves with sales. The path is schematic and is not one of the versioned simulation results. It assumes a 10 percent remittance on net sales and a 3 percent return deduction.</figcaption>
+  </figure>
+  <div class="table-title">Table 1. Contract Arms</div>
+  <table>
+    <thead><tr><th>Arm</th><th>Role in the analysis</th><th>Response to lower sales</th><th>Key assumption</th></tr></thead>
+    <tbody>
+      <tr><td>RBF</td><td>Revenue-contingent structure</td><td>Monthly payment falls</td><td>10 percent of eligible net sales until target</td></tr>
+      <tr><td>FIX-A</td><td>Primary cost-matched benchmark</td><td>Scheduled payment unchanged</td><td>Every instalment is paid on time</td></tr>
+      <tr><td>FIX-B</td><td>Illustrative 18 percent nominal benchmark</td><td>Scheduled payment unchanged</td><td>Assumed rate, not a market estimate</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Notes:</em> Payment burden is payment divided by gross merchandise value (GMV). The contractual remittance base is net sales, so the usual displayed RBF burden is approximately 9.7 percent rather than exactly 10 percent when returns are 3 percent. The final clipped payment can be lower.</p>
+</section>
+
+<!-- PAGE 5 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>5</span></div>
+  <h2 class="major">IV. Simulation Design</h2>
+  <p>Monthly sales are generated from a baseline level with deterministic trend, mean-normalized seasonality, a scenario-specific shock, and lognormal idiosyncratic noise. Each run applies all three contract arms to the same path. Comparisons are formed within path and then summarized across 500 paths per scenario over a 24-month horizon.</p>
+  <p>The study contains ten non-closure scenarios: stable sales, moderate seasonality, strong seasonality, 3 percent monthly growth, gradual decline, sustained 40 percent decline, a severe 60 percent downturn followed by recovery, a one-month disruption, a platform outage, and a returns spike. Three additional scenarios impose permanent closure from month 7, permanent closure from month 13, or a temporary three-month closure.</p>
+
+  <div class="table-title">Table 2. Principal Simulation Inputs</div>
+  <table>
+    <thead><tr><th>Input</th><th class="num">Value</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline monthly sales</td><td class="num">185.0 million VND</td><td>Illustrative seller scale</td></tr>
+      <tr><td>Advance</td><td class="num">185.0 million VND</td><td>One month of baseline sales</td></tr>
+      <tr><td>Remittance rate</td><td class="num">10 percent of net sales</td><td>Payment rule before the target is reached</td></tr>
+      <tr><td>Illustrative cap factor</td><td class="num">1.20</td><td>Target of 222.0 million VND</td></tr>
+      <tr><td>Reference-path price match</td><td class="num">1.0945</td><td>Nearest tested APR match; target of 202.4825 million VND</td></tr>
+      <tr><td>Amortizing reference</td><td class="num">18 percent nominal; 12 months</td><td>Assumed input, not a market estimate</td></tr>
+      <tr><td>Simulation horizon</td><td class="num">24 months</td><td>Recovery measured at months 12, 18, and 24</td></tr>
+      <tr><td>Paths and seed</td><td class="num">500; 20260803</td><td>Per scenario</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Notes:</em> Values are illustrative. The protocol was frozen in the public repository before the current versioned result files were generated.</p>
+
+  <h3>A. Revenue process</h3>
+  <p>For path <em>i</em> and month <em>t</em>, target GMV follows the multiplicative process</p>
+  <div class="equation"><div class="formula"><em>R<sub>it</sub></em> = <em>R</em><sub>0</sub>(1 + <em>g</em>)<sup><em>t</em></sup><em>S<sub>t</sub>K<sub>t</sub>&epsilon;<sub>it</sub></em>, &nbsp; log <em>&epsilon;<sub>it</sub></em> ~ N(-&sigma;<sup>2</sup>/2, &sigma;<sup>2</sup>).</div><div class="number">(3)</div></div>
+  <p>The mean adjustment in (3) gives E[<em>&epsilon;<sub>it</sub></em>] = 1. Average order value is sampled as 440,000 x (1 + <em>&delta;<sub>it</sub></em>) VND, with <em>&delta;<sub>it</sub></em> ~ N(0, 0.05<sup>2</sup>); nonpositive draws are regenerated. Integer order count is the rounded ratio of target GMV to sampled order value, and realized GMV is then recomputed as orders x order value so the accounting identity holds exactly. Net sales equal GMV x (1 - return rate).</p>
+</section>
+
+<!-- PAGE 6 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>6</span></div>
+  <h2 class="major">IV. Simulation Design <span style="font-weight:400">(continued)</span></h2>
+  <h3 style="margin-top:0">A. Revenue process <span style="font-weight:400">(continued)</span></h3>
+  <div class="table-title">Table 3. Revenue-Process and Scenario Assumptions</div>
+  <table>
+    <thead><tr><th>Component</th><th>Specification used in the simulations</th></tr></thead>
+    <tbody>
+      <tr><td>Idiosyncratic variation</td><td>Lognormal multiplier with &sigma; = 0.15 and mean one</td></tr>
+      <tr><td>Seasonality</td><td>Mean-normalized monthly shape [1.05, 0.80, 0.90, 0.95, 1.00, 0.95, 0.95, 1.00, 1.10, 1.15, 1.30, 1.25]; the strong profile doubles deviations from one</td></tr>
+      <tr><td>Trend</td><td>Zero except the growth scenario, which uses 3 percent monthly growth</td></tr>
+      <tr><td>Shock onset</td><td>Month 7 for all stress and closure scenarios</td></tr>
+      <tr><td>Decline shocks</td><td>40 percent gradual decline over six months; 40 percent sustained decline; 60 percent downturn for six months followed by six-month recovery</td></tr>
+      <tr><td>Temporary shocks</td><td>One month at 50 percent of baseline; one-month platform outage at 30 percent; three-month return rate of 9 percent rather than 3 percent</td></tr>
+      <tr><td>Closure shocks</td><td>Permanent zero sales from month 7 or 13; temporary zero sales for three months followed by partial recovery</td></tr>
+      <tr><td>Price matching</td><td>Choose <em>f</em> from 1.0005 to 1.4000 in 0.0005 steps to minimize the absolute reference-path APR gap to FIX-B</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Notes:</em> Scenario shapes and parameters are assumptions, not estimates from Vietnamese merchant data.</p>
+
+  <h3>B. Outcomes and denominators</h3>
+  <p>Seller burden is payment divided by that month's GMV. The paper reports mean burden, mean path-level peak burden, and months above descriptive 10, 15, 20, and 25 percent reporting bands. Provider recovery divides cumulative payment by the contractual target for RBF and FIX-A, and by scheduled total repayment for the uncapped FIX-B arm. It is measured at months 12, 18, and 24.</p>
+  <p>Mean duration is calculated only among paths that reach their repayment total within the horizon. Effective APR is calculated where the payment stream admits an internal rate of return, which is a different conditioning event. Both denominators are reported when closure causes them to differ.</p>
+
+  <h3>C. Interpretation of uncertainty</h3>
+  <p>Monte Carlo intervals measure stability across a finite number of simulated paths under fixed assumptions. They do not measure population uncertainty, parameter uncertainty, or uncertainty about whether the chosen revenue process is correct. Selected convergence checks establish numerical stability for two estimators in one stress scenario, not for every reported statistic.</p>
+  <p class="notes"><em>Benchmark limitation:</em> FIX-A and FIX-B assume every scheduled instalment is paid in full and on time. Their recovery figures are therefore scheduled recovery under an optimistic assumption, not estimates of realized lender performance.</p>
+</section>
+
+<!-- PAGE 7 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>7</span></div>
+  <h2 class="major">V. Results</h2>
+  <h3>A. Severe downturn</h3>
+  <p>In the severe-downturn scenario, sales fall 60 percent for six months and recover over the following six. The central result is not that one contract dominates. One payment rule produces two linked outcomes.</p>
+  <figure>
+    <img src="{{FIGURE_2}}" alt="Severe downturn comparison">
+    <figcaption><strong>Figure 2. Seller burden and provider recovery in the severe downturn.</strong> Means across 500 paired paths at <em>f</em> = 1.20. Recovery is measured against each arm's contractual target. The RBF and FIX-A comparison is cost-matched.</figcaption>
+  </figure>
+  <div class="table-title">Table 4. Severe-Downturn Outcomes</div>
+  <table>
+    <thead><tr><th>Contract arm</th><th class="num">Mean burden</th><th class="num">Months above 15 percent</th><th class="num">Recovered by month 12</th><th class="num">Mean duration</th></tr></thead>
+    <tbody>
+      <tr><td>Revenue-contingent</td><td class="num">9.43%</td><td class="num">0.00</td><td class="num">65.46%</td><td class="num">18.72</td></tr>
+      <tr><td>Fixed, cost-matched</td><td class="num">16.36%</td><td class="num">6.85</td><td class="num">92.31%</td><td class="num">13.00</td></tr>
+      <tr><td>18 percent amortizing reference</td><td class="num">16.06%</td><td class="num">5.91</td><td class="num">100.00%</td><td class="num">12.00</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Notes:</em> Mean duration is calculated among paths that reach the repayment total within 24 months. All paths complete in this non-closure scenario. Source: Author's paired simulations.</p>
+
+  <p>The revenue-contingent arm eliminates 6.85 months above the illustrative 15 percent threshold relative to FIX-A (Monte Carlo interval over simulated paths: 6.80 to 6.90). Its mean payment burden remains near its stable-scenario level. The same adjustment reduces month-12 recovery by 26.85 percentage points (26.60 to 27.10) and extends mean completion time by 5.72 months. These intervals measure simulation stability under the chosen process, not uncertainty about real sellers.</p>
+  <p>For the seller, the contingent rule prevents weak-month payments from remaining fixed as sales fall. For the provider, it shifts cash receipts out of the downturn. By month 18, the contingent arm has recovered 97.79 percent of its target, and it reaches 100 percent by month 24. Seller relief and provider delay are therefore the same mechanism viewed from opposite sides in this scenario. A burden comparison that omits recovery, or a recovery comparison that omits burden, provides an incomplete account of the contract.</p>
+</section>
+
+<!-- PAGE 8 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>8</span></div>
+  <h3 style="margin-top:0">B. Across-scenario recovery</h3>
+  <p>Across the ten non-closure scenarios, the revenue-contingent arm reduces the count of months above the 15 percent reporting threshold. Provider recovery behaves differently: it may lead or lag the matched fixed schedule depending on the realized sales path.</p>
+  <figure>
+    <img src="{{FIGURE_3}}" alt="Seller relief and provider recovery across scenarios">
+    <figcaption><strong>Figure 3. Seller relief and month-12 provider recovery across scenarios.</strong> Each point summarizes 500 paired paths at <em>f</em> = 1.20. The horizontal axis is FIX-A high-burden months minus RBF high-burden months. The vertical axis is RBF month-12 recovery minus FIX-A recovery. The diamond identifies the severe downturn.</figcaption>
+  </figure>
+  <p>The stress scenarios trace the expected trade-off. Under gradual decline, the contingent arm avoids 0.89 high-burden months while trailing fixed recovery by 8.10 percentage points. Under sustained decline, the corresponding values are 3.10 months and 16.27 points. Under the severe downturn, they widen to 6.85 months and 26.85 points.</p>
+  <p>The relationship is not uniformly negative. Under stable revenue, moderate seasonality, growth, a one-month disruption, and a returns spike, the contingent arm is slightly ahead of the 13-month matched schedule at month 12. The stable-path lead is an artifact of integer matching: a 12.37-month reference duration is rounded up to 13 months, allowing the contingent arm to finish earlier on sufficiently strong paths.</p>
+  <p>The general ordering follows directly from the contract definition. Before either arm reaches its target and while the fixed schedule remains active, contingent cumulative recovery is ahead exactly when realized mean eligible sales exceed the fixed payment divided by the remittance rate. Describing a path only as declining or growing is insufficient to determine the ordering.</p>
+  <p>The supported conclusion is therefore conditional. Revenue-contingent financing slows recovery on weaker paths and can lead on stronger paths. The threshold depends on the fixed payment, the remittance rate, and realized eligible sales.</p>
+</section>
+
+<!-- PAGE 9 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>9</span></div>
+  <h3 style="margin-top:0">C. Price and payment structure</h3>
+  <p>The cap factor is a price input: multiplying the advance by <em>f</em> gives the repayment target. The remittance rate is a structural input: before completion, payment remains 10 percent of eligible net sales. Lowering the cap factor preserves the pre-target response to sales but moves the point at which payments stop.</p>
+  <figure>
+    <img src="{{FIGURE_4}}" alt="Revenue-contingent outcomes at two cap factors">
+    <figcaption><strong>Figure 4. The same payment rule at two prices.</strong> Severe-downturn means across 500 paths. Effective APR is averaged over paths for which an internal rate of return exists; all paths complete in these non-closure scenarios.</figcaption>
+  </figure>
+  <div class="table-title">Table 5. Pricing and Severe-Downturn Outcomes</div>
+  <table>
+    <thead><tr><th>Price specification</th><th class="num">Target</th><th class="num">Reference-path APR</th><th class="num">Recovered by month 12</th><th class="num">Mean duration</th></tr></thead>
+    <tbody>
+      <tr><td>Illustrative <em>f</em> = 1.20</td><td class="num">222.00m</td><td class="num">39.90%</td><td class="num">65.46%</td><td class="num">18.72</td></tr>
+      <tr><td>Nearest grid match <em>f*</em> = 1.0945</td><td class="num">202.48m</td><td class="num">19.54%</td><td class="num">71.77%</td><td class="num">17.50</td></tr>
+      <tr><td>18 percent nominal benchmark</td><td class="num">203.53m scheduled</td><td class="num">19.56%</td><td class="num">100.00%</td><td class="num">12.00</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Notes:</em> Amounts are million VND. The 1.0945 factor is the nearest tested grid match, not an exact equality. Its reference-path APR is approximately 0.02 percentage points below the amortizing benchmark.</p>
+  <p>Repricing changes the severe-downturn outcomes. The lower target raises the share recovered by month 12 and shortens average completion time. Yet the payment remains the same share of net sales before completion. A cost comparison at one factor is therefore a finding about that price, not a property of the revenue-contingent structure itself.</p>
+  <p>This distinction also matters for disclosure. A factor rate is not an APR. Comparing contracts requires the advance, repayment target, payment timing, and an annualized rate on a stated basis. The New York and California disclosure rules cited above reflect this comparability problem.</p>
+</section>
+
+<!-- PAGE 10 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>10</span></div>
+  <h3 style="margin-top:0">D. Closure, incomplete recovery, and censoring</h3>
+  <p>All ten non-closure scenarios reach the repayment target within the 24-month window. That result is a property of the scenario library, not a contractual guarantee. Permanent revenue cessation provides the relevant counterexample.</p>
+  <figure>
+    <img src="{{FIGURE_5}}" alt="Completion rates under closure scenarios">
+    <figcaption><strong>Figure 5. Completion within 24 months under closure.</strong> Bars show the share of 500 revenue-contingent paths reaching the target. Fixed schedules are not plotted because the model mechanically assumes every scheduled instalment is paid, even after simulated business closure.</figcaption>
+  </figure>
+  <div class="table-title">Table 6. Revenue-Contingent Recovery Under Closure</div>
+  <table>
+    <thead><tr><th>Scenario</th><th class="num">Complete, <em>f</em> = 1.20</th><th class="num">Mean repaid</th><th class="num">Complete, <em>f*</em> = 1.0945</th><th class="num">Mean repaid</th></tr></thead>
+    <tbody>
+      <tr><td>Permanent closure, month 7</td><td class="num">0.0%</td><td class="num">98.35m</td><td class="num">0.0%</td><td class="num">98.35m</td></tr>
+      <tr><td>Permanent closure, month 13</td><td class="num">23.8%</td><td class="num">214.31m</td><td class="num">92.4%</td><td class="num">202.23m</td></tr>
+      <tr><td>Temporary three-month closure</td><td class="num">98.0%</td><td class="num">221.95m</td><td class="num">100.0%</td><td class="num">202.48m</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Notes:</em> Amounts are million VND. Completion is reaching the contractual target within 24 months. Source: Author's paired simulations.</p>
+  <p>Timing, rather than the mere presence of zero-sales months, determines completion. Temporary closure can be absorbed when later sales are sufficient. Permanent closure from month 7 leaves every path below its target at either price. Closure from month 13 lies close to the boundary, so reducing the target changes completion from 23.8 percent to 92.4 percent.</p>
+  <p>Incomplete recovery is not the same as principal loss. At <em>f</em> = 1.20, 76.2 percent of month-13 closure paths miss the 222 million VND contractual target, yet mean repayment is 214.3 million VND against a 185 million VND advance. Month-7 closure is different: mean repayment is only 98.3 million VND, below principal.</p>
+  <p>Duration statistics require a separate warning. Mean duration is calculated among paths that complete. A short duration beside a high incomplete-recovery rate can be misleading because unfinished paths are excluded (Lancaster 1990; Heckman 1979). In the month-13 closure case at <em>f</em> = 1.20, mean duration is 11.99 months among the 23.8 percent that finish; it is not a portfolio-wide completion time.</p>
+</section>
+
+<!-- PAGE 11 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>11</span></div>
+  <h2 class="major">VI. Discussion</h2>
+  <h3>A. Flexibility reallocates timing risk</h3>
+  <p>The simulation makes the allocation transparent. A fixed schedule places more short-run sales risk on the seller: the payment is unchanged, so burden rises when sales fall. A revenue-contingent schedule absorbs part of the shock automatically, but the provider receives less cash in weak months. Neither statement requires a prediction of default. Both follow from the payment rules.</p>
+  <p>The magnitude and direction of the recovery effect are scenario-dependent. In the severe downturn, seller relief is large and recovery is delayed. In growth and stable scenarios, the contingent arm can be ahead of the rounded fixed schedule. Product descriptions should therefore avoid universal claims such as flexibility without cost or necessarily slower recovery. The applicable condition should be stated.</p>
+
+  <h3>B. Price is not a structural property</h3>
+  <p>At <em>f</em> = 1.20, the contract has a 222 million VND target and appears expensive relative to the assumed 18 percent nominal benchmark. At <em>f*</em> = 1.0945, reference-path effective cost is nearly matched. The remittance rule is identical in both cases. The correct conclusion is not that revenue-contingent financing is inherently cheap or expensive. It is that the product's price and contingent payment rule must be evaluated separately.</p>
+
+  <h3>C. Recovery reporting needs more than one number</h3>
+  <p>Completion rate and amount recovered answer different questions. Missing a contractual target does not automatically mean losing principal, as month-13 closure shows. Conversely, a statistic calculated only among completed contracts can look favorable because unfinished cases are excluded. Provider reporting should place completion, amount recovered, and the basis of any annualized return side by side.</p>
+
+  <h3>D. Implementation implications</h3>
+  <p>The analysis supports a verifiable financing engine that keeps price separate from payment structure, presents seller burden beside provider recovery, settles in integer VND, and exposes failure cases. A public implementation can demonstrate these mechanics without claiming predictive validity, making credit decisions, or funding loans.</p>
+  <p>A production system would additionally require observed transaction data, adjudicated repayment outcomes, pricing calibration, legal review, monitoring, and a funding partner.</p>
+
+  <h3>E. What observed data would add</h3>
+  <p>Observed merchant data could calibrate sales volatility, seasonality, returns, and closure frequency. It would not by itself identify the comparison between two contracts on the same seller and sales path. That counterfactual would still require random assignment, a credible quasi-experimental design, or a structural model with explicit behavioral assumptions.</p>
+</section>
+
+<!-- PAGE 12 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>12</span></div>
+  <h2 class="major">VII. Limitations and Conclusion</h2>
+  <h3>A. Limitations</h3>
+  <p><strong>No observed outcomes.</strong> The magnitudes describe simulated contract mechanics. They do not estimate the distribution of sales, repayment, default, or closure among Vietnamese sellers.</p>
+  <p><strong>No behavioral response.</strong> Sellers do not alter sales, reporting, platform use, or effort in response to the contract. Real revenue diversion documented by Russel, Shi, and Clarke (2025) is outside the model.</p>
+  <p><strong>No affordability measure.</strong> Burden is payment divided by sales rather than profit or available cash. Costs, margins, reserves, taxes, and other obligations are omitted.</p>
+  <p><strong>Optimistic fixed benchmark.</strong> Fixed instalments are always paid on schedule, so their results describe scheduled recovery rather than realized lender performance.</p>
+  <p><strong>Illustrative parameters.</strong> The benchmark rate, price factors, shock shapes, and seasonal amplitudes are assumptions rather than market estimates.</p>
+  <p><strong>Incomplete uncertainty analysis.</strong> The study reports stochastic variation under chosen parameters and selected sensitivities. It does not quantify parameter uncertainty or uncertainty about the revenue model itself.</p>
+
+  <h3>B. Conclusion</h3>
+  <p>Revenue-contingent financing changes the timing of repayment by linking monthly payment to sales. When sales fall, this rule can prevent payment burden from rising as sharply as it does under a fixed instalment. The same rule can delay provider recovery, and permanent sales cessation can leave the contractual target unreached.</p>
+  <p>The direction of recovery is not universal. It depends on realized sales relative to the fixed schedule's break-even level. Nor is price a structural property: the cap factor sets the repayment target, while the remittance rate sets the pre-target response to sales. Both dimensions must be reported.</p>
+  <p>The study's contribution is a disciplined comparison rather than a market forecast. It provides a transparent way to ask whether seller relief and provider recovery are described together, whether price is confused with structure, and whether failure cases remain visible. Those questions also define a clear agenda for future work with observed data.</p>
+  <p>The next empirical step is calibration with observed merchant revenue and repayment records. The next identification step is separate: a randomized or quasi-experimental comparison capable of estimating how contract structure changes behavior and outcomes. Until then, the results should be read as mechanics under assumptions, not as evidence of impact.</p>
+</section>
+
+<!-- PAGE 13 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>13</span></div>
+  <h2 class="major">References</h2>
+  <p class="ref">Barr, Nicholas, Bruce Chapman, Lorraine Dearden, and Susan Dynarski. 2019. "The US College Loans System: Lessons from Australia and England." <em>Economics of Education Review</em> 71: 32-48. <a href="https://doi.org/10.1016/j.econedurev.2018.07.007">https://doi.org/10.1016/j.econedurev.2018.07.007</a>.</p>
+  <p class="ref">Battaglia, Marianna, Selim Gulesci, and Andreas Madestam. 2024. "Repayment Flexibility and Risk Taking: Experimental Evidence from Credit Contracts." <em>Review of Economic Studies</em> 91 (5): 2635-2675. <a href="https://doi.org/10.1093/restud/rdad107">https://doi.org/10.1093/restud/rdad107</a>.</p>
+  <p class="ref">California Legislature. 2025. <em>Commercial Financing: Disclosures</em>. Senate Bill 362, Chapter 352, Statutes of 2025. <a href="https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB362">California Legislative Information</a>.</p>
+  <p class="ref">Chapman, Bruce, and Lorraine Dearden. 2017. "Conceptual and Empirical Issues for Alternative Student Loan Designs: The Significance of Loan Repayment Burdens for the United States." <em>ANNALS of the American Academy of Political and Social Science</em> 671 (1): 249-268. <a href="https://doi.org/10.1177/0002716217703969">https://doi.org/10.1177/0002716217703969</a>.</p>
+  <p class="ref">Chapman, Bruce, Timothy Higgins, and Joseph E. Stiglitz, eds. 2014. <em>Income Contingent Loans: Theory, Practice and Prospects</em>. Palgrave Macmillan. <a href="https://doi.org/10.1057/9781137413208">https://doi.org/10.1057/9781137413208</a>.</p>
+  <p class="ref">Cordaro, Francesco, Marcel Fafchamps, Colin Mayer, Muhammad Meki, Simon Quinn, and Kate Roll. 2022. <em>Microequity and Mutuality: Experimental Evidence on Credit with Performance-Contingent Repayment</em>. NBER Working Paper 30411. <a href="https://doi.org/10.3386/w30411">https://doi.org/10.3386/w30411</a>.</p>
+  <p class="ref">Ganong, Peter, and Pascal Noel. 2020. "Liquidity versus Wealth in Household Debt Obligations: Evidence from Housing Policy in the Great Recession." <em>American Economic Review</em> 110 (10): 3100-3138. <a href="https://doi.org/10.1257/aer.20181243">https://doi.org/10.1257/aer.20181243</a>.</p>
+  <p class="ref">Heckman, James J. 1979. "Sample Selection Bias as a Specification Error." <em>Econometrica</em> 47 (1): 153-161. <a href="https://doi.org/10.2307/1912352">https://doi.org/10.2307/1912352</a>.</p>
+  <p class="ref">Herbst, Daniel, and Nathaniel Hendren. 2024. "Opportunity Unraveled: Private Information and the Missing Markets for Financing Human Capital." <em>American Economic Review</em> 114 (7): 2024-2072. <a href="https://doi.org/10.1257/aer.20211653">https://doi.org/10.1257/aer.20211653</a>.</p>
+  <p class="ref">International Finance Corporation and SME Finance Forum. 2017. <em>MSME Finance Gap: Assessment of the Shortfalls and Opportunities in Financing Micro, Small and Medium Enterprises in Emerging Markets</em>. World Bank Group. <a href="https://www.ifc.org/content/dam/ifc/doclink/2018/msme-finance-gap-report.pdf">https://www.ifc.org/content/dam/ifc/doclink/2018/msme-finance-gap-report.pdf</a>.</p>
+  <p class="ref">Koehler, Elizabeth, Elizabeth Brown, and Sebastien J.-P. A. Haneuse. 2009. "On the Assessment of Monte Carlo Error in Simulation-Based Statistical Analyses." <em>The American Statistician</em> 63 (2): 155-162. <a href="https://doi.org/10.1198/tast.2009.0030">https://doi.org/10.1198/tast.2009.0030</a>.</p>
+  <p class="ref">Lancaster, Tony. 1990. <em>The Econometric Analysis of Transition Data</em>. Cambridge University Press. <a href="https://doi.org/10.1017/CCOL0521265967">https://doi.org/10.1017/CCOL0521265967</a>.</p>
+</section>
+
+<!-- PAGE 14 -->
+<section class="page">
+  <div class="running"><span>Revenue-Contingent Financing Under Volatile Sales</span><span>14</span></div>
+  <h2 class="major">References <span style="font-weight:400">(continued)</span></h2>
+  <p class="ref">Morris, Tim P., Ian R. White, and Michael J. Crowther. 2019. "Using Simulation Studies to Evaluate Statistical Methods." <em>Statistics in Medicine</em> 38 (11): 2074-2102. <a href="https://doi.org/10.1002/sim.8086">https://doi.org/10.1002/sim.8086</a>.</p>
+  <p class="ref">Nerlove, Marc. 1975. "Some Problems in the Use of Income-Contingent Loans for the Finance of Higher Education." <em>Journal of Political Economy</em> 83 (1): 157-183. <a href="https://doi.org/10.1086/260311">https://doi.org/10.1086/260311</a>.</p>
+  <p class="ref">New York State Department of Financial Services. 2023. <em>Commercial Financing Disclosure</em>. 23 NYCRR Part 600. <a href="https://www.dfs.ny.gov/system/files/documents/2023/01/rf_finservices_23nycrr600_text.pdf">https://www.dfs.ny.gov/system/files/documents/2023/01/rf_finservices_23nycrr600_text.pdf</a>.</p>
+  <p class="ref">Pawel, Samuel, Lorenz Kook, and Kelly Reeve. 2024. "Pitfalls and Potentials in Simulation Studies." <em>Biometrical Journal</em> 66 (1): e2200091. <a href="https://doi.org/10.1002/bimj.202200091">https://doi.org/10.1002/bimj.202200091</a>.</p>
+  <p class="ref">Russel, Dominic, Claire Shi, and Rowan Clarke. 2025. <em>Fintech and Financial Frictions: The Rise of Revenue-Based Financing</em>. South African Reserve Bank Working Paper 11078. <a href="https://www.resbank.co.za/content/dam/sarb/publications/working-papers/2025/fintech-and-financial-frictions-the-rise-of-revenue-based-financing.pdf">https://www.resbank.co.za/content/dam/sarb/publications/working-papers/2025/fintech-and-financial-frictions-the-rise-of-revenue-based-financing.pdf</a>.</p>
+  <p class="ref">Shen, Hua, and Adrian Ziderman. 2009. "Student Loans Repayment and Recovery: International Comparisons." <em>Higher Education</em> 57 (3): 315-333. <a href="https://doi.org/10.1007/s10734-008-9146-0">https://doi.org/10.1007/s10734-008-9146-0</a>.</p>
+  <p class="ref">World Bank. 2021. <em>Taking Stock: Digital Vietnam - The Path to Tomorrow</em>. Report 163180. <a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/522031629469673810">https://documents.worldbank.org/en/publication/documents-reports/documentdetail/522031629469673810</a>.</p>
+
+  <div class="availability">
+    <h2 class="major">Data and Code Availability</h2>
+    <p>The analysis uses no confidential or observed seller-level data. The versioned simulation outputs, frozen methodology, scenario generators, derivations, and reproduction scripts are available in the <a href="https://github.com/hoangle0919/sellerflow/tree/e3669051b8d098e9effb43643bb46ee5ef1ef301/research">public repository snapshot at commit e366905</a>. The repository manifest identifies the current and superseded artifacts and records their checksums.</p>
+    <p>The current files reproduce numerically at published precision across tested environments. Byte identity is platform-dependent and is not claimed across platforms. Superseded outputs are preserved separately so that corrections remain auditable.</p>
+  </div>
+
+  <div class="availability">
+    <h2 class="major">Acknowledgments and Disclosures</h2>
+    <p>No external funding supported this study. The author reports no financial interest in a revenue-based financing provider. The author has family connections to consumer-finance businesses in Vietnam; those businesses supplied no data, funding, direction, or review. Generative AI tools were used for code review, editorial assistance, and document formatting. The author directed the research, verified the calculations and sources, and accepts responsibility for the manuscript. The SellerFlow deployment is a research prototype, not a lending service, credit offer, financial recommendation, or validated underwriting model.</p>
+  </div>
+</section>
+
+</body>
+</html>

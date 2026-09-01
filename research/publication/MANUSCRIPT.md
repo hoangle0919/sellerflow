@@ -1,5 +1,15 @@
 # Revenue-Contingent Financing Under Volatile Sales: Separating Price from Structure in a Paired Simulation Study
 
+> ## ⚠️ HISTORICAL TECHNICAL MANUSCRIPT — superseded as the public paper
+>
+> **The current reader-facing papers are the 14-page editions**, English and Vietnamese, listed in [`PUBLICATION_INDEX.md`](PUBLICATION_INDEX.md). Cite those.
+>
+> This 19-page version carries the full audit apparatus inline — per-claim source notes, checksum tables, the reproducibility statement. That made it a poor read and a good record. Its apparatus has been harvested into [`REPRODUCIBILITY_SUPPLEMENT.md`](REPRODUCIBILITY_SUPPLEMENT.md), which is now the companion to the reader editions.
+>
+> It is **retained byte-for-byte, never regenerated and never deleted**: figures were published from it, so what was said and when has to stay checkable. Nothing in it is known to be wrong — it is superseded in *role*, not in correctness.
+
+---
+
 **Le Huu Hoang**^†^
 
 *Independent research*
