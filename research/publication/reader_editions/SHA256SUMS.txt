@@ -1,6 +1,3 @@
-# Runnable in-repository manifest. Verify with:
-#     cd research/publication/reader_editions && sha256sum -c SHA256SUMS.txt
-# Archival transfer receipt with the original ZIP paths: SHA256SUMS.handoff.txt
 f3a0aec26a1437620909ab8a13402525d5939bd087f19ad2087e830cb2a3aa78  papers/Revenue_Contingent_Financing_Professional_Paper.pdf
 1f36142e33a3db7baf635e556c0c470a91b656bf47517129cd572787d4b41c5c  papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf
 cc051a55a804069b3bbe8e7e830a1bb155599c58c8bad90170c92c50442a6a1a  academic_paper_template.html

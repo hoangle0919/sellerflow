@@ -249,7 +249,7 @@ function source(s, t) {
     s.addText(sub, { x: x + 0.4, y: 3.45, w: 4.8, h: 0.65, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 17, margin: 0 });
   };
   box(0.7, RBF, "ILLUSTRATIVE CAP", "f = 1.20", "Substantially more expensive than the 18% amortizing reference.");
-  box(7.0, FIXB, "NEAREST GRID MATCH", "f* = 1.0945", "19.537656% against the reference's 19.561817% — residual ≈ 0.02416pp. Not an exact match: duration is integer-valued.");
+  box(7.0, FIXB, "NEAREST GRID MATCH", "f* = 1.0945", "19.537656% against the reference's 19.561817% — residual ≈ 0.02416pp. That residual is a grid-resolution result: 1.0945 is the nearest point the 0.0005-step search visited. APR varies continuously with f within a fixed paying term; a numerical root sits at approximately 1.09462066267694.");
   s.addText([
     { text: "Unchanged by price:  ", options: { bold: true } },
     { text: "the pre-cap payment rule — each payment is the same share of net sales.", options: { breakLine: true } },
@@ -423,7 +423,7 @@ function source(s, t) {
     s.addText(lab, { x: x + 0.32, y: 2.82, w: 3.06, h: 0.6, fontSize: 12, color: "444444", fontFace: "Calibri", lineSpacing: 16, valign: "top", margin: 0 });
   };
   stat(0.7,  "5",     "canonical artifacts, each with a\nregistered SHA-256");
-  stat(4.80, "1,153", "non-browser tests passing —\n502 backend, 651 simulation");
+  stat(4.80, "1,156", "non-browser tests passing —\n505 backend, 651 simulation");
   stat(8.90, "44",    "verified sources, with 6\nevidence gaps stated openly");
   s.addText("Reproducibility, stated at the strength the measurement supports", { x: 0.7, y: 3.85, w: 11.9, h: 0.4, fontSize: 16, bold: true, color: INK, fontFace: "Cambria", margin: 0 });
   bullets(s, [
@@ -431,7 +431,7 @@ function source(s, t) {
     "Byte equality holds within a fixed runtime, not across platforms — 5 of 5 byte-identical on Linux 3.10.12, and 3 of 5 on macOS 26.0 arm64 / CPython 3.11.5, measured on these artifacts by an independent audit run.",
     "An earlier claim of unqualified byte-for-byte reproducibility rested on a step that re-hashed the committed file rather than regenerating it. Both the claim and the evidence were corrected.",
   ], { x: 0.7, y: 4.3, w: 11.9, step: 0.58, fontSize: 12.5, color: "333333", fontFace: "Calibri", lineSpacing: 16, margin: 0 });
-  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,153 figure is non-browser: 502 backend and 651 simulation. The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit c8261c6. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.",
+  s.addText("Scope: simulation results are artifact-backed. Analytical results are derivation-backed and external facts are literature-backed; neither is covered by the checksum table. The 1,156 figure is non-browser: 505 backend and 651 simulation. The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit c8261c6. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.",
     { x: 0.7, y: 6.25, w: 11.9, h: 0.6, fontSize: 11, italic: true, color: MUTED, fontFace: "Calibri", lineSpacing: 15, margin: 0 });
   notes(s, "The corrected reproducibility claim is a better credential than the overstated one would have been. If asked: the checksum table covers simulation output only — proofs are backed by DERIVATIONS.md and cited facts by the literature matrix.", [
     "Five registered SHA-256 digests: MANUSCRIPT.md §15; RESULTS_REGISTRY.md",

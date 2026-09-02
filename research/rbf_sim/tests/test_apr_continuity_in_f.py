@@ -16,11 +16,13 @@ so does its internal rate of return. Duration integrality introduces **kinks**
 where the term steps — it makes the map piecewise. It does not put gaps in the
 range.
 
-The practical consequence is that an exact reference-path solution to the
-benchmark APR *does* exist. The registered `f* = 1.0945` is not that root; it is
-the nearest point on the 0.0005-step grid that `run_validation.py` actually
-searched. That distinction is the whole correction: the residual is a property
-of **the grid**, not of attainability.
+The practical consequence is that a reference-path solution to the benchmark APR
+*does* exist. It is a **numerical root located by bisection** — approximately
+`f = 1.09462066267694`, to floating-point tolerance, not a closed-form solution.
+The registered `f* = 1.0945` is not that root; it is the nearest point found on
+the 0.0005-step grid that `run_validation.py` actually searched. That
+distinction is the whole correction: the residual is a **grid-resolution**
+result, not a limit on attainability.
 
 Nothing here changes the engine, a generator, or a registered artifact. These
 tests read the same reference path the pricing section reads and assert
@@ -49,8 +51,12 @@ GRID = [1.0 + i * GRID_STEP for i in range(1, 801)]
 REGISTERED_F_STAR = 1.0945
 REGISTERED_APR = 0.1953765648184853
 
-#: The exact continuous root on the reference path, located by bisection.
-EXACT_F = 1.0946206626769461
+#: The numerical root located by bisection on the reference path. This is a
+#: floating-point approximation to bisection tolerance, NOT a closed-form
+#: solution — full precision is kept here only so the tolerance assertions
+#: below stay tight. Reader-facing copy quotes it as approximately
+#: 1.09462066267694 and calls it a numerical root.
+NUMERICAL_ROOT_F = 1.0946206626769461
 
 
 def _ref():
@@ -77,19 +83,22 @@ def benchmark():
     return solve_apr(BASE["A"], fix_b_payments(ContractTerms(**BASE), 24))
 
 
-# ── 1. the exact continuous root ────────────────────────────────────────────
+# ── 1. the numerical root located by bisection ────────────────────────────────────────────
 
-def test_an_exact_reference_path_root_exists(ref, benchmark):
+def test_a_numerical_reference_path_root_exists(ref, benchmark):
     """The counterexample that falsifies the discreteness claim.
+
+    Located by bisection, so it is a numerical root to floating-point tolerance,
+    not a symbolic solution.
 
     If achievable APRs were a discrete set, no `f` would hit the benchmark. One
     does, to floating-point precision.
     """
-    apr, term, _ = _apr_and_term(EXACT_F, ref)
+    apr, term, _ = _apr_and_term(NUMERICAL_ROOT_F, ref)
 
-    assert term == 12, "the exact root must lie in the 12-month region"
+    assert term == 12, "the numerical root must lie in the 12-month region"
     assert apr == pytest.approx(benchmark, abs=1e-13), (
-        f"f = {EXACT_F} gives APR {apr!r} against benchmark {benchmark!r}; "
+        f"f = {NUMERICAL_ROOT_F} gives APR {apr!r} against benchmark {benchmark!r}; "
         f"gap {apr - benchmark:.3e}")
     # Tight enough to be floating-point noise rather than a real residual.
     assert abs(apr - benchmark) < 1e-14
@@ -113,8 +122,8 @@ def test_the_root_is_findable_by_bisection_not_just_asserted(ref, benchmark):
             hi = mid
     root = (lo + hi) / 2.0
 
-    assert root == pytest.approx(EXACT_F, abs=1e-13), (
-        f"bisection converged to {root!r}, not the recorded {EXACT_F!r}")
+    assert root == pytest.approx(NUMERICAL_ROOT_F, abs=1e-13), (
+        f"bisection converged to {root!r}, not the recorded {NUMERICAL_ROOT_F!r}")
 
 
 # ── 2. continuity within a fixed-term region ────────────────────────────────
@@ -200,10 +209,10 @@ def test_the_exact_root_is_not_on_the_searched_grid(ref):
     is the entire explanation, and it is about the grid rather than about
     duration integrality.
     """
-    assert not any(abs(g - EXACT_F) < 1e-9 for g in GRID)
-    assert REGISTERED_F_STAR < EXACT_F < REGISTERED_F_STAR + GRID_STEP
+    assert not any(abs(g - NUMERICAL_ROOT_F) < 1e-9 for g in GRID)
+    assert REGISTERED_F_STAR < NUMERICAL_ROOT_F < REGISTERED_F_STAR + GRID_STEP
 
-    gap_to_grid = min(abs(g - EXACT_F) for g in GRID)
+    gap_to_grid = min(abs(g - NUMERICAL_ROOT_F) for g in GRID)
     assert 0 < gap_to_grid < GRID_STEP
 
 

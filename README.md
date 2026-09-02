@@ -50,7 +50,7 @@ The risk score comes from **whichever scorer is active** and is an **unvalidated
 | [Reproducibility supplement](research/publication/REPRODUCIBILITY_SUPPLEMENT.md) | Checksums, artifact and JSON-path map, reproduction commands, correction history |
 | [Publication index](research/publication/PUBLICATION_INDEX.md) | Authoritative document status — which paper is current, which is historical |
 
-All magnitudes in both papers are simulation output under stated assumptions. No observed seller revenue, repayment or default outcome exists in this project.
+All magnitudes in both papers are simulation output under stated assumptions. No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. The repository does contain one observed dataset — `backend/validation_data/taiwan.csv`, 30,000 UCI borrower records — which belongs solely to the secondary, unvalidated scoring path and supports no financing-mechanics finding (D-057).
 
 ## Data provenance
 
@@ -169,7 +169,7 @@ The project's quantitative contribution is a **deterministic, reproducible compa
 
 ### Research-integrity statement
 
-- Every quantitative result is **simulation output under stated assumptions**. No observed seller revenue, repayment, or default outcome exists in this project.
+- Every quantitative result is **simulation output under stated assumptions**. No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. The repository does contain one observed dataset — `backend/validation_data/taiwan.csv`, 30,000 UCI borrower records — which belongs solely to the secondary, unvalidated scoring path and supports no financing-mechanics finding (D-057).
 - No causal claim is made and no significance test is reported. Intervals are **Monte Carlo intervals over simulated paths**: they measure whether enough paths were run for a number to be stable, not population uncertainty about real sellers.
 - No contract parameter is externally sourced. All are classified illustrative or derived, and are subject to sensitivity analysis rather than claimed calibration.
 - Null and unfavourable results are reported, not dropped — including a guardrail whose **hardship floor** provably never activates (0 of 36,000 month-observations) while its **ceiling does bind** — 6,009 of 36,000, changing 6 of 10 scenarios — and a provider-recovery effect that reverses sign exactly when the realized mean eligible base crosses `B* = P/r`, not under the looser label of non-declining revenue (traced to integer rounding in the matching rule, not economics).

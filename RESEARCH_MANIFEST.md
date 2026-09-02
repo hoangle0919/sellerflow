@@ -8,7 +8,7 @@
 
 > Everything needed to reproduce every number in the project is in this repository.
 >
-> ⚠️ All reported **simulated magnitudes** are simulation output under modeled assumptions. No observed seller revenue, repayment, or default outcome exists in this project. The seven propositions in `DERIVATIONS.md` are derivation-backed, not simulation output.
+> ⚠️ All reported **simulated magnitudes** are simulation output under modeled assumptions. No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. The repository does contain one observed dataset — `backend/validation_data/taiwan.csv`, 30,000 UCI borrower records — which belongs solely to the secondary, unvalidated scoring path and supports no financing-mechanics finding (D-057). The seven propositions in `DERIVATIONS.md` are derivation-backed, not simulation output.
 
 ---
 
@@ -91,7 +91,7 @@
 cd research                       # from the repository root
 pip install pytest numpy          # only dependencies
 
-# 1. Simulation suite  (expect: 643 passed)
+# 1. Simulation suite  (expect: 651 passed)
 python3 -m pytest rbf_sim/tests/ -q
 #    Backend suite (expect: 502 passed, 10 skipped). The suite also contains
 #    9 Playwright browser checks, EXCLUDED from that figure. They EXECUTED
@@ -156,8 +156,8 @@ Spot-check any reproduction against these:
 
 | Quantity | Value | Source |
 |---|---|---|
-| Simulation tests passing | 643 (629 + 14 IRR-definition guards, A-9) | `pytest rbf_sim/tests/ -q` |
-| Non-browser tests passing | **1,153 — 502 backend and 651 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
+| Simulation tests passing | **651** (629 original + 14 A-9 IRR-definition guards + 8 APR-continuity tests, D-056) | `pytest rbf_sim/tests/ -q` |
+| Non-browser tests passing | **1,156 — 505 backend and 651 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass. Historical composition at the D-028 checkpoint was 71 = 47 inherited + 1 credential guard (D-025) + 8 withdrawn-claim guards (D-026) + 15 model-artifact guards (D-028); the suite has grown since with the claim-integrity guards of D-037…D-045 and the scoring-path disclosure guards of D-047 | `pytest backend/tests/ -q` — runs with **no model artifact**, the clean-checkout state |
 | Canonical baseline SHA-256 | `363729016298b3d7307ec066c8df37c60e1c9aa2582db2c058c5cc74df894d55` | `results/baseline_v3_canonical.json` |
 | Matched benchmark term / payment | 13 months / 17,076,923 VND | `baseline_v3` |
 | Benchmark A implied APR | 37.87% | `baseline_v3` |
@@ -192,7 +192,7 @@ Spot-check any reproduction against these:
 | **Paper, Vietnamese** | `research/publication/reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf` — **current reader edition**, 14 Letter pages. An independently written Vietnamese scholarly paper, not a translation. Built by `build_professional_paper_vi.py` |
 | **Reproducibility supplement** | `research/publication/REPRODUCIBILITY_SUPPLEMENT.md` — checksums, claim-to-artifact and JSON-path map, reproduction commands, tested environments, correction history. The verifier's companion to the papers |
 | **Publication index** | `research/publication/PUBLICATION_INDEX.md` — **authoritative for document status.** Which paper is current, which is historical, and why |
-| Historical technical manuscript | `research/publication/MANUSCRIPT.md` / `.pdf`, 19 pages. The full-apparatus version, **superseded as the public paper** and retained byte-for-byte for provenance. Its apparatus was harvested into the supplement. Never cited as current |
+| Historical technical manuscript | `research/publication/MANUSCRIPT.md` / `.pdf`, 19 pages. The full-apparatus version, **superseded as the public paper**. Its **PDF is byte-identical** to its registered form; the **Markdown source carries added status framing** at the head, so the Markdown/PDF pair is **not** jointly byte-identical. The historical body itself remains matched to the protected PDF. Its apparatus was harvested into the supplement. Never cited as current |
 | Superseded Vietnamese overview | `research/publication/TONG_QUAN_VI.md` / `.pdf`, 5 pages. A short summary predating the Vietnamese scholarly edition. Retained as dated history; **not** the Vietnamese academic paper |
 | Deck | `research/publication/RBF_DECK.pptx`, 13 slides with speaker notes. Built by `build_deck.js` |
 | Career package | `research/publication/CAREER_PACKAGE.md` |

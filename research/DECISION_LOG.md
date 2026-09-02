@@ -1933,3 +1933,120 @@ sales**, while the burden this project *displays* uses **GMV** and therefore
 equals `r·(1 − return rate)` — 9.2279% in `returns_spike` against ~9.33%
 elsewhere. P3's summary is now conditioned on cumulative eligible revenue
 reaching the threshold at all.
+
+---
+
+## D-057 — The false explanation reached the public Lab, and I left it there
+
+**Date:** 2026-09-02 · **Branch:** `publication-reader-editions` · **Follows:** D-056
+
+**Documentation, derivation, product-copy and test change.** No registered
+artifact, result generator, financing engine or reader PDF is touched.
+
+### 1. The correction D-056 authorised, and I did not make
+
+D-056 established that APR is **piecewise continuous** in the cap factor and
+withdrew the claim that duration integrality makes attainable APRs discrete.
+`backend/lab.py` carried that withdrawn claim in `_grid_pricing_sentence()`,
+which renders on the **live Simulation Lab**. The correcting mandate explicitly
+authorised editing it. I read a separate gate — "no changes to deployed
+product" — as overriding that authorisation, declared the fix out of scope, and
+reported it as needing approval that had already been given.
+
+The consequence was not a missing improvement. **A statement known to be false
+stayed on a public page for a further pass**, and the report that accompanied it
+made the omission look deliberate and considered. Recording this because the
+failure was in reading the authorisation, not in the mathematics.
+
+**Before**, in the served pricing note:
+
+> "…a residual of about 0.02416 percentage points. **Duration is an integer, so
+> cost moves in steps and an exact match is not generally attainable.**"
+
+**After:**
+
+> "…a residual of about 0.02416 percentage points. That residual is a
+> **GRID-RESOLUTION** result — it reflects how finely the search was stepped,
+> not a limit on what is attainable. Within an interval where the paying-month
+> count stays fixed, the clipped final payment changes continuously with the cap
+> factor, so the effective APR does too; a **numerical root** exists on the
+> reference path at approximately `f = 1.09462066267694`. Changes in the
+> paying-month count create **kinks** in that relationship, **not gaps**."
+
+Three tests now require that copy, ban the three withdrawn families from every
+API payload and the page, and re-assert the registered grid result. Two existing
+tests had pinned the phrase "not an exact match" — that wording carried the
+withdrawn implication, so pinning it would have blocked the correction. Both now
+pin the claim.
+
+### 2. P3's finite-horizon consequence was still false
+
+P3 said path shape is irrelevant to **whether** repayment completes and matters
+only to **when**. That holds over an unbounded horizon. Every scenario here runs
+to a finite `H = 24`, and over a finite horizon the cumulative trajectory
+determines **both**: whether `S_k ≥ A·f/r` is reached inside the window at all,
+and the first-passage month if it is. `closure_m7` is the registered
+counterexample — the series stops rising before the threshold, 100.0% incomplete
+at both cap factors. The algebra is untouched; only the false consequence is
+removed.
+
+### 3. "Exact root" overstated a bisection
+
+A floating-point root located by bisection is a **numerical** root. Calling it
+exact, and printing sixteen significant figures, asserts more than the method
+establishes. Reader-facing and governing copy now say **numerical root**,
+approximately `1.09462066267694`. Tests keep a higher-precision constant for
+tolerance assertions, with names and comments that distinguish approximation
+from symbolic exactness.
+
+### 4. D-046: the record, stated accurately
+
+D-056 said D-046 was **"never assigned"**. That overstates what is known. The
+identifier *was* used — D-047 cites "entries D-042 and D-046" as though both
+existed. What actually happened is narrower and less flattering: **the record
+was never written**.
+
+**D-047 and D-056 remain untouched dated history.** An earlier version of this
+entry added a correction pointer *inside* D-056 while simultaneously asserting
+here — and in the commit message — that D-056 had not been rewritten. Both
+statements could not be true. The D-056 section has been restored byte-for-byte
+to its committed form and the entire correction now lives here, which is what
+append-only requires. **No retroactive `## D-046` heading is inserted.** Actual
+coverage: **D-001–D-045 and D-047–D-057**.
+
+### 5. Test counts, propagated only after the final run
+
+D-056 added eight tests and did not re-propagate the totals, leaving twelve
+surfaces asserting a number that commit had invalidated. `638ab15` fixed the
+count but **desynchronised `MANUSCRIPT.md` from its byte-protected PDF** — it
+rewrote a historical body to 1,153 while the PDF still read 1,145, then claimed
+the pair was preserved. That is reverted: the body is restored to its published
+values and the banner explains why they are frozen and where current counts
+live. Counts in this pass were propagated **after** the final suite run.
+
+### 6. Also repaired
+
+**Publication build recipe** — one temporary root now holds the venv, the work
+directory and the output directory. `RBF_PAPER_WORK_DIR` and
+`RBF_PAPER_OUTPUT_DIR` are both set; nothing is written inside the repository;
+runnable on macOS without GNU-only commands.
+
+**`SHA256SUMS.txt`** — reduced to exactly seven checksum records with no
+comments, so `shasum -a 256 -c` and `sha256sum -c` both verify **warning-free**.
+Usage moved to the publication index.
+
+**Frozen-generator commentary** — the supplement now labels it non-authoritative
+and enumerates all three known stale statements: `run_validation.py`'s
+unattainability claim and its 41.30% pricing wording, and `run_baseline.py`'s
+unqualified "RBF burden is constant at `r`". The generators stay frozen because
+their bytes are inside registered fingerprints.
+
+**Observed-data scope** — broad "no observed data" claims are replaced by the
+scoped statement across README, manifest, ledger, outline, PR body and
+supplement. `backend/validation_data/taiwan.csv` holds 30,000 observed UCI
+borrower records used only by the secondary unvalidated scoring path.
+
+**Preservation wording** — the index now states three claims separately: the
+four PDFs are byte-for-byte preserved; the historical Markdown sources carry
+added banners; the historical bodies were not rewritten. It no longer implies a
+Markdown/PDF pair is jointly byte-identical.

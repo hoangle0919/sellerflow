@@ -79,7 +79,7 @@ Stable reference path, `A = 185,000,000 VND`, `r = 0.10`, remittance basis `net_
 | Total repaid | 202,482,500 VND |
 | Achieved effective APR | 19.5377% (residual 0.0242%) |
 
-Duration is integer-valued, so effective cost moves in steps and an exact match is not generally attainable. *(**Superseded by D-056.** This reasoning is false: within a fixed paying term the clipped final payment varies continuously with `f`, so APR is piecewise continuous and an exact reference-path root exists at `f ≈ 1.0946206626769461`. The registered `f* = 1.0945` remains the nearest point on the 0.0005-step grid that was searched, with the same ≈0.02416pp residual.)* The residual is reported rather than smoothed away.
+Duration is integer-valued, so effective cost moves in steps and an exact match is not generally attainable. *(**Superseded by D-056.** This reasoning is false: within a fixed paying term the clipped final payment varies continuously with `f`, so APR is piecewise continuous and a **numerical** reference-path root sits at approximately `f = 1.09462066267694`. The registered `f* = 1.0945` remains the nearest point on the 0.0005-step grid that was searched, with the same ≈0.02416pp residual.)* The residual is reported rather than smoothed away.
 
 > **Claim, as it will appear publicly:** *At the illustrative 1.20× cap, the simulated RBF contract is substantially more expensive than the 18% amortizing loan. This is a pricing result, not an inherent property of revenue-based repayment. Repricing the same revenue-contingent structure at f ≈ 1.095 produces approximately equal effective cost under the stable baseline.*
 

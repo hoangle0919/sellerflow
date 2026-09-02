@@ -109,7 +109,7 @@ def test_f_star_is_presented_as_a_grid_match_with_its_residual():
     # Matched on the claim, not one phrasing of it. D-056 replaced "nearest grid
     # match" with the more precise "nearest point on the registered 0.0005-step
     # grid", because the residual is a property of the GRID that was searched --
-    # an exact continuous root exists at f ~ 1.0946206626769461. Pinning the old
+    # a numerical root sits at approximately f = 1.09462066267694. Pinning the old
     # words would have blocked a correction that strengthens the same claim.
     assert ("nearest point on the registered" in txt or "nearest grid match" in txt
             or "grid match" in txt), "P-1 must not imply an exact cost match"

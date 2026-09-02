@@ -77,7 +77,14 @@ The repayment duration is `D = min{ k : S_k ≥ A·f/r }`.
 
 **Proof.** By P1, cumulative RBF payments through `k` equal `min(r·S_k, C)`. This equals `C` iff `r·S_k ≥ C`. ∎
 
-**Consequence — path shape is irrelevant to *whether*, only to *when*.** The threshold `A·f/r` is a constant. Seasonality, volatility, and shock timing affect duration only through their effect on the *cumulative* series.
+**Consequence — the threshold is a constant; the trajectory decides the rest.** `A·f/r` does not depend on the path. Seasonality, volatility and shock timing enter only through the *cumulative* series `S_1, S_2, …`.
+
+> **⚠️ Finite-horizon correction (D-057).** This paragraph previously read: ~~"path shape is irrelevant to *whether*, only to *when*"~~. **Withdrawn.** That holds only over an unbounded horizon. Every scenario in this project runs to a **finite** `H = 24` months, and over a finite horizon the cumulative trajectory determines **both**:
+>
+> 1. **whether** `S_k ≥ A·f/r` is reached for some `k ≤ H` — i.e. whether the contract completes at all within the window; and
+> 2. **when** it is reached, the first-passage month `D = min{k : S_k ≥ A·f/r}`, if it is.
+>
+> The closure scenarios are the counterexample and they are registered: at `closure_m7` the cumulative series stops rising before the threshold, so completion never occurs at either cap factor — 100.0% incomplete. Two paths with the same terminal cumulative base can therefore differ not only in timing but in **whether the horizon contains the crossing at all**. The algebraic statement of the proposition is untouched; only the false consequence drawn from it is removed. P7 gives the exact finite-time criterion.
 
 > **⚠️ Scope correction (D-042).** This paragraph previously continued: ~~"Two sellers with identical cumulative sales reach the cap at the same month regardless of how differently that revenue was distributed in time."~~ **Withdrawn — it confuses the terminal cumulative total with the cumulative trajectory.** Duration is the **first passage time** `D = min{k : S_k ≥ A·f/r}`, a property of the whole path `S_1, S_2, …`, not of its endpoint. Two sellers with the same *terminal* cumulative base can cross the threshold in different months: front-loaded revenue crosses earlier, back-loaded later. Equal first-passage months follow only from **identical cumulative trajectories up to the crossing**, or trivially from both crossing at the same `k`. What the proposition actually says is that duration depends on the path *only through* `S_k` — which is a much weaker and correct statement.
 
@@ -156,20 +163,20 @@ This is the formal reason the earlier claim "RBF costs 2.3× a conventional loan
 
    Within any region of `f` where the **paying term is constant**, the terminal payment is clipped to whatever remains of the cap, `C − Σ_{s<t} p_s`, and that residue varies **continuously** with `f`. So the payment vector — and therefore its internal rate of return — varies continuously too. On the reference path at `N = 12`, the final payment moves smoothly from 4,995,000 at `f = 1.0940` through 5,109,822.60 at `f ≈ 1.09462` to 5,180,000 at `f = 1.0950`. Duration integrality makes the map **piecewise**, introducing kinks where the term steps; it does not make it discrete.
 
-   **Consequence: an exact continuous solution exists here.** Bisecting on the reference path gives
+   **Consequence: a numerical solution exists here.** Bisecting on the reference path locates a root to floating-point tolerance — an approximation, not a closed form:
 
    ```
-   f*_exact  = 1.0946206626769461      APR = 0.19561817146154326
-   benchmark                                 0.19561817146154947
-   gap                                      −6.22e−15   (floating-point noise)
+   f_root  ≈ 1.09462066267694      APR ≈ 0.195618171462
+   benchmark                                    0.195618171462
+   gap                                         ~ −6.2e−15   (at bisection tolerance)
    paying term = 12 months, unchanged
    ```
 
    **What was withdrawn.** The previous text asserted that "the achievable APRs form a discrete set and a given target APR generally has no `f` attaining it exactly." That is **false**, and it is withdrawn (D-056). It confused a *kink* with a *gap*.
 
-   **What still stands, unchanged.** `f* = 1.0945` remains the **nearest point on the swept grid** actually tested and registered: 19.537656% against 19.561817%, residual ≈**0.02416pp**. The grid has a 0.0005 step and simply does not contain the exact root. The residual is a property of **the grid that was searched**, not of the attainability of the target. Every registered artifact, and both current reader editions, describe `1.0945` as the nearest tested grid point and not as an exact match — so no registered figure and no published paper is affected.
+   **What still stands, unchanged.** `f* = 1.0945` remains the **nearest point found on the swept grid** actually tested and registered: 19.537656% against 19.561817%, residual ≈**0.02416pp**. The grid has a 0.0005 step and simply does not contain the numerical-root estimate. The residual is a property of **the grid that was searched**, not of the attainability of the target. Every registered artifact, and both current reader editions, describe `1.0945` as the nearest tested grid point and not as an exact match — so no registered figure and no published paper is affected.
 
-~~"for any target cost there exists an `f` attaining it"~~ read as covering the APR match. It was withdrawn as false; **D-056 partially reinstates it** — on the reference path, within a fixed-term region, a target APR in range *is* exactly attainable, and the reference-path 18% benchmark is one such target. What remains true is the narrower point the original correction was reaching for: the *registered* `f*` was selected from a discrete grid, so it is a nearest match rather than the exact root, and it must never be called "equal cost". ~~"Equal-cost pricing"~~ **superseded (D-043): the registered search returns the nearest point on the swept grid, not an exact solution.** Against the illustrative 18% amortizing reference the nearest grid point is `f* ≈ 1.0945`. **Price and structure are separable, and P6 is why.**
+~~"for any target cost there exists an `f` attaining it"~~ read as covering the APR match. It was withdrawn as false; **D-056 partially reinstates it** — on the reference path, within a fixed-term region, a target APR in range *is* attainable to numerical tolerance, and the reference-path 18% benchmark is one such target. What remains true is the narrower point the original correction was reaching for: the *registered* `f*` was selected from a discrete grid, so it is a nearest match rather than the numerical-root estimate, and it must never be called "equal cost". ~~"Equal-cost pricing"~~ **superseded (D-043): the registered search returns the nearest point on the swept grid, not an exact solution.** Against the illustrative 18% amortizing reference the nearest grid point is `f* ≈ 1.0945`. **Price and structure are separable, and P6 is why.**
 
 ---
 
@@ -324,7 +331,7 @@ Every statement the project makes falls into exactly one of these five classes. 
 ### A. Mathematical properties — hold for any revenue path, no calibration needed
 - **P1** RBF burden ≡ `r` until the capped payment — **on the contractual base**, which is net sales. The burden *displayed* in this project is measured against **GMV**, so it equals `r·(1 − return rate)` and is **not** constant: it moves whenever the net-sales/GMV ratio moves. Across the registered scenarios it sits near 9.33% against `r = 10%`, and drops to 9.2279% in `returns_spike` where returns rise. State the denominator whenever this proposition is quoted.
 - **P2** Fixed burden has elasticity `−1` in revenue; a −50% month doubles it.
-- **P3** Cap reached iff `S_k ≥ A·f/r`. **Conditional on cumulative eligible revenue reaching that threshold at all** — i.e. on completion — path shape affects only *timing*. Where the threshold is never reached the proposition says nothing about ordering, because there is no completion to order; that case is P7's, and the closure scenarios are where it binds — but note that two paths with the **same terminal cumulative base need not reach the threshold in the same month**. Equal first-passage months follow only from identical cumulative trajectories up to the crossing, or from the crossing occurring at the same `k`.
+- **P3** Cap reached iff `S_k ≥ A·f/r`. Over a **finite** horizon the cumulative trajectory determines **both** whether that threshold is reached inside the window **and** the first-passage month if it is (D-057). Path shape is irrelevant to *whether* only over an unbounded horizon; the closure scenarios are where it binds. Where the threshold is never reached the proposition says nothing about ordering, because there is no completion to order; that case is P7's, and the closure scenarios are where it binds — but note that two paths with the **same terminal cumulative base need not reach the threshold in the same month**. Equal first-passage months follow only from identical cumulative trajectories up to the crossing, or from the crossing occurring at the same `k`.
 - **P4** RBF leads fixed on cumulative recovery through `k` iff the **realized mean eligible base** `(1/k)·S_k > B* = P/r` — the exact condition at P4 above. It is *not* captured by the labels "declining" versus "non-declining": a declining path whose realized mean still clears `B*` leads, and a flat path below `B*` lags. Integer rounding of `N` makes `B* < B̄`, which is why the stable scenario leads.
 - **P5** Underreporting scales recovery by `ω` exactly and raises the required cumulative base by `1/ω`. **Duration does not generally scale by `1/ω`** — it is the first passage time to that threshold (corrected, D-040).
 - **P6** The **contractual repayment target** is `A·f`, path-independently. **Realized total repayment equals it only upon completion**; where the cap is never reached the realized total falls short. APR is path-dependent; price and structure are separable.

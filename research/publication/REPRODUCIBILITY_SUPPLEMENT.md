@@ -117,11 +117,17 @@ The script regenerates all five artifacts into a scratch tree and reports **byte
 > `verify_reproduction.py` above, which regenerates into a **scratch tree** and
 > never touches a registered file.
 >
-> Some of them also print commentary that predates later corrections; the
-> pricing section of `run_validation.py`, for example, still says an exact APR
-> match is unattainable, which **D-056 withdrew**. The generators are not edited
-> for this, because their bytes are inside the artifacts' generator
-> fingerprints, and editing one would force a re-registration to fix a sentence.
+> **Their console commentary is NOT authoritative.** The generators are frozen:
+> their bytes are inside the artifacts' `generator_fingerprint`, so editing one
+> to fix a sentence would force a re-registration of the artifact it produced.
+> The registered JSON and the reconciled documents are authoritative; the
+> printed prose is a historical stratum. Known stale statements, in full:
+>
+> | Generator | Stale console statement | Corrected by |
+> |---|---|---|
+> | `run_validation.py` | "Duration is an integer, so cost moves in steps; an exact match is not always attainable." | **D-056** — APR is piecewise continuous in `f`; the residual is a grid-resolution result and a numerical root exists at approximately `1.09462066267694` |
+> | `run_validation.py` | The 41.30% illustrative pricing wording in the section-2 reading note | Superseded by the registered sweep; the current figure at `f = 1.20` is **39.90%** (`validation_v2` → `/pricing/sweep/1.2/apr`) |
+> | `run_baseline.py` | "RBF burden is constant at `r`" stated without qualification | **D-056 / P1** — that holds on the contractual base (net sales). Displayed burden uses **GMV**, so it equals `r·(1 − return rate)` and moves with the return rate: 9.2279% in `returns_spike` against ~9.33% elsewhere |
 >
 > ```bash
 > cd research
@@ -140,18 +146,34 @@ The script regenerates all five artifacts into a scratch tree and reports **byte
 
 ### 4.2 Rebuild the reader editions
 
+Everything this recipe creates lives under **one temporary root** — the virtual
+environment, the working directory and the output directory. Nothing is written
+inside the repository: no `.venv-publication`, no build files, no caches, no
+PDFs. Runs on macOS and Linux without GNU-only commands.
+
 ```bash
-python3 -m venv .venv-publication
-source .venv-publication/bin/activate
+# One scratch root for the venv, the work dir and the output dir.
+RBF_BUILD_ROOT="$(mktemp -d)"
+export RBF_PAPER_WORK_DIR="$RBF_BUILD_ROOT/work"
+export RBF_PAPER_OUTPUT_DIR="$RBF_BUILD_ROOT/out"
+mkdir -p "$RBF_PAPER_WORK_DIR" "$RBF_PAPER_OUTPUT_DIR"
+
+python3 -m venv "$RBF_BUILD_ROOT/venv"
+. "$RBF_BUILD_ROOT/venv/bin/activate"
 python -m pip install -r research/publication/reader_editions/requirements-publication.txt
 
-# Build into a scratch directory. Without RBF_PAPER_OUTPUT_DIR the builders
-# write beside themselves, NOT into the registered reader_editions/papers/.
-export RBF_PAPER_OUTPUT_DIR="$(mktemp -d)"
 python research/publication/reader_editions/build_professional_paper.py
 python research/publication/reader_editions/build_professional_paper_vi.py
+
 echo "built into $RBF_PAPER_OUTPUT_DIR"
+# Clean up when finished:  deactivate && rm -rf "$RBF_BUILD_ROOT"
 ```
+
+**Both variables are required.** Without `RBF_PAPER_OUTPUT_DIR` the builders
+write beside themselves; without `RBF_PAPER_WORK_DIR` intermediate HTML lands in
+the working tree. Neither default writes into the registered
+`reader_editions/papers/` directory, so a build never silently replaces a
+registered PDF.
 
 **A rebuild never replaces a registered PDF automatically.** Compare the fresh
 output against the registered file — extracted text first, then rendered pages —
@@ -167,11 +189,11 @@ Overrides: `CHROME_BIN`, `RBF_REPO_ROOT`, `RBF_RESULTS_DIR`, `RBF_PAPER_WORK_DIR
 ### 4.3 Test suites
 
 ```bash
-python3 -m pytest backend/tests -q      # 502 passed, 10 skipped
-cd research && python3 -m pytest -q     # 643 passed
+python3 -m pytest backend/tests -q      # 505 passed, 10 skipped
+cd research && python3 -m pytest -q     # 651 passed
 ```
 
-**1,153 non-browser tests.** Nine Playwright browser checks are excluded from that total; they executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable the checks skip; a skip is never counted as a pass.
+**1,156 non-browser tests.** Nine Playwright browser checks are excluded from that total; they executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable the checks skip; a skip is never counted as a pass.
 
 Of the 10 backend skips, 9 are the browser module and 1 is a two-scoring-path cohort comparison that requires an ensemble artifact a clean checkout does not carry.
 
@@ -209,7 +231,7 @@ IEEE-754 last-bit divergence between CPython builds is expected. Presenting it a
 
 ## 6. Correction history
 
-This project retracted several of its own claims. Each retraction is recorded next to the evidence that overturned it. The full record is `research/DECISION_LOG.md` (D-001 … D-055); the pointers below are the ones a verifier is most likely to need.
+This project retracted several of its own claims. Each retraction is recorded next to the evidence that overturned it. The full record is `research/DECISION_LOG.md`, covering **D-001–D-045 and D-047–D-057**; the D-046 identifier was used, but its corresponding decision-log record was never written. The pointers below are the ones a verifier is most likely to need.
 
 | Withdrawn claim | Why | Entry |
 |---|---|---|
@@ -225,7 +247,7 @@ This project retracted several of its own claims. Each retraction is recorded ne
 
 **Specification amendments.** `research/METHODOLOGY_SPEC.md` v1.0 was frozen before any outcome analysis; §16 logs amendments A-1 … A-9. A-9 is the one that moved registered numbers, and only in the rate layer — burden, recovery, duration, settlement arithmetic, scenario inputs and seeds were verified unchanged leaf-by-leaf.
 
-**Recent closure entries.** D-049/D-050 (A-9 and the artifact migration), D-051 (solver unification, genuine reproduction, lineage), D-052 (Lab provenance and the retired convergence script), D-053/D-054 (browser gate executed, then re-executed on the merged tip), D-055 (release-metadata statements that outlived their facts).
+**Recent closure entries.** D-049/D-050 (A-9 and the artifact migration), D-051 (solver unification, genuine reproduction, lineage), D-052 (Lab provenance and the retired convergence script), D-053/D-054 (browser gate executed, then re-executed on the merged tip), D-055 (release-metadata statements that outlived their facts), **D-056** (APR is piecewise continuous in the cap factor, not discrete; the pricing residual is a grid-resolution result) and **D-057** (the withdrawn explanation was corrected in the public Lab; P3's finite-horizon consequence; numerical-root language; the D-046 record).
 
 ---
 

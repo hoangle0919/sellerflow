@@ -61,7 +61,7 @@ Four strands, each with its transfer limit stated in the text:
 
 - Matched benchmark at `f = 1.20`: term **13** months, payment **17,076,923 VND**, implied APR **37.8694%** **[baseline_v3 → /match_benchmark_a]**.
 - At `f* = 1.0945`: term **12**, payment **16,873,542**, APR **18.3980%** **[baseline_equalcost_v2 → /match_benchmark_a]**.
-- Cost-matching is exact on the contractual total. In APR it is **piecewise continuous** in `f`, not stepwise: within a fixed paying term the clipped final payment varies continuously, so an exact reference-path root exists (`f ≈ 1.0946206626769461`). The registered `f* = 1.0945` is the nearest point on the **0.0005-step grid that was searched** — a property of the grid, not of attainability (D-056) — **[M-3, P-1]**.
+- Cost-matching is exact on the contractual total. In APR it is **piecewise continuous** in `f`, not stepwise: within a fixed paying term the clipped final payment varies continuously, so a **numerical** reference-path root exists at approximately `f = 1.09462066267694` (located by bisection, not solved in closed form). The registered `f* = 1.0945` is the nearest point **found on the 0.0005-step grid that was searched** — a grid-resolution result, not a limit on attainability (D-056) — **[M-3, P-1]**.
 - Comparability limit: an APR loan prices time, a factor-rate cap prices a multiple regardless of time **[L-23, L-24]**.
 
 **Figure 1** — contract payment schedules on the reference path, three arms. **[baseline_v3 → /match_benchmark_a; /terms]**
@@ -109,12 +109,12 @@ Severe downturn **[baseline_v3 → /scenarios/severe_downturn]**:
 
 ### §9 Pricing versus structure
 - At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**. State precisely what is held constant: the **pre-cap payment rule** is unchanged, the **cap factor changes the contractual target** and therefore completion timing, terminal clipping and the realised stream. Price and payment rule are analytically separable but **jointly determine realised outcomes** — do not write "structural behaviour unchanged".
-- `f* = 1.0945` is the **nearest point on the registered grid**, not the exact root: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v2 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
+- `f* = 1.0945` is the **nearest point found on the registered 0.0005-step search grid**: 19.537656% against 19.561817%, residual **≈0.02416pp**, which is a **grid-resolution** result. A numerical root exists on the reference path at approximately `f = 1.09462066267694` (D-056) **[P-1 | validation_v2 → /pricing/equal_cost, /pricing/benchmark_b_apr]**.
 - Same scenarios repriced **[baseline_equalcost_v2 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
 - **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): the contractual repayment target `A·f` is proportional to `f` (P6a) — and realised repayment equals that target only upon completion — while APR, among paths admitting an internal rate of return, is jointly determined by `f` and the path — and is undefined only where no payment occurs, not merely where a path fails to complete (P6b, A-9), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
 - Regulatory recognition of the comparability problem **[L-23, L-24]**; contingency carries a premium **[L-18, L-19]**.
 
-**Figure 5** — cap-factor sweep: effective APR against `f`, with the reference APR and `f*` marked, showing the step structure. **[validation_v2 → /pricing/sweep]**
+**Figure 5** — cap-factor sweep: effective APR against `f`, with the reference APR and `f*` marked. **Describe it as sampled grid points, not a step structure**: APR is piecewise continuous in `f`, and the visible jumps between plotted points are the 0.0005 sampling interval, not gaps in the attainable range (D-056). **[validation_v2 → /pricing/sweep]**
 
 ### §10 Closure, incomplete recovery and censoring
 - Across the ten non-closure scenarios, incomplete recovery is **0.0%** and total repaid identical at the cap **[S-2]** — **horizon- and scenario-bounded**, and none of those ten reaches zero revenue. Must never appear without §10's closure results.
@@ -136,7 +136,7 @@ Severe downturn **[baseline_v3 → /scenarios/severe_downturn]**:
 - Fixed arms are modelled as **paid in full and on time** — an optimistic scheduled-recovery benchmark, not a realized-recovery one **[Q-3]**.
 
 ### §12 Limitations and responsible use
-- No observed seller revenue, repayment or default outcome exists anywhere in this project. No causal, predictive or population claim.
+- No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. The repository does contain one observed dataset — `backend/validation_data/taiwan.csv`, 30,000 UCI borrower records — which belongs solely to the secondary, unvalidated scoring path and supports no financing-mechanics finding (D-057). No causal, predictive or population claim.
 - **No affordability claim** — burden is measured against revenue, not against what the seller retains **[Q-2]**; thresholds are illustrative bands **[Q-4]**.
 - **No default-prevention claim** — §10 is the counterexample.
 - Parameters `j`, `N_B`, seasonality shapes, `m`, `F` are unsourced assumptions **[Q-5]**.
@@ -155,7 +155,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested (5/5 at rel. tol. `1e-9`); **byte** reproducibility within a fixed runtime — 5/5 on Linux 3.10.12, **3/5 on macOS 26.0 arm64 / 3.11.5 / NumPy 2.2.6** (11 last-bit leaves in `baseline_v3`, 3 in `baseline_equalcost_v2`), from an independent audit run of the current artifacts; the superseded generation's counts (9 and 2) are not carried across **[D-041, D-043, D-051, D-052]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: **1,153 non-browser tests pass — 502 backend and 651 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.
+- Test counts: **1,156 non-browser tests pass — 505 backend and 651 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.
 
 ---
 
