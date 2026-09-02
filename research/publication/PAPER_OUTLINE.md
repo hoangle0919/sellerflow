@@ -61,7 +61,7 @@ Four strands, each with its transfer limit stated in the text:
 
 - Matched benchmark at `f = 1.20`: term **13** months, payment **17,076,923 VND**, implied APR **37.8694%** **[baseline_v3 → /match_benchmark_a]**.
 - At `f* = 1.0945`: term **12**, payment **16,873,542**, APR **18.3980%** **[baseline_equalcost_v2 → /match_benchmark_a]**.
-- Duration is integer-valued, so cost-matching is exact on total but stepwise in APR — **[M-3, P-1]**.
+- Cost-matching is exact on the contractual total. In APR it is **piecewise continuous** in `f`, not stepwise: within a fixed paying term the clipped final payment varies continuously, so an exact reference-path root exists (`f ≈ 1.0946206626769461`). The registered `f* = 1.0945` is the nearest point on the **0.0005-step grid that was searched** — a property of the grid, not of attainability (D-056) — **[M-3, P-1]**.
 - Comparability limit: an APR loan prices time, a factor-rate cap prices a multiple regardless of time **[L-23, L-24]**.
 
 **Figure 1** — contract payment schedules on the reference path, three arms. **[baseline_v3 → /match_benchmark_a; /terms]**
@@ -80,7 +80,7 @@ Stated as theorems, **not** simulation output — the ledger's class-dependent q
 
 | Proposition | Proof | Statement | Related ledger row |
 |---|---|---|---|
-| P1 | `DERIVATIONS.md` **P1** | RBF burden ≡ `r` on the contractual base until the final capped payment | *(none — M-1 is the cap-settlement inequality `Σ payments ≤ cap`, a different result)* |
+| P1 | `DERIVATIONS.md` **P1** | RBF burden ≡ `r` on the contractual base (net sales) until the final capped payment. **Displayed burden uses GMV**, so it equals `r·(1 − return rate)` and varies with the return rate — 9.2279% in `returns_spike` against ~9.33% elsewhere. Always name the denominator | *(none — M-1 is the cap-settlement inequality `Σ payments ≤ cap`, a different result)* |
 | P2 | `DERIVATIONS.md` **P2** | Fixed burden has elasticity −1 in revenue; a −50% month doubles it | *(none)* |
 | P3 | `DERIVATIONS.md` **P3** | Cap reached by `k` iff `S_k ≥ A·f/r`; duration is first passage, not a function of the terminal total | *(none — M-2 is under-reporting)* |
 | P4 | `DERIVATIONS.md` **P4** | For `k ≤ N`, before either arm caps out: RBF leads on recovery iff `(1/k)·S_k > B* = P/r`; integer rounding makes `B* < B̄` | *(none — I-3 is a downstream product judgement drawing on P4, not its proof)* |
@@ -109,7 +109,7 @@ Severe downturn **[baseline_v3 → /scenarios/severe_downturn]**:
 
 ### §9 Pricing versus structure
 - At `f = 1.20` the simulated contract is substantially more expensive than the illustrative 18% amortizing reference; at `f* = 1.0945` it is not **[P-2]**. State precisely what is held constant: the **pre-cap payment rule** is unchanged, the **cap factor changes the contractual target** and therefore completion timing, terminal clipping and the realised stream. Price and payment rule are analytically separable but **jointly determine realised outcomes** — do not write "structural behaviour unchanged".
-- `f* = 1.0945` is the **nearest grid match**: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v2 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
+- `f* = 1.0945` is the **nearest point on the registered grid**, not the exact root: 19.537656% against 19.561817%, residual **≈0.02416pp** **[P-1 | validation_v2 → /pricing/equal_cost, /pricing/benchmark_b_apr]**. Not an exact solution — duration is integer-valued, so achievable APRs are discrete.
 - Same scenarios repriced **[baseline_equalcost_v2 → /scenarios/*]**: stable duration **11.784**, severe downturn **17.504**, sustained decline **16.01**.
 - **The retracted claim.** An earlier version stated "RBF costs ~2.3× the interest of a conventional loan". Withdrawn (D-015): the contractual repayment target `A·f` is proportional to `f` (P6a) — and realised repayment equals that target only upon completion — while APR, among paths admitting an internal rate of return, is jointly determined by `f` and the path — and is undefined only where no payment occurs, not merely where a path fails to complete (P6b, A-9), so a ratio quoted at one `f` is a pricing result, not a structural property. **Reporting the retraction is part of the contribution** — it is the concrete instance of the conflation the paper argues against.
 - Regulatory recognition of the comparability problem **[L-23, L-24]**; contingency carries a premium **[L-18, L-19]**.

@@ -13,7 +13,7 @@ The reader editions carry the argument. This supplement carries the proof that t
 
 They are deliberately separate. An earlier version of this project put the full audit apparatus — checksums, JSON paths, verification commands, decision-log pointers — inside the paper itself. The result read like an engineering audit rather than a research argument, and the qualifications that matter most to a reader were buried among digests that matter only to a verifier. Splitting them lets each document address one reader.
 
-**Nothing here restates or revises a finding.** If this supplement and a reader edition ever disagree about a magnitude, the registered artifact in §2 settles it, and the disagreement is a defect to be logged.
+**This supplement does not independently define or revise findings.** It reports identities, paths and procedures for figures defined elsewhere. If it and a reader edition ever disagree about a magnitude, the registered artifact in §2 settles it, and the disagreement is a defect to be logged.
 
 ---
 
@@ -24,7 +24,7 @@ They are deliberately separate. An earlier version of this project put the full 
 | `reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf` | **Current reader edition, English** | 14 (Letter) | `f3a0aec26a1437620909ab8a13402525d5939bd087f19ad2087e830cb2a3aa78` |
 | `reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf` | **Current reader edition, Vietnamese** | 14 (Letter) | `1f36142e33a3db7baf635e556c0c470a91b656bf47517129cd572787d4b41c5c` |
 | `MANUSCRIPT.pdf` | **Historical technical manuscript** — superseded as the public paper, retained for provenance | 19 (A4) | `8d4d59df6ab5f7a7cd14111f18f97641bba35d6be05705a041d0df30a7683a56` |
-| `TONG_QUAN_VI.pdf` | **Superseded Vietnamese overview** — a 5-page summary, not the scholarly edition | 5 (A4) | `10a4569bd4977bbcd6f20bd8b5c1f339299a3b6511776babb718e03ca9b4a212` |
+| `TONG_QUAN_VI.pdf` | **Superseded Vietnamese overview** — a 5-page summary, not the scholarly edition | 5 (Letter) | `10a4569bd4977bbcd6f20bd8b5c1f339299a3b6511776babb718e03ca9b4a212` |
 
 The Vietnamese reader edition is an **independently written Vietnamese scholarly paper**, not a sentence-by-sentence translation of the English. The two are parallel in status and in claim boundaries; they are not mechanically identical in prose.
 
@@ -34,7 +34,7 @@ The historical documents are retained because figures were published from them. 
 
 ## 2. Registered result artifacts
 
-Every simulated magnitude in either reader edition derives from one of these five files. The propositions are derivation-backed and the cited literature is neither — this table does not cover them.
+Every **registered simulation result** in either reader edition derives from one of these five files. Three categories are **not** covered by this table: the propositions, which are derivation-backed; the cited literature, which is neither; and **Figure 1, which is an explicitly schematic illustrative series embedded in each builder and generated from no artifact** (§3.2).
 
 ### 2.1 Current generation (produced under amendment A-9)
 
@@ -70,7 +70,7 @@ Ledger identifiers resolve in `research/CLAIM_LEDGER.md`; literature identifiers
 
 | Figure | Value | Artifact → JSON path | Ledger |
 |---|---|---|---|
-| High-burden months removed, severe downturn, `f = 1.20` | 6.85 | `baseline_v3` → `/scenarios/severe_downturn/FIX-A/n_high_burden/0.15` | S-1 |
+| High-burden months removed, severe downturn, `f = 1.20` | 6.85 | `baseline_v3` → `/tradeoff/severe_downturn/d_n_hpb_015/mean` (the paired FIX-A − RBF difference, Monte Carlo interval [6.802, 6.898], n = 500). Equivalently from both arms: `/scenarios/severe_downturn/FIX-A/n_high_burden/0.15` = 6.85 minus `…/RBF/n_high_burden/0.15` = 0.0 | S-1 |
 | RBF recovery by month 12, severe downturn | 65.46% | `baseline_v3` → `/scenarios/severe_downturn/RBF/recovery_ratio/12` | S-1 |
 | Matched fixed recovery by month 12 | 92.31% | `baseline_v3` → `/scenarios/severe_downturn/FIX-A/recovery_ratio/12` | S-1 |
 | RBF mean duration, severe downturn | 18.718 mo | `baseline_v3` → `/scenarios/severe_downturn/RBF/duration_mean` | S-1 |
@@ -109,20 +109,32 @@ python3 research/verify_reproduction.py
 
 The script regenerates all five artifacts into a scratch tree and reports **byte equality and numeric-leaf equality in separate columns**. It never rewrites a registered file. Expected on Linux/aarch64 CPython 3.10.12: exit 0, 5/5 byte-identical, 5/5 numerically equal at relative tolerance `1e-9`.
 
-Individual generators, if run manually:
-
-```bash
-cd research
-python3 run_baseline.py                 # baseline_v3
-python3 run_equal_cost_baseline.py      # baseline_equalcost_v2
-python3 run_closure_baseline.py         # both closure artifacts
-python3 run_validation.py 1             # convergence ladder
-python3 run_validation.py 2             # pricing sweep and f*
-python3 run_validation.py 4             # incomplete-recovery boundary
-python3 run_validation.py 5             # RBF-G breakpoint
-python3 run_validation.py 6             # revenue-definition sensitivity
-python3 canonicalize_validation.py --write
-```
+> ### ⚠️ Maintainer-only, and destructive to the working tree
+>
+> The individual generators below **overwrite tracked raw, canonical and
+> provenance files in `research/results/`**. They are not part of normal
+> verification and a reader checking this work should not run them — use
+> `verify_reproduction.py` above, which regenerates into a **scratch tree** and
+> never touches a registered file.
+>
+> Some of them also print commentary that predates later corrections; the
+> pricing section of `run_validation.py`, for example, still says an exact APR
+> match is unattainable, which **D-056 withdrew**. The generators are not edited
+> for this, because their bytes are inside the artifacts' generator
+> fingerprints, and editing one would force a re-registration to fix a sentence.
+>
+> ```bash
+> cd research
+> python3 run_baseline.py                 # baseline_v3
+> python3 run_equal_cost_baseline.py      # baseline_equalcost_v2
+> python3 run_closure_baseline.py         # both closure artifacts
+> python3 run_validation.py 1             # convergence ladder
+> python3 run_validation.py 2             # pricing sweep and f*
+> python3 run_validation.py 4             # incomplete-recovery boundary
+> python3 run_validation.py 5             # RBF-G breakpoint
+> python3 run_validation.py 6             # revenue-definition sensitivity
+> python3 canonicalize_validation.py --write
+> ```
 
 > `research/conv_step.py` is **retired and fails closed**. It wrote into the now-frozen `validation_v1.json`. Section 1 of `run_validation.py` computes the same convergence ladder into the current raw file. See D-052.
 
@@ -132,9 +144,19 @@ python3 canonicalize_validation.py --write
 python3 -m venv .venv-publication
 source .venv-publication/bin/activate
 python -m pip install -r research/publication/reader_editions/requirements-publication.txt
+
+# Build into a scratch directory. Without RBF_PAPER_OUTPUT_DIR the builders
+# write beside themselves, NOT into the registered reader_editions/papers/.
+export RBF_PAPER_OUTPUT_DIR="$(mktemp -d)"
 python research/publication/reader_editions/build_professional_paper.py
 python research/publication/reader_editions/build_professional_paper_vi.py
+echo "built into $RBF_PAPER_OUTPUT_DIR"
 ```
+
+**A rebuild never replaces a registered PDF automatically.** Compare the fresh
+output against the registered file — extracted text first, then rendered pages —
+and only then decide whether a replacement is warranted. See the byte-identity
+caveat below.
 
 Both builders **verify four input checksums before rendering** and abort on any mismatch — `baseline_v3`, `baseline_equalcost_v2`, `baseline_closure_v2` and `baseline_closure_equalcost_v2`, at the digests in §2.1. This has been confirmed by negative test: mutating a single field of an input artifact causes the build to fail with a checksum mismatch rather than silently rendering a paper from altered data.
 
@@ -169,7 +191,15 @@ Of the 10 backend skips, 9 are the browser module and 1 is a two-scoring-path co
 
 **Totals:** Linux 5/5 byte-identical; macOS **3/5**; **5/5 numerically equal** at relative tolerance `1e-9` in both.
 
-The macOS column is an **independent audit run** of `verify_reproduction.py` against the current artifacts on a platform this project does not itself have access to. It is not a self-measurement. The column previously read "not measured", and before that carried counts (9 and 2) inherited from the superseded generation — which were wrong for these files **in both rows**. That is the case for removing an unverified number rather than letting it ride. Reproduce with `./verify_native_macos.sh` on a macOS host.
+The macOS column is an **independent audit run** of `verify_reproduction.py` against the current artifacts on a platform this project does not itself have access to. It is not a self-measurement. The column previously read "not measured", and before that carried counts (9 and 2) inherited from the superseded generation — which were wrong for these files **in both rows**. That is the case for removing an unverified number rather than letting it ride.
+
+**How to reproduce the macOS column.** On a macOS host with the repository checked out:
+
+```bash
+python3 research/verify_reproduction.py
+```
+
+Read the per-artifact `bytes` and `numeric` columns it prints. That is the procedure that produced the figures above. **`./verify_native_macos.sh` does not reproduce this table** — it installs the pinned dependency set on an external volume and runs the product test suite, which is a different check. An earlier version of this section named it here in error.
 
 Publication build environment: CPython 3.11.5, NumPy 2.2.6, Matplotlib 3.10.3, Google Chrome 152 / Skia PDF m152, Times New Roman for text, DejaVu Serif for charts (Matplotlib converts chart glyphs to SVG paths), Poppler for acceptance checks.
 
@@ -203,7 +233,9 @@ This project retracted several of its own claims. Each retraction is recorded ne
 
 Stated because a thorough verification record can create a false impression of scope.
 
-- **No observed data exist anywhere in this project.** Reproducibility means the simulation regenerates. It says nothing about whether the simulation resembles the world.
+- **No observed seller or merchant revenue, repayment, or default outcomes enter this study.** Reproducibility means the simulation regenerates. It says nothing about whether the simulation resembles the world.
+
+  The narrower wording is deliberate. The repository **does** contain real data — `backend/validation_data/taiwan.csv`, the UCI default-of-credit-card-clients dataset, 30,000 borrower records — used by `backend/validate_on_real_data.py` for the **separate, unvalidated scoring demonstration**. It feeds no financing result, no proposition and no registered artifact. An earlier version of this section said "no observed data exist anywhere in this project", which was false as written.
 - **The propositions are proved, not measured.** Their limitation is different in kind: they describe a contract, and a contract is not a market.
 - **The literature is neither.** 44 verified sources with 6 documented evidence gaps; the checksum table does not cover cited facts.
 - **The underwriting ensemble is unvalidated** and plays no part in any research finding. Its benchmark was withdrawn as circular.

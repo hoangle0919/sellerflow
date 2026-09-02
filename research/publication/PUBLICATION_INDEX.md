@@ -2,7 +2,7 @@
 
 **Which document to read, and which to cite.** This index is authoritative for document status. If any other file disagrees about which paper is current, this one is right and the disagreement is a defect to be logged.
 
-Last reconciled: 2026-08-27.
+Last reconciled: 2026-08-28 (D-056).
 
 ---
 
@@ -27,7 +27,8 @@ The supplement is a **companion, not an appendix**. The papers carry the argumen
 | `reader_editions/build_professional_paper.py` | English builder |
 | `reader_editions/build_professional_paper_vi.py` | Vietnamese builder |
 | `reader_editions/requirements-publication.txt` | Pinned publication dependencies |
-| `reader_editions/SHA256SUMS.handoff.txt` | Identities as received, for transfer verification |
+| `reader_editions/SHA256SUMS.txt` | **Runnable manifest** — `cd research/publication/reader_editions && sha256sum -c SHA256SUMS.txt` verifies all seven committed files |
+| `reader_editions/SHA256SUMS.handoff.txt` | **Archival transfer receipt.** Identities as they arrived in the incoming ZIP, whose layout differs from the repository's. Not runnable from its committed location, by design |
 
 Both builders verify four registered artifact checksums before rendering and abort on mismatch. Build instructions are in the supplement, §4.2.
 
@@ -40,7 +41,7 @@ Both builders verify four registered artifact checksums before rendering and abo
 | [`MANUSCRIPT.md`](MANUSCRIPT.md) / [`MANUSCRIPT.pdf`](MANUSCRIPT.pdf) | **Historical technical manuscript**, 19 pages | The full-apparatus version: per-claim source notes, checksum tables, the reproducibility statement. Superseded as the public paper; it is the raw material the supplement was harvested from, and the record of how the argument was assembled. Preserved byte-for-byte. |
 | [`TONG_QUAN_VI.md`](TONG_QUAN_VI.md) / [`TONG_QUAN_VI.pdf`](TONG_QUAN_VI.pdf) | **Superseded Vietnamese overview**, 5 pages | A short summary written before the Vietnamese scholarly edition existed. Superseded by the 14-page Vietnamese paper. Retained as dated history; not the Vietnamese academic paper. |
 
-Neither is deleted and neither is overwritten. Figures were shown from them, so the record of what was said and when has to stay checkable. Document identities are listed in the supplement, §1.
+**Exactly what was preserved, and what was edited.** Both **PDFs are byte-identical** to their originally registered form and are asserted so by the publication gates. Their **Markdown sources were edited** — each gained a status banner at the head, and pointer lines were updated to name the current editions. **The historical bodies were not rewritten**: no argument, figure or qualification inside either document was altered. Neither file is deleted. Figures were shown from them, so the record of what was said and when has to stay checkable. Document identities are listed in the supplement, §1.
 
 ---
 
@@ -52,7 +53,7 @@ Neither is deleted and neither is overwritten. Figures were shown from them, so 
 | `PAPER_OUTLINE.md` | Every figure bound to a ledger ID and artifact path |
 | `CAREER_PACKAGE.md` | Résumé, portfolio and interview text, with a "what must never be said" table |
 | `../CLAIM_LEDGER.md` | Every claim cleared for public use, with its artifact and required qualifier |
-| `../DECISION_LOG.md` | D-001 … D-055, append-only, including every retraction |
+| `../DECISION_LOG.md` | Append-only, including every retraction. Coverage is **D-001–D-045 and D-047–D-056**; **D-046 was never assigned** — a reference to it in D-047 is a dangling pointer, corrected in D-056 rather than by editing the dated entry |
 | `../METHODOLOGY_SPEC.md` | The frozen specification, v1.0 + amendments A-1…A-9 |
 | `../RESULTS_REGISTRY.md` | R-000 … R-014, each with a public-safety classification |
 
@@ -66,6 +67,6 @@ Neither is deleted and neither is overwritten. Figures were shown from them, so 
 
 ## If you only read one thing
 
-- **To evaluate the argument** → the English paper, 14 pages.
+- **To evaluate the argument** → the **English paper** (14 pages), or the **Vietnamese edition** if Vietnamese is your reading language — they are parallel in status, not one derived from the other.
 - **To check whether the numbers are real** → the supplement, §2 and §4.
 - **To see what was got wrong and corrected** → the supplement, §6, then `DECISION_LOG.md`.

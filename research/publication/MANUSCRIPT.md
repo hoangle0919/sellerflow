@@ -6,7 +6,9 @@
 >
 > This 19-page version carries the full audit apparatus inline — per-claim source notes, checksum tables, the reproducibility statement. That made it a poor read and a good record. Its apparatus has been harvested into [`REPRODUCIBILITY_SUPPLEMENT.md`](REPRODUCIBILITY_SUPPLEMENT.md), which is now the companion to the reader editions.
 >
-> It is **retained byte-for-byte, never regenerated and never deleted**: figures were published from it, so what was said and when has to stay checkable. Nothing in it is known to be wrong — it is superseded in *role*, not in correctness.
+> It is **retained byte-for-byte, never regenerated and never deleted**: figures were published from it, so what was said and when has to stay checkable. It is superseded in *role*.
+>
+> **⚠️ One statement in this body is now known to be wrong and is NOT corrected here.** Where the text says duration integrality makes attainable APRs a discrete set, so an exact cost match is unattainable — that reasoning is **false and withdrawn (D-056)**. APR is *piecewise continuous* in the cap factor: within a fixed paying term the clipped final payment varies continuously with `f`, and an exact reference-path root exists at `f ≈ 1.0946206626769461`. The registered `f* = 1.0945` remains correct as **the nearest point on the 0.0005-step grid that was searched**, with the same ≈0.02416pp residual — so no figure in this document moves. The body is left as written because a historical record that gets edited later cannot be audited; the correction lives in `DERIVATIONS.md` P6 and D-056.
 
 ---
 
