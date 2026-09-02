@@ -106,8 +106,18 @@ def test_f_star_is_presented_as_a_grid_match_with_its_residual():
         f"residual drifted to {residual:.6f}pp"
     txt = _text()
     assert "0.02416" in txt, "P-1 must state the residual in percentage points"
-    assert "nearest grid match" in txt or "grid match" in txt, \
-        "P-1 must not imply an exact cost match"
+    # Matched on the claim, not one phrasing of it. D-056 replaced "nearest grid
+    # match" with the more precise "nearest point on the registered 0.0005-step
+    # grid", because the residual is a property of the GRID that was searched --
+    # a numerical root sits at approximately f = 1.09462066267694. Pinning the old
+    # words would have blocked a correction that strengthens the same claim.
+    assert ("nearest point on the registered" in txt or "nearest grid match" in txt
+            or "grid match" in txt), "P-1 must not imply an exact cost match"
+    # And the withdrawn reasoning must not come back anywhere in the ledger.
+    for banned in ("achievable APRs form a discrete set",
+                   "duration is integer-valued, so effective cost moves in steps"):
+        assert banned.lower() not in txt.lower(), (
+            f"the discrete-APR reasoning withdrawn by D-056 reappeared: {banned!r}")
 
 
 def test_rbf_g_floor_never_binds_but_the_ceiling_does():

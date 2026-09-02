@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Tài trợ dựa trên doanh thu trong điều kiện doanh số biến động: Phân tích mô phỏng ghép cặp về gánh nặng thanh toán và tiến độ thu hồi vốn</title>
+<meta name="author" content="Le Huu Hoang">
+<style>
+  @page { size: Letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #000; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.46; }
+  .page {
+    position: relative; width: 8.5in; height: 11in; margin: 0 auto;
+    padding: 0.78in 0.88in 0.65in; overflow: hidden; page-break-after: always; background: #fff;
+  }
+  .page:last-child { page-break-after: auto; }
+  .running {
+    position: absolute; top: 0.30in; left: 0.88in; right: 0.88in;
+    padding-bottom: 3px; border-bottom: 0.7px solid #333;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: "Times New Roman", Times, serif; font-size: 8.5pt; color: #333;
+  }
+  h1 { font-size: 19pt; line-height: 1.12; text-align: center; margin: 0; font-weight: 700; }
+  .subtitle { font-size: 12.5pt; text-align: center; margin-top: 7pt; }
+  .author { text-align: center; margin-top: 15pt; font-size: 10.5pt; line-height: 1.45; }
+  h2.major { font-size: 12.5pt; line-height: 1.2; text-align: center; margin: 0 0 11pt; font-weight: 700; }
+  h3 { font-size: 11.2pt; line-height: 1.25; margin: 10pt 0 4pt; font-weight: 700; }
+  p { margin: 0 0 7.5pt; text-align: justify; hyphens: auto; }
+  .lead { font-size: 11.2pt; }
+  .abstract-heading { text-align: center; font-size: 10.7pt; margin: 23pt 0 5pt; font-weight: 700; }
+  .abstract { font-size: 10pt; line-height: 1.42; margin: 0 13pt; }
+  .keywords { font-size: 9.3pt; margin: 9pt 13pt 0; }
+  .author-note {
+    position: absolute; left: .88in; right: .88in; bottom: .50in;
+    border-top: .6px solid #777; padding-top: 6pt; font-size: 8.2pt; line-height: 1.3;
+  }
+  .rq { margin: 9pt 18pt; font-style: italic; text-align: left; }
+  ol, ul { margin: 4pt 0 8pt 21pt; padding: 0; }
+  li { margin-bottom: 4pt; }
+  .equation { display: grid; grid-template-columns: 1fr auto; align-items: center; margin: 10pt 13pt; font-size: 12pt; }
+  .equation .formula { text-align: center; }
+  .equation .number { text-align: right; font-size: 10pt; }
+  .table-title, .figure-title { text-align: center; font-size: 9.8pt; font-weight: 700; margin: 9pt 0 3pt; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3pt; font-size: 8.8pt; line-height: 1.28; }
+  th { text-align: left; border-top: 1.2px solid #111; border-bottom: .7px solid #111; padding: 4px 5px; font-weight: 700; }
+  td { padding: 4px 5px; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 1.2px solid #111; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .notes { font-size: 8.2pt; line-height: 1.30; margin: 3pt 0 8pt; text-align: left; }
+  figure { margin: 9pt 0 7pt; }
+  figure img { display: block; width: 100%; height: auto; }
+  figcaption { margin-top: 3pt; font-size: 8.4pt; line-height: 1.30; text-align: left; }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24pt; }
+  .small { font-size: 9.3pt; line-height: 1.36; }
+  .ref { font-size: 8.9pt; line-height: 1.34; margin: 0 0 6.3pt; text-align: left; padding-left: 16pt; text-indent: -16pt; }
+  a { color: #000; text-decoration: none; }
+  .availability { margin-top: 18pt; }
+  code { font-family: "Courier New", monospace; font-size: 8.3pt; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<section class="page">
+  <div style="margin-top:.42in">
+    <h1 style="font-size:18pt">Tài trợ dựa trên doanh thu trong điều kiện doanh số biến động: Phân tích mô phỏng ghép cặp về gánh nặng thanh toán và tiến độ thu hồi vốn</h1>
+    <div class="author"><strong>Lê Hữu Hoàng</strong><br>Nghiên cứu độc lập<br>Tháng 8 năm 2026</div>
+
+    <div class="abstract-heading">Tóm tắt</div>
+    <p class="abstract">Nghiên cứu này so sánh cơ chế tài trợ hoàn trả theo doanh thu với cơ chế thanh toán cố định trên cùng các quỹ đạo doanh số mô phỏng. Trong kịch bản suy giảm nghiêm trọng, phương án hoàn trả theo doanh thu loại bỏ 6,85 tháng vượt ngưỡng minh họa 15% giữa khoản thanh toán và doanh số, nhưng đến tháng 12 chỉ thu hồi 65,46% mục tiêu, so với 92,31% ở phương án cố định có cùng chi phí hợp đồng. Trên toàn bộ các kịch bản, phương án hoàn trả theo doanh thu có thể thu hồi nhanh hơn hoặc chậm hơn tùy theo doanh số thực hiện. Hệ số hoàn trả quyết định mức giá, còn tỷ lệ trích doanh thu quyết định khoản thanh toán phản ứng như thế nào trước biến động doanh số. Kịch bản ngừng hoạt động vĩnh viễn cho thấy mục tiêu hoàn trả theo hợp đồng có thể không đạt được. Các kết quả mô tả cơ chế vận hành của hợp đồng dưới những giả định đã nêu, chứ không phản ánh hành vi quan sát được của người bán hay hiệu quả thực tế của một danh mục tài trợ.</p>
+    <p class="keywords"><strong>Từ khóa:</strong> tài trợ theo doanh thu; hoàn trả phụ thuộc doanh thu; gánh nặng thanh toán; thu hồi vốn; mô phỏng ghép cặp; tài chính doanh nghiệp nhỏ<br><strong>Mã phân loại JEL:</strong> G23, G32, C63, O16, L81</p>
+
+    <div style="margin-top:24pt">
+      <h2 class="major">1. Giới thiệu</h2>
+      <p class="lead">Một người bán quy mô nhỏ có thể hoạt động ổn định trong tháng bình thường nhưng vẫn gặp khó khăn tài chính khi doanh số suy yếu. Khoản trả góp cố định không thay đổi khi doanh số giảm, vì vậy chiếm tỷ trọng lớn hơn trong doanh thu của tháng yếu. Trái lại, khoản hoàn trả theo doanh thu điều chỉnh cùng doanh số. Cơ chế linh hoạt này có thể giảm áp lực thanh toán cho người bán, đồng thời làm thay đổi thời điểm và, trong một số trường hợp, khả năng thu hồi đầy đủ của bên cấp vốn.</p>
+      <p>Khả năng tiếp cận vốn vẫn là một trở ngại dai dẳng đối với doanh nghiệp nhỏ tại các thị trường mới nổi. Báo cáo <em>MSME Finance Gap</em> (2017) ước tính khoảng thiếu hụt tài chính đáng kể của các doanh nghiệp siêu nhỏ, nhỏ và vừa chính thức; trong khi báo cáo <em>Digital Vietnam</em> của Ngân hàng Thế giới đặt thương mại số vào vị trí trung tâm trong quá trình chuyển đổi kinh tế của Việt Nam (International Finance Corporation và SME Finance Forum, 2017; World Bank, 2021). Các tài liệu này cung cấp bối cảnh nghiên cứu, nhưng không được dùng để hiệu chỉnh người bán, hợp đồng hay quá trình doanh thu trong mô hình dưới đây.</p>
+    </div>
+  </div>
+  <div class="author-note">Email tác giả: lehuuhoang1909@gmail.com. Nghiên cứu không nhận tài trợ bên ngoài. Toàn bộ kết quả định lượng đều được tạo từ mô phỏng; nghiên cứu không sử dụng kết quả hoàn trả quan sát được của người bán. Các tham số chỉ mang tính minh họa và chưa được hiệu chỉnh theo dữ liệu người bán Việt Nam.</div>
+</section>
+
+<!-- PAGE 2 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>2</span></div>
+  <h3 style="margin-top:0">1.1. Câu hỏi nghiên cứu và đóng góp</h3>
+  <p>Cấu trúc hợp đồng được xem xét tương đối đơn giản. Bên cấp vốn ứng trước một khoản tiền; người bán trích một tỷ lệ cố định trên doanh số đủ điều kiện cho đến khi đạt mục tiêu hoàn trả đã xác định trước. Trong khi đó, hợp đồng thanh toán cố định yêu cầu cùng một khoản tiền theo lịch mỗi tháng. Cấu trúc thứ nhất hấp thụ một phần cú sốc doanh số thông qua quy tắc thanh toán; cấu trúc thứ hai giữ nguyên khoản phải trả theo lịch. Vì vậy, bài toán kinh tế có hai mặt: áp lực thanh toán của người bán giảm bao nhiêu, và tốc độ thu hồi vốn của bên cấp vốn thay đổi như thế nào?</p>
+  <p class="rq"><strong>Câu hỏi nghiên cứu.</strong> Trên cùng các quỹ đạo doanh thu mô phỏng, gánh nặng thanh toán của người bán và tiến độ thu hồi của bên cấp vốn thay đổi ra sao khi khoản hoàn trả phụ thuộc doanh thu thay vì được ấn định cố định?</p>
+  <p>Nghiên cứu trả lời câu hỏi này bằng mô phỏng ghép cặp. Mỗi cấu trúc hợp đồng được áp dụng trên cùng một quỹ đạo doanh thu tháng đã tạo. Do đó, chênh lệch được tính trong từng quỹ đạo, không phải giữa những người bán mô phỏng khác nhau. Phương án cố định chính được ghép để có cùng khoản ứng trước, cùng mục tiêu hoàn trả và cùng kỳ hạn trên quỹ đạo tham chiếu với hợp đồng theo doanh thu. Một lịch trả góp thứ hai, với lãi suất danh nghĩa minh họa 18%, được sử dụng làm mốc tham chiếu về chi phí.</p>
+  <p>Nghiên cứu có ba đóng góp. Thứ nhất, nghiên cứu tách mức giá khỏi cấu trúc thanh toán: hệ số hoàn trả quyết định mục tiêu theo hợp đồng, còn tỷ lệ trích doanh thu quyết định khoản trả hàng tháng phản ứng như thế nào trước doanh số. Thứ hai, nghiên cứu báo cáo đồng thời gánh nặng của người bán và tiến độ thu hồi của bên cấp vốn, vì đây là hai hệ quả của cùng một quy tắc. Thứ ba, nghiên cứu không che khuất các trường hợp thất bại và hiện tượng dữ liệu bị kiểm duyệt: các kịch bản ngừng hoạt động được đưa vào, và những thống kê chỉ tính trên các quỹ đạo hoàn tất được chỉ rõ.</p>
+  <p>Phạm vi câu hỏi được giới hạn có chủ đích. Nghiên cứu không dự báo người bán nào sẽ vỡ nợ, không kết luận hợp đồng có phù hợp với khả năng chi trả hay không, và không ước tính hiệu quả của một danh mục tài trợ thực tế. Mục tiêu là xác định các hệ quả cơ học của điều khoản hợp đồng khi quỹ đạo doanh số được giữ giống nhau giữa các phương án.</p>
+
+  <h3>1.2. Vì sao sử dụng mô phỏng ghép cặp?</h3>
+  <p>Một so sánh thực nghiệm lý tưởng cần quan sát cùng một người bán dưới cả hai hợp đồng và trên cùng một quỹ đạo doanh số thực hiện. Phản thực tế đó không thể quan sát trực tiếp vì mỗi người bán chỉ có thể nhận một hợp đồng tại một thời điểm. Mô phỏng ghép cặp tạo ra đối chứng này theo thiết kế: mọi phương án được đánh giá trên từng quỹ đạo trước khi lấy trung bình. Cách làm này tăng khả năng so sánh nội bộ nhưng không bảo đảm khả năng khái quát hóa ra dữ liệu thực. Quá trình doanh thu mô phỏng được lựa chọn theo giả định chứ không được ước lượng từ dữ liệu.</p>
+  <p>Nghiên cứu mô phỏng có thể hữu ích cho thiết kế hợp đồng khi quá trình tạo dữ liệu, biến kết quả, số lần lặp và cách diễn giải bất định được trình bày rõ ràng (Morris, White và Crowther, 2019). Tuy nhiên, mô phỏng cũng dễ chịu ảnh hưởng bởi mức độ tùy ý của nhà nghiên cứu và nguy cơ nhầm lẫn độ chính xác Monte Carlo với bằng chứng về một tổng thể thực (Koehler, Brown và Haneuse, 2009; Pawel, Kook và Reeve, 2024). Quy trình và biến kết quả đã được cố định trong kho mã công khai trước khi các tệp kết quả có phiên bản hiện tại được tạo; những hạn chế của quá trình đã chọn được trình bày ở Mục 7.</p>
+
+</section>
+
+<!-- PAGE 3 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>3</span></div>
+  <h3 style="margin-top:0">1.3. Kết quả chính</h3>
+  <p>Trong kịch bản suy giảm nghiêm trọng, phương án theo doanh thu tránh được 6,85 tháng có gánh nặng cao nhưng mức thu hồi đến tháng 12 thấp hơn phương án cố định 26,85 điểm phần trăm. Thứ tự thu hồi thay đổi theo kịch bản: phương án này chậm hơn trên quỹ đạo yếu nhưng có thể nhanh hơn trên quỹ đạo mạnh. Định giá lại làm đổi chi phí mà không đổi tỷ lệ trích; ngừng hoạt động vĩnh viễn cho thấy tổng nghĩa vụ có thể không được thu đủ.</p>
+  <h2 class="major">2. Tổng quan nghiên cứu</h2>
+  <h3>2.1. Cơ chế hoàn trả phụ thuộc kết quả</h3>
+  <p>Hoàn trả phụ thuộc kết quả được phát triển rõ nhất trong các khoản vay gắn với thu nhập. Khoản thanh toán biến đổi theo thu nhập thực hiện có thể làm phẳng nghĩa vụ tiền mặt, đồng thời chuyển rủi ro về thời điểm và lựa chọn sang bên cấp vốn (Chapman, Higgins và Stiglitz, 2014; Nerlove, 1975). Dù các mô hình này thuộc tài chính giáo dục, cơ chế cốt lõi vẫn phù hợp: khi cơ sở tính thanh toán thay đổi, khoản thanh toán cũng thay đổi theo.</p>
+  <p>Russel, Shi và Clarke (2025) nghiên cứu tài trợ dựa trên doanh thu qua một nền tảng thanh toán tại Nam Phi và ghi nhận hành vi chuyển doanh thu sang kênh khác sau khi nhận tài trợ. Cordaro và cộng sự (2022) thử nghiệm hợp đồng hoàn trả phụ thuộc kết quả cho nhà phân phối vi mô tại Kenya, nhưng cấu trúc vốn chủ sở hữu và lai của họ khác hợp đồng trích phần trăm doanh thu. Các nghiên cứu này xác lập tính liên quan của chủ đề nhưng không cung cấp ước lượng có thể chuyển trực tiếp sang hợp đồng được phân tích ở đây.</p>
+
+  <h3>2.2. Gánh nặng thanh toán và tính linh hoạt</h3>
+  <p>Gánh nặng hoàn trả thường được đo bằng khoản phải trả so với thu nhập hiện tại. Trong tài liệu về khoản vay sinh viên, lịch trả cố định tập trung gánh nặng vào thời kỳ thu nhập thấp, còn khoản trả gắn với thu nhập tự động điều chỉnh (Chapman và Dearden, 2017; Barr và cộng sự, 2019). Bằng chứng tại Bangladesh và về thế chấp tại Hoa Kỳ cũng cho thấy thời điểm thanh toán có ý nghĩa đối với hành vi rủi ro, vỡ nợ và khả năng thanh khoản (Battaglia, Gulesci và Madestam, 2024; Ganong và Noel, 2020). Vì công cụ và bối cảnh khác nhau, nghiên cứu này chỉ kế thừa khái niệm chứ không sử dụng lại các độ lớn ước lượng.</p>
+
+  <h3>2.3. Thu hồi vốn và mức giá</h3>
+  <p>Hợp đồng phụ thuộc kết quả không thể được đánh giá chỉ từ phía người vay. Tỷ lệ và thời điểm thu hồi có ý nghĩa đối với bên cấp vốn; việc chuyển giao rủi ro có thể đòi hỏi phần bù hoặc tạo ra vấn đề lựa chọn (Shen và Ziderman, 2009; Herbst và Hendren, 2024). Quy định tại New York và California cũng cho thấy hệ số hoàn trả và tỷ lệ phần trăm năm chỉ có thể so sánh khi được chuyển về cùng cơ sở (New York State Department of Financial Services, 2023; California Legislature, 2025).</p>
+  <p>Tài liệu hiện có chưa cung cấp so sánh trực tiếp, có kiểm soát mức giá, giữa gánh nặng của người bán và tiến độ thu hồi của bên cấp vốn đối với hợp đồng SME trích tỷ lệ doanh thu. Nghiên cứu này bổ sung so sánh đó bằng mô phỏng minh bạch, không phải bằng chứng nhân quả ngoài thực tế.</p>
+</section>
+
+<!-- PAGE 4 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>4</span></div>
+  <h2 class="major">3. Mô hình hợp đồng</h2>
+  <p>Ký hiệu <em>A</em> là khoản ứng trước, <em>f</em> là hệ số hoàn trả, <em>r</em> là tỷ lệ trích doanh thu, và <em>B<sub>t</sub></em> là doanh thu thuần đủ điều kiện trong tháng <em>t</em>. Mục tiêu hoàn trả theo hợp đồng là <em>C = Af</em>. Trước khi đạt mục tiêu, khoản hoàn trả theo doanh thu bằng một tỷ lệ cố định trên doanh thu đủ điều kiện. Khoản trả cuối cùng được giới hạn bằng phần dư chưa thanh toán:</p>
+  <div class="equation"><div class="formula"><em>p<sub>t</sub></em> = min{<em>rB<sub>t</sub></em>, <em>C</em> - &Sigma;<sub><em>s</em>&lt;<em>t</em></sub><em>p<sub>s</sub></em>}.</div><div class="number">(1)</div></div>
+  <p>Phương án cố định được ghép cặp trả một khoản không đổi <em>P</em> trong <em>N</em> tháng. Quy tắc ghép trên quỹ đạo tham chiếu đặt cùng khoản ứng trước, cùng mục tiêu và cùng kỳ hạn:</p>
+  <div class="equation"><div class="formula"><em>q<sub>t</sub></em> = <em>P</em> khi <em>t</em> &le; <em>N</em>, &nbsp; và &nbsp; <em>NP = C</em>.</div><div class="number">(2)</div></div>
+  <p>Phương trình (1) và (2) tách mức giá khỏi cấu trúc. Quy tắc <em>rB<sub>t</sub></em> quyết định khoản thanh toán phản ứng thế nào trước doanh số. Hệ số <em>f</em> quyết định mục tiêu và do đó quyết định thời điểm dừng. Thay đổi <em>f</em> không làm đổi tỷ lệ trước khi đạt mục tiêu, nhưng làm thay đổi thời hạn, khoản thanh toán cuối được giới hạn, và chuỗi dòng tiền thực hiện.</p>
+  <p>Để trình bày gọn, phương án hoàn trả theo doanh thu được ký hiệu RBF; hai đối chuẩn cố định được ký hiệu FIX-A và FIX-B.</p>
+  <figure style="margin-top:6pt;margin-bottom:5pt">
+    <img src="{{FIGURE_1}}" alt="Minh họa doanh số và khoản thanh toán hàng tháng" style="width:60%;margin:0 auto">
+    <figcaption><strong>Hình 1. Minh họa cơ chế thanh toán.</strong> Khoản trả cố định giữ nguyên, trong khi khoản hoàn trả theo doanh thu biến động cùng doanh số. Đây là quỹ đạo minh họa, không thuộc các kết quả mô phỏng có phiên bản. Hình giả định tỷ lệ trích 10% trên doanh thu thuần và tỷ lệ hoàn hàng 3%.</figcaption>
+  </figure>
+  <div class="table-title">Bảng 1. Các phương án hợp đồng</div>
+  <table>
+    <thead><tr><th>Mã</th><th>Vai trò trong phân tích</th><th>Phản ứng khi doanh số giảm</th><th>Giả định chính</th></tr></thead>
+    <tbody>
+      <tr><td>RBF</td><td>Cấu trúc hoàn trả theo doanh thu</td><td>Khoản trả hàng tháng giảm</td><td>10% doanh thu thuần đủ điều kiện đến khi đạt mục tiêu</td></tr>
+      <tr><td>FIX-A</td><td>Đối chuẩn chính có cùng chi phí</td><td>Khoản trả theo lịch không đổi</td><td>Mọi kỳ trả đều đúng hạn</td></tr>
+      <tr><td>FIX-B</td><td>Đối chuẩn minh họa 18% danh nghĩa</td><td>Khoản trả theo lịch không đổi</td><td>Lãi suất giả định, không phải ước lượng thị trường</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Ghi chú:</em> Gánh nặng thanh toán bằng khoản trả chia cho doanh số gộp (GMV). Cơ sở trích theo hợp đồng là doanh thu thuần đủ điều kiện; vì vậy khi tỷ lệ hoàn hàng là 3%, gánh nặng RBF thường hiển thị khoảng 9,7% thay vì đúng 10%. Khoản thanh toán cuối cùng có thể thấp hơn do bị giới hạn bằng phần dư.</p>
+</section>
+
+<!-- PAGE 5 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>5</span></div>
+  <h2 class="major">4. Thiết kế mô phỏng</h2>
+  <p>Doanh số tháng được tạo từ mức cơ sở, xu hướng định trước, yếu tố mùa vụ đã chuẩn hóa trung bình, cú sốc riêng của từng kịch bản và nhiễu đặc thù có phân phối lognormal. Trong mỗi lần mô phỏng, cả ba phương án hợp đồng được áp dụng cho cùng một quỹ đạo. Chênh lệch được tính trong từng quỹ đạo trước khi tổng hợp trên 500 quỹ đạo cho mỗi kịch bản, với thời gian theo dõi 24 tháng.</p>
+  <p>Nghiên cứu xây dựng mười kịch bản không ngừng hoạt động: doanh số ổn định; mùa vụ vừa; mùa vụ mạnh; tăng trưởng 3% mỗi tháng; suy giảm dần; suy giảm kéo dài 40%; suy giảm nghiêm trọng 60% rồi phục hồi; gián đoạn một tháng; sự cố nền tảng; và tỷ lệ hoàn hàng tăng đột biến. Ba kịch bản bổ sung mô phỏng việc ngừng hoạt động vĩnh viễn từ tháng 7, ngừng hoạt động vĩnh viễn từ tháng 13, hoặc tạm ngừng trong ba tháng.</p>
+
+  <div class="table-title">Bảng 2. Các tham số chính của mô phỏng</div>
+  <table>
+    <thead><tr><th>Tham số</th><th class="num">Giá trị</th><th>Diễn giải</th></tr></thead>
+    <tbody>
+      <tr><td>Doanh số cơ sở hàng tháng</td><td class="num">185,0 triệu đồng</td><td>Quy mô minh họa của nhà bán hàng</td></tr>
+      <tr><td>Khoản vốn ứng trước</td><td class="num">185,0 triệu đồng</td><td>Tương đương một tháng doanh số cơ sở</td></tr>
+      <tr><td>Tỷ lệ trích nộp</td><td class="num">10% doanh thu thuần</td><td>Quy tắc thanh toán trước khi đạt tổng nghĩa vụ</td></tr>
+      <tr><td>Hệ số trần minh họa</td><td class="num">1,20</td><td>Tổng nghĩa vụ 222,0 triệu đồng</td></tr>
+      <tr><td>Hệ số giá ghép trên quỹ đạo tham chiếu</td><td class="num">1,0945</td><td>Điểm APR gần nhất trên lưới thử; tổng nghĩa vụ 202,4825 triệu đồng</td></tr>
+      <tr><td>Đối chứng trả góp</td><td class="num">18% danh nghĩa; 12 tháng</td><td>Tham số giả định, không phải ước lượng thị trường</td></tr>
+      <tr><td>Khoảng thời gian mô phỏng</td><td class="num">24 tháng</td><td>Tỷ lệ thu hồi được đo tại tháng 12, 18 và 24</td></tr>
+      <tr><td>Số quỹ đạo và hạt giống</td><td class="num">500; 20260803</td><td>Áp dụng cho từng kịch bản</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Ghi chú:</em> Các giá trị chỉ mang tính minh họa. Đề cương phân tích được chốt trong kho mã công khai trước khi các tệp kết quả phiên bản hiện hành được tạo.</p>
+
+  <h3>4.1. Quá trình tạo doanh thu</h3>
+  <p>Với quỹ đạo <em>i</em> tại tháng <em>t</em>, GMV mục tiêu được tạo theo quá trình nhân</p>
+  <div class="equation"><div class="formula"><em>R<sub>it</sub></em> = <em>R</em><sub>0</sub>(1 + <em>g</em>)<sup><em>t</em></sup><em>S<sub>t</sub>K<sub>t</sub>&epsilon;<sub>it</sub></em>, &nbsp; log <em>&epsilon;<sub>it</sub></em> ~ N(-&sigma;<sup>2</sup>/2, &sigma;<sup>2</sup>).</div><div class="number">(3)</div></div>
+  <p>Thành phần hiệu chỉnh trung bình trong (3) bảo đảm E[<em>&epsilon;<sub>it</sub></em>] = 1. Giá trị đơn hàng bình quân được lấy mẫu bằng 440.000 × (1 + <em>&delta;<sub>it</sub></em>) đồng, với <em>&delta;<sub>it</sub></em> ~ N(0; 0,05<sup>2</sup>); các giá trị không dương được lấy mẫu lại. Số đơn hàng nguyên bằng tỷ lệ đã làm tròn giữa doanh số gộp (GMV) mục tiêu và giá trị đơn hàng; sau đó GMV thực hiện được tính lại bằng số đơn hàng nhân giá trị đơn hàng, nhờ đó đồng nhất thức kế toán được duy trì chính xác. Doanh thu thuần bằng GMV × (1 - tỷ lệ hoàn hàng).</p>
+</section>
+
+<!-- PAGE 6 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>6</span></div>
+  <h2 class="major">4. Thiết kế mô phỏng <span style="font-weight:400">(tiếp theo)</span></h2>
+  <h3 style="margin-top:0">4.1. Quá trình tạo doanh thu <span style="font-weight:400">(tiếp theo)</span></h3>
+  <div class="table-title">Bảng 3. Giả định về quá trình doanh thu và các kịch bản</div>
+  <table>
+    <thead><tr><th>Thành phần</th><th>Đặc tả sử dụng trong mô phỏng</th></tr></thead>
+    <tbody>
+      <tr><td>Biến động riêng có</td><td>Hệ số nhân lognormal với &sigma; = 0,15 và kỳ vọng bằng một</td></tr>
+      <tr><td>Mùa vụ</td><td>Dạng tháng đã chuẩn hóa trung bình [1,05; 0,80; 0,90; 0,95; 1,00; 0,95; 0,95; 1,00; 1,10; 1,15; 1,30; 1,25]; kịch bản mùa vụ mạnh nhân đôi độ lệch so với một</td></tr>
+      <tr><td>Xu hướng</td><td>Bằng không, ngoại trừ kịch bản tăng trưởng sử dụng mức tăng 3% mỗi tháng</td></tr>
+      <tr><td>Thời điểm cú sốc bắt đầu</td><td>Tháng 7 đối với mọi kịch bản căng thẳng và ngừng hoạt động</td></tr>
+      <tr><td>Cú sốc suy giảm</td><td>Suy giảm dần 40% trong sáu tháng; suy giảm kéo dài 40%; suy giảm 60% trong sáu tháng rồi phục hồi trong sáu tháng</td></tr>
+      <tr><td>Cú sốc tạm thời</td><td>Một tháng ở mức 50% cơ sở; sự cố nền tảng một tháng ở mức 30%; tỷ lệ hoàn hàng 9% trong ba tháng thay vì 3%</td></tr>
+      <tr><td>Cú sốc ngừng hoạt động</td><td>Doanh số vĩnh viễn bằng không từ tháng 7 hoặc 13; hoặc bằng không trong ba tháng rồi phục hồi một phần</td></tr>
+      <tr><td>Đối sánh chi phí</td><td>Chọn <em>f</em> từ 1,0005 đến 1,4000, bước 0,0005, để tối thiểu hóa chênh lệch APR tuyệt đối so với FIX-B trên quỹ đạo tham chiếu</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Ghi chú:</em> Hình dạng kịch bản và các tham số đều là giả định, không phải ước lượng từ dữ liệu nhà bán hàng Việt Nam.</p>
+
+  <h3>4.2. Chỉ tiêu đánh giá và mẫu số</h3>
+  <p>Gánh nặng thanh toán của nhà bán hàng bằng khoản thanh toán chia cho doanh số gộp (GMV) của tháng tương ứng. Nghiên cứu báo cáo gánh nặng bình quân, mức đỉnh bình quân trên từng quỹ đạo, và số tháng vượt các ngưỡng minh họa 10%, 15%, 20% và 25%. Tỷ lệ thu hồi của bên tài trợ bằng khoản thanh toán lũy kế chia cho tổng nghĩa vụ hợp đồng đối với RBF và FIX-A; đối với FIX-B không có trần, mẫu số là tổng khoản phải trả theo lịch. Tỷ lệ thu hồi được đo tại tháng 12, 18 và 24.</p>
+  <p>Thời gian hoàn tất bình quân chỉ được tính trên các quỹ đạo đạt đủ tổng nghĩa vụ trong thời gian quan sát. APR hiệu dụng được tính trên các chuỗi dòng tiền có nghiệm tỷ suất hoàn vốn nội bộ; đây là một điều kiện chọn mẫu khác. Khi kịch bản ngừng hoạt động làm hai điều kiện này khác nhau, tỷ lệ quỹ đạo thuộc từng mẫu được báo cáo riêng.</p>
+
+  <h3>4.3. Diễn giải bất định</h3>
+  <p>Khoảng Monte Carlo phản ánh độ ổn định của ước lượng khi số quỹ đạo mô phỏng hữu hạn và toàn bộ giả định được giữ cố định. Khoảng này không đo bất định của tổng thể, bất định tham số, hay bất định về tính đúng đắn của quá trình doanh thu đã chọn. Các kiểm tra hội tụ được lựa chọn chỉ xác nhận tính ổn định số của hai đại lượng trong một kịch bản căng thẳng, không phải của mọi thống kê được báo cáo.</p>
+  <p class="notes"><em>Hạn chế của đối chứng:</em> FIX-A và FIX-B giả định mọi khoản theo lịch đều được thanh toán đầy đủ và đúng hạn. Vì vậy, kết quả của hai phương án phản ánh thu hồi theo lịch dưới giả định thuận lợi, không phải hiệu quả thu hồi thực tế của bên cho vay.</p>
+</section>
+
+<!-- PAGE 7 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>7</span></div>
+  <h2 class="major">5. Kết quả nghiên cứu</h2>
+  <h3>5.1. Kịch bản suy giảm nghiêm trọng</h3>
+  <p>Trong kịch bản suy giảm nghiêm trọng, doanh số giảm 60% trong sáu tháng và phục hồi trong sáu tháng tiếp theo. Kết quả trung tâm không cho thấy một hợp đồng luôn vượt trội. Cùng một quy tắc thanh toán tạo ra hai hệ quả gắn liền.</p>
+  <figure>
+    <img src="{{FIGURE_2}}" alt="So sánh trong kịch bản suy giảm nghiêm trọng">
+    <figcaption><strong>Hình 2. Gánh nặng thanh toán và mức thu hồi trong kịch bản suy giảm nghiêm trọng.</strong> Giá trị bình quân trên 500 quỹ đạo ghép cặp tại <em>f</em> = 1,20. Tỷ lệ thu hồi được tính trên tổng nghĩa vụ của từng phương án. RBF và FIX-A được ghép về chi phí hợp đồng.</figcaption>
+  </figure>
+  <div class="table-title">Bảng 4. Kết quả trong kịch bản suy giảm nghiêm trọng</div>
+  <table>
+    <thead><tr><th>Phương án hợp đồng</th><th class="num">Gánh nặng bình quân</th><th class="num">Số tháng gánh nặng &gt; 15%</th><th class="num">Thu hồi đến tháng 12</th><th class="num">Thời gian bình quân</th></tr></thead>
+    <tbody>
+      <tr><td>Hoàn trả theo doanh thu</td><td class="num">9,43%</td><td class="num">0,00</td><td class="num">65,46%</td><td class="num">18,72</td></tr>
+      <tr><td>Cố định, cùng chi phí</td><td class="num">16,36%</td><td class="num">6,85</td><td class="num">92,31%</td><td class="num">13,00</td></tr>
+      <tr><td>Trả góp, lãi suất danh nghĩa 18%</td><td class="num">16,06%</td><td class="num">5,91</td><td class="num">100,00%</td><td class="num">12,00</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Ghi chú:</em> Thời gian bình quân chỉ được tính trên các quỹ đạo đạt đủ tổng nghĩa vụ trong 24 tháng. Toàn bộ quỹ đạo đều hoàn tất trong kịch bản không đóng cửa này. Nguồn: Tính toán của tác giả từ mô phỏng ghép cặp.</p>
+
+  <p>So với FIX-A, phương án theo doanh thu làm giảm 6,85 số tháng mà tỷ lệ thanh toán vượt ngưỡng minh họa 15%; khoảng Monte Carlo trên các quỹ đạo mô phỏng là từ 6,80 đến 6,90 tháng. Gánh nặng thanh toán bình quân vẫn gần mức của kịch bản ổn định. Đổi lại, tỷ lệ thu hồi đến tháng 12 thấp hơn 26,85 điểm phần trăm (khoảng Monte Carlo: 26,60 đến 27,10 điểm phần trăm), và thời gian hoàn tất bình quân dài hơn 5,72 tháng. Các khoảng này chỉ phản ánh độ ổn định của mô phỏng dưới quá trình đã chọn, không phải bất định về người bán thực tế.</p>
+  <p>Đối với nhà bán hàng, quy tắc theo doanh thu ngăn khoản phải trả trong tháng yếu bị giữ cố định khi doanh số giảm. Đối với bên tài trợ, cùng quy tắc đó dịch chuyển một phần dòng tiền thu hồi sang giai đoạn sau suy giảm. Đến tháng 18, phương án theo doanh thu đã thu hồi 97,79% tổng nghĩa vụ và đạt 100% vào tháng 24. Vì vậy, giảm áp lực cho người bán và kéo dài thời gian thu hồi là hai mặt của cùng một cơ chế trong kịch bản này. Chỉ báo cáo một phía sẽ cho cái nhìn không đầy đủ về hợp đồng.</p>
+</section>
+
+<!-- PAGE 8 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>8</span></div>
+  <h3 style="margin-top:0">5.2. Kết quả thu hồi giữa các kịch bản</h3>
+  <p>Trong cả mười kịch bản không có tình trạng đóng cửa vĩnh viễn, phương án theo doanh thu làm giảm số tháng vượt ngưỡng gánh nặng 15%. Tuy nhiên, thứ tự thu hồi không cố định: phương án theo doanh thu có thể nhanh hơn hoặc chậm hơn lịch trả cố định, tùy quỹ đạo doanh số thực hiện.</p>
+  <figure>
+    <img src="{{FIGURE_3}}" alt="Giảm gánh nặng và tiến độ thu hồi giữa các kịch bản">
+    <figcaption><strong>Hình 3. Mức giảm gánh nặng và chênh lệch thu hồi đến tháng 12 giữa các kịch bản.</strong> Mỗi điểm tổng hợp 500 quỹ đạo ghép cặp tại <em>f</em> = 1,20. Trục hoành là số tháng gánh nặng cao của FIX-A trừ RBF; trục tung là tỷ lệ thu hồi tháng 12 của RBF trừ FIX-A. Hình thoi biểu thị kịch bản suy giảm nghiêm trọng.</figcaption>
+  </figure>
+  <p>Các kịch bản suy giảm thể hiện rõ sự đánh đổi. Trong kịch bản suy giảm dần, phương án theo doanh thu tránh được 0,89 tháng gánh nặng cao nhưng tỷ lệ thu hồi thấp hơn FIX-A 8,10 điểm phần trăm. Ở kịch bản suy giảm kéo dài, hai chênh lệch lần lượt là 3,10 tháng và 16,27 điểm phần trăm. Trong kịch bản suy giảm nghiêm trọng, chúng tăng lên 6,85 tháng và 26,85 điểm phần trăm.</p>
+  <p>Mối quan hệ này không luôn âm. Với doanh số ổn định, mùa vụ vừa, tăng trưởng, gián đoạn một tháng và tỷ lệ hoàn hàng tăng đột biến, phương án theo doanh thu nhỉnh hơn lịch cố định (có kỳ hạn 13 tháng) tại thời điểm tháng 12. Khoảng dẫn trước trong kịch bản ổn định xuất phát từ phép làm tròn kỳ hạn ghép: thời gian tham chiếu 12,37 tháng được làm tròn lên 13 tháng, trong khi phương án theo doanh thu có thể hoàn tất sớm hơn trên các quỹ đạo đủ mạnh.</p>
+  <p>Thứ tự tổng quát xuất phát trực tiếp từ định nghĩa hợp đồng. Trước khi một trong hai phương án đạt tổng nghĩa vụ và khi lịch cố định còn hiệu lực, thu hồi lũy kế của phương án theo doanh thu cao hơn khi doanh thu thuần đủ điều kiện bình quân lớn hơn khoản thanh toán cố định chia cho tỷ lệ trích nộp. Chỉ mô tả quỹ đạo là tăng hay giảm chưa đủ để xác định phương án nào thu hồi nhanh hơn.</p>
+  <p>Vì vậy, kết luận phù hợp phải mang tính điều kiện. Tài trợ hoàn trả theo doanh thu thường chậm hơn trên các quỹ đạo yếu nhưng có thể dẫn trước trên quỹ đạo mạnh. Ngưỡng phân định phụ thuộc khoản trả cố định, tỷ lệ trích nộp và doanh thu thuần đủ điều kiện thực hiện.</p>
+</section>
+
+<!-- PAGE 9 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>9</span></div>
+  <h3 style="margin-top:0">5.3. Phân biệt mức giá và cấu trúc thanh toán</h3>
+  <p>Hệ số trần <em>f</em> là biến số về giá: tích của khoản ứng trước và <em>f</em> xác định tổng nghĩa vụ hoàn trả. Tỷ lệ trích nộp là biến số về cấu trúc: trước khi hoàn tất, khoản trả mỗi tháng vẫn bằng 10% doanh thu thuần đủ điều kiện. Giảm hệ số trần không làm thay đổi cách khoản thanh toán phản ứng với doanh thu trước khi đạt tổng nghĩa vụ; nó chỉ làm thay đổi mức tổng thanh toán tại đó hợp đồng dừng thu.</p>
+  <figure>
+    <img src="{{FIGURE_4}}" alt="Kết quả hoàn trả theo doanh thu tại hai hệ số trần">
+    <figcaption><strong>Hình 4. Cùng một quy tắc thanh toán tại hai mức giá.</strong> Giá trị bình quân của 500 quỹ đạo trong kịch bản suy giảm nghiêm trọng. APR hiệu dụng chỉ được lấy bình quân trên các quỹ đạo có nghiệm tỷ suất hoàn vốn nội bộ; toàn bộ quỹ đạo trong các kịch bản không đóng cửa này đều hoàn tất.</figcaption>
+  </figure>
+  <div class="table-title">Bảng 5. Mức giá và kết quả trong kịch bản suy giảm nghiêm trọng</div>
+  <table>
+    <thead><tr><th>Cấu hình giá</th><th class="num">Tổng nghĩa vụ</th><th class="num">APR tham chiếu</th><th class="num">Thu hồi đến tháng 12</th><th class="num">Thời gian bình quân</th></tr></thead>
+    <tbody>
+      <tr><td>Mức minh họa <em>f</em> = 1,20</td><td class="num">222,00 triệu</td><td class="num">39,90%</td><td class="num">65,46%</td><td class="num">18,72</td></tr>
+      <tr><td>Điểm lưới gần nhất <em>f*</em> = 1,0945</td><td class="num">202,48 triệu</td><td class="num">19,54%</td><td class="num">71,77%</td><td class="num">17,50</td></tr>
+      <tr><td>Đối chuẩn 18% danh nghĩa</td><td class="num">203,53 triệu theo lịch</td><td class="num">19,56%</td><td class="num">100,00%</td><td class="num">12,00</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Ghi chú:</em> Đơn vị tiền tệ là triệu đồng. Hệ số 1,0945 là điểm gần nhất trên lưới được kiểm tra, không phải nghiệm bằng nhau chính xác. APR trên quỹ đạo tham chiếu thấp hơn khoảng 0,02 điểm phần trăm so với đối chuẩn trả góp.</p>
+  <p>Việc định giá lại làm thay đổi kết quả trong kịch bản suy giảm nghiêm trọng. Tổng nghĩa vụ thấp hơn làm tăng tỷ lệ thu hồi đến tháng 12 và rút ngắn thời gian hoàn tất bình quân. Tuy nhiên, trước khi hoàn tất, khoản trả vẫn là cùng một tỷ lệ trên doanh thu thuần. Vì vậy, so sánh chi phí tại một giá trị <em>f</em> cụ thể là kết quả của lựa chọn giá đó, không phải thuộc tính cố hữu của cấu trúc hoàn trả theo doanh thu.</p>
+  <p>Sự phân biệt này cũng quan trọng đối với công bố thông tin. Hệ số trần không phải APR. Một phép so sánh có ý nghĩa phải trình bày khoản ứng trước, tổng nghĩa vụ, thời điểm dòng tiền và tỷ lệ chi phí quy đổi theo năm trên cơ sở đã nêu. Các quy định tại New York và California được viện dẫn ở trên cùng phản ánh vấn đề về khả năng so sánh này.</p>
+</section>
+
+<!-- PAGE 10 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>10</span></div>
+  <h3 style="margin-top:0">5.4. Ngừng hoạt động, không đạt tổng nghĩa vụ và kiểm duyệt phải</h3>
+  <p>Cả mười kịch bản không đóng cửa đều đạt tổng nghĩa vụ hoàn trả trong cửa sổ 24 tháng. Tuy nhiên, đây chỉ là đặc điểm của tập kịch bản, không phải bảo đảm của hợp đồng. Trường hợp doanh thu chấm dứt vĩnh viễn cung cấp phản ví dụ trực tiếp.</p>
+  <figure>
+    <img src="{{FIGURE_5}}" alt="Tỷ lệ hoàn tất trong các kịch bản ngừng hoạt động" style="width:86%;margin:0 auto">
+    <figcaption><strong>Hình 5. Tỷ lệ hoàn tất trong 24 tháng khi doanh nghiệp ngừng hoạt động.</strong> Các cột thể hiện tỷ lệ trong 500 quỹ đạo RBF đạt tổng nghĩa vụ. Phương án cố định không được biểu diễn vì mô hình giả định cơ học rằng mọi khoản theo lịch đều được trả, kể cả sau khi doanh nghiệp mô phỏng đã ngừng hoạt động.</figcaption>
+  </figure>
+  <div class="table-title">Bảng 6. Kết quả hoàn trả theo doanh thu khi doanh nghiệp ngừng hoạt động</div>
+  <table>
+    <thead><tr><th>Kịch bản</th><th class="num">Hoàn tất, <em>f</em> = 1,20</th><th class="num">Hoàn trả bình quân</th><th class="num">Hoàn tất, <em>f*</em> = 1,0945</th><th class="num">Hoàn trả bình quân</th></tr></thead>
+    <tbody>
+      <tr><td>Ngừng vĩnh viễn từ tháng 7</td><td class="num">0,0%</td><td class="num">98,35 triệu</td><td class="num">0,0%</td><td class="num">98,35 triệu</td></tr>
+      <tr><td>Ngừng vĩnh viễn từ tháng 13</td><td class="num">23,8%</td><td class="num">214,31 triệu</td><td class="num">92,4%</td><td class="num">202,23 triệu</td></tr>
+      <tr><td>Tạm ngừng trong ba tháng</td><td class="num">98,0%</td><td class="num">221,95 triệu</td><td class="num">100,0%</td><td class="num">202,48 triệu</td></tr>
+    </tbody>
+  </table>
+  <p class="notes"><em>Ghi chú:</em> Đơn vị tiền tệ là triệu đồng. “Hoàn tất” nghĩa là đạt tổng nghĩa vụ theo hợp đồng trong 24 tháng. Nguồn: Tính toán của tác giả từ mô phỏng ghép cặp.</p>
+  <p>Khả năng hoàn tất phụ thuộc vào thời điểm và thời lượng doanh số bằng không, chứ không chỉ phụ thuộc vào việc có xuất hiện tháng không phát sinh doanh số. Một giai đoạn ngừng tạm thời vẫn có thể được bù đắp nếu doanh số về sau đủ lớn. Ngược lại, ngừng vĩnh viễn từ tháng 7 khiến toàn bộ quỹ đạo không đạt tổng nghĩa vụ ở cả hai mức giá. Trường hợp ngừng từ tháng 13 nằm gần ranh giới hoàn tất; do đó, hạ tổng nghĩa vụ làm tỷ lệ hoàn tất tăng từ 23,8% lên 92,4%.</p>
+  <p>Không đạt tổng nghĩa vụ không đồng nghĩa với mất vốn gốc. Tại <em>f</em> = 1,20, có 76,2% quỹ đạo ngừng từ tháng 13 không đạt 222 triệu đồng, nhưng số tiền hoàn trả bình quân vẫn là 214,3 triệu đồng, cao hơn khoản ứng trước 185 triệu đồng. Ngừng từ tháng 7 có bản chất khác: số tiền hoàn trả bình quân chỉ đạt 98,3 triệu đồng, thấp hơn vốn gốc.</p>
+  <p>Các chỉ tiêu thời gian cần được diễn giải thận trọng. Những quỹ đạo chưa hoàn tất khi cửa sổ quan sát 24 tháng kết thúc là dữ liệu bị kiểm duyệt phải. Thời gian hoàn tất bình quân chỉ được tính trên các quỹ đạo đã hoàn tất. Khi tỷ lệ không hoàn tất cao, một thời gian bình quân ngắn có thể gây hiểu lầm vì các trường hợp chưa hoàn tất bị loại khỏi phép tính (Lancaster, 1990; Heckman, 1979). Tại <em>f</em> = 1,20 trong kịch bản ngừng từ tháng 13, thời gian bình quân là 11,99 tháng nhưng chỉ áp dụng cho 23,8% quỹ đạo đã hoàn tất; đây không phải thời gian hoàn tất bình quân của toàn danh mục.</p>
+</section>
+
+<!-- PAGE 11 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>11</span></div>
+  <h2 class="major">6. Thảo luận</h2>
+  <h3>6.1. Cơ chế linh hoạt làm thay đổi phân bổ rủi ro theo thời gian</h3>
+  <p>Kết quả mô phỏng làm rõ cách thức hai cấu trúc phân bổ rủi ro do biến động doanh số. Với lịch trả cố định, nhà bán hàng chịu phần lớn biến động ngắn hạn: khoản phải trả không đổi nên gánh nặng thanh toán tăng khi doanh số giảm. Với hợp đồng theo doanh thu, một phần cú sốc doanh số được hấp thụ tự động thông qua khoản trả thấp hơn; đổi lại, bên tài trợ nhận ít tiền hơn trong các tháng yếu. Hai nhận định này xuất phát trực tiếp từ quy tắc thanh toán và không đòi hỏi dự báo xác suất vỡ nợ.</p>
+  <p>Mức độ và chiều của chênh lệch thu hồi phụ thuộc kịch bản. Trong kịch bản suy giảm nghiêm trọng, chênh lệch về gánh nặng thanh toán giữa hai phương án lớn và quá trình thu hồi bị trì hoãn. Trong kịch bản ổn định hoặc tăng trưởng, phương án theo doanh thu có thể thu hồi nhanh hơn phương án cố định có kỳ hạn ghép được làm tròn theo tháng. Vì vậy, không nên mô tả cơ chế bằng khẳng định tuyệt đối như “linh hoạt mà không có chi phí” hoặc “luôn làm chậm thu hồi”. Điều kiện áp dụng phải được nêu rõ.</p>
+
+  <h3>6.2. Giá không phải thuộc tính cố hữu của cấu trúc</h3>
+  <p>Tại <em>f</em> = 1,20, tổng nghĩa vụ là 222 triệu đồng và APR hiệu dụng trên quỹ đạo tham chiếu cao hơn phương án đối chuẩn có lãi suất danh nghĩa 18%. Tại <em>f*</em> = 1,0945, APR hiệu dụng trên quỹ đạo tham chiếu gần bằng APR của phương án đối chuẩn. Quy tắc trích nộp giống hệt nhau trong cả hai trường hợp. Kết luận đúng không phải là tài trợ theo doanh thu tự thân rẻ hay đắt, mà là mức giá và quy tắc thanh toán phụ thuộc doanh thu phải được đánh giá riêng.</p>
+
+  <h3>6.3. Báo cáo thu hồi cần nhiều hơn một chỉ tiêu</h3>
+  <p>Tỷ lệ hoàn tất và số tiền thu hồi trả lời hai câu hỏi khác nhau. Việc không đạt tổng nghĩa vụ chưa chắc đồng nghĩa với tổn thất vốn gốc, như trường hợp ngừng hoạt động từ tháng 13 cho thấy. Ngược lại, một chỉ tiêu chỉ tính trên các quỹ đạo đã hoàn tất có thể quá lạc quan vì các trường hợp chưa hoàn tất đã bị loại khỏi mẫu. Báo cáo cho bên tài trợ nên đặt cạnh nhau tỷ lệ hoàn tất, số tiền thu hồi, cách xác định và mẫu được sử dụng để tính các tỷ lệ lợi suất quy đổi theo năm.</p>
+
+  <h3>6.4. Hàm ý đối với triển khai</h3>
+  <p>Kết quả cho thấy giá trị của một công cụ tính toán cho phép kiểm tra từng bước, trong đó mức giá được tách khỏi cấu trúc thanh toán; gánh nặng của nhà bán hàng được trình bày bên cạnh tiến độ thu hồi; mọi khoản thanh toán được xác định và tất toán đến đơn vị đồng, không sử dụng số lẻ; và các trường hợp thất bại không bị che khuất. Một bản triển khai công khai có thể minh họa các cơ chế này mà không đưa ra tuyên bố về năng lực dự báo, không ra quyết định tín dụng và không cấp vốn.</p>
+  <p>Để trở thành hệ thống vận hành thực tế, sản phẩm còn cần dữ liệu giao dịch quan sát được, kết quả trả nợ đã xác minh, hiệu chỉnh mức giá, rà soát pháp lý, cơ chế giám sát và đối tác cung cấp vốn.</p>
+
+  <h3>6.5. Vai trò của dữ liệu quan sát</h3>
+  <p>Dữ liệu nhà bán hàng thực tế có thể giúp hiệu chỉnh mức biến động doanh số, yếu tố mùa vụ, tỷ lệ hàng trả lại và tần suất ngừng hoạt động. Tuy nhiên, dữ liệu quan sát đơn thuần không thể nhận diện kết quả phản thực của cùng một nhà bán hàng nếu lần lượt áp dụng hai cấu trúc hợp đồng trên cùng một diễn biến doanh số. Để nhận diện tác động này cần ngẫu nhiên hóa việc phân bổ hợp đồng, sử dụng một thiết kế bán thực nghiệm đáng tin cậy, hoặc xây dựng mô hình cấu trúc với các giả định hành vi được công bố rõ.</p>
+</section>
+
+<!-- PAGE 12 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>12</span></div>
+  <h2 class="major">7. Hạn chế và kết luận</h2>
+  <h3>7.1. Hạn chế của nghiên cứu</h3>
+  <p><strong>Không có kết quả quan sát thực tế.</strong> Các giá trị định lượng được báo cáo chỉ mô tả cơ chế vận hành của hợp đồng trong mô phỏng. Chúng không ước lượng phân phối doanh số, hoàn trả, vỡ nợ hoặc ngừng hoạt động của nhà bán hàng tại Việt Nam.</p>
+  <p><strong>Không mô hình hóa phản ứng hành vi.</strong> Nhà bán hàng không điều chỉnh doanh số, doanh thu khai báo, nền tảng kinh doanh hay mức độ nỗ lực khi cấu trúc hợp đồng thay đổi. Mô hình không xét hành vi chuyển doanh thu mà Russel, Shi và Clarke (2025) ghi nhận.</p>
+  <p><strong>Không đo lường khả năng chi trả.</strong> Gánh nặng được tính trên doanh số, không phải lợi nhuận hay dòng tiền khả dụng. Biên lợi nhuận, chi phí, dự phòng tiền mặt, thuế và các nghĩa vụ khác đều chưa được đưa vào.</p>
+  <p><strong>Phương án đối chuẩn cố định dựa trên giả định thuận lợi.</strong> Mô hình giả định mọi khoản cố định luôn được trả đúng lịch; vì vậy, kết quả phản ánh thu hồi theo lịch chứ không phải hiệu quả thu hồi thực tế.</p>
+  <p><strong>Tham số chỉ mang tính minh họa.</strong> Lãi suất tham chiếu, hệ số trần, dạng thức của cú sốc doanh số và biên độ mùa vụ đều là giả định nghiên cứu, không phải tham số ước lượng từ thị trường.</p>
+  <p><strong>Phân tích bất định chưa đầy đủ.</strong> Nghiên cứu xem xét biến động ngẫu nhiên dưới bộ tham số đã chọn và một số phép phân tích độ nhạy, nhưng chưa định lượng bất định tham số hoặc bất định của chính mô hình doanh thu.</p>
+
+  <h3>7.2. Kết luận</h3>
+  <p>Tài trợ hoàn trả theo doanh thu làm thay đổi thời điểm thanh toán bằng cách gắn nghĩa vụ hàng tháng với doanh số. Khi doanh số giảm, cơ chế này có thể hạn chế mức tăng của gánh nặng thanh toán so với lịch trả cố định. Tuy nhiên, cùng cơ chế có thể kéo dài quá trình thu hồi; nếu doanh số chấm dứt vĩnh viễn, hợp đồng có thể không đạt tổng nghĩa vụ.</p>
+  <p>Thứ tự thu hồi không mang tính phổ quát. Nó phụ thuộc vào doanh số thực hiện so với ngưỡng doanh số mà tại đó khoản hoàn trả theo doanh thu bằng khoản trả cố định. Giá cũng không phải thuộc tính cố hữu của cấu trúc: hệ số trần xác định tổng nghĩa vụ, còn tỷ lệ trích nộp xác định phản ứng của khoản trả trước khi hoàn tất. Hai thành phần này phải được công bố riêng.</p>
+  <p>Đóng góp của nghiên cứu nằm ở một khuôn khổ so sánh chặt chẽ và có thể kiểm chứng, không phải dự báo thị trường. Khuôn khổ này buộc người phân tích trình bày đồng thời tác động đối với dòng tiền của nhà bán hàng và tiến độ thu hồi; không đánh đồng mức giá với cấu trúc; và không che khuất các trường hợp hợp đồng không hoàn tất. Đây cũng là ba yêu cầu nền tảng cho nghiên cứu tiếp theo sử dụng dữ liệu quan sát.</p>
+  <p>Về thực nghiệm, bước tiếp theo là hiệu chỉnh mô hình bằng dữ liệu doanh số và thanh toán thực tế. Tuy nhiên, nhận diện tác động nhân quả là một bài toán riêng: cần ngẫu nhiên hóa việc phân bổ hợp đồng, sử dụng một thiết kế bán thực nghiệm đáng tin cậy hoặc xây dựng mô hình cấu trúc với các giả định hành vi được công bố rõ. Trước khi có bằng chứng đó, các kết quả hiện tại chỉ phản ánh cơ chế vận hành của hợp đồng dưới các giả định đã nêu, không phải bằng chứng về tác động trong thực tế.</p>
+</section>
+
+<!-- PAGE 13 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>13</span></div>
+  <h2 class="major">Tài liệu tham khảo</h2>
+  <p class="ref">Barr, Nicholas, Bruce Chapman, Lorraine Dearden, and Susan Dynarski. 2019. "The US College Loans System: Lessons from Australia and England." <em>Economics of Education Review</em> 71: 32-48. <a href="https://doi.org/10.1016/j.econedurev.2018.07.007">https://doi.org/10.1016/j.econedurev.2018.07.007</a>.</p>
+  <p class="ref">Battaglia, Marianna, Selim Gulesci, and Andreas Madestam. 2024. "Repayment Flexibility and Risk Taking: Experimental Evidence from Credit Contracts." <em>Review of Economic Studies</em> 91 (5): 2635-2675. <a href="https://doi.org/10.1093/restud/rdad107">https://doi.org/10.1093/restud/rdad107</a>.</p>
+  <p class="ref">California Legislature. 2025. <em>Commercial Financing: Disclosures</em>. Senate Bill 362, Chapter 352, Statutes of 2025. <a href="https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB362">California Legislative Information</a>.</p>
+  <p class="ref">Chapman, Bruce, and Lorraine Dearden. 2017. "Conceptual and Empirical Issues for Alternative Student Loan Designs: The Significance of Loan Repayment Burdens for the United States." <em>ANNALS of the American Academy of Political and Social Science</em> 671 (1): 249-268. <a href="https://doi.org/10.1177/0002716217703969">https://doi.org/10.1177/0002716217703969</a>.</p>
+  <p class="ref">Chapman, Bruce, Timothy Higgins, and Joseph E. Stiglitz, eds. 2014. <em>Income Contingent Loans: Theory, Practice and Prospects</em>. Palgrave Macmillan. <a href="https://doi.org/10.1057/9781137413208">https://doi.org/10.1057/9781137413208</a>.</p>
+  <p class="ref">Cordaro, Francesco, Marcel Fafchamps, Colin Mayer, Muhammad Meki, Simon Quinn, and Kate Roll. 2022. <em>Microequity and Mutuality: Experimental Evidence on Credit with Performance-Contingent Repayment</em>. NBER Working Paper 30411. <a href="https://doi.org/10.3386/w30411">https://doi.org/10.3386/w30411</a>.</p>
+  <p class="ref">Ganong, Peter, and Pascal Noel. 2020. "Liquidity versus Wealth in Household Debt Obligations: Evidence from Housing Policy in the Great Recession." <em>American Economic Review</em> 110 (10): 3100-3138. <a href="https://doi.org/10.1257/aer.20181243">https://doi.org/10.1257/aer.20181243</a>.</p>
+  <p class="ref">Heckman, James J. 1979. "Sample Selection Bias as a Specification Error." <em>Econometrica</em> 47 (1): 153-161. <a href="https://doi.org/10.2307/1912352">https://doi.org/10.2307/1912352</a>.</p>
+  <p class="ref">Herbst, Daniel, and Nathaniel Hendren. 2024. "Opportunity Unraveled: Private Information and the Missing Markets for Financing Human Capital." <em>American Economic Review</em> 114 (7): 2024-2072. <a href="https://doi.org/10.1257/aer.20211653">https://doi.org/10.1257/aer.20211653</a>.</p>
+  <p class="ref">International Finance Corporation and SME Finance Forum. 2017. <em>MSME Finance Gap: Assessment of the Shortfalls and Opportunities in Financing Micro, Small and Medium Enterprises in Emerging Markets</em>. World Bank Group. <a href="https://www.ifc.org/content/dam/ifc/doclink/2018/msme-finance-gap-report.pdf">https://www.ifc.org/content/dam/ifc/doclink/2018/msme-finance-gap-report.pdf</a>.</p>
+  <p class="ref">Koehler, Elizabeth, Elizabeth Brown, and Sebastien J.-P. A. Haneuse. 2009. "On the Assessment of Monte Carlo Error in Simulation-Based Statistical Analyses." <em>The American Statistician</em> 63 (2): 155-162. <a href="https://doi.org/10.1198/tast.2009.0030">https://doi.org/10.1198/tast.2009.0030</a>.</p>
+  <p class="ref">Lancaster, Tony. 1990. <em>The Econometric Analysis of Transition Data</em>. Cambridge University Press. <a href="https://doi.org/10.1017/CCOL0521265967">https://doi.org/10.1017/CCOL0521265967</a>.</p>
+</section>
+
+<!-- PAGE 14 -->
+<section class="page">
+  <div class="running"><span>Tài trợ dựa trên doanh thu khi doanh số biến động</span><span>14</span></div>
+  <h2 class="major">Tài liệu tham khảo <span style="font-weight:400">(tiếp theo)</span></h2>
+  <p class="ref">Morris, Tim P., Ian R. White, and Michael J. Crowther. 2019. "Using Simulation Studies to Evaluate Statistical Methods." <em>Statistics in Medicine</em> 38 (11): 2074-2102. <a href="https://doi.org/10.1002/sim.8086">https://doi.org/10.1002/sim.8086</a>.</p>
+  <p class="ref">Nerlove, Marc. 1975. "Some Problems in the Use of Income-Contingent Loans for the Finance of Higher Education." <em>Journal of Political Economy</em> 83 (1): 157-183. <a href="https://doi.org/10.1086/260311">https://doi.org/10.1086/260311</a>.</p>
+  <p class="ref">New York State Department of Financial Services. 2023. <em>Commercial Financing Disclosure</em>. 23 NYCRR Part 600. <a href="https://www.dfs.ny.gov/system/files/documents/2023/01/rf_finservices_23nycrr600_text.pdf">https://www.dfs.ny.gov/system/files/documents/2023/01/rf_finservices_23nycrr600_text.pdf</a>.</p>
+  <p class="ref">Pawel, Samuel, Lorenz Kook, and Kelly Reeve. 2024. "Pitfalls and Potentials in Simulation Studies." <em>Biometrical Journal</em> 66 (1): e2200091. <a href="https://doi.org/10.1002/bimj.202200091">https://doi.org/10.1002/bimj.202200091</a>.</p>
+  <p class="ref">Russel, Dominic, Claire Shi, and Rowan Clarke. 2025. <em>Fintech and Financial Frictions: The Rise of Revenue-Based Financing</em>. South African Reserve Bank Working Paper 11078. <a href="https://www.resbank.co.za/content/dam/sarb/publications/working-papers/2025/fintech-and-financial-frictions-the-rise-of-revenue-based-financing.pdf">https://www.resbank.co.za/content/dam/sarb/publications/working-papers/2025/fintech-and-financial-frictions-the-rise-of-revenue-based-financing.pdf</a>.</p>
+  <p class="ref">Shen, Hua, and Adrian Ziderman. 2009. "Student Loans Repayment and Recovery: International Comparisons." <em>Higher Education</em> 57 (3): 315-333. <a href="https://doi.org/10.1007/s10734-008-9146-0">https://doi.org/10.1007/s10734-008-9146-0</a>.</p>
+  <p class="ref">World Bank. 2021. <em>Taking Stock: Digital Vietnam - The Path to Tomorrow</em>. Report 163180. <a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/522031629469673810">https://documents.worldbank.org/en/publication/documents-reports/documentdetail/522031629469673810</a>.</p>
+
+  <div class="availability">
+    <h2 class="major">Khả năng tiếp cận dữ liệu và mã nguồn</h2>
+    <p>Nghiên cứu không sử dụng dữ liệu mật hay dữ liệu quan sát ở cấp nhà bán hàng. Các kết quả mô phỏng được quản lý phiên bản; đặc tả phương pháp, mã sinh kịch bản, các chứng minh và mã nguồn tái lập kết quả được công bố tại <a href="https://github.com/hoangle0919/sellerflow/tree/e3669051b8d098e9effb43643bb46ee5ef1ef301/research">mốc phiên bản e366905 của kho mã công khai</a>. Tệp danh mục trong kho mã phân biệt các tệp kết quả hiện hành với những phiên bản đã được thay thế và cung cấp mã băm kiểm tra toàn vẹn tương ứng.</p>
+    <p>Các tệp kết quả hiện hành tái lập nhất quán về mặt số học đến độ chính xác được công bố trên những môi trường đã kiểm tra. Nghiên cứu không khẳng định các tệp đầu ra đồng nhất từng byte trên mọi nền tảng. Các phiên bản đã được thay thế vẫn được lưu riêng để bảo toàn khả năng truy vết lịch sử sửa đổi.</p>
+  </div>
+
+  <div class="availability">
+    <h2 class="major">Nguồn tài trợ, xung đột lợi ích và việc sử dụng AI tạo sinh</h2>
+    <p>Nghiên cứu không nhận tài trợ từ bên ngoài. Tác giả không có lợi ích tài chính trong bất kỳ đơn vị nào cung cấp tài trợ dựa trên doanh thu. Gia đình tác giả có liên hệ với một số doanh nghiệp hoạt động trong lĩnh vực tài chính tiêu dùng tại Việt Nam; các doanh nghiệp này không cung cấp dữ liệu, kinh phí, định hướng nghiên cứu hay phản biện bản thảo. Các công cụ trí tuệ nhân tạo (AI) tạo sinh được sử dụng để hỗ trợ rà soát mã nguồn, biên tập ngôn ngữ và định dạng tài liệu. Tác giả quyết định định hướng nghiên cứu, kiểm chứng các phép tính và nguồn tài liệu, đồng thời chịu trách nhiệm hoàn toàn về nội dung bản thảo. SellerFlow chỉ là nguyên mẫu phục vụ nghiên cứu; đây không phải dịch vụ cho vay, chào mời cấp tín dụng, tư vấn tài chính hay mô hình thẩm định tín dụng đã được kiểm định.</p>
+  </div>
+</section>
+
+</body>
+</html>

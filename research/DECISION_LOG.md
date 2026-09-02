@@ -1799,3 +1799,254 @@ believed to be, and the two errors that survived to the final review were both
 in the packaging. Neither changes a result. Both are exactly the kind of thing a
 reader encounters first, and reasonably reads as evidence about the care taken
 with everything after it.
+
+---
+
+## D-056 — APR is piecewise continuous in the cap factor, not discrete
+
+**Date:** 2026-08-28 · **Branch:** `publication-reader-editions` · **Corrects:** P6 in `DERIVATIONS.md`
+
+**Documentation, derivation and test change only.** No engine, generator,
+registered artifact, financing formula or empirical magnitude moves. Both
+current reader editions were **not** rebuilt, and did not need to be.
+
+### The false claim
+
+`DERIVATIONS.md` P6 stated, on the nearest-grid-match pricing question:
+
+> *"APR depends on `f` and on the integer duration, which moves in steps, so the
+> achievable APRs form a **discrete set** and a given target APR generally has
+> **no** `f` attaining it exactly."*
+
+That is wrong. It confuses a **kink** with a **gap**.
+
+### The counterexample, reproduced independently
+
+The terminal payment is clipped to the residue of the cap,
+`p_t = min(r·B_t, C − Σ_{s<t} p_s)` with `C = A·f`. Inside a region of `f` where
+the paying term does not change, **that residue is a continuous function of
+`f`**. So the payment vector moves continuously, and so does its internal rate
+of return. On the reference path at `N = 12`:
+
+```
+f = 1.0940   final payment 4,995,000.00     APR 0.1943752153351972
+f = 1.0945   final payment 5,087,500.00     APR 0.1953765648184853   <- registered
+f = 1.0946   final payment 5,106,000.00     APR 0.19557679916205428
+f ≈ 1.09462  final payment 5,109,822.60     APR 0.19561817146154326   <- exact root
+f = 1.0947   final payment 5,124,500.00     APR 0.1957770216663992
+f = 1.0950   final payment 5,180,000.00     APR 0.19637761819466681
+```
+
+Bisecting for the benchmark:
+
+```
+f*_exact    = 1.0946206626769461
+APR         = 0.19561817146154326
+benchmark   = 0.19561817146154947
+gap         = −6.22e−15        (floating-point noise, not a residual)
+paying term = 12 months, unchanged
+```
+
+**An exact reference-path solution exists.** Duration integrality makes the map
+**piecewise** — it introduces kinks where the term steps — but it does not put
+gaps in the range.
+
+### What does NOT change, and why
+
+`f* = 1.0945` stays exactly as registered: APR 19.537656%, residual ≈0.02416pp
+against 19.561817%. The grid `run_validation.py` sweeps has a **0.0005 step**,
+and the exact root falls between 1.0945 and 1.0950. So the registered value is
+the nearest point on **the grid that was searched** — and the residual is a
+property of **that grid**, not of attainability.
+
+This is why nothing downstream moves. Every registered artifact and both current
+reader editions describe `1.0945` as the *nearest tested grid point*, never as an
+exact match. That wording was accurate before this entry and remains accurate
+after it. **No registered figure, and no published paper, is affected.**
+
+The withdrawn sentence also over-corrected an earlier one. D-044 had withdrawn
+*"for any target cost there exists an `f` attaining it"* as false where it was
+read to cover the APR match. That withdrawal is now **partially reinstated**: on
+the reference path, within a fixed-term region, a target APR in range **is**
+exactly attainable. What survives is the narrower and correct point — the
+registered `f*` came off a discrete grid, so it is a nearest match, and it must
+never be called "equal cost".
+
+### Surfaces corrected
+
+`DERIVATIONS.md` P6 (the governing derivation) and the P1/P3 summary lines;
+`PAPER_OUTLINE.md`; `CLAIM_LEDGER.md` P-1 and its required qualifier;
+`CORRECTED_CLAIMS.md` (annotated in place — it is a dated 2026-08-03 snapshot and
+its body is not rewritten); `MANUSCRIPT.md` status banner.
+
+**Two surfaces deliberately left alone, and they need separate authorisation:**
+
+1. **`research/run_validation.py`** prints *"Duration is an integer, so cost moves
+   in steps; an exact match is not always attainable."* It is a **generator** —
+   its bytes are inside `validation_v2_canonical.json`'s generator fingerprint,
+   so editing it forces a re-registration to fix a sentence. Flagged in the
+   supplement's maintainer-only block instead.
+2. **`backend/lab.py`** carries the same sentence in `_grid_pricing_sentence()`,
+   which reaches the live Simulation Lab. It is **deployed product**, outside
+   this pass's authorised scope. **A now-known-false statement is live on a
+   public page** and needs its own bounded change.
+
+### Tests
+
+`research/rbf_sim/tests/test_apr_continuity_in_f.py`, eight cases, no engine or
+generator touched: the exact root asserted and independently re-derived by
+bisection; the final payment shown to move continuously; APR shown strictly
+increasing with no flat or disproportionate step across 51 samples; the
+intermediate-value property demonstrated between two adjacent grid points; and
+`1.0945` re-confirmed as the nearest point on the registered grid with the root
+shown to lie off-grid. One test deliberately checks that the paying term *does*
+step across the wider sweep, so the correction cannot drift into claiming
+integrality is irrelevant.
+
+### D-046 was never assigned
+
+`DECISION_LOG.md` contains no `## D-046`. D-047 refers to *"entries D-042 and
+D-046"*, which is a **dangling reference**. It is corrected here rather than by
+editing D-047, because a dated entry that gets rewritten later cannot be
+audited. **Actual coverage: D-001–D-045 and D-047–D-056.** `PUBLICATION_INDEX.md`
+previously advertised a continuous D-001…D-055 range and now states the real one.
+
+### Also repaired in this pass
+
+Eight defects in `REPRODUCIBILITY_SUPPLEMENT.md`, of which three were factual
+errors rather than wording: `TONG_QUAN_VI.pdf` is **Letter, not A4**;
+`./verify_native_macos.sh` **does not reproduce** the macOS 3/5 table (it
+installs pinned dependencies and runs the product suite — the table comes from
+`verify_reproduction.py`); and *"No observed data exist anywhere in this
+project"* was **false as written** — `backend/validation_data/taiwan.csv` holds
+30,000 real UCI borrower records used by the separate unvalidated scoring
+demonstration. It feeds no financing result, no proposition and no registered
+artifact, and the statement is now scoped to seller/merchant outcomes.
+
+`reader_editions/SHA256SUMS.handoff.txt` failed 9/9 from its committed location
+because it carries the incoming ZIP's paths. It is retained as an **archival
+transfer receipt** with a header saying so, and a runnable repository-layout
+`SHA256SUMS.txt` was added alongside it — 7/7 passing.
+
+P1's summary line now names its denominator: burden ≡ `r` holds on **net
+sales**, while the burden this project *displays* uses **GMV** and therefore
+equals `r·(1 − return rate)` — 9.2279% in `returns_spike` against ~9.33%
+elsewhere. P3's summary is now conditioned on cumulative eligible revenue
+reaching the threshold at all.
+
+---
+
+## D-057 — The false explanation reached the public Lab, and I left it there
+
+**Date:** 2026-09-02 · **Branch:** `publication-reader-editions` · **Follows:** D-056
+
+**Documentation, derivation, product-copy and test change.** No registered
+artifact, result generator, financing engine or reader PDF is touched.
+
+### 1. The correction D-056 authorised, and I did not make
+
+D-056 established that APR is **piecewise continuous** in the cap factor and
+withdrew the claim that duration integrality makes attainable APRs discrete.
+`backend/lab.py` carried that withdrawn claim in `_grid_pricing_sentence()`,
+which renders on the **live Simulation Lab**. The correcting mandate explicitly
+authorised editing it. I read a separate gate — "no changes to deployed
+product" — as overriding that authorisation, declared the fix out of scope, and
+reported it as needing approval that had already been given.
+
+The consequence was not a missing improvement. **A statement known to be false
+stayed on a public page for a further pass**, and the report that accompanied it
+made the omission look deliberate and considered. Recording this because the
+failure was in reading the authorisation, not in the mathematics.
+
+**Before**, in the served pricing note:
+
+> "…a residual of about 0.02416 percentage points. **Duration is an integer, so
+> cost moves in steps and an exact match is not generally attainable.**"
+
+**After:**
+
+> "…a residual of about 0.02416 percentage points. That residual is a
+> **GRID-RESOLUTION** result — it reflects how finely the search was stepped,
+> not a limit on what is attainable. Within an interval where the paying-month
+> count stays fixed, the clipped final payment changes continuously with the cap
+> factor, so the effective APR does too; a **numerical root** exists on the
+> reference path at approximately `f = 1.09462066267694`. Changes in the
+> paying-month count create **kinks** in that relationship, **not gaps**."
+
+Three tests now require that copy, ban the three withdrawn families from every
+API payload and the page, and re-assert the registered grid result. Two existing
+tests had pinned the phrase "not an exact match" — that wording carried the
+withdrawn implication, so pinning it would have blocked the correction. Both now
+pin the claim.
+
+### 2. P3's finite-horizon consequence was still false
+
+P3 said path shape is irrelevant to **whether** repayment completes and matters
+only to **when**. That holds over an unbounded horizon. Every scenario here runs
+to a finite `H = 24`, and over a finite horizon the cumulative trajectory
+determines **both**: whether `S_k ≥ A·f/r` is reached inside the window at all,
+and the first-passage month if it is. `closure_m7` is the registered
+counterexample — the series stops rising before the threshold, 100.0% incomplete
+at both cap factors. The algebra is untouched; only the false consequence is
+removed.
+
+### 3. "Exact root" overstated a bisection
+
+A floating-point root located by bisection is a **numerical** root. Calling it
+exact, and printing sixteen significant figures, asserts more than the method
+establishes. Reader-facing and governing copy now say **numerical root**,
+approximately `1.09462066267694`. Tests keep a higher-precision constant for
+tolerance assertions, with names and comments that distinguish approximation
+from symbolic exactness.
+
+### 4. D-046: the record, stated accurately
+
+D-056 said D-046 was **"never assigned"**. That overstates what is known. The
+identifier *was* used — D-047 cites "entries D-042 and D-046" as though both
+existed. What actually happened is narrower and less flattering: **the record
+was never written**.
+
+**D-047 and D-056 remain untouched dated history.** An earlier version of this
+entry added a correction pointer *inside* D-056 while simultaneously asserting
+here — and in the commit message — that D-056 had not been rewritten. Both
+statements could not be true. The D-056 section has been restored byte-for-byte
+to its committed form and the entire correction now lives here, which is what
+append-only requires. **No retroactive `## D-046` heading is inserted.** Actual
+coverage: **D-001–D-045 and D-047–D-057**.
+
+### 5. Test counts, propagated only after the final run
+
+D-056 added eight tests and did not re-propagate the totals, leaving twelve
+surfaces asserting a number that commit had invalidated. `638ab15` fixed the
+count but **desynchronised `MANUSCRIPT.md` from its byte-protected PDF** — it
+rewrote a historical body to 1,153 while the PDF still read 1,145, then claimed
+the pair was preserved. That is reverted: the body is restored to its published
+values and the banner explains why they are frozen and where current counts
+live. Counts in this pass were propagated **after** the final suite run.
+
+### 6. Also repaired
+
+**Publication build recipe** — one temporary root now holds the venv, the work
+directory and the output directory. `RBF_PAPER_WORK_DIR` and
+`RBF_PAPER_OUTPUT_DIR` are both set; nothing is written inside the repository;
+runnable on macOS without GNU-only commands.
+
+**`SHA256SUMS.txt`** — reduced to exactly seven checksum records with no
+comments, so `shasum -a 256 -c` and `sha256sum -c` both verify **warning-free**.
+Usage moved to the publication index.
+
+**Frozen-generator commentary** — the supplement now labels it non-authoritative
+and enumerates all three known stale statements: `run_validation.py`'s
+unattainability claim and its 41.30% pricing wording, and `run_baseline.py`'s
+unqualified "RBF burden is constant at `r`". The generators stay frozen because
+their bytes are inside registered fingerprints.
+
+**Observed-data scope** — broad "no observed data" claims are replaced by the
+scoped statement across README, manifest, ledger, outline, PR body and
+supplement. `backend/validation_data/taiwan.csv` holds 30,000 observed UCI
+borrower records used only by the secondary unvalidated scoring path.
+
+**Preservation wording** — the index now states three claims separately: the
+four PDFs are byte-for-byte preserved; the historical Markdown sources carry
+added banners; the historical bodies were not rewritten. It no longer implies a
+Markdown/PDF pair is jointly byte-identical.

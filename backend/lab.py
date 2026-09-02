@@ -215,11 +215,23 @@ def _grid_pricing() -> dict:
     """Reference-path pricing, read from the CANONICAL validation artifact.
 
     `f*` is not solved analytically. `run_validation.py` sweeps a cap-factor
-    grid and keeps the point whose reference-path effective rate lands closest
-    to the amortizing loan's. Duration is an integer, so cost moves in steps and
-    an exact match is not generally attainable — the script has always said so
-    in its own output. The Lab said "equals", which promised an exact match the
-    method cannot deliver and the artifact does not record.
+    grid in steps of 0.0005 and keeps the point whose reference-path effective
+    rate lands closest to the amortizing loan's. So the residual is a **grid
+    resolution** result: the registered value is the nearest point *the search
+    visited*.
+
+    **The residual is NOT evidence that an exact match is unattainable
+    (D-056).** Within an interval where the paying-month count stays fixed, the
+    terminal payment is clipped to the residue of the cap and therefore varies
+    continuously with `f` — so the effective APR varies continuously too. A
+    numerical root exists on the reference path at approximately
+    `f = 1.09462066267694`. Changes in the paying-month count create kinks in
+    that relationship; they do not create the universal gaps once claimed here.
+
+    This docstring previously said "duration is an integer, so cost moves in
+    steps and an exact match is not generally attainable". That reasoning is
+    **withdrawn** — it confused a kink with a gap. Before that, the Lab said
+    "equals", which promised an exact match the search never performed.
 
     Every number here is READ FROM THE ARTIFACT. None is hand-typed, so the
     residual cannot drift away from the file it describes, and if a future sweep
@@ -241,23 +253,41 @@ def _grid_pricing() -> dict:
     }
 
 
+#: Approximate reference-path numerical root, located by bisection (D-056).
+#: Quoted to 14 significant figures deliberately: it is a floating-point
+#: approximation, not a closed-form solution, and calling it "exact" would
+#: assert more than a bisection can establish.
+NUMERICAL_ROOT_F = "1.09462066267694"
+
+
 def _grid_pricing_sentence() -> str:
-    """One sentence, built from the artifact, stating the residual honestly."""
+    """The pricing statement, built from the artifact.
+
+    Says three things, in order: what the registered value **is** (nearest point
+    on a 0.0005-step grid), what its residual **means** (grid resolution), and
+    what the residual does **not** mean (that no `f` attains the target).
+    """
     p = _grid_pricing()
     a, t, r = p["achieved_apr"], p["benchmark_apr"], p["residual_pp"]
     if a is None or t is None:
-        return ("The cost-matched cap factor is the nearest point on the swept "
-                "cap-factor grid, not an exact solution; the pricing artifact "
+        return ("The cost-matched cap factor is the nearest point found on the "
+                "registered search grid, not a solved root; the pricing artifact "
                 "needed to quote the residual is not loaded.")
     if p["exact_match"]:
-        return (f"The cost-matched cap factor is the nearest point on the swept "
-                f"cap-factor grid. On this sweep that point happens to land "
-                f"exactly on the benchmark's {t:.6%}.")
-    return (f"The cost-matched cap factor is the NEAREST POINT ON THE SWEPT "
-            f"cap-factor grid, not an exact match: it prices at {a:.6%} against "
-            f"the amortizing loan's {t:.6%}, a residual of about {r:.5f} "
-            f"percentage points. Duration is an integer, so cost moves in steps "
-            f"and an exact match is not generally attainable.")
+        return (f"The cost-matched cap factor is the nearest point found on the "
+                f"registered 0.0005-step search grid. On this sweep that point "
+                f"lands on the benchmark's {t:.6%} to displayed precision.")
+    return (
+        f"The cost-matched cap factor is the NEAREST POINT FOUND ON THE "
+        f"REGISTERED 0.0005-step search grid: it prices at {a:.6%} against the "
+        f"amortizing loan's {t:.6%}, a residual of about {r:.5f} percentage "
+        f"points. That residual is a GRID-RESOLUTION result — it reflects how "
+        f"finely the search was stepped, not a limit on what is attainable. "
+        f"Within an interval where the paying-month count stays fixed, the "
+        f"clipped final payment changes continuously with the cap factor, so "
+        f"the effective APR does too; a numerical root exists on the reference "
+        f"path at approximately f = {NUMERICAL_ROOT_F}. Changes in the "
+        f"paying-month count create kinks in that relationship, not gaps.")
 
 
 def _resolve(track: str, scenario: str):

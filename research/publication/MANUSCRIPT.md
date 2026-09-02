@@ -1,5 +1,21 @@
 # Revenue-Contingent Financing Under Volatile Sales: Separating Price from Structure in a Paired Simulation Study
 
+> ## ⚠️ HISTORICAL TECHNICAL MANUSCRIPT — superseded as the public paper
+>
+> **The current reader-facing papers are the 14-page editions**, English and Vietnamese, listed in [`PUBLICATION_INDEX.md`](PUBLICATION_INDEX.md). Cite those.
+>
+> This 19-page version carries the full audit apparatus inline — per-claim source notes, checksum tables, the reproducibility statement. That made it a poor read and a good record. Its apparatus has been harvested into [`REPRODUCIBILITY_SUPPLEMENT.md`](REPRODUCIBILITY_SUPPLEMENT.md), which is now the companion to the reader editions.
+>
+> **`MANUSCRIPT.pdf` is retained byte-identical, never regenerated and never deleted.** This Markdown source, by contrast, carries the added status framing you are reading, so the source and the PDF are **not** a jointly byte-identical pair — the body below is what remains matched to the PDF. Figures were published from it, so what was said and when has to stay checkable. It is superseded in *role*.
+>
+> **⚠️ One statement in this body is now known to be wrong and is NOT corrected here.** Where the text says duration integrality makes attainable APRs a discrete set, so an exact cost match is unattainable — that reasoning is **false and withdrawn (D-056)**. APR is *piecewise continuous* in the cap factor: within a fixed paying term the clipped final payment varies continuously with `f`, and a **numerical** reference-path root sits at approximately `f = 1.09462066267694`. The registered `f* = 1.0945` remains correct as **the nearest point on the 0.0005-step grid that was searched**, with the same ≈0.02416pp residual — so no figure in this document moves. The body is left as written because a historical record that gets edited later cannot be audited; the correction lives in `DERIVATIONS.md` P6 and D-056.
+>
+> **Test counts in this body are frozen at their published values** — 1,145 non-browser, 502 backend and 643 simulation — because they must continue to match the byte-protected PDF. A previous pass updated them here without rebuilding the PDF, which broke that pairing; that change is reverted (D-057). For **current** counts see `PUBLICATION_INDEX.md` and `REPRODUCIBILITY_SUPPLEMENT.md`.
+>
+> **One more scope correction not applied to the body (D-057).** Where §12 says "no observed seller revenue, repayment or default outcome exists anywhere in this study", read it as scoped to **financing** outcomes. `backend/validation_data/taiwan.csv` holds 30,000 observed UCI borrower records, used only by the secondary unvalidated scoring path; it feeds no financing result, no proposition and no registered artifact.
+
+---
+
 **Le Huu Hoang**^†^
 
 *Independent research*

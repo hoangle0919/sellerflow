@@ -11,11 +11,15 @@ whose name, hash and contents referred to two different files. A reader
 checksumming the named file would have verified bytes that never produced the
 numbers displayed beside them.
 
-**Overclaimed exactness.** The block said the cost-matched cap factor was solved
-"so that its effective rate equals the amortizing loan's". It does not equal it.
-`f*` is the nearest point on a swept cap-factor grid; duration is an integer, so
-cost moves in steps and an exact match is not generally attainable.
-`run_validation.py` has always printed that caveat — only the Lab dropped it.
+**Overclaimed exactness, then a false explanation for it.** The block first said
+the cost-matched cap factor was solved "so that its effective rate equals the
+amortizing loan's". It does not equal it. The replacement then explained the
+residual by saying duration integrality makes an exact match unattainable —
+which is **also wrong (D-056)**. Within a fixed paying-month count the clipped
+final payment varies continuously with `f`, so APR does too, and a numerical
+root exists at approximately `f = 1.09462066267694`. The residual is a
+**grid-resolution** result: the registered `1.0945` is the nearest point the
+0.0005-step search visited.
 
 Neither defect changed a number. Both changed what the page promised about a
 number, which is the harder failure to notice.
@@ -192,9 +196,15 @@ def test_an_exact_grid_hit_would_be_described_as_exact():
 
     with _cache(validation_v2_canonical=poisoned):
         ref = _pricing_reference()
+        low = ref["note"].lower()
         assert ref["grid_pricing"]["exact_match"] is True
-        assert "not an exact match" not in ref["note"]
-        assert "lands\nexactly" in ref["note"] or "exactly" in ref["note"]
+        # The wording is derived, so a grid that happens to land on target says
+        # so. It still must not claim mathematical exactness for a float
+        # comparison -- "to displayed precision" is the honest form (D-057).
+        assert "lands on the benchmark" in low
+        assert "displayed precision" in low
+        assert "grid-resolution result" not in low, (
+            "on an exact hit there is no residual to attribute to the grid")
 
 
 # ── 4. no active copy conditions the rate on completion ─────────────────────
@@ -274,6 +284,59 @@ EXACT_EQUALITY = [
     re.compile(r"equal[- ]effective[- ]cost cap factor (?:solves|gives) an exact", re.I),
 ]
 
+#: The three withdrawn explanations for the residual (D-056). Each was, at some
+#: point, live copy on a public page. Banning the words is weaker than
+#: understanding why they were wrong, but it stops a regression reaching a
+#: reader while nobody is looking.
+WITHDRAWN_DISCRETENESS = [
+    re.compile(r"cost moves in steps", re.I),
+    re.compile(r"achievable APRs?[^.]{0,30}(?:are |form a )?discrete", re.I),
+    re.compile(r"attainable APRs?[^.]{0,30}(?:are |form a )?discrete", re.I),
+    re.compile(r"exact match is (?:not |un)(?:generally )?(?:attainable|available)", re.I),
+    re.compile(r"duration is an integer[^.]{0,60}(?:step|exact|attain)", re.I),
+    re.compile(r"integer[- ]valued[^.]{0,60}(?:no exact|not attainable|discrete)", re.I),
+]
+
+
+def test_no_active_lab_copy_explains_the_residual_by_discreteness():
+    """The withdrawn family must not reach a reader through the API or page."""
+    copy_text = _active_copy()
+    hits = []
+    for pat in WITHDRAWN_DISCRETENESS:
+        hits += [m.group(0)[:120] for m in pat.finditer(copy_text)]
+    assert not hits, (
+        "active Lab copy explains the pricing residual by duration integrality. "
+        "D-056 withdrew that: APR is piecewise continuous in the cap factor and "
+        "a numerical root exists at approximately 1.09462066267694. The residual "
+        "is a grid-resolution result.\n  " + "\n  ".join(hits[:5]))
+
+
+def test_the_lab_states_the_corrected_grid_and_continuity_explanation():
+    """Not saying the wrong thing is only half. It must say the right thing."""
+    note = _pricing_reference()["note"]
+    low = note.lower()
+    assert "0.0005" in note, "the grid step must be named, since the residual is its consequence"
+    assert "grid-resolution" in low or "grid resolution" in low, (
+        "the note must attribute the residual to the search grid")
+    assert "continuous" in low, "the note must state APR varies continuously within a fixed term"
+    assert "numerical root" in low, "the note must call the root numerical, not exact"
+    assert "1.09462066267694" in note, "the note must quote the approximate root"
+    assert "kink" in low and "gap" in low, (
+        "the note must distinguish kinks at term changes from gaps in the range")
+    # And it must not overclaim the root.
+    assert "exact root" not in low
+    assert re.search(r"exactly[^.]{0,40}1\.0946", note) is None
+
+
+def test_the_registered_grid_result_is_unchanged_by_the_correction():
+    """The correction is about the explanation, not the number."""
+    g = _pricing_reference()["grid_pricing"]
+    assert g["f_star"] == 1.0945
+    assert g["achieved_apr"] == 0.1953765648184853
+    assert g["benchmark_apr"] == 0.19561817146154947
+    assert g["residual_pp"] == pytest.approx(0.02416, abs=5e-6)
+    assert g["exact_match"] is False
+
 
 def test_no_active_lab_copy_implies_exact_reference_path_equality():
     copy_text = _active_copy()
@@ -292,16 +355,22 @@ def test_the_grid_basis_and_residual_are_stated_where_the_claim_is_made():
     t = canon["pricing"]["benchmark_b_apr"]
 
     ref = _pricing_reference()
-    assert "grid" in ref["note"].lower()
-    assert "not an exact match" in ref["note"]
+    low = ref["note"].lower()
+    assert "grid" in low
+    # Was: `assert "not an exact match" in ref["note"]`. That phrasing carried
+    # the withdrawn implication that no f attains the target. The claim now
+    # required is stronger AND correct: nearest point found on a stepped grid,
+    # residual attributed to resolution (D-056/D-057).
+    assert "nearest point found on the registered" in low
+    assert "grid-resolution" in low or "grid resolution" in low
     assert f"{a:.6%}" in ref["note"] and f"{t:.6%}" in ref["note"]
 
     d = client.get("/api/lab/comparison/stable").json()
     note = next(x for x in d["arms"] if x["id"] == "RBF-EQ")["note"]
-    assert "grid" in note.lower() and "not an exact match" in note
+    assert "grid" in note.lower() and "numerical root" in note.lower()
 
     caveats = " ".join(c["text"] for c in d["caveats"])
-    assert "grid" in caveats.lower() and "not an exact match" in caveats
+    assert "grid" in caveats.lower() and "numerical root" in caveats.lower()
 
 
 def test_the_chart_label_carries_the_artifacts_own_cap_factor():

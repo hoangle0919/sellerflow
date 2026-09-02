@@ -1,5 +1,15 @@
 # Tài trợ vốn theo doanh thu cho người bán thương mại điện tử
 
+> ## ⚠️ TÀI LIỆU ĐÃ ĐƯỢC THAY THẾ — bản tổng quan 5 trang
+>
+> **Bài nghiên cứu học thuật tiếng Việt hiện hành là bản 14 trang**: `reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf`. Xem [`PUBLICATION_INDEX.md`](PUBLICATION_INDEX.md).
+>
+> Tài liệu này là bản tóm tắt ngắn, viết trước khi có bản học thuật đầy đủ. Nó **không phải** bài nghiên cứu tiếng Việt. Được giữ lại làm tư liệu lịch sử, không xóa và không ghi đè.
+>
+> *(Superseded 5-page overview. The current Vietnamese academic paper is the 14-page edition. Retained as dated history.)*
+
+---
+
 **Bối cảnh, vấn đề, sản phẩm và nghiên cứu**
 
 Lê Hữu Hoàng · Tháng 8 năm 2026
@@ -152,4 +162,4 @@ Bước tiếp theo, nếu có, là dữ liệu trả nợ thực tế. Đó là
 
 ---
 
-*Bài nghiên cứu đầy đủ bằng tiếng Anh: `MANUSCRIPT.pdf`. Mã nguồn, dữ liệu và toàn bộ nhật ký quyết định: github.com/hoangle0919/sellerflow*
+*Bài nghiên cứu học thuật tiếng Việt hiện hành (14 trang): `reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf`. Bản tiếng Anh: `reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf`. Mã nguồn, dữ liệu và toàn bộ nhật ký quyết định: github.com/hoangle0919/sellerflow*

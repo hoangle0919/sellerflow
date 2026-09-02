@@ -114,7 +114,7 @@ One test failure occurred during development: a hand-computed annuity constant w
 
 ## What this run does NOT establish
 
-- Nothing about real Vietnamese sellers. No observed data exists.
+- Nothing about real Vietnamese sellers. No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. `backend/validation_data/taiwan.csv` contains observed UCI borrower records used only by the secondary, unvalidated scoring path and supports no financing-mechanics finding. *(Scope corrected D-057; the original line read "No observed data exists".)*
 - No default prediction. Incomplete recovery is not a default rate.
 - No causal claim.
 - No significance claim. Intervals are Monte Carlo precision; more paths narrow them without adding facts about the world.

@@ -41,6 +41,17 @@ The risk score comes from **whichever scorer is active** and is an **unvalidated
 - **Integrity screen** (`backend/integrity_engine.py`): five rule-based checks run in parallel with the credit assessment — revenue reconciliation (claimed revenue vs orders × AOV), quality/consistency, exposure velocity (advance stacking vs tenure), growth plausibility, and resubmission divergence (same merchant reporting different numbers across submissions). This is RBF's answer to the *fraud* half of "unify credit and fraud": one assessment returns both a credit view and an integrity view. When the integrity level is elevated, the result page **marks the demonstration assessment for review** rather than presenting it as a completed recommendation. RBF holds no capital and funds nothing, so it cannot hold funding; the earlier wording implied an authority the product does not have. It is deterministic and self-reported-data-only by design; a supervised fraud model on device/behavioral signals is roadmap, not shipped.
 - **Learning loop** (`POST /api/sellers/{id}/outcome`, `GET /api/model/status`): the only way a ground-truth label enters the system is a lender recording an adjudicated repayment outcome — never inferred by the model. `model/status` reports real-world validation (rank AUC) computed from those recorded outcomes once enough exist. The synthetic training baseline it used to report alongside is **withdrawn** — that tier now returns `auc: null` with `validation_status: "withdrawn"` and the reason, rather than a number. `backend/demo_learning_loop.py` exercises the full pipeline on an explicitly-labeled *simulated* cohort to demonstrate the wiring without presenting a real result.
 
+## Research papers
+
+| Document | |
+|---|---|
+| [English paper](research/publication/reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf) | 14 pages. *Revenue-Contingent Financing under Volatile Sales: A Paired Simulation of Seller Burden and Provider Recovery* |
+| [Vietnamese paper](research/publication/reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf) | 14 pages. An independently written Vietnamese scholarly edition |
+| [Reproducibility supplement](research/publication/REPRODUCIBILITY_SUPPLEMENT.md) | Checksums, artifact and JSON-path map, reproduction commands, correction history |
+| [Publication index](research/publication/PUBLICATION_INDEX.md) | Authoritative document status — which paper is current, which is historical |
+
+All magnitudes in both papers are simulation output under stated assumptions. No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. The repository does contain one observed dataset — `backend/validation_data/taiwan.csv`, 30,000 UCI borrower records — which belongs solely to the secondary, unvalidated scoring path and supports no financing-mechanics finding (D-057).
+
 ## Data provenance
 
 Every value RBF returns is one of: **user-entered fact**, **system-derived metric**, or **assumption** — and the API response says which. The current submission form collects a single current-period revenue figure plus a reported growth rate, not a monthly time series, so volatility, seasonality, and drawdown metrics are honestly reported as `null` with a `missing_data_note` rather than invented from one data point. Submitting monthly revenue history (`backend/financing_engine.py::revenue_metrics`) unlocks them.
@@ -158,7 +169,7 @@ The project's quantitative contribution is a **deterministic, reproducible compa
 
 ### Research-integrity statement
 
-- Every quantitative result is **simulation output under stated assumptions**. No observed seller revenue, repayment, or default outcome exists in this project.
+- Every quantitative result is **simulation output under stated assumptions**. No observed seller-revenue, merchant-repayment, financing-performance or default outcomes enter this financing study. The repository does contain one observed dataset — `backend/validation_data/taiwan.csv`, 30,000 UCI borrower records — which belongs solely to the secondary, unvalidated scoring path and supports no financing-mechanics finding (D-057).
 - No causal claim is made and no significance test is reported. Intervals are **Monte Carlo intervals over simulated paths**: they measure whether enough paths were run for a number to be stable, not population uncertainty about real sellers.
 - No contract parameter is externally sourced. All are classified illustrative or derived, and are subject to sensitivity analysis rather than claimed calibration.
 - Null and unfavourable results are reported, not dropped — including a guardrail whose **hardship floor** provably never activates (0 of 36,000 month-observations) while its **ceiling does bind** — 6,009 of 36,000, changing 6 of 10 scenarios — and a provider-recovery effect that reverses sign exactly when the realized mean eligible base crosses `B* = P/r`, not under the looser label of non-declining revenue (traced to integer rounding in the matching rule, not economics).
