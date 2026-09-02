@@ -155,7 +155,7 @@ Every entry from `LITERATURE_MATRIX.md`, verified. No entry may appear that is n
 - **Numeric** reproducibility at published precision on every platform tested (5/5 at rel. tol. `1e-9`); **byte** reproducibility within a fixed runtime — 5/5 on Linux 3.10.12, **3/5 on macOS 26.0 arm64 / 3.11.5 / NumPy 2.2.6** (11 last-bit leaves in `baseline_v3`, 3 in `baseline_equalcost_v2`), from an independent audit run of the current artifacts; the superseded generation's counts (9 and 2) are not carried across **[D-041, D-043, D-051, D-052]**. **Never claim cross-platform byte determinism.**
 - Verifier: `research/verify_reproduction.py`, reporting byte and numeric equality separately.
 - Disclose: the embedded `canonical.determinism` field carries the withdrawn claim and is **superseded, not rewritten** (D-044) — the artifacts were not regenerated.
-- Test counts: **1,145 non-browser tests pass — 502 backend and 643 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.
+- Test counts: **1,153 non-browser tests pass — 502 backend and 651 simulation.** The nine Playwright browser checks are excluded from that total. They executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable, the checks skip; a skip is never counted as a pass.
 
 ---
 

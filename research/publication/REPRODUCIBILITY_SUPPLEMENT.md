@@ -171,7 +171,7 @@ python3 -m pytest backend/tests -q      # 502 passed, 10 skipped
 cd research && python3 -m pytest -q     # 643 passed
 ```
 
-**1,145 non-browser tests.** Nine Playwright browser checks are excluded from that total; they executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable the checks skip; a skip is never counted as a pass.
+**1,153 non-browser tests.** Nine Playwright browser checks are excluded from that total; they executed and passed 9/9 in 23.55 seconds on macOS 26.0 arm64, Python 3.11.5 and Playwright 1.62.0 with Chromium, against a local server at commit `c8261c6`. When Chromium is unavailable the checks skip; a skip is never counted as a pass.
 
 Of the 10 backend skips, 9 are the browser module and 1 is a two-scoring-path cohort comparison that requires an ensemble artifact a clean checkout does not carry.
 
