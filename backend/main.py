@@ -782,6 +782,13 @@ Allow: /lab.html
 # route and `lab.html` is the file. Naming only one leaves the other governed by
 # the Disallow.
 #
+# `Allow: /$` uses the `$` end-anchor, which is a Google/Bing/Yandex extension
+# rather than original-spec robots.txt. A strict crawler reads `/$` as a literal
+# path, fails to match `/`, and falls through to `Disallow: /` — so it indexes
+# nothing. That is the safe direction to fail for a demonstration that should not
+# be mistaken for a lender, so the idiom stands rather than being loosened to
+# `Allow: /`, which would re-open the whole site.
+#
 # RBF is a research demonstration, not a lending service. It holds no capital
 # and makes no credit offers. https://github.com/hoangle0919/sellerflow
 """
