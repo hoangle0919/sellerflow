@@ -207,6 +207,13 @@ label{display:block;font-size:.78rem;font-weight:600;color:var(--ink);margin-bot
 .mobile-menu .btn{margin-top:14px}
 
 /* Hero */
+.demo-banner{background:#2E2A24;color:#F4F1EA;padding:10px 0;font-size:.84rem;line-height:1.55;
+  position:relative;z-index:60;border-bottom:1px solid rgba(255,255,255,.14)}
+.demo-banner .wrap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.demo-banner b{letter-spacing:.06em;text-transform:uppercase;font-size:.72rem;opacity:.95}
+.demo-banner span{opacity:.88}
+.demo-banner a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:600px){.demo-banner{font-size:.79rem}}
 .hero{padding:164px 0 0}
 .hero .label{display:block;margin-bottom:22px}
 .hero h1{max-width:820px}
@@ -614,6 +621,17 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 </style>
 </head>
 <body>
+<!-- P1: the deployment's status has to be visible where the visitor arrives, not
+     only on /lab or in the README. The paper cites this URL; anyone following it
+     lands here. Placed above the nav, unconditional, not dismissible. -->
+<div class="demo-banner"><div class="container wrap">
+  <b>Research demonstration</b>
+  <span>RBF is a demonstration, <b style="text-transform:none;letter-spacing:0">not a lending service</b>.
+  It holds no capital, makes no credit offers, and has never received an external merchant submission.
+  Its risk score is unvalidated. Pricing, cohorts and API access below are illustrative product design, not
+  services on sale. <a href="/lab.html">See the simulation study</a>.</span>
+</div></div>
+
 <nav class="nav">
   <div class="wrap">
     <div class="brand" onclick="go('landing')"><span class="brand-mark"></span>RBF</div>
@@ -783,6 +801,13 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   </section>
 
   <section class="section" id="pricing">
+    <!-- P1: the banner states this at the top, repeated here because a visitor
+         can arrive at #pricing directly and never see the top of the page. -->
+    <p class="sub" style="margin:0 0 26px;padding:12px 16px;border-left:3px solid var(--hairline);background:rgba(0,0,0,.02);font-size:.88rem">
+      <b>Illustrative product design.</b> Nothing below is a service on sale. RBF holds no capital,
+      makes no credit offers, and is not a lending service — these tiers show how such a product
+      <i>would</i> be packaged, not what is being sold today.
+    </p>
     <div class="wrap">
       <div class="pricing-head">
         <span class="label">Pricing</span>
@@ -818,13 +843,19 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <section class="waitlist" id="waitlist">
     <div class="wrap waitlist-inner">
       <h2>Request access</h2>
-      <p>We're onboarding financing teams in small cohorts.</p>
+      <p>Illustrative. No onboarding is running and no cohort is scheduled — RBF is a research demonstration. Write if you would like to talk about the work.</p>
       <div id="wl-form-wrap">
         <div class="waitlist-form">
           <input id="wl-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')submitWaitlist()">
+          <p class="sub" style="margin:10px 0 0;font-size:.8rem;max-width:520px">
+            Your email is the only personal data this demonstration stores, and it is used solely to reply to you.
+            It is never sold or shared. Ask at any time and it is deleted —
+            <a href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20—%20delete%20my%20email">write to have it removed</a>.
+            <a href="#" onclick="go('privacy');return false;">How data is handled</a>.
+          </p>
           <button class="btn btn-primary" id="wl-btn" onclick="submitWaitlist()">Request access</button>
         </div>
-        <div class="waitlist-note">next cohort · august 2026 · or <a class="waitlist-mail" href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20—%20access%20request">email us directly</a></div>
+        <div class="waitlist-note">no cohort is scheduled — this is a demonstration · <a class="waitlist-mail" href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20—%20access%20request">email us directly</a></div>
       </div>
       <div class="waitlist-success" id="wl-success"></div>
     </div>
@@ -840,10 +871,10 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <h2>Tell us about the merchant</h2><p class="sub">Basic merchant and channel information.</p>
         <div class="field"><label>Merchant name</label><input id="f_shop_name" data-req><div class="err-msg">Merchant name is required.</div></div>
         <div class="field"><label>Platform</label><select id="f_platform"><option>Shopee</option><option>TikTok Shop</option><option>Lazada</option></select></div>
-        <div class="field-row">
-          <div class="field"><label>Owner name</label><input id="f_owner_name"></div>
-          <div class="field"><label>Phone</label><input id="f_phone"></div>
-        </div>
+        <p class="sub" style="margin:-6px 0 18px;font-size:.86rem">
+          No contact name or phone number is collected. Neither is used by the assessment —
+          the analysis reads ten operational figures only — so this demonstration does not ask for them.
+        </p>
         <div class="field-row">
           <div class="field"><label>Monthly revenue (VND)</label><input id="f_monthly_revenue" type="number" data-req min="1"><div class="err-msg">Enter monthly revenue.</div></div>
           <div class="field"><label>Orders / month</label><input id="f_order_volume" type="number" data-req min="1"><div class="err-msg">Enter order volume.</div></div>
@@ -976,14 +1007,14 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
     <span class="label">Privacy</span>
     <h2 style="margin:10px 0 24px">How we handle your data</h2>
     <h3>What we collect</h3>
-    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the resulting illustrative risk tier and the assessment record — this is a demonstration, not a credit decision our model produces. When you join the access list, we store your email address.</p>
+    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the resulting illustrative risk tier and the assessment record. <b>We do not collect a contact name or phone number.</b> Those fields were removed in September 2026 because the assessment never used them, and data that is not needed should not be collected — this is a demonstration, not a credit decision our model produces. When you join the access list, we store your email address.</p>
     <h3>How it is used</h3>
     <p>Submitted metrics are used solely to generate your credit assessment and to display it to authenticated lenders in the portfolio dashboard. Waitlist emails are used only to contact you about access. We do not sell data, and we do not share it with third parties beyond the hosting infrastructure the service runs on.</p>
     <h3>Retention and deletion</h3>
     <p>Data is retained while the service operates. To have your records deleted, write to lehuuhoang1909@gmail.com from the address you signed up with and we will remove them.</p>
     <h3>Status</h3>
-    <p>RBF is in pilot. The risk model is a baseline trained on synthetic data; the financing structure is computed deterministically from submitted revenue data. Neither is a lending commitment or an offer of credit, and results should be reviewed before any financing decision.</p>
-    <p class="small" style="margin-top:24px">Last updated July 2026 · lehuuhoang1909@gmail.com</p>
+    <p>RBF is a <b>research demonstration, not a lending service</b> — it holds no capital and makes no credit offers. The risk model is a baseline trained on synthetic data and has no measured predictive validity; the financing structure is computed deterministically from submitted revenue data. Neither is a lending commitment or an offer of credit, and results should be reviewed before any financing decision.</p>
+    <p class="small" style="margin-top:24px">Last updated September 2026 · lehuuhoang1909@gmail.com</p>
     <div style="margin-top:32px"><button class="btn btn-ghost" onclick="go('landing')">Back</button></div>
   </div></div>
 </div>
@@ -1177,7 +1208,7 @@ const val=id=>document.getElementById(id).value.trim(), num=id=>parseFloat(val(i
 function next(step){
   if(!validateStep(step)){ toast('Fix the highlighted fields'); return; }
   if(step===1){
-    applyData={shop_name:val('f_shop_name'),platform:val('f_platform'),owner_name:val('f_owner_name'),phone:val('f_phone'),monthly_revenue:num('f_monthly_revenue'),order_volume:int('f_order_volume')};
+    applyData={shop_name:val('f_shop_name'),platform:val('f_platform'),monthly_revenue:num('f_monthly_revenue'),order_volume:int('f_order_volume')};
     showStep(2);
   } else {
     Object.assign(applyData,{revenue_growth:num('f_revenue_growth'),avg_order_value:num('f_avg_order_value'),return_rate:num('f_return_rate'),late_ship_rate:num('f_late_ship_rate'),rating:num('f_rating'),days_active:int('f_days_active'),inventory_turnover:num('f_inventory_turnover'),previous_loans:int('f_previous_loans')});

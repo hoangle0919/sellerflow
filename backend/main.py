@@ -5,7 +5,7 @@ from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, Header, Depends, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from models import MerchantSubmission, WaitlistSignup, LoginRequest, KeyRequest, OutcomeRecord, VisitPing
 from database import get_db, init_db
@@ -18,6 +18,31 @@ from integrity_engine import screen_integrity
 # ── Init ──
 app = FastAPI(title="RBF API", version="1.0.0", docs_url="/api/docs")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+
+@app.middleware("http")
+async def _security_headers(request: Request, call_next):
+    """Baseline response headers (P5). None were set, so a page displaying
+    financing figures could be framed by a third party and presented as theirs.
+
+    The CSP is deliberately permissive on style/script `unsafe-inline`: both
+    pages are single files with inline `<style>` and `<script>`, and a policy
+    that breaks the demo is worse than one that is merely a floor. It still
+    blocks framing, foreign object/embed, and form posts to other origins.
+    HSTS is safe here because Railway terminates TLS and serves HTTPS only.
+    """
+    response = await call_next(request)
+    response.headers.setdefault(
+        "Content-Security-Policy",
+        "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+        "script-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self' data:; "
+        "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    )
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
 
 
 @app.exception_handler(Exception)
@@ -733,6 +758,29 @@ def serve_lab():
     raise HTTPException(status_code=404, detail="Simulation Lab page not found")
 
 
+#: Paths the SPA fallback must never answer. Serving HTML at these made
+#: robots.txt effectively absent — a crawler asking for it got a 200 and a
+#: landing page, read no directives, and indexed everything. Any unmatched
+#: path outside the SPA's own routes now 404s honestly, so broken links
+#: surface instead of silently rendering the home page.
+_SPA_ROUTES = {"", "lab", "dashboard", "apply", "pricing"}
+
+ROBOTS_TXT = """User-agent: *
+Allow: /$
+Allow: /lab.html
+Disallow: /api/
+Disallow: /dashboard
+
+# RBF is a research demonstration, not a lending service. It holds no capital
+# and makes no credit offers. See https://github.com/hoangle0919/sellerflow
+"""
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots():
+    return Response(content=ROBOTS_TXT, media_type="text/plain")
+
+
 @app.get("/")
 @app.get("/{path:path}")
 def serve_spa(path: str = ""):
@@ -741,6 +789,12 @@ def serve_spa(path: str = ""):
         candidate = os.path.realpath(os.path.join(root, path))
         if candidate.startswith(root + os.sep) and os.path.isfile(candidate):
             return FileResponse(candidate)
+        # Not a real file and not one of the SPA's own routes: say so.
+        if path.strip("/").split("/")[0] not in _SPA_ROUTES:
+            return JSONResponse(
+                status_code=404,
+                content={"error": "not_found", "detail": f"No such path: /{path}"},
+            )
     index = os.path.join(FRONTEND, "index.html")
     if os.path.exists(index):
         return FileResponse(index)
