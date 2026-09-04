@@ -120,3 +120,21 @@ def test_no_stale_cohort_date_is_advertised():
     assert "next cohort · august 2026" not in src
     assert not re.search(r"next cohort\s*·\s*\w+ 20\d\d", src), \
         "a hard-coded future cohort date will expire silently again"
+
+
+def test_robots_expresses_an_allowlist_rather_than_implying_one():
+    """Without a bare `Disallow: /`, Allow lines are inert — everything not
+    explicitly disallowed is crawlable, so the file read as an allowlist while
+    behaving as a blocklist. Flagged by the research chat's audit."""
+    body = client.get("/robots.txt").text
+    directives = "\n".join(l for l in body.splitlines() if not l.strip().startswith("#"))
+    assert "Disallow: /" in directives, "the Allow lines are inert without it"
+    for path in ("Allow: /$", "Allow: /lab", "Allow: /lab.html"):
+        assert path in directives, f"missing {path}"
+
+
+def test_both_lab_routes_resolve_so_both_must_be_listed():
+    """`lab` is an SPA route and `lab.html` is the file; naming only one leaves
+    the other governed by the blanket Disallow."""
+    for path in ("/lab", "/lab.html"):
+        assert client.get(path).status_code == 200

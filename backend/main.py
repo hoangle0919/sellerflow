@@ -766,13 +766,24 @@ def serve_lab():
 _SPA_ROUTES = {"", "lab", "dashboard", "apply", "pricing"}
 
 ROBOTS_TXT = """User-agent: *
+Disallow: /
 Allow: /$
+Allow: /lab
 Allow: /lab.html
-Disallow: /api/
-Disallow: /dashboard
 
+# The bare `Disallow: /` is load-bearing. Without it the Allow lines are inert:
+# everything not explicitly disallowed is crawlable by default, so an earlier
+# version of this file expressed "index everything except /api and /dashboard"
+# while reading as though it named an allowlist. Allow wins over Disallow on the
+# longer match for the major crawlers, so the three paths above stay indexable
+# and nothing else does.
+#
+# `/lab` and `/lab.html` are both listed because both resolve — `lab` is an SPA
+# route and `lab.html` is the file. Naming only one leaves the other governed by
+# the Disallow.
+#
 # RBF is a research demonstration, not a lending service. It holds no capital
-# and makes no credit offers. See https://github.com/hoangle0919/sellerflow
+# and makes no credit offers. https://github.com/hoangle0919/sellerflow
 """
 
 
