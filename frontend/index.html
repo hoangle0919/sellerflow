@@ -434,8 +434,19 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .waitlist{padding:120px 0}
 .waitlist-inner{max-width:480px;margin:0 auto;text-align:center}
 .waitlist-inner p{margin:14px 0 28px}
-.waitlist-form{display:flex;gap:10px}
+.waitlist-form{display:flex;gap:10px;align-items:center}
 .waitlist-form input{flex:1}
+/* The privacy line is a sibling of the form, never a child. As a third flex
+   child it claimed the row, collapsed input{flex:1} to a sliver and stretched
+   the button to its height — invisible on mobile, where line ~603 reflows the
+   container to a column. */
+.waitlist-privacy{margin:10px 0 0;max-width:520px;font-size:.8rem;line-height:1.6;color:var(--ink-3)}
+.waitlist-privacy a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+/* One treatment for the demonstration statement wherever it repeats, so the
+   banner and the pricing note are visibly the same claim. */
+.demo-note{margin:0 0 26px;padding:12px 16px;border-left:3px solid var(--hairline);
+  background:rgba(0,0,0,.02);font-size:.88rem;line-height:1.65;color:var(--ink-2)}
+.field-note{margin:-6px 0 18px;font-size:.86rem;line-height:1.6;color:var(--ink-3)}
 .waitlist-note{margin-top:16px;font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--ink-3)}
 .waitlist-mail{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .waitlist-success{display:none;padding:20px 0;font-size:1.05rem;color:var(--ink)}
@@ -624,7 +635,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 <!-- P1: the deployment's status has to be visible where the visitor arrives, not
      only on /lab or in the README. The paper cites this URL; anyone following it
      lands here. Placed above the nav, unconditional, not dismissible. -->
-<div class="demo-banner"><div class="container wrap">
+<div class="demo-banner"><div class="wrap">
   <b>Research demonstration</b>
   <span>RBF is a demonstration, <b style="text-transform:none;letter-spacing:0">not a lending service</b>.
   It holds no capital, makes no credit offers, and has never received an external merchant submission.
@@ -803,12 +814,12 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <section class="section" id="pricing">
     <!-- P1: the banner states this at the top, repeated here because a visitor
          can arrive at #pricing directly and never see the top of the page. -->
-    <p class="sub" style="margin:0 0 26px;padding:12px 16px;border-left:3px solid var(--hairline);background:rgba(0,0,0,.02);font-size:.88rem">
-      <b>Illustrative product design.</b> Nothing below is a service on sale. RBF holds no capital,
-      makes no credit offers, and is not a lending service — these tiers show how such a product
-      <i>would</i> be packaged, not what is being sold today.
-    </p>
     <div class="wrap">
+      <p class="demo-note">
+        <b>Illustrative product design.</b> Nothing below is a service on sale. RBF holds no capital,
+        makes no credit offers, and is not a lending service — these tiers show how such a product
+        <i>would</i> be packaged, not what is being sold today.
+      </p>
       <div class="pricing-head">
         <span class="label">Pricing</span>
         <h2>Start with a pilot. Grow with us.</h2>
@@ -847,14 +858,14 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       <div id="wl-form-wrap">
         <div class="waitlist-form">
           <input id="wl-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')submitWaitlist()">
-          <p class="sub" style="margin:10px 0 0;font-size:.8rem;max-width:520px">
-            Your email is the only personal data this demonstration stores, and it is used solely to reply to you.
-            It is never sold or shared. Ask at any time and it is deleted —
-            <a href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20—%20delete%20my%20email">write to have it removed</a>.
-            <a href="#" onclick="go('privacy');return false;">How data is handled</a>.
-          </p>
           <button class="btn btn-primary" id="wl-btn" onclick="submitWaitlist()">Request access</button>
         </div>
+        <p class="waitlist-privacy">
+          Your email is the only personal data this demonstration stores, and it is used solely to reply to you.
+          It is never sold or shared. Ask at any time and it is deleted —
+          <a href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20—%20delete%20my%20email">write to have it removed</a>.
+          <a href="#" onclick="go('privacy');return false;">How data is handled</a>.
+        </p>
         <div class="waitlist-note">no cohort is scheduled — this is a demonstration · <a class="waitlist-mail" href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20—%20access%20request">email us directly</a></div>
       </div>
       <div class="waitlist-success" id="wl-success"></div>
@@ -871,7 +882,7 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
         <h2>Tell us about the merchant</h2><p class="sub">Basic merchant and channel information.</p>
         <div class="field"><label>Merchant name</label><input id="f_shop_name" data-req><div class="err-msg">Merchant name is required.</div></div>
         <div class="field"><label>Platform</label><select id="f_platform"><option>Shopee</option><option>TikTok Shop</option><option>Lazada</option></select></div>
-        <p class="sub" style="margin:-6px 0 18px;font-size:.86rem">
+        <p class="field-note">
           No contact name or phone number is collected. Neither is used by the assessment —
           the analysis reads ten operational figures only — so this demonstration does not ask for them.
         </p>

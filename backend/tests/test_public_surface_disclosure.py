@@ -138,3 +138,54 @@ def test_both_lab_routes_resolve_so_both_must_be_listed():
     the other governed by the blanket Disallow."""
     for path in ("/lab", "/lab.html"):
         assert client.get(path).status_code == 200
+
+
+# ── R1: the disclosure must not break the field it describes ──
+
+def test_waitlist_form_holds_exactly_the_input_and_the_button():
+    """`.waitlist-form` is `display:flex` with `input{flex:1}` and was built for
+    two children. The P2 privacy paragraph was inserted as a third, which claimed
+    the row, collapsed the email input to a sliver and stretched the button to the
+    paragraph's height — the page's primary interaction, unusable at desktop
+    width. Invisible on mobile, where the container reflows to a column, which is
+    how it shipped.
+
+    The existing tests asserted the disclosure TEXT was present. None asserted the
+    field still worked. This is that test.
+    """
+    import re
+    src = open(INDEX, encoding="utf-8").read()
+    m = re.search(r'<div class="waitlist-form">(.*?)</div>', src, re.S)
+    assert m, "waitlist-form not found"
+    children = re.findall(r"<(input|button|p|div|select|textarea)\b", m.group(1))
+    assert children == ["input", "button"], (
+        f"waitlist-form must contain exactly [input, button]; found {children}. "
+        "A third flex child collapses the email field."
+    )
+
+
+def test_the_privacy_line_is_a_sibling_of_the_form_not_a_child():
+    src = open(INDEX, encoding="utf-8").read()
+    assert 'class="waitlist-privacy"' in src
+    form_end = src.index('<div class="waitlist-form">')
+    form_end = src.index("</div>", form_end)
+    assert src.index('class="waitlist-privacy"') > form_end, \
+        "the privacy line must follow the form, not sit inside it"
+
+
+def test_the_flex_row_centres_its_children():
+    """Without align-items the default `stretch` sizes the button to the tallest
+    sibling, which is what produced the oversized button."""
+    src = open(INDEX, encoding="utf-8").read()
+    assert "align-items:center" in src[src.index(".waitlist-form{"):src.index(".waitlist-form{") + 120]
+
+
+def test_new_markup_uses_classes_that_actually_exist():
+    """The regressions shared one root cause: markup written against `.container`
+    and a bare `.sub`, neither of which is defined, so it inherited nothing and
+    fell back to inline styles sitting beside the design system."""
+    src = open(INDEX, encoding="utf-8").read()
+    assert 'class="container' not in src, ".container is not defined in this stylesheet"
+    assert 'class="sub" style' not in src, "bare .sub is a no-op outside .app-card"
+    for rule in (".waitlist-privacy{", ".demo-note{", ".field-note{"):
+        assert rule in src, f"missing rule {rule}"
