@@ -611,7 +611,11 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   .waitlist{padding:88px 0}
   .price-grid,.field-row,.metric-grid,.foot-grid,.stat-row,.why-grid{grid-template-columns:1fr}
   .hc-row{grid-template-columns:98px 1fr 92px;gap:8px}
-  .waitlist-form{flex-direction:column}
+  /* `align-items:center` is right for the desktop row, but in a column it
+     shrinks the button to its content width. Restore `stretch` so the
+     button stays full-width on a phone — a larger tap target, matching
+     the input, which is what the default gave before the R1 fix. */
+  .waitlist-form{flex-direction:column;align-items:stretch}
   .app-card{padding:24px}
   .result-actions{flex-direction:column}
   .dash-search{max-width:100%}

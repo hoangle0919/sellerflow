@@ -189,3 +189,18 @@ def test_new_markup_uses_classes_that_actually_exist():
     assert 'class="sub" style' not in src, "bare .sub is a no-op outside .app-card"
     for rule in (".waitlist-privacy{", ".demo-note{", ".field-note{"):
         assert rule in src, f"missing rule {rule}"
+
+
+def test_the_mobile_column_keeps_a_full_width_button():
+    """`align-items:center` is right for the desktop row and wrong in the column:
+    it shrinks the button to content width, where the pre-R1 default `stretch`
+    gave a full-width tap target matching the input. The mobile check that passed
+    R1 would not have caught this — nothing overflows and everything stays in the
+    viewport; only the button's width changes."""
+    src = open(INDEX, encoding="utf-8").read()
+    i = src.index(".waitlist-form{flex-direction:column")
+    rule = src[i:src.index("}", i) + 1]
+    assert "align-items:stretch" in rule, (
+        "the column must restore stretch, or the mobile button becomes a "
+        f"centred pill; found: {rule}"
+    )
