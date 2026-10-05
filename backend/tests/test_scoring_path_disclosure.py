@@ -35,6 +35,10 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import financing_engine  # noqa: E402
 import ml_engine  # noqa: E402
+import main  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+client = TestClient(main.app)
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -577,3 +581,38 @@ def test_the_closure_return_is_labelled_observed_window():
     src = open(idx, encoding="utf-8").read()
     assert "observed_apr_to_closure" in src
     assert "observed window, not a lifetime return" in src
+
+
+# ── P3: a disclaimer that invites reproduction must say under what ──
+
+def _training_baseline():
+    import os
+    pw = os.environ["DASHBOARD_PASSWORD"]
+    tok = client.post("/api/auth/login", json={"password": pw}).json()["token"]
+    return client.get("/api/model/status",
+                      headers={"Authorization": f"Bearer {tok}"}).json()["training_baseline"]
+
+
+def test_the_withdrawn_benchmark_states_the_runtime_it_was_measured_under():
+    """The disclaimer tells the reader to reproduce 0.9098 vs 0.9182. The code is
+    fully seeded, so those figures are deterministic within a runtime and not
+    across scikit-learn versions — measured here, 1.8.0 gives 0.9180 while
+    production pins >=1.9.0 and gives something else. Inviting reproduction
+    without naming the runtime invites a reader to conclude the figures are
+    wrong when they are merely environment-bound."""
+    tb = _training_baseline()
+    assert "reported_under_runtime" in tb, "the figures must carry their runtime"
+    assert "scikit-learn" in tb["reported_under_runtime"]
+    note = tb["reproduction_note"]
+    assert "deterministic within a runtime" in note
+    assert "sklearn_runtime" in note, "point the reader at the live runtime field"
+
+
+def test_the_registered_digits_are_unchanged():
+    """0.9182 and 0.9098 are cited by RESULTS_REGISTRY, DECISION_LOG, MANUSCRIPT
+    and a dozen other files. The fix for a stale caveat is the caveat, never the
+    number — overwriting here would desynchronise the registered network."""
+    tb = _training_baseline()
+    assert "0.9182" in tb["disclaimer"] and "0.9098" in tb["disclaimer"]
+    assert tb["auc"] is None and tb["validation_status"] == "withdrawn"
+    assert tb["withdrawn_value"] == 0.92

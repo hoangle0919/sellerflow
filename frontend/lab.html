@@ -168,6 +168,50 @@ table.data th[scope=row]{text-align:left;font-weight:600;padding:8px 10px 8px 0;
 .qual{display:block;font-family:var(--sans);font-size:.68rem;color:var(--faint);
   letter-spacing:.02em;margin-top:1px;}
 .scrollnote{font-size:.74rem;color:var(--faint);margin:6px 0 0;display:none;}
+/* ── P8: the comparison table on a narrow screen ──────────────
+   Measured at 375px: a 760px table inside a 313px scroller, so reading one
+   contract meant scrolling ~2.4 screen-widths sideways. Below 600px each row
+   becomes a card and every value carries its own label.
+
+   A container query rather than a media query, because this keys off the
+   table's own width — the Lab renders it inside panels narrower than the
+   viewport, where a viewport breakpoint would miss. */
+#dur-scroll{container-type:inline-size;}
+@container (width < 600px){
+  #dur-table table,#dur-table thead,#dur-table tbody,
+  #dur-table tr,#dur-table th,#dur-table td{display:block;}
+  /* `table.data` carries `min-width:760px` so the columns stay legible
+     while scrolling on a wide screen. Stacked, that min-width is what
+     keeps the horizontal scrollbar alive, so it has to be released — 
+     display:block alone does not relax it. */
+  #dur-table table{min-width:0;width:100%;}
+  /* Removed from layout AND from assistive technology: each cell re-attaches
+     its own label below, so leaving the header row readable would announce
+     every column name twice. */
+  #dur-table thead{display:none;}
+  #dur-table tr{border:1px solid var(--hairline);border-radius:10px;
+    padding:2px 12px 8px;margin:0 0 12px;}
+  /* The contract name is the card's heading and stays put while the card
+     scrolls, which is the row-header equivalent of a sticky column. */
+  #dur-table tbody th{position:sticky;inset-block-start:0;z-index:2;
+    background:var(--paper,#fff);text-align:left;font-weight:600;
+    padding:10px 0 8px;border-bottom:1px solid var(--hairline);}
+  #dur-table td{text-align:left;padding:7px 0;
+    border-bottom:1px solid var(--hairline);}
+  #dur-table tr td:last-child{border-bottom:none;}
+  #dur-table table{--l2:"Mean duration";--l3:"SD";--l4:"Completed in 24 mo";
+    --l5:"Repayment target";--l6:"Mean total repaid";--l7:"Incomplete recovery";}
+  /* `/ var(--lN)` supplies the accessible name without the trailing colon, so
+     a screen reader says "Mean duration" rather than "Mean duration colon". */
+  #dur-table td:nth-child(2)::before{content:var(--l2) ": " / var(--l2);}
+  #dur-table td:nth-child(3)::before{content:var(--l3) ": " / var(--l3);}
+  #dur-table td:nth-child(4)::before{content:var(--l4) ": " / var(--l4);}
+  #dur-table td:nth-child(5)::before{content:var(--l5) ": " / var(--l5);}
+  #dur-table td:nth-child(6)::before{content:var(--l6) ": " / var(--l6);}
+  #dur-table td:nth-child(7)::before{content:var(--l7) ": " / var(--l7);}
+  #dur-table td::before{color:var(--faint);font-weight:500;}
+}
+
 .scrollnote.on{display:block;}
 
 dl.gloss{margin:0;}

@@ -204,3 +204,29 @@ def test_the_mobile_column_keeps_a_full_width_button():
         "the column must restore stretch, or the mobile button becomes a "
         f"centred pill; found: {rule}"
     )
+
+
+# ── P8: the Lab comparison table on a phone ──
+
+def test_lab_table_stacks_in_a_narrow_container():
+    """Measured at 375px before the fix: a 760px table in a 313px scroller, so
+    reading one contract meant scrolling ~2.4 screen-widths sideways. Below
+    600px each row becomes a card. Asserted on the source because the layout is
+    CSS-only; the rendered geometry was verified in a browser at 375 and 1280."""
+    src = open(os.path.join(REPO, "frontend", "lab.html"), encoding="utf-8").read()
+    assert "container-type:inline-size" in src, "the query needs a container"
+    assert "@container (width < 600px)" in src, "a container query, not a media query"
+    assert "#dur-table thead{display:none;}" in src, "header row must leave the a11y tree too"
+    assert "#dur-table table{min-width:0;width:100%;}" in src, (
+        "table.data carries min-width:760px; display:block does not relax it, "
+        "and leaving it keeps the horizontal scrollbar alive when stacked")
+
+
+def test_lab_table_labels_carry_an_accessible_name_without_the_colon():
+    """`content: var(--l2) ": " / var(--l2)` — the text after the slash is the
+    accessible name, so a screen reader says "Mean duration", not "Mean
+    duration colon"."""
+    src = open(os.path.join(REPO, "frontend", "lab.html"), encoding="utf-8").read()
+    for n in range(2, 8):
+        assert f'#dur-table td:nth-child({n})::before{{content:var(--l{n}) ": " / var(--l{n});}}' in src, \
+            f"column {n} has no labelled ::before with an accessible name"
