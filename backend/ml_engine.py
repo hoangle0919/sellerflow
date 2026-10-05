@@ -20,8 +20,8 @@ output. See tests/test_scoring_path_disclosure.py.
 
 MODEL ARTIFACTS ARE NOT IN THE REPOSITORY. `*.pkl` is gitignored. Production
 trains its own at deploy time (`railway.toml`: `train_model.py
---skip-if-exists`) from `generate_data.py`, so the artifact is always built by
-the same interpreter and scikit-learn that will consume it. A clean checkout has
+--skip-if-exists`) from `generate_data.py`. Existing artifacts can be reused,
+so the serving runtime does not establish their training environment. A clean checkout has
 no model and must not pretend otherwise -- hence the honest fallback below.
 
 WHY LOADING IS NOT ENOUGH (D-028). A pickle written by a different

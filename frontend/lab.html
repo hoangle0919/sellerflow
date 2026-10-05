@@ -185,9 +185,8 @@ table.data th[scope=row]{text-align:left;font-weight:600;padding:8px 10px 8px 0;
      keeps the horizontal scrollbar alive, so it has to be released — 
      display:block alone does not relax it. */
   #dur-table table{min-width:0;width:100%;}
-  /* Removed from layout AND from assistive technology: each cell re-attaches
-     its own label below, so leaving the header row readable would announce
-     every column name twice. */
+  /* Each stacked cell supplies a label below. Screen-reader announcement
+     behaviour must be checked separately from computed CSS or geometry. */
   #dur-table thead{display:none;}
   #dur-table tr{border:1px solid var(--hairline);border-radius:10px;
     padding:2px 12px 8px;margin:0 0 12px;}
@@ -201,8 +200,8 @@ table.data th[scope=row]{text-align:left;font-weight:600;padding:8px 10px 8px 0;
   #dur-table tr td:last-child{border-bottom:none;}
   #dur-table table{--l2:"Mean duration";--l3:"SD";--l4:"Completed in 24 mo";
     --l5:"Repayment target";--l6:"Mean total repaid";--l7:"Incomplete recovery";}
-  /* `/ var(--lN)` supplies the accessible name without the trailing colon, so
-     a screen reader says "Mean duration" rather than "Mean duration colon". */
+  /* Request alternative text without the colon. This syntax alone does not
+     prove how a particular browser/screen-reader combination announces it. */
   #dur-table td:nth-child(2)::before{content:var(--l2) ": " / var(--l2);}
   #dur-table td:nth-child(3)::before{content:var(--l3) ": " / var(--l3);}
   #dur-table td:nth-child(4)::before{content:var(--l4) ": " / var(--l4);}

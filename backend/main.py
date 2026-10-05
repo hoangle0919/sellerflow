@@ -141,6 +141,10 @@ def health():
         # from "scikit-learn is absent from the image" without shell access.
         # start_railway.sh points operators here, so it has to be here.
         "sklearn_runtime": _ml_engine.model_status()["sklearn_runtime"],
+        "sklearn_runtime_note": (
+            "Version imported by the serving process. This does not establish "
+            "the training version of saved models or the runtime of the "
+            "historical withdrawn benchmark."),
         # The fallback changes the assigned tier, not just the label on it.
         "scoring_path_note": (
             "Financing formulas are deterministic once a risk tier is "
@@ -459,27 +463,22 @@ def model_status(_: None = Depends(require_auth)):
                           "the generating function scores 0.9098 against its own "
                           "label versus the model's 0.9182 — reproduce with "
                           "research/analysis/00_audit_evidence.py.",
-            # The disclaimer invites reproduction, so it has to say under what.
-            # The training code is fully seeded (generate_seller_data(seed=42),
-            # train_test_split(random_state=42), RandomForestClassifier(
-            # random_state=42)), so the figures are deterministic WITHIN a
-            # runtime and not across scikit-learn versions. Measured here:
-            # scikit-learn 1.8.0 reproduces the ensemble figure at 0.9180.
-            # Production pins >=1.9.0 and yields a different value. The
-            # registered digits are NOT restated per environment, because
-            # RESULTS_REGISTRY, DECISION_LOG, MANUSCRIPT and fourteen other
-            # files cite 0.9182 — changing it here would desynchronise them to
-            # fix a caveat. The caveat is the right fix.
-            "reported_under_runtime": "scikit-learn 1.8.x",
+            # The audit records the historical figure, but not its exact
+            # environment. A later near-match cannot establish that provenance.
+            "reported_under_runtime": None,
             "reproduction_note": (
-                "These figures are seeded and deterministic within a runtime, "
-                "but not across scikit-learn versions; reproducing on a "
-                "different version yields a different ensemble figure. The "
-                "argument does not depend on the digits — it is that the "
-                "generating function scores about as well against its own "
-                "label as the model does, which is what makes the benchmark "
-                "circular. GET /api/health reports the runtime actually in "
-                "use (sklearn_runtime)."),
+                "The exact runtime for the historical 0.9182 result is "
+                "unverified. A later run reported 0.9180 under scikit-learn "
+                "1.8.0; this does not establish the historical runtime or "
+                "the cause of any difference. The relayed 0.9140 result has "
+                "not been independently reproduced. Training may reuse an "
+                "existing sellers.csv, so matching seeds alone is insufficient: "
+                "compare input data, code and the full environment. The audit "
+                "script prints the historical ensemble value; it does not "
+                "retrain the ensemble. The benchmark remains withdrawn because "
+                "its labels were generated from the same input features. "
+                "GET /api/health sklearn_runtime describes the serving "
+                "process, not saved-model training provenance."),
         },
         "methodology_validation": {
             "data": "real_public_credit_benchmarks",

@@ -222,10 +222,8 @@ def test_lab_table_stacks_in_a_narrow_container():
         "and leaving it keeps the horizontal scrollbar alive when stacked")
 
 
-def test_lab_table_labels_carry_an_accessible_name_without_the_colon():
-    """`content: var(--l2) ": " / var(--l2)` — the text after the slash is the
-    accessible name, so a screen reader says "Mean duration", not "Mean
-    duration colon"."""
+def test_lab_table_labels_request_alternative_text_without_the_colon():
+    """Check CSS alternative-text syntax; this is not a screen-reader test."""
     src = open(os.path.join(REPO, "frontend", "lab.html"), encoding="utf-8").read()
     for n in range(2, 8):
         assert f'#dur-table td:nth-child({n})::before{{content:var(--l{n}) ": " / var(--l{n});}}' in src, \

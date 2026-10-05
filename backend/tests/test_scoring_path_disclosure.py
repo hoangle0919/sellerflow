@@ -593,19 +593,18 @@ def _training_baseline():
                       headers={"Authorization": f"Bearer {tok}"}).json()["training_baseline"]
 
 
-def test_the_withdrawn_benchmark_states_the_runtime_it_was_measured_under():
-    """The disclaimer tells the reader to reproduce 0.9098 vs 0.9182. The code is
-    fully seeded, so those figures are deterministic within a runtime and not
-    across scikit-learn versions — measured here, 1.8.0 gives 0.9180 while
-    production pins >=1.9.0 and gives something else. Inviting reproduction
-    without naming the runtime invites a reader to conclude the figures are
-    wrong when they are merely environment-bound."""
+def test_the_withdrawn_benchmark_does_not_invent_historical_runtime():
+    """A later near-match and a serving version do not identify an old run."""
     tb = _training_baseline()
-    assert "reported_under_runtime" in tb, "the figures must carry their runtime"
-    assert "scikit-learn" in tb["reported_under_runtime"]
+    assert tb["reported_under_runtime"] is None
     note = tb["reproduction_note"]
-    assert "deterministic within a runtime" in note
-    assert "sklearn_runtime" in note, "point the reader at the live runtime field"
+    assert "unverified" in note and "sellers.csv" in note
+    assert "does not establish" in note
+    assert "does not retrain" in note
+    assert "not saved-model training provenance" in note
+    health = client.get("/api/health").json()
+    assert "serving process" in health["sklearn_runtime_note"]
+    assert "does not establish" in health["sklearn_runtime_note"]
 
 
 def test_the_registered_digits_are_unchanged():
