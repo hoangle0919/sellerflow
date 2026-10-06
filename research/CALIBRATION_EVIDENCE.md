@@ -43,11 +43,17 @@ Canonical artifacts, re-checksummed at this commit (first 16 hex):
 **Caution carried over from the P3 correction:** that correction concerned the
 classifier's `train_model.py`, which reads a cached `backend/data/sellers.csv`
 when present and only falls through to the seeded generator otherwise. The
-simulation does **not** have this defect — `rbf_sim` reads no external data at
-all (only `canonical.py` touches the filesystem, to write and verify artifacts),
-so a seed match here *is* sufficient for comparability. The transferable lesson
-is narrower: record input data, code version and environment together. The
-mistake itself does not carry over.
+simulation does not have *that specific* defect — `rbf_sim` reads no external
+data at all (only `canonical.py` touches the filesystem, to write and verify
+artifacts), so there is no cached-input path to go stale.
+
+**That does not make a seed match sufficient for comparability, and an earlier
+draft of this document said it did.** Parameters, code version, random-number
+handling and environment all still determine the output; the absence of one
+failure mode does not license the general claim. This is the same error as the
+P3 seed mistake in a new form, which is why the correction is recorded here
+rather than quietly removed. **Any calibration run must record input data,
+parameters, code version and the full environment together.**
 
 ---
 
@@ -61,7 +67,7 @@ column is **post-search** — see §6 for the evidence behind each.
 |---|---|---|---|---|
 | `R0` starting monthly revenue | 185,000,000 VND | no | **Nothing.** L-01 is a benchmarking construct over 128 economies and explicitly supports no Vietnam-specific parameter | **Flagged as implausibly high** — ~3.1× the mean per-shop figure implied by Metric, which is itself far above the median (§6, C-8) |
 | `growth` monthly drift | 0.0 | no | Nothing | Not searched this pass |
-| `sigma` idiosyncratic volatility | 0.15 | no | Nothing | **Not estimable from public data.** Model form supported, magnitude not (§6, C-3) |
+| `sigma` idiosyncratic volatility | 0.15 | no | Nothing | **Not estimated from the reviewed sources** (§6, C-3) |
 | `seasonality` 12-month shape | `_SHAPE` vector | **yes** — "ASSUMPTION, not measurement" | Nothing in-matrix | **Usable proxy exists** — GSO monthly retail series, with stated mismatch (§6, C-6) |
 | `shock_depth` | 0.40 | no | Nothing | Not searched this pass; keep as declared range |
 | `shock_onset` | month 7 | no | n/a | Keep as scenario (not a population parameter) |
@@ -155,9 +161,14 @@ instructive.
 3. **Likely not estimable from public data:** seller-level revenue volatility
    (`sigma`) and the exit hazard.
 
-**What §6 changed.** Item 3 was half wrong. `sigma` is indeed not estimable. The
-**exit hazard is the best-evidenced parameter in the study** — measured in
-Vietnam, on a population that overlaps the study's sellers, from a tax census.
+*(The wording of item 3 is itself too strong — see correction under C-3 — but it
+is preserved verbatim because this section records the prediction as made.)*
+
+**What §6 changed.** Item 3 was half wrong. `sigma` remains unestimated from the
+sources reviewed. But the exit hazard has **a promising proxy source** —
+Vietnamese, measured from a tax census, separating closure from suspension — on a
+population whose relationship to platform sellers is a stated assumption rather
+than a demonstrated overlap.
 Meanwhile `return_rate` from item 1 found nothing usable. The pre-search ranking
 tracked *how hard the quantity sounded*, not where anyone had actually looked;
 the household-business tax literature was simply outside the frame of both
@@ -226,9 +237,24 @@ Figures, from the paper's Table 1 and Table A.1:
 
 Pre-COVID commune-month averages: **0.5 closure** and **6.7 suspension** filings
 per commune per month, against a stock of 92.5 — i.e. **0.54%/month closure** and
-**7.2%/month suspension**. Two independent routes agree: the 2019 annual closure
-rate implies **0.49%/month** if spread uniformly, against 0.54% measured
-directly. That internal consistency is the main reason to trust the figure.
+**7.2%/month** suspension of the stock.
+
+**Both monthly figures are constructions, and they are not independent
+validation** — they are two derivations from the same underlying tax census:
+
+- **0.49%/month** is the *constant-monthly-probability equivalent* of the 2019
+  annual closure rate, via `1 − (1 − 0.0567)^(1/12)`. It is what a uniform
+  monthly probability would have to be to reproduce the annual figure; it is not
+  a measured monthly quantity, and it assumes a constant hazard the paper does
+  not report.
+- **0.54%/month** is a *ratio of aggregate commune-month closure filings to a
+  reference business count* (0.5 ÷ 92.5, where the denominator is January 2019
+  regular annual filings). It is a filings-to-stock ratio, not an individual
+  firm's conditional probability of exit in a month.
+
+That the two land close together is mildly reassuring about arithmetic
+consistency within one dataset. It is **not** corroboration from independent
+evidence, and it does not establish either as a firm-level hazard.
 
 Two heterogeneities that bear directly on this study:
 
@@ -246,10 +272,18 @@ Two heterogeneities that bear directly on this study:
    objection that dissolution paperwork lags reality applies to the *doanh
    nghiệp* register, not here. But their footnote 14 concedes some HBs close
    without filing, so closure is **undercounted** by an unquantified amount.
-2. **Online sellers resemble the tax-registered HB population.** Partly
-   supported: >half of filings are wholesale/retail, and the study's seller at
-   185m VND/month is 22× the registration threshold, so it would certainly sit
-   inside this population. Not supported for channel-specific risks.
+2. **Online sellers resemble the tax-registered HB population.** **Not
+   established.** What can be said is a qualified comparison: >half of all
+   filings come from wholesale and retail, the sector nearest the study's
+   sellers; and the study's seller, at 185m VND/month, is well above the
+   100m VND *annual* registration threshold that defined tax liability in
+   2018–19. Being above a historical revenue threshold does **not** show that a
+   hypothetical e-commerce seller belongs to this population or shares its
+   closure risk — registration is a behavioural and administrative outcome, not
+   a revenue test applied automatically, and the paper states that most
+   Vietnamese HBs are not registered at all. Channel-specific risks (platform
+   suspension, migration to social commerce) are outside what this census
+   observes.
 3. **Constant hazard over 24 months.** The paper includes month fixed effects but
    publishes no pre-pandemic monthly seasonal profile, so a Tet concentration of
    exits can be neither confirmed nor excluded here. C-2 suggests it exists.
@@ -261,11 +295,39 @@ least once inside the 24-month horizon is **≈11%** (7.3% at the 2018 rate). Th
 closure arms currently apply a stop to every path; this supplies the weight they
 would need to be read as a population statement rather than a conditional one.
 
-**The more useful finding may be suspension, not closure.** ~25% of these firms
-suspend for part of a year, averaging 2.5–2.8 months. A temporary revenue stop of
-a few months is much closer to what a revenue-share contract actually has to
-absorb than permanent closure is — and it is an order of magnitude more common.
-The study has no arm for it.
+**Suspension is the better-matched risk, and the study already models it.** An
+earlier draft of this document claimed "the study has no arm for it." **That was
+false, and it was asserted about this repository without reading it.** The
+`temp_closure` arm has existed since D-032: `run_closure_baseline.py:54` sets
+`shock="temporary_closure", shock_depth=0.50, shock_onset=7`, which
+`generator.py:62-67` implements as **three months at exactly zero from month 7,
+then a permanent step to 50% of baseline** for the remaining term. It is not an
+incidental arm either — registered claim **S-3** depends on it, using its 2.0%
+incomplete rate at `f = 1.20` (0.0% at `f*`) as the counterexample to "revenue
+contingency prevents default."
+
+So the opportunity is **not a missing scenario**. It is to examine that existing
+arm's three embedded assumptions against this evidence:
+
+| `temp_closure` assumption | As coded | What C-1 bears on it |
+|---|---|---|
+| **Frequency** | applied to 100% of paths in the arm | ~24.5% of firms filed to suspend at least once in 2019 |
+| **Duration** | exactly 3 contiguous months | mean *annual* dormancy 2.5–2.8 months — see below |
+| **Recovery** | permanent step to 50%, never returns to baseline | **nothing** — the paper reports no post-resumption revenue |
+
+**The duration comparison does not read the way it first appears.** The 2.5–2.8
+months is total dormancy *per year*, and it need not be one uninterrupted
+episode. The paper reports 655,244 total suspension filings in 2018 against
+227,205 firms filing at least once — **~2.9 filings per suspending firm** — so if
+filings track episodes, the mean episode is closer to **~1 month** than to three.
+That would make `temp_closure`'s single 3-month contiguous zero a *longer and
+more concentrated* interruption than the typical suspending firm experiences,
+not a shorter one. The caveat is that a filing is not necessarily an episode (a
+firm may file to extend one continuous suspension), so this decomposition needs
+checking against the paper's definitions before it is used.
+
+**And the frequency correction:** ~24.5% against ~5.7% is about **five times**,
+not an order of magnitude. An earlier draft said the latter.
 
 ### 6b. Usable proxies, contextual evidence, and unsuitable measures
 
@@ -298,15 +360,22 @@ last month of the sample, is scored as dead, so the 12-month figure is biased
 - **Assumptions required:** that Vietnamese Shopee/TikTok Shop sellers in 2026
   resemble Taobao sellers in 2010–11 — different country, platform, era and
   logistics regime. Weak on its own.
-- **What it buys:** a bracket. 1.4–1.9%/month here against 0.49–0.54%/month in
-  C-1 is a 3–4× spread across two populations measured very differently. That
-  spread *is* the honest sensitivity range for the hazard, and it is far better
-  than an unsourced chosen month.
-- Also relevant to seasonality: the paper documents that in February 2011 both
-  seller count and average monthly revenue "took a plunge" for Chinese New Year,
-  and that while many sellers merely pause, "some consider the time a natural
-  point for exiting the market." Exit and seasonality are **coupled** at the
-  holiday. The Vietnamese analogue is Tet.
+- **What it buys, and what it does not.** These figures are **kept as a separate
+  comparison case, not merged with C-1 into a single range.** An earlier draft
+  combined them into a "3–4× honest sensitivity range"; that was premature.
+  Reconciliation is needed first on at least four axes: **event definition**
+  (absence from a platform sample vs a tax closure filing), **selection** (this
+  sample covers only sellers who sold ≥1 item in the window, and the 12-month
+  figure is biased down by end-of-sample censoring), **geography** (China vs
+  Vietnam), and **period** (2010–11 vs 2018–19). Until those are addressed, the
+  two sources are two comparison cases that happen to differ by 3–4×, which is
+  information about the gap between them rather than a calibrated interval.
+- **On seasonality:** the paper documents that in February 2011 both seller count
+  and average monthly revenue "took a plunge" for Chinese New Year, and that
+  while many sellers merely pause, "some consider the time a natural point for
+  exiting the market." That is a reason to **investigate** whether exit
+  concentrates at Tet in Vietnam. It does **not** establish a Vietnamese seasonal
+  exit effect, and no source found this pass does.
 
 **C-3 · `sigma` — contextual evidence only**
 
@@ -315,21 +384,31 @@ month fixed effects**: within R² = **0.022** (established), **0.028–0.029** (
 So ~97–98% of within-seller month-to-month variation in log revenue is left
 unexplained by reputation and calendar month.
 
-- **What this supports:** the *model form* — treating a seller's month-to-month
-  revenue as dominated by idiosyncratic noise rather than by observable seller
-  characteristics.
-- **What it does not support:** the magnitude. **No residual standard deviation
-  is reported**, so `sigma = 0.15` is not calibrated by this and the direction of
-  any error is unknown.
+- **What this supports:** only that reputation and calendar month have low
+  explanatory power for within-seller log revenue **in this particular
+  regression**.
+- **What it does not support — and an earlier draft overread this.** A low
+  within-R² does **not** demonstrate that month-to-month revenue follows
+  independent lognormal shocks, does not identify their magnitude, and does not
+  measure the variance of month-to-month revenue *changes*. Unexplained variation
+  is not the same object as i.i.d. noise: it can be serially correlated, driven by
+  omitted observables, or contaminated by measurement error, and this statistic
+  cannot distinguish those. **No residual standard deviation is reported**, so
+  `sigma = 0.15` is untouched by this evidence and the direction of any error is
+  unknown.
 - **A trap worth recording.** Table 4's Std. Dev. — $44,993.89 on a mean of
-  $5,966.28 (established); $8,459.18 on $876.61 (new) — is **pooled over
-  seller-months**. It mixes between-seller dispersion with within-seller
+  $5,966.28 **for established sellers specifically**, and $8,459.18 on $876.61
+  for new sellers; these are the paper's two separate subsamples and neither is
+  a whole-sample figure — is **pooled over seller-months**. It mixes between-seller dispersion with within-seller
   variation over time and, given the skew, is dominated by the former. The
   implied CVs of 7.5 and 9.7 are **not** volatility estimates and must not be
   used as such. The within-seller quantity *is* identified in these data (the
   fixed-effects specification uses exactly that variation) but is not published.
-- **Verdict:** `sigma` stays a declared sensitivity range. Estimating it needs
-  platform cooperation or primary collection from sellers.
+- **Verdict:** **within-seller volatility was not estimated from the sources
+  reviewed in this pass.** That is a statement about this search, not about
+  availability: the quantity is identified in platform panel data, and a source
+  that reports it may well exist outside what was reviewed here. `sigma` stays a
+  declared sensitivity range for now.
 
 **C-4 · FIX-B 18% nominal rate — contextual evidence only**
 
@@ -433,11 +512,16 @@ order "regardless of whether the transaction is settled **or if the item is
 returned**" — definition as relayed in search summaries of Sea's results releases
 and Form 20-F; **the filing itself was not opened this pass**.
 
-- **Why this matters beyond being unusable:** the issuer's own public order metric
-  is *constructed to be return-insensitive*, so no return rate can be differenced
-  out of platform disclosures. Together with C-5 this is a real feasibility
-  finding: `return_rate` is unpublished by construction at both the platform and
-  the issuer level, not merely missed by this search.
+- **Why this matters beyond being unusable:** this particular metric is
+  *constructed to be return-insensitive*, so a return rate cannot be differenced
+  out of **it**. Together with C-5 that narrows where to look — the platform's own
+  enforcement metric and the issuer's order counts are both dead ends.
+- **An earlier draft went further and said `return_rate` is "unpublished by
+  construction" at platform and issuer level. That overreaches.** Non-disclosure
+  in the Shopee and Sea materials reviewed here does not establish that
+  return-rate evidence is unavailable elsewhere — category-level retail returns
+  research, logistics-operator data, customs or tax records, and other platforms'
+  disclosures were not reviewed.
 
 ### 6c. Coverage, and what "nothing found" means here
 
@@ -450,7 +534,9 @@ about these sources and this protocol, not about whether the data exist:
   population and no sample — "10–15% overall," "apparel 5–10%," and "apparel
   25–40%, up to 50% during mega-sales" appeared in the same result set; one
   attributed a figure to a US shopper study. **None is usable and none should be
-  cited.** The issuer and platform routes are closed by construction (C-5, C-10).
+  cited.** The two routes checked — the platform's enforcement metric (C-5) and
+  the issuer's order counts (C-10) — are both dead ends for a different reason in
+  each case. Other routes were not reviewed.
 - **`sigma`.** No Vietnamese source encountered reports month-to-month revenue
   dispersion for individual sellers; everything public is platform-aggregate. An
   aggregate is smoother than its components by construction, so using it even as
@@ -477,41 +563,62 @@ from their absence here.
 
 ---
 
-## 7. Revised feasibility assessment
+## 7. Revised assessment: evidence-informed sensitivity analysis
 
-**Calibration is partially feasible, and the achievable version is narrower and
-differently shaped than the proposal language implied.**
+**No parameter of this study has been calibrated, and none should yet be
+described that way.** What the search produced is one promising proxy source and
+a set of sources whose unsuitability is now documented with reasons. The
+defensible shape of the next phase is **evidence-informed sensitivity analysis**:
+interruption and closure frequencies treated as uncertain quantities with
+sourced plausibility ranges, rather than parameters replaced by estimates.
 
 | | Parameters | Basis |
 |---|---|---|
-| **Calibratable now, with the population named** | closure/exit hazard; suspension incidence and duration | C-1, direct evidence, Vietnam, tax census |
-| **Calibratable as a stated proxy** | seasonality (Tet trough); platform fee schedule *(not load-bearing — §2a)* | C-6, C-2; published schedules |
-| **Sensitivity range only, sourced direction** | FIX-B nominal rate | C-4 — 18% is ~2× documented bank SME pricing, direction defensible, level not |
-| **Sensitivity range only, no source** | `sigma`, `aov0`, `aov_sigma`, `return_rate`, `growth`, `shock_depth` | C-3, C-5, C-9, C-10; §6c |
+| **Promising proxy source, population mismatch stated** | closure frequency; interruption frequency and duration | C-1 — Vietnamese tax census, household businesses, all sectors. Relationship to platform sellers is an assumption, not a finding |
+| **Separate comparison case, not merged with the above** | platform-native seller survival | C-2 — Taobao 2010–11; differs 3–4× from C-1, unreconciled |
+| **Usable proxy, mismatch stated** | seasonality (Tet trough) | C-6 — GSO monthly retail, all-retail and national, needs detrending |
+| **Estimable but not load-bearing** | `platform_fee_rate` | §2a — does not enter the remittance base |
+| **Sensitivity range, direction sourced** | FIX-B nominal rate | C-4 — 18% is ~2× documented bank SME pricing; direction defensible, level not |
+| **Sensitivity range, no source found this pass** | `sigma`, `aov0`, `aov_sigma`, `return_rate`, `growth`, `shock_depth` | C-3, C-5, C-9, C-10; §6c |
 | **Flagged for reconsideration** | `R0` | C-8 — likely not a typical small seller |
 
-**The contribution this supports.** Not "calibrated therefore real." Rather: one
-parameter — the one carrying the headline result — moves from an unsourced chosen
-month to a **measured Vietnamese rate with a named population and a stated
-3–4× uncertainty bracket**, and the rest become declared sensitivity ranges with
-their populations and failure modes written down. That is a smaller claim than the
-proposal made and it is defensible.
+**The contribution this supports.** Not "calibrated therefore real," and not "one
+calibrated hazard" either. Rather: the parameters carrying the headline result
+acquire **sourced plausibility ranges with named populations and documented
+failure modes**, and the existing deterministic scenarios keep their current
+role. That is smaller than the proposal's language and it is defensible.
+
+**Keep the deterministic closure scenarios as they are.** `closure_m7`,
+`closure_m13` and `temp_closure` are valid conditional statements — what happens
+*if* revenue stops at a given time — and they need no hazard estimate to stand.
+Registered claims S-2 and S-3 rest on them and are unaffected by anything in this
+document.
+
+**Design a separate experiment for uncertain frequencies.** Rather than editing
+the scenario arms, the open question is what the portfolio looks like when
+interruption and closure arrive with some probability instead of with certainty.
+That is a new experiment with its own spec amendment, parameterised over a range
+drawn from C-1 rather than a point estimate, and it leaves the existing artifacts
+untouched.
 
 **Two substantive findings beyond the parameter table:**
 
-1. **Suspension, not closure, may be the better-matched risk.** ~25% of
-   tax-registered Vietnamese household businesses suspend for part of a year,
-   averaging 2.5–2.8 months, against a ~5% annual permanent-closure rate. A
-   months-long revenue interruption is both far more common than closure and
-   closer to what a revenue-share contract must absorb. **The study has no arm
-   for it.** Adding one is a design question, not a calibration question, and it
-   does not depend on any further data.
-2. **Exit and seasonality are coupled.** C-2 documents sellers treating the
-   holiday as a natural exit point. A constant monthly hazard and an independent
-   seasonality vector may therefore both be wrong in the same place — at Tet.
-   Worth testing before either is calibrated.
+1. **The `temp_closure` arm's assumptions are now checkable, which they were not
+   before.** Its frequency (100% of paths), duration (3 contiguous months) and
+   recovery (permanent 50% step) can each be compared against C-1 — and the
+   duration comparison is the interesting one, because the filings-per-firm
+   decomposition suggests typical suspension episodes are *shorter and more
+   repeated* than one 3-month block. The recovery assumption has **no evidence
+   either way**, and is the most consequential of the three for whether a
+   contract completes.
+2. **Exit may concentrate at the holiday — worth investigating, not assuming.**
+   C-2 documents Chinese New Year functioning as an exit point on Taobao. If the
+   Tet analogue holds in Vietnam, a constant monthly frequency and an independent
+   seasonality vector would both be wrong in the same month. No source found this
+   pass establishes that for Vietnam.
 
 **Recommended next step:** obtain the VECOM EBI report and the published WBER
-version of C-1 before any simulation change. If VECOM yields nothing seller-level,
-the honest shape of this phase is **one calibrated hazard plus a sensitivity
-study**, and it should be described that way rather than as a calibration.
+version of C-1, and check C-1's own definitions on whether a suspension filing
+corresponds to an episode. None of that requires touching the simulation. If
+VECOM yields nothing seller-level, this phase is a sensitivity study with one
+proxy-informed range, and should be described that way.
