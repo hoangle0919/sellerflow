@@ -302,9 +302,22 @@ false, and it was asserted about this repository without reading it.** The
 `shock="temporary_closure", shock_depth=0.50, shock_onset=7`, which
 `generator.py:62-67` implements as **three months at exactly zero from month 7,
 then a permanent step to 50% of baseline** for the remaining term. It is not an
-incidental arm either — registered claim **S-3** depends on it, using its 2.0%
-incomplete rate at `f = 1.20` (0.0% at `f*`) as the counterexample to "revenue
-contingency prevents default."
+incidental arm either — registered claim **S-3** cites its 2.0% incomplete rate
+at `f = 1.20` (0.0% at `f*`) as the case showing that a temporary zero-revenue
+spell does not necessarily prevent completion.
+
+**Incomplete recovery is not default, and an earlier summary of mine blurred
+them.** `incomplete_recovery_rate` measures whether the contractual target was
+reached within `T = 24`; it says nothing about borrower default, and under a
+revenue-share contract a seller remitting a share of zero revenue is not in
+breach. **This project's own standard is already stricter than my summary was:**
+`CLAIM_LEDGER.md` S-3 states only that a balance is left "unrecovered";
+`publication/CAREER_PACKAGE.md:156` maps "Showed RBF prevents default" to "Showed
+no guarantee of contractual completion"; and `backend/tests/test_public_copy.py`
+forbids the phrase outright, with the reason **"no default model exists in this
+study; non-recovery is mechanical."** The correct summary of S-3 is that
+revenue-contingent payments do not guarantee reaching the repayment target within
+24 months. No default rate is established anywhere in this study.
 
 So the opportunity is **not a missing scenario**. It is to examine that existing
 arm's three embedded assumptions against this evidence:
@@ -315,16 +328,28 @@ arm's three embedded assumptions against this evidence:
 | **Duration** | exactly 3 contiguous months | mean *annual* dormancy 2.5–2.8 months — see below |
 | **Recovery** | permanent step to 50%, never returns to baseline | **nothing** — the paper reports no post-resumption revenue |
 
-**The duration comparison does not read the way it first appears.** The 2.5–2.8
-months is total dormancy *per year*, and it need not be one uninterrupted
-episode. The paper reports 655,244 total suspension filings in 2018 against
-227,205 firms filing at least once — **~2.9 filings per suspending firm** — so if
-filings track episodes, the mean episode is closer to **~1 month** than to three.
-That would make `temp_closure`'s single 3-month contiguous zero a *longer and
-more concentrated* interruption than the typical suspending firm experiences,
-not a shorter one. The caveat is that a filing is not necessarily an episode (a
-firm may file to extend one continuous suspension), so this decomposition needs
-checking against the paper's definitions before it is used.
+The recovery level is **a priority for sensitivity testing, not an established
+driver.** It is plausible that a permanent 50% step does more to determine
+non-completion than interruption timing or duration do — but that comparison has
+not been run, and an earlier draft called it "the most consequential of the
+three" without it. Ranking the three requires the bounded experiment in §8.
+
+**The duration comparison is an open question, not a finding.** The 2.5–2.8
+months is total dormancy *per year*, and the paper reports 655,244 total
+suspension filings in 2018 against 227,205 firms filing at least once — **~2.9
+filings per suspending firm**.
+
+Dividing annual dormant months by filings per firm yields ~1 month. **That
+number is an artifact of circular arithmetic and is withdrawn — see OC-1 in §8.**
+The paper's reported dormancy duration *is itself* the filings-per-firm ratio, so
+dividing one by the other could only ever return ≈1.
+
+**This source carries no episode-length information at all.** ~2.9 dormant months
+per suspending firm is equally consistent with one 3-month episode, three
+separate 1-month episodes, or anything between. No claim can be made that
+`temp_closure`'s 3-month contiguous zero is longer, shorter or more concentrated
+than a typical suspension — not pending further checking, but because the
+published figures cannot answer it in either direction.
 
 **And the frequency correction:** ~24.5% against ~5.7% is about **five times**,
 not an order of magnitude. An earlier draft said the latter.
@@ -607,10 +632,11 @@ untouched.
    before.** Its frequency (100% of paths), duration (3 contiguous months) and
    recovery (permanent 50% step) can each be compared against C-1 — and the
    duration comparison is the interesting one, because the filings-per-firm
-   decomposition suggests typical suspension episodes are *shorter and more
-   repeated* than one 3-month block. The recovery assumption has **no evidence
-   either way**, and is the most consequential of the three for whether a
-   contract completes.
+   arithmetic raises — but does not answer — the question of whether typical
+   suspension episodes are shorter and more repeated than one 3-month block
+   (OC-1). The recovery assumption has **no evidence either way** and is the
+   first candidate for sensitivity testing, though it has not been shown to
+   matter more than timing or duration.
 2. **Exit may concentrate at the holiday — worth investigating, not assuming.**
    C-2 documents Chinese New Year functioning as an exit point on Taobao. If the
    Tet analogue holds in Vietnam, a constant monthly frequency and an independent
@@ -622,3 +648,105 @@ version of C-1, and check C-1's own definitions on whether a suspension filing
 corresponds to an episode. None of that requires touching the simulation. If
 VECOM yields nothing seller-level, this phase is a sensitivity study with one
 proxy-informed range, and should be described that way.
+
+---
+
+## 8. Targeted source checks, 2026-10-05
+
+Three checks were identified as the next step. Each is recorded with **whether it
+resolves a parameter question**, which for two of the three is "no."
+
+### OC-1 · Does a suspension filing correspond to an episode? — **RESOLVED, negatively**
+
+**It does not, and the check invalidated my own arithmetic.**
+
+WP 10223 §2.2 reports "the average dormancy duration of firms that filed for
+suspension was 2.8 months in 2018 and 2.5 months in 2019," introduced with the
+words **"By extension"** — immediately after noting that this statistic counts
+*all* filings including multiple per firm-year, unlike Table 1. That phrasing is
+load-bearing, and the arithmetic confirms what it means:
+
+| Year | Total filings | Firms filing ≥once | Ratio | Paper's "dormancy duration" |
+|---|---|---|---|---|
+| 2018 | 655,244 | 227,205 | **2.884** | **2.8 months** |
+| 2019 | 570,933 | 225,230 | **2.535** | **2.5 months** |
+
+The reported duration **is** the filings-per-firm ratio. One filing is counted as
+**one month** of dormancy — filings are month-grants, not episodes.
+
+Two consequences:
+
+1. **My earlier division was circular.** Dividing 2.8 months by 2.88 filings/firm
+   divides the ratio by its own value, so it could only return ≈1. The "~1 month
+   mean episode" was an artifact of the arithmetic, not a finding about Vietnamese
+   firms. Withdrawn.
+2. **No episode-length information exists in the published figures.** ~2.9 dormant
+   months per suspending firm cannot be decomposed into episode count × episode
+   length from anything reported. The comparison against `temp_closure`'s 3-month
+   contiguous zero is **unanswerable from this source in either direction**.
+
+**Resolves a parameter question?** Yes — negatively, which is still useful. It
+closes interruption *duration* calibration from this source and removes a false
+input before it propagated. Interruption duration stays a sensitivity range.
+
+### OC-2 · The published WBER version — **PARTIALLY RESOLVED**
+
+- **The title changed.** Working paper: *Firm Entry, Exit and Suspension: Evidence
+  from Household Businesses in Vietnam*. Published: ***Firm Exit and Suspension in
+  Developing Countries: Evidence from a Household Business Tax Census in
+  Vietnam*** — "Entry" dropped, framing broadened to developing countries.
+  `doi:10.1093/wber/lhaf038`, *World Bank Economic Review* 2026, same three
+  authors.
+- **The headline rates are unchanged:** 5–6%/yr entry and exit pre-pandemic, ~25%
+  annual suspension, 40% spike in 2020. No numerical revision between versions.
+- **The full text was not opened.** The OUP article page returned only navigation
+  scaffolding, and paywall status is undetermined. So the **sector breakdown and
+  any monthly profile in the published version remain unchecked**, and every
+  figure in §6a C-1 still traces to the working-paper PDF.
+
+**Resolves a parameter question?** No. It raises confidence that the rates already
+recorded survived peer review, and it corrects the citation. It adds no parameter.
+
+### OC-3 · VECOM's EBI report — **RESOLVED, negatively**
+
+Rated the highest-value remaining lead in §6c. **It yields nothing for any
+parameter in this study.**
+
+- The official host `ebi.vecom.vn` was unreachable this pass (**HTTP 522**).
+- The **EBI 2024 English edition** was reviewed through a third-party copy:
+  **~5,000 valid survey responses**, but the quantities reported are
+  **IT-adoption and spending shares**, not revenue distributions — e.g. 62% of
+  enterprises spent <10m VND/yr on website or app promotion, 44% have a website,
+  24% sell on e-commerce platforms, 37% put e-commerce at 10–20% of their export
+  value.
+- **Absent:** revenue per enterprise, revenue growth distribution, revenue bands,
+  returns or cancellations, month-to-month variation, seasonality, and any
+  enterprise exit or cessation data.
+- **Population caveat regardless of content:** the survey is described in
+  Vietnamese press coverage as drawing on thousands of **VECOM member
+  enterprises** — a self-selected association sample — and the index itself is
+  built to rank provinces, not to characterise sellers.
+
+**Resolves a parameter question?** No. The report's *kind* of content — an
+adoption and readiness index — makes it unlikely that other editions differ in
+character, but that is an expectation, not a finding: **only the 2024 English
+edition was reviewed, through an unofficial copy and a partial extraction.** The
+2025 edition and the Vietnamese original remain unchecked.
+
+### What the three checks leave
+
+No parameter moved. One false input was removed, one citation was corrected, and
+the lead with the highest prior expectation was eliminated. **The frequency and
+duration of interruption remain unresolved, and the evidence for them is not
+adequate.**
+
+That is the condition the next experiment has to be designed around, so it should
+**vary interruption timing, duration and post-interruption recovery level, and
+keep frequency out of scope** until its evidence is adequate. Ranking those three
+against each other is the open question §7 says has not been answered. The
+existing deterministic scenarios remain valid and unchanged throughout, and
+S-2/S-3 are untouched.
+
+**Still unchecked, and no longer expected to be productive:** Sách trắng TMĐT
+(MoIT), the EBI 2025/Vietnamese editions, SBV primary releases for C-4, GSO
+primary monthly series for C-6, and the published WBER full text for OC-2.
