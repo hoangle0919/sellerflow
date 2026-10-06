@@ -671,23 +671,42 @@ load-bearing, and the arithmetic confirms what it means:
 | 2018 | 655,244 | 227,205 | **2.884** | **2.8 months** |
 | 2019 | 570,933 | 225,230 | **2.535** | **2.5 months** |
 
-The reported duration **is** the filings-per-firm ratio. One filing is counted as
-**one month** of dormancy — filings are month-grants, not episodes.
+**Two things must be kept apart here, and an earlier draft of this section ran
+them together.**
 
-Two consequences:
+**What is observed:** the filings-per-firm ratios reproduce the paper's reported
+dormancy figures to the stated precision, and the figures are introduced with
+"By extension" immediately after the sentence explaining that this statistic
+counts multiple filings per firm-year.
 
-1. **My earlier division was circular.** Dividing 2.8 months by 2.88 filings/firm
-   divides the ratio by its own value, so it could only return ≈1. The "~1 month
-   mean episode" was an artifact of the arithmetic, not a finding about Vietnamese
-   firms. Withdrawn.
-2. **No episode-length information exists in the published figures.** ~2.9 dormant
-   months per suspending firm cannot be decomposed into episode count × episode
-   length from anything reported. The comparison against `temp_closure`'s 3-month
-   contiguous zero is **unanswerable from this source in either direction**.
+**What is inferred and NOT confirmed:** the recording rule. The numerical match
+and the phrase "By extension" are consistent with one filing being recorded as
+one month of dormancy, but they do not establish it. A filing could carry a
+declared duration, the ratio could be coincidental at this precision, or the
+dormancy figure could be computed from a field not described in the text. The
+paper does not state the rule, and this pass did not confirm it.
 
-**Resolves a parameter question?** Yes — negatively, which is still useful. It
-closes interruption *duration* calibration from this source and removes a false
-input before it propagated. Interruption duration stays a sensitivity range.
+**The defensible conclusion is narrower than either:** **the reviewed published
+aggregates do not identify contiguous episode lengths.** That holds whichever
+recording rule applies.
+
+Two consequences follow from the narrow conclusion alone:
+
+1. **The earlier division was circular given the observed match.** Dividing 2.8
+   months by 2.88 filings/firm divides a quantity by a ratio that reproduces it,
+   so it could only return ≈1. The "~1 month mean episode" is withdrawn
+   regardless of what the recording rule turns out to be.
+2. **~2.9 dormant months per suspending firm cannot be decomposed** into episode
+   count × episode length from anything reported. The comparison against
+   `temp_closure`'s 3-month contiguous zero is **not answerable from these
+   aggregates in either direction**.
+
+**Resolves a parameter question?** Yes — negatively, which is still useful. The
+reviewed aggregates cannot calibrate interruption *duration*, and a false input
+was removed before it propagated. Interruption duration stays a sensitivity
+range. The recording rule itself remains an open question, but resolving it would
+not change this outcome: contiguous episode lengths are not identified by these
+aggregates either way.
 
 ### OC-2 · The published WBER version — **PARTIALLY RESOLVED**
 
@@ -707,10 +726,12 @@ input before it propagated. Interruption duration stays a sensitivity range.
 **Resolves a parameter question?** No. It raises confidence that the rates already
 recorded survived peer review, and it corrects the citation. It adds no parameter.
 
-### OC-3 · VECOM's EBI report — **RESOLVED, negatively**
+### OC-3 · VECOM's EBI report — **PARTIALLY CHECKED; the original lead is UNRESOLVED**
 
-Rated the highest-value remaining lead in §6c. **It yields nothing for any
-parameter in this study.**
+Rated the highest-value remaining lead in §6c. Outcome: **no suitable parameter
+found in the inspected 2024 unofficial copy; the original 2025 lead remains
+unresolved.** The official report could not be retrieved, and an unavailable
+source is not a negative search result.
 
 - The official host `ebi.vecom.vn` was unreachable this pass (**HTTP 522**).
 - The **EBI 2024 English edition** was reviewed through a third-party copy:
@@ -727,18 +748,20 @@ parameter in this study.**
   enterprises** — a self-selected association sample — and the index itself is
   built to rank provinces, not to characterise sellers.
 
-**Resolves a parameter question?** No. The report's *kind* of content — an
-adoption and readiness index — makes it unlikely that other editions differ in
-character, but that is an expectation, not a finding: **only the 2024 English
-edition was reviewed, through an unofficial copy and a partial extraction.** The
-2025 edition and the Vietnamese original remain unchecked.
+**Resolves a parameter question?** No — and it does not close the lead either.
+The report's *kind* of content, an adoption and readiness index, makes it
+unlikely that other editions differ in character, but that is an expectation
+rather than a finding. **Only the 2024 English edition was reviewed, through an
+unofficial copy and a partial extraction.** The 2025 edition that was the actual
+lead, the Vietnamese original, and the official host all remain unchecked, and
+**this pass establishes nothing about them.**
 
 ### What the three checks leave
 
-No parameter moved. One false input was removed, one citation was corrected, and
-the lead with the highest prior expectation was eliminated. **The frequency and
-duration of interruption remain unresolved, and the evidence for them is not
-adequate.**
+No parameter moved. One false input was removed and one citation was corrected.
+The highest-prior lead returned nothing usable **in the copy inspected**, and is
+not eliminated. **The frequency and duration of interruption remain unresolved,
+and the evidence for them is not adequate.**
 
 That is the condition the next experiment has to be designed around, so it should
 **vary interruption timing, duration and post-interruption recovery level, and
@@ -747,6 +770,7 @@ against each other is the open question §7 says has not been answered. The
 existing deterministic scenarios remain valid and unchanged throughout, and
 S-2/S-3 are untouched.
 
-**Still unchecked, and no longer expected to be productive:** Sách trắng TMĐT
-(MoIT), the EBI 2025/Vietnamese editions, SBV primary releases for C-4, GSO
-primary monthly series for C-6, and the published WBER full text for OC-2.
+**Still unchecked:** the EBI 2025 edition and the official VECOM host (the
+original lead, still open), the Vietnamese EBI editions, Sách trắng TMĐT (MoIT),
+SBV primary releases for C-4, GSO primary monthly series for C-6, the published
+WBER full text for OC-2, and WP 10223's filing-recording rule.
