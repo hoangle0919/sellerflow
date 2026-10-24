@@ -26,6 +26,8 @@ PUBLIC_SURFACES = [
     "backend/train_model.py",
     "backend/validate_on_real_data.py",
     "frontend/index.html",
+    "frontend/demo.html",
+    "frontend/overview.js",
 ]
 
 # (file, matched text fragment) -> why this occurrence is legitimate.

@@ -15,7 +15,7 @@ import main
 client = TestClient(main.app)
 BACKEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(BACKEND)          # backend/tests -> backend -> repo root
-INDEX = os.path.join(REPO, "frontend", "index.html")
+INDEX = os.path.join(REPO, "frontend", "demo.html")
 
 # Deliberately NOT guarded with pytest.skip. An earlier guard in this repo
 # skipped when its path was wrong, and a skip reads exactly like a pass. A
@@ -39,7 +39,7 @@ def test_landing_page_states_it_is_not_a_lending_service():
 def test_the_disclosure_is_above_the_nav_not_buried():
     """A footnote below three screens of pricing is not a disclosure."""
     src = _landing()
-    banner = src.index("demo-banner")
+    banner = src.index('<div class="demo-banner">')
     nav = src.index('<nav class="nav"')
     assert banner < nav, "the demonstration banner must precede the nav"
 
@@ -66,15 +66,10 @@ def test_no_contact_name_or_phone_is_collected():
     assert "owner_name" not in FEATURES and "phone" not in FEATURES
 
 
-def test_the_remaining_personal_field_carries_a_notice_where_it_is_collected():
-    """The waitlist email is the only personal datum left; the notice sits beside
-    the input, not only on a page the user must go looking for."""
-    src = _landing()
-    i = src.index('id="wl-email"')
-    window = src[i:i + 900]
-    assert "only personal data" in window
-    assert "delete" in window.lower() or "removed" in window.lower()
-
+def test_access_list_input_is_retired():
+    """The redesign does not solicit emails through a stored waitlist."""
+    assert 'id="wl-email"' not in _landing()
+    assert 'class="waitlist-form"' not in _landing()
 
 def test_the_privacy_notice_is_current_and_does_not_call_this_a_pilot():
     src = _landing()
@@ -142,43 +137,18 @@ def test_both_lab_routes_resolve_so_both_must_be_listed():
 
 # ── R1: the disclosure must not break the field it describes ──
 
-def test_waitlist_form_holds_exactly_the_input_and_the_button():
-    """`.waitlist-form` is `display:flex` with `input{flex:1}` and was built for
-    two children. The P2 privacy paragraph was inserted as a third, which claimed
-    the row, collapsed the email input to a sliver and stretched the button to the
-    paragraph's height — the page's primary interaction, unusable at desktop
-    width. Invisible on mobile, where the container reflows to a column, which is
-    how it shipped.
+def test_contact_is_a_mail_link_not_a_collection_form():
+    assert 'mailto:lehuuhoang1909@gmail.com' in _landing()
+    assert 'onclick="submitWaitlist()"' not in _landing()
 
-    The existing tests asserted the disclosure TEXT was present. None asserted the
-    field still worked. This is that test.
-    """
-    import re
-    src = open(INDEX, encoding="utf-8").read()
-    m = re.search(r'<div class="waitlist-form">(.*?)</div>', src, re.S)
-    assert m, "waitlist-form not found"
-    children = re.findall(r"<(input|button|p|div|select|textarea)\b", m.group(1))
-    assert children == ["input", "button"], (
-        f"waitlist-form must contain exactly [input, button]; found {children}. "
-        "A third flex child collapses the email field."
-    )
+def test_prototype_warns_before_submission():
+    src = _landing()
+    banner = src[src.index('<div class="demo-banner">'):src.index('<nav class="nav"')]
+    assert 'synthetic examples only' in banner.lower()
+    assert 'stored' in banner and 'notifications' in banner
 
-
-def test_the_privacy_line_is_a_sibling_of_the_form_not_a_child():
-    src = open(INDEX, encoding="utf-8").read()
-    assert 'class="waitlist-privacy"' in src
-    form_end = src.index('<div class="waitlist-form">')
-    form_end = src.index("</div>", form_end)
-    assert src.index('class="waitlist-privacy"') > form_end, \
-        "the privacy line must follow the form, not sit inside it"
-
-
-def test_the_flex_row_centres_its_children():
-    """Without align-items the default `stretch` sizes the button to the tallest
-    sibling, which is what produced the oversized button."""
-    src = open(INDEX, encoding="utf-8").read()
-    assert "align-items:center" in src[src.index(".waitlist-form{"):src.index(".waitlist-form{") + 120]
-
+def test_prototype_shares_the_institutional_stylesheet():
+    assert 'href="/institutional.css"' in _landing()
 
 def test_new_markup_uses_classes_that_actually_exist():
     """The regressions shared one root cause: markup written against `.container`
@@ -191,20 +161,10 @@ def test_new_markup_uses_classes_that_actually_exist():
         assert rule in src, f"missing rule {rule}"
 
 
-def test_the_mobile_column_keeps_a_full_width_button():
-    """`align-items:center` is right for the desktop row and wrong in the column:
-    it shrinks the button to content width, where the pre-R1 default `stretch`
-    gave a full-width tap target matching the input. The mobile check that passed
-    R1 would not have caught this — nothing overflows and everything stays in the
-    viewport; only the button's width changes."""
-    src = open(INDEX, encoding="utf-8").read()
-    i = src.index(".waitlist-form{flex-direction:column")
-    rule = src[i:src.index("}", i) + 1]
-    assert "align-items:stretch" in rule, (
-        "the column must restore stretch, or the mobile button becomes a "
-        f"centred pill; found: {rule}"
-    )
-
+def test_prototype_mobile_navigation_exposes_its_state():
+    src = _landing()
+    assert 'aria-controls="mobile-menu"' in src
+    assert "setAttribute('aria-expanded',String(open))" in src
 
 # ── P8: the Lab comparison table on a phone ──
 
