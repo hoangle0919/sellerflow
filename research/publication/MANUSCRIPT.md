@@ -6,11 +6,11 @@
 >
 > This 19-page version carries the full audit apparatus inline — per-claim source notes, checksum tables, the reproducibility statement. That made it a poor read and a good record. Its apparatus has been harvested into [`REPRODUCIBILITY_SUPPLEMENT.md`](REPRODUCIBILITY_SUPPLEMENT.md), which is now the companion to the reader editions.
 >
-> **`MANUSCRIPT.pdf` is retained byte-identical, never regenerated and never deleted.** This Markdown source, by contrast, carries the added status framing you are reading, so the source and the PDF are **not** a jointly byte-identical pair — the body below is what remains matched to the PDF. Figures were published from it, so what was said and when has to stay checkable. It is superseded in *role*.
+> **`MANUSCRIPT.pdf` remains historical, with an author-requested declaration correction on 2026-10-24.** It was regenerated for that correction; no scientific finding, numerical result or citation was revised. The earlier binary remains in Git history. This Markdown source also carries the status framing you are reading, which is excluded from the rebuilt PDF body; the source and PDF are not a jointly byte-identical pair. It remains superseded in *role*.
 >
 > **⚠️ One statement in this body is now known to be wrong and is NOT corrected here.** Where the text says duration integrality makes attainable APRs a discrete set, so an exact cost match is unattainable — that reasoning is **false and withdrawn (D-056)**. APR is *piecewise continuous* in the cap factor: within a fixed paying term the clipped final payment varies continuously with `f`, and a **numerical** reference-path root sits at approximately `f = 1.09462066267694`. The registered `f* = 1.0945` remains correct as **the nearest point on the 0.0005-step grid that was searched**, with the same ≈0.02416pp residual — so no figure in this document moves. The body is left as written because a historical record that gets edited later cannot be audited; the correction lives in `DERIVATIONS.md` P6 and D-056.
 >
-> **Test counts in this body are frozen at their published values** — 1,145 non-browser, 502 backend and 643 simulation — because they must continue to match the byte-protected PDF. A previous pass updated them here without rebuilding the PDF, which broke that pairing; that change is reverted (D-057). For **current** counts see `PUBLICATION_INDEX.md` and `REPRODUCIBILITY_SUPPLEMENT.md`.
+> **Test counts in this body are frozen at their published values** — 1,145 non-browser, 502 backend and 643 simulation — and remain matched to the historical PDF's scientific body. The 2026-10-24 declaration correction does not update these historical counts. A previous pass updated them here without rebuilding the PDF, which broke that pairing; that change was reverted (D-057). For **current** counts see `PUBLICATION_INDEX.md` and `REPRODUCIBILITY_SUPPLEMENT.md`.
 >
 > **One more scope correction not applied to the body (D-057).** Where §12 says "no observed seller revenue, repayment or default outcome exists anywhere in this study", read it as scoped to **financing** outcomes. `backend/validation_data/taiwan.csv` holds 30,000 observed UCI borrower records, used only by the secondary unvalidated scoring path; it feeds no financing result, no proposition and no registered artifact.
 
@@ -40,7 +40,7 @@ Revenue-contingent financing repays a lender a fixed share of a borrower's reali
 
 *Software disclosure.* The accompanying software is a **demonstration**. It holds no capital and makes no credit decisions. As of August 2026, no external merchant data were used in this study; the public deployment is a demonstration, not a lending service.
 
-*Declaration of interest.* The author reports no funding and no financial interest in any revenue-based financing provider. The author has family connections to consumer-finance businesses in Vietnam; those businesses supplied no data, funding, direction or review, and no proprietary information from them appears in this study.
+*Declaration of interest.* The author reports no external funding and no financial interest in any revenue-based financing provider.
 
 ---
 
