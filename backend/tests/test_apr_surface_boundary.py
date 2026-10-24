@@ -59,7 +59,7 @@ def test_the_two_aprs_are_computed_from_different_things():
 
 def test_product_surface_labels_its_apr_as_a_base_case():
     """`effective_apr_base_case` must not be presented as a study result."""
-    html = open(os.path.join(REPO, "frontend", "index.html"),
+    html = open(os.path.join(REPO, "frontend", "demo.html"),
                 encoding="utf-8", errors="replace").read()
     assert "effective_apr_base_case" in html
     assert re.search(r"APR \(base case\)|base[- ]case", html, re.I), (
@@ -123,7 +123,7 @@ def test_neither_surface_claims_the_other_validates_it():
         r"matches|verifies)[^.\n]{0,40}(APR|rate)"
         r"|(APR|rate)[^.\n]{0,40}(validated|confirmed|verified)[^.\n]{0,40}"
         r"(by the )?(simulation|study)", re.I)
-    for rel in ("frontend/index.html", "frontend/lab.html", "README.md",
+    for rel in ("frontend/index.html", "frontend/demo.html", "frontend/lab.html", "README.md",
                 "backend/lab.py", "backend/financing_engine.py"):
         text = open(os.path.join(REPO, rel), encoding="utf-8",
                     errors="replace").read()

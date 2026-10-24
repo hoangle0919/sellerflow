@@ -127,6 +127,7 @@ def test_score_reports_which_path_produced_it():
 SURFACES = [
     "README.md",
     "frontend/index.html",
+    "frontend/demo.html",
     "backend/ENVIRONMENT.md",
     "backend/ml_engine.py",
     "backend/main.py",
@@ -292,7 +293,7 @@ def test_hero_badge_fails_closed():
     It was previously the literal string "RF+LR ENSEMBLE v1.0", rendered
     whether or not the artifact had loaded.
     """
-    html = open(os.path.join(REPO, "frontend/index.html"),
+    html = open(os.path.join(REPO, "frontend/demo.html"),
                 encoding="utf-8", errors="replace").read()
     assert "ACTIVE SCORER — UNKNOWN" in html, (
         "the unreachable-/api/health path must fall back to an explicit "
@@ -313,7 +314,7 @@ def test_public_scorer_copy_is_conditional():
         r"Its risk score is trained on synthetic data with a circular label",
         r"RBF turns platform data into",
     ]
-    for rel in ("README.md", "frontend/index.html"):
+    for rel in ("README.md", "frontend/index.html", "frontend/demo.html"):
         text = open(os.path.join(REPO, rel), encoding="utf-8",
                     errors="replace").read()
         for pattern in unconditional:
@@ -322,9 +323,12 @@ def test_public_scorer_copy_is_conditional():
                 "The ensemble runs only when its artifact loads; otherwise the "
                 "heuristic does. Neither has measured predictive validity."
             )
-        assert re.search(r"active scorer|whichever scorer", text, re.I), (
-            f"{rel} must name the active scorer rather than one fixed path"
-        )
+        # Only the prototype renders a scorer. The overview must not imply
+        # an unconditional ensemble, but need not introduce a scoring system.
+        if rel != "frontend/index.html":
+            assert re.search(r"active scorer|whichever scorer", text, re.I), (
+                f"{rel} must name the active scorer rather than one fixed path"
+            )
 
 
 # Every surface is scanned for the false claim; these must additionally state
@@ -338,7 +342,7 @@ MUST_DISCLOSE = [
     "README.md",
     "backend/ENVIRONMENT.md",
     "backend/ml_engine.py",
-    "frontend/index.html",
+    "frontend/demo.html",
 ]
 
 
@@ -432,6 +436,7 @@ def test_readme_states_the_tier_dependency():
 PUBLIC_COPY = [
     os.path.join(REPO, "README.md"),
     os.path.join(REPO, "frontend", "index.html"),
+    os.path.join(REPO, "frontend", "demo.html"),
 ]
 
 
@@ -563,7 +568,7 @@ def test_the_main_surface_actually_renders_the_apr_basis():
     Asserted on the source because this string is assembled in JS at render time;
     the browser-level equivalent lives in the Lab suite.
     """
-    idx = os.path.join(REPO, "frontend", "index.html")
+    idx = os.path.join(REPO, "frontend", "demo.html")
     src = open(idx, encoding="utf-8").read()
     assert "structure.apr_basis" in src, "index.html never reads structure.apr_basis"
     # and it must not be confined to a branch that other notes can displace
@@ -577,7 +582,7 @@ def test_the_main_surface_actually_renders_the_apr_basis():
 def test_the_closure_return_is_labelled_observed_window():
     """A-9: on a path that never completes, the rate is an observed-window figure
     and must not read as a lifetime return."""
-    idx = os.path.join(REPO, "frontend", "index.html")
+    idx = os.path.join(REPO, "frontend", "demo.html")
     src = open(idx, encoding="utf-8").read()
     assert "observed_apr_to_closure" in src
     assert "observed window, not a lifetime return" in src
