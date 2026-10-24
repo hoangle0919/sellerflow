@@ -65,6 +65,18 @@ def test_no_contact_name_or_phone_is_collected():
     from ml_engine import FEATURES
     assert "owner_name" not in FEATURES and "phone" not in FEATURES
 
+    # The `f_`-prefixed assertions above cover COLLECTION only, and for a while
+    # that was all this test checked -- while the admin table still rendered
+    # `owner_name` and the CSV export still shipped it as a column. Not
+    # collecting a field and not disclosing it are different properties, and a
+    # guard that conflates them reads as protection it does not provide.
+    # `phone` is deliberately NOT asserted absent: it appears in the privacy
+    # copy, which is the page telling the reader the field is not requested.
+    assert "owner_name" not in src, (
+        "owner_name reappeared in the public surface -- check the portfolio "
+        "table and the CSV export column list, not just the form inputs"
+    )
+
 
 def test_access_list_input_is_retired():
     """The redesign does not solicit emails through a stored waitlist."""
