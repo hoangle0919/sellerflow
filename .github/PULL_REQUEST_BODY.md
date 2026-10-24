@@ -13,7 +13,7 @@ Publication package for the revenue-contingent financing study, plus the runtime
 | `research/publication/reader_editions/papers/` | **Current reader editions** — English and Vietnamese academic papers, 14 Letter pages each, with editable HTML sources and portable builders that verify registered artifact checksums before rendering |
 | `research/publication/REPRODUCIBILITY_SUPPLEMENT.md` | Checksums, claim-to-artifact map, reproduction commands, tested environments, correction history |
 | `research/publication/PUBLICATION_INDEX.md` | Authoritative document status: current, historical, superseded |
-| `research/publication/MANUSCRIPT.md` / `.pdf` | **Historical technical manuscript**, 19 pages. The PDF is byte-identical; the Markdown source carries added status framing, so the pair is not jointly byte-identical. Superseded as the public paper; apparatus harvested into the supplement |
+| `research/publication/MANUSCRIPT.md` / `.pdf` | **Historical technical manuscript**, 19 pages. Rebuilt on 2026-10-24 for an author-requested declaration correction; scientific content unchanged. Markdown status framing is separate from the PDF body. Superseded as the public paper; apparatus harvested into the supplement; earlier binaries remain in Git history |
 | `research/publication/RBF_DECK.pptx` | 13 slides with speaker notes; `[Sources]` blocks on the slides carrying externally sourced claims. Built by `build_deck.js` |
 | `research/publication/LITERATURE_MATRIX.md` | 44 verified sources, 6 evidence gaps stated explicitly |
 | `research/publication/PAPER_OUTLINE.md` | Every figure bound to a ledger ID and artifact path |

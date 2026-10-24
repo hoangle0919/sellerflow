@@ -2,7 +2,7 @@
 
 **Which document to read, and which to cite.** This index is authoritative for document status. If any other file disagrees about which paper is current, this one is right and the disagreement is a defect to be logged.
 
-Last reconciled: 2026-09-02 (D-057).
+Last reconciled: 2026-10-24 (author-requested declaration correction; scientific results unchanged).
 
 ---
 
@@ -32,20 +32,22 @@ The supplement is a **companion, not an appendix**. The papers carry the argumen
 
 Both builders verify four registered artifact checksums before rendering and abort on mismatch. Build instructions are in the supplement, §4.2.
 
+**Publication-only revision, 2026-10-24.** The author requested a simpler declaration while retaining the statements of no external funding and no financial interest in an RBF provider. Both reader editions and the historical technical manuscript were rebuilt. Reader editions remain 14 Letter pages; the historical manuscript remains 19 A4 pages. Numerical findings, citations and registered research artifacts were not revised. Current document identities are in the supplement and runnable manifest; earlier binaries remain in Git history.
+
 ---
 
 ## Historical — retained, never cited as current
 
 | Document | Status | Why retained |
 |---|---|---|
-| [`MANUSCRIPT.md`](MANUSCRIPT.md) / [`MANUSCRIPT.pdf`](MANUSCRIPT.pdf) | **Historical technical manuscript**, 19 pages | The full-apparatus version: per-claim source notes, checksum tables, the reproducibility statement. Superseded as the public paper; it is the raw material the supplement was harvested from, and the record of how the argument was assembled. Its **PDF is byte-identical** to its registered form; the **Markdown source carries added status framing** at the head, so the Markdown/PDF pair is **not** jointly byte-identical. The historical body itself remains matched to the protected PDF. |
+| [`MANUSCRIPT.md`](MANUSCRIPT.md) / [`MANUSCRIPT.pdf`](MANUSCRIPT.pdf) | **Historical technical manuscript**, 19 pages | The full-apparatus version: per-claim source notes, checksum tables, the reproducibility statement. Superseded as the public paper; its apparatus supplied the supplement. Rebuilt on 2026-10-24 only for the author-requested declaration correction; scientific content is unchanged. The Markdown also carries status framing excluded from the PDF body. Earlier versions remain in Git history. |
 | [`TONG_QUAN_VI.md`](TONG_QUAN_VI.md) / [`TONG_QUAN_VI.pdf`](TONG_QUAN_VI.pdf) | **Superseded Vietnamese overview**, 5 pages | A short summary written before the Vietnamese scholarly edition existed. Superseded by the 14-page Vietnamese paper. Retained as dated history; not the Vietnamese academic paper. |
 
 **Exactly what is preserved, and what is not.** State these three separately, because collapsing them overstates the guarantee:
 
-1. **The four PDF binaries are preserved byte-for-byte.** `MANUSCRIPT.pdf`, `TONG_QUAN_VI.pdf` and both reader editions are asserted byte-identical by the publication gates on every run.
-2. **The historical Markdown sources have been edited.** Each gained a status banner at the head and pointer lines naming the current editions. So a Markdown source and its PDF are **no longer a byte-identical pair**, and this index does not claim they are.
-3. **The historical bodies were not rewritten.** No argument, figure, table or qualification inside either document was altered — the edits are additive framing at the head, plus pointer lines.
+1. **Three PDF identities changed on 2026-10-24.** Both reader editions and `MANUSCRIPT.pdf` were rebuilt for the author-requested declaration correction. `TONG_QUAN_VI.pdf` is unchanged. Previous PDF identities remain recorded in Git history and the archival handoff receipt, not asserted as current.
+2. **The historical Markdown sources carry status framing.** Their banners and current-edition pointers are separate from the PDF bodies. The manuscript declaration also carries the 2026-10-24 correction; the Markdown/PDF pairs are not jointly byte-identical.
+3. **Scientific content was not revised.** No argument, numerical result, figure, table or citation was changed by the declaration correction. Existing historical corrections and qualifications remain visible; the current papers and supplement govern present claims.
 
 Neither file is deleted. Figures were published from them, so the record of what was said and when has to stay checkable. Document identities are in the supplement, §1.
 

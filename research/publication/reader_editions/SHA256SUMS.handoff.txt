@@ -11,7 +11,9 @@
 #
 #     cd research/publication/reader_editions && sha256sum -c SHA256SUMS.txt
 #
-# The seven digests common to both files agree.
+# The seven common digests agreed at the original transfer. The author-requested
+# declaration correction of 2026-10-24 changed current templates and PDFs;
+# these archival identities are unchanged. Use SHA256SUMS.txt for current files.
 f3a0aec26a1437620909ab8a13402525d5939bd087f19ad2087e830cb2a3aa78  pdfs/Revenue_Contingent_Financing_Professional_Paper.pdf
 1f36142e33a3db7baf635e556c0c470a91b656bf47517129cd572787d4b41c5c  pdfs/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf
 cc051a55a804069b3bbe8e7e830a1bb155599c58c8bad90170c92c50442a6a1a  reader_editions/academic_paper_template.html

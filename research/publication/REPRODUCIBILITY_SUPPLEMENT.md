@@ -21,14 +21,16 @@ They are deliberately separate. An earlier version of this project put the full 
 
 | Document | Role | Pages | SHA-256 |
 |---|---|---|---|
-| `reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf` | **Current reader edition, English** | 14 (Letter) | `f3a0aec26a1437620909ab8a13402525d5939bd087f19ad2087e830cb2a3aa78` |
-| `reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf` | **Current reader edition, Vietnamese** | 14 (Letter) | `1f36142e33a3db7baf635e556c0c470a91b656bf47517129cd572787d4b41c5c` |
-| `MANUSCRIPT.pdf` | **Historical technical manuscript** — superseded as the public paper, retained for provenance | 19 (A4) | `8d4d59df6ab5f7a7cd14111f18f97641bba35d6be05705a041d0df30a7683a56` |
+| `reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf` | **Current reader edition, English** | 14 (Letter) | `a40a4e4b21698483db8223554fced7ad3d227cc13bfff6b80945f38d5cda63bd` |
+| `reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf` | **Current reader edition, Vietnamese** | 14 (Letter) | `4f1504a327f4dba645e27c3e49a6f6f0a36960af7262c18551da60601416afc7` |
+| `MANUSCRIPT.pdf` | **Historical technical manuscript** — superseded as the public paper, retained for provenance | 19 (A4) | `e08479926e7fca360c92106ffe0de5811583804bfc58abcc0673021f8518619c` |
 | `TONG_QUAN_VI.pdf` | **Superseded Vietnamese overview** — a 5-page summary, not the scholarly edition | 5 (Letter) | `10a4569bd4977bbcd6f20bd8b5c1f339299a3b6511776babb718e03ca9b4a212` |
 
 The Vietnamese reader edition is an **independently written Vietnamese scholarly paper**, not a sentence-by-sentence translation of the English. The two are parallel in status and in claim boundaries; they are not mechanically identical in prose.
 
 The historical documents are retained because figures were published from them. Deleting them would break the ability to check what was said and when. They are never cited as current.
+
+**Author-requested declaration correction, 2026-10-24.** The two reader PDFs and historical technical manuscript were regenerated after simplifying the declaration; no external funding and no financial interest in an RBF provider remain stated. The identities above are the corrected local files. Earlier versions remain in Git history and, for delivered reader editions, the archival handoff receipt. Scientific source content is unchanged; the English reader PDF has only declaration-related line reflow, the Vietnamese extracted text changes only at that declaration, and historical URL/paragraph wrapping changes with the local TeX environment. The URI targets and numerical tokens outside wrapped URLs were checked against the prior PDF. No registered simulation artifact was regenerated.
 
 ---
 
