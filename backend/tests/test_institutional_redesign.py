@@ -83,13 +83,30 @@ def test_conceptual_diagram_is_not_presented_as_registered_output(homepage):
 
 def test_homepage_has_no_inline_api_or_scoring_dependencies(homepage):
     scripts = [attrs for tag, attrs in homepage.elements if tag == "script"]
-    assert scripts == [{"src": "/overview.js", "defer": None}]
+    # Two first-party deferred scripts, in this order: the i18n runtime must be
+    # parsed before overview.js, which reads RBF_I18N for the diagram copy.
+    assert scripts == [{"src": "/i18n.js", "defer": None},
+                       {"src": "/overview.js", "defer": None}]
     assert not any(name.startswith("on") for _, attrs in homepage.elements for name in attrs)
     script = (FRONTEND / "overview.js").read_text()
     for pattern in (r"\bfetch\s*\(", r"\bXMLHttpRequest\b", r"\bWebSocket\b",
                     r"\bsendBeacon\s*\(", r"\b(?:local|session)Storage\b",
                     r"/api/", r"\bimport\s", r"\brequire\s*\("):
         assert not re.search(pattern, script), pattern
+
+
+def test_i18n_runtime_reaches_only_its_own_catalogues(homepage):
+    """The runtime is allowed the two things overview.js is not -- a fetch and
+    localStorage -- because it loads catalogues and remembers a preference.
+    It is allowed nothing else, and in particular no API or scoring surface."""
+    script = (FRONTEND / "i18n.js").read_text()
+    for pattern in (r"/api/", r"\bXMLHttpRequest\b", r"\bWebSocket\b",
+                    r"\bsendBeacon\s*\(", r"\bimport\s", r"\brequire\s*\("):
+        assert not re.search(pattern, script), pattern
+    fetches = re.findall(r"fetch\(([^)]*)", script)
+    assert fetches, "expected the catalogue fetch"
+    for call in fetches:
+        assert "'/i18n/'" in call, f"i18n.js fetches something other than a catalogue: {call}"
 
 
 def test_local_assets_exist_and_homepage_fragments_resolve(homepage):
@@ -200,6 +217,9 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const config = JSON.parse(process.env.RBF_OVERVIEW_CASE);
 const source = fs.readFileSync(process.env.RBF_OVERVIEW_SOURCE, 'utf8');
+// Real catalogue, not fixture strings: this makes the test fail if a key the
+// diagram needs is ever dropped from en.json.
+const catalogue = JSON.parse(fs.readFileSync(process.env.RBF_I18N_EN, 'utf8'));
 function element(attrs={}) {
   return { attrs:{...attrs}, hidden: 'hidden' in attrs, textContent:'', listeners:{},
     dataset: Object.fromEntries(Object.entries(attrs).filter(([k])=>k.startsWith('data-')).map(([k,v])=>[k.slice(5),v])),
@@ -213,7 +233,10 @@ const forbidden=()=>{ throw Error('Overview must not access network or storage')
 const document={ getElementById(id){ assert.ok(nodes[id],id); return nodes[id]; },
   querySelectorAll(q){ assert.equal(q,'[data-shape]'); return shapes; },
   addEventListener(k,fn){ events[k]=fn; } };
-const context={document, location:{pathname:config.path||'/',search:config.search||'',replace(x){redirects.push(x);}},
+const winEvents={};
+const windowStub={ addEventListener(k,fn){ winEvents[k]=fn; },
+  RBF_I18N:{ t(key){ return Object.prototype.hasOwnProperty.call(catalogue,key)?catalogue[key]:''; } } };
+const context={window:windowStub, document, location:{pathname:config.path||'/',search:config.search||'',replace(x){redirects.push(x);}},
   URLSearchParams, matchMedia(){return media;}, fetch:forbidden, XMLHttpRequest:forbidden,
   WebSocket:forbidden, localStorage:new Proxy({}, {get:forbidden}),
   sessionStorage:new Proxy({}, {get:forbidden}), navigator:{sendBeacon:forbidden}};
@@ -243,6 +266,17 @@ if(config.action==='redirect'){
     assert.ok(nodes['shape-description'].textContent.length>30);
   }
   assert.ok(nodes['shape-description'].textContent.includes('not assured'));
+
+  // A language switch must re-paint the ACTIVE shape's copy. The loop above
+  // ends on `interruption`; a regression here would silently revert the
+  // description to whichever shape the page happened to load with.
+  assert.ok(winEvents['rbf:languagechange'], 'overview.js must observe rbf:languagechange');
+  nodes['shape-description'].textContent = 'cleared';
+  nodes['chart-title'].textContent = 'cleared';
+  winEvents['rbf:languagechange']();
+  assert.ok(nodes['shape-description'].textContent.includes('not assured'),
+    'language change repainted the wrong shape: ' + nodes['shape-description'].textContent);
+  assert.ok(nodes['chart-title'].textContent.startsWith('Conceptual interruption'));
 }
 """
 
@@ -252,6 +286,7 @@ def run_overview_case(homepage, **case):
     if node is None:
         pytest.skip("Node unavailable: overview logic tests not executed")
     environment = {**os.environ, "RBF_OVERVIEW_SOURCE": str(FRONTEND / "overview.js"),
+                   "RBF_I18N_EN": str(FRONTEND / "i18n" / "en.json"),
                    "RBF_OVERVIEW_CASE": json.dumps({"elements": homepage.elements, **case})}
     result = subprocess.run([node, "-e", NODE_HARNESS], env=environment,
                             capture_output=True, text=True, timeout=15)

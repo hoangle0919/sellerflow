@@ -9,6 +9,20 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const source = readFileSync(join(__dirname, '../frontend/demo.html'), 'utf8');
+/* The state functions render through the i18n catalogue now, so the fake
+ * environment resolves against the REAL en.json. A key the hero logic needs
+ * but the catalogue lacks therefore fails here, instead of rendering blank in
+ * a browser -- which is exactly how 85 missing keys went unnoticed once. */
+const CATALOGUE = JSON.parse(
+  readFileSync(join(__dirname, '../frontend/i18n/en.json'), 'utf8'));
+function translate(key, vars) {
+  if (!Object.prototype.hasOwnProperty.call(CATALOGUE, key)) {
+    throw new Error('missing catalogue key: ' + key);
+  }
+  let out = CATALOGUE[key];
+  if (vars) for (const k of Object.keys(vars)) out = out.split('{' + k + '}').join(String(vars[k]));
+  return out;
+}
 const start = source.indexOf('const HERO_FIXED=');
 const end = source.indexOf('/* Premium scroll-reveal', start);
 assert(start > 0 && end > start, 'prototype state-function boundaries exist');
@@ -34,7 +48,14 @@ function setup() {
     document: { getElementById:get, querySelectorAll:selector => selector.includes('input') ? ranges : presets },
     URLSearchParams, performance: { now:() => 100 },
     fmtVND:String, pct:String, signed:String,
-    VERDICT: { APPROVED:'Illustrative low risk' },
+    t: translate,
+    setElText: (el, key, vars) => { if (el) el.textContent = translate(key, vars); },
+    setI18nText: (id, key, vars) => { get(id).textContent = translate(key, vars); },
+    VERDICT: { APPROVED:'demo.verdict.approved' },
+    // Display labels for the engine's own tier values, keyed like the page.
+    // An unrecognised tier falls through to the API's own string.
+    TIER_LABEL: { 'Low Risk':'demo.tier.low', 'Medium Risk':'demo.tier.medium',
+                  'High Risk':'demo.tier.high' },
     callAPI:route => new Promise(resolve => requests.push({route, resolve})),
     clearTimeout() {}, setTimeout:() => 1,
     renderResult:value => results.push(value), go() {}, window: { scrollTo() {} },

@@ -249,19 +249,21 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important;}}
 </style>
 <link rel="stylesheet" href="/institutional.css">
+<script src="/i18n.js" defer></script>
 </head>
 <body class="lab-shell">
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main" data-i18n="chrome.skip">Skip to content</a>
 
-<nav class="lab-navigation" aria-label="Research navigation"><div class="wrap">
+<nav class="lab-navigation" aria-label="Research navigation" data-i18n-attr="aria-label:lab.nav.label"><div class="wrap">
   <a class="wordmark" href="/"><span class="rbf-mark" aria-hidden="true">R</span>RBF</a>
-  <div class="lab-nav-links"><a href="/">Overview</a><a href="/#research">Research library</a><a href="/demo.html">Prototype</a></div>
+  <div class="lab-nav-links"><a href="/" data-i18n="lab.nav.overview">Overview</a><a href="/#research" data-i18n="lab.nav.researchLibrary">Research library</a><a href="/demo.html" data-i18n="chrome.nav.prototype">Prototype</a></div>
+  <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label"><button type="button" data-lang-option="en" aria-pressed="true">English</button><span class="lang-sep" aria-hidden="true">/</span><button type="button" data-lang-option="vi" aria-pressed="false" lang="vi">Tiếng Việt</button></div>
 </div></nav>
 
 <div class="banner" role="note">
   <div class="wrap">
     <span aria-hidden="true">▲</span>
-    <span><strong>All figures on this page are simulation output</strong> under stated
+    <span data-i18n-html="lab.banner"><strong>All figures on this page are simulation output</strong> under stated
     modelling assumptions. No observed seller revenue, repayment or default outcome
     exists in this project. A research prototype — not a lending service, a credit
     offer, or financial advice.</span>
@@ -270,14 +272,14 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 
 <header class="hero">
   <div class="wrap">
-    <p class="eyebrow">Simulation Lab</p>
-    <h1>Revenue-Contingent Financing Under&nbsp;Volatile Sales</h1>
-    <p class="lede">A model-based and simulation study motivated by Vietnamese
+    <p class="eyebrow" data-i18n="chrome.nav.lab">Simulation Lab</p>
+    <h1 data-i18n="lab.hero.h1">Revenue-Contingent Financing Under&nbsp;Volatile Sales</h1>
+    <p class="lede" data-i18n="lab.hero.lede">A model-based and simulation study motivated by Vietnamese
       e-commerce sellers. The contribution is a deterministic, line-by-line-verifiable
       comparison of fixed-payment and revenue-based financing — it needs no labels
       and makes no prediction about who defaults.</p>
     <div class="qbox">
-      <p><strong>Research question.</strong> When a seller's revenue falls, how does
+      <p data-i18n-html="lab.hero.question"><strong>Research question.</strong> When a seller's revenue falls, how does
       the burden of a fixed instalment differ from a revenue share — and what does
       that flexibility cost the financier in recovery speed?</p>
     </div>
@@ -287,11 +289,11 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 <div class="summary" id="summary" hidden>
   <div class="wrap summary-in">
     <p id="summary-text" aria-live="polite"></p>
-    <nav class="jump" aria-label="Jump to section">
-      <a href="#s-scn">Scenario</a><a href="#s-arms">Contracts</a>
-      <a href="#s-burden">Burden</a><a href="#s-recovery">Recovery</a>
-      <a href="#s-dur">Settlement</a><a href="#s-under">Under-reporting</a>
-      <a href="#s-find">Findings</a><a href="#s-limits">Limitations</a>
+    <nav class="jump" aria-label="Jump to section" data-i18n-attr="aria-label:lab.jump.label">
+      <a href="#s-scn" data-i18n="lab.jump.scenario">Scenario</a><a href="#s-arms" data-i18n="lab.idx1.title">Contracts</a>
+      <a href="#s-burden" data-i18n="lab.jump.burden">Burden</a><a href="#s-recovery" data-i18n="lab.jump.recovery">Recovery</a>
+      <a href="#s-dur" data-i18n="lab.jump.settlement">Settlement</a><a href="#s-under" data-i18n="lab.jump.underreporting">Under-reporting</a>
+      <a href="#s-find" data-i18n="lab.jump.findings">Findings</a><a href="#s-limits" data-i18n="lab.jump.limitations">Limitations</a>
     </nav>
   </div>
 </div>
@@ -301,19 +303,19 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 
   <div id="status" aria-live="polite">
     <div class="state" id="st-loading">
-      <h3>Loading the research artifacts…</h3>
-      <p style="margin:0;color:var(--muted)">Reading committed, checksummed result files.</p>
+      <h3 data-i18n="lab.state.loading.title">Loading the research artifacts…</h3>
+      <p style="margin:0;color:var(--muted)" data-i18n="lab.state.loading.body">Reading committed, checksummed result files.</p>
       <div class="skel" style="width:70%"></div><div class="skel" style="width:52%"></div>
       <div class="skel" style="width:61%"></div>
     </div>
     <div class="state err" id="st-error" hidden>
-      <h3 id="err-title">Could not load the research artifacts</h3>
+      <h3 id="err-title" data-i18n="lab.state.error.title">Could not load the research artifacts</h3>
       <p id="err-detail" style="margin:0"></p>
-      <button type="button" id="retry">Try again</button>
+      <button type="button" id="retry" data-i18n="lab.state.error.retry">Try again</button>
     </div>
     <div class="state" id="st-unavailable" hidden>
-      <h3>Research artifacts are not part of this deployment</h3>
-      <p style="margin:0;color:var(--muted)">The Simulation Lab renders committed result
+      <h3 data-i18n="lab.state.unavailable.title">Research artifacts are not part of this deployment</h3>
+      <p style="margin:0;color:var(--muted)" data-i18n-html="lab.state.unavailable.body">The Simulation Lab renders committed result
         files from <span class="mono">research/results/</span>. This instance was started
         without them, so nothing is shown rather than something invented.</p>
     </div>
@@ -322,80 +324,80 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
   <div id="content" hidden>
 
   <section id="s-scn" aria-labelledby="h-scn">
-    <h2 id="h-scn">Scenario</h2>
-    <p class="lede" style="font-size:.92rem">Each scenario is a family of 500 simulated
+    <h2 id="h-scn" data-i18n="lab.jump.scenario">Scenario</h2>
+    <p class="lede" style="font-size:.92rem" data-i18n="lab.scn.lede">Each scenario is a family of 500 simulated
       revenue paths sharing a shape. Choose one — every panel below updates together.</p>
     <div id="scn-groups"></div>
     <p class="scn-desc" id="scn-desc"></p>
   </section>
 
   <section id="s-arms" aria-labelledby="h-arms">
-    <h2 id="h-arms">Contracts compared</h2>
-    <p class="lede" style="font-size:.92rem">Four contracts on the same revenue paths.
+    <h2 id="h-arms" data-i18n="lab.arms.h2">Contracts compared</h2>
+    <p class="lede" style="font-size:.92rem" data-i18n-html="lab.arms.lede">Four contracts on the same revenue paths.
       The two revenue-based arms differ <em>only in price</em> — which is how a pricing
       effect can be told from a structural one.</p>
     <div class="arms" id="arms"></div>
   </section>
 
-  <div class="legend" id="legend" aria-label="Contract colours"></div>
+  <div class="legend" id="legend" aria-label="Contract colours" data-i18n-attr="aria-label:lab.legend.label"></div>
 
   <section id="s-burden" aria-labelledby="h-burden">
     <div class="card">
-      <h2 id="h-burden">Seller payment burden</h2>
-      <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px">Payment as a share of
+      <h2 id="h-burden" data-i18n="lab.burden.h2">Seller payment burden</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px" data-i18n="lab.burden.lede">Payment as a share of
         that month's revenue, summarised across simulated paths.</p>
       <div class="chart-wrap"><svg class="chart" id="chart-burden" role="img"
-        aria-labelledby="burden-title"><title id="burden-title">Payment burden by contract</title></svg></div>
+        aria-labelledby="burden-title"><title id="burden-title" data-i18n="lab.burden.chartTitle">Payment burden by contract</title></svg></div>
       <div class="warn" id="burden-caveat"></div>
-      <details class="def"><summary>How this is measured</summary><p id="def-burden"></p></details>
+      <details class="def"><summary data-i18n="lab.def.how">How this is measured</summary><p id="def-burden"></p></details>
     </div>
   </section>
 
   <section id="s-hpb" aria-labelledby="h-hpb">
     <div class="card">
       <details class="fold" data-fold="narrow">
-        <summary><h2 id="h-hpb">Months above a burden threshold</h2></summary>
-        <p style="color:var(--muted);font-size:.9rem;margin:10px 0 12px">Averages hide bad
+        <summary><h2 id="h-hpb" data-i18n="lab.hpb.h2">Months above a burden threshold</h2></summary>
+        <p style="color:var(--muted);font-size:.9rem;margin:10px 0 12px" data-i18n="lab.hpb.lede">Averages hide bad
           months; this counts them, out of a 24-month window.</p>
         <div class="chart-wrap"><svg class="chart" id="chart-hpb" role="img"
-          aria-labelledby="hpb-title"><title id="hpb-title">High-burden month counts by contract</title></svg></div>
+          aria-labelledby="hpb-title"><title id="hpb-title" data-i18n="lab.hpb.chartTitle">High-burden month counts by contract</title></svg></div>
         <div class="warn" id="hpb-caveat"></div>
-        <details class="def"><summary>How this is measured</summary><p id="def-hpb"></p></details>
+        <details class="def"><summary data-i18n="lab.def.how">How this is measured</summary><p id="def-hpb"></p></details>
       </details>
     </div>
   </section>
 
   <section id="s-recovery" aria-labelledby="h-recovery">
     <div class="card">
-      <h2 id="h-recovery">Provider recovery — the other side of the trade</h2>
-      <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px">Share of each
+      <h2 id="h-recovery" data-i18n="lab.recovery.h2">Provider recovery — the other side of the trade</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:12px" data-i18n="lab.recovery.lede">Share of each
         contract's own repayment target recovered by month 12, 18 and 24.</p>
       <div class="chart-wrap"><svg class="chart" id="chart-recovery" role="img"
-        aria-labelledby="rec-title"><title id="rec-title">Cumulative provider recovery by contract</title></svg></div>
+        aria-labelledby="rec-title"><title id="rec-title" data-i18n="lab.recovery.chartTitle">Cumulative provider recovery by contract</title></svg></div>
       <div class="warn" id="rec-caveat"></div>
-      <details class="def"><summary>How this is measured</summary><p id="def-recovery"></p></details>
+      <details class="def"><summary data-i18n="lab.def.how">How this is measured</summary><p id="def-recovery"></p></details>
     </div>
   </section>
 
   <section id="s-dur" aria-labelledby="h-dur">
     <div class="card">
-      <h2 id="h-dur">Repayment duration and settlement</h2>
+      <h2 id="h-dur" data-i18n="lab.dur.h2">Repayment duration and settlement</h2>
       <div class="chart-wrap" id="dur-scroll"><div id="dur-table"></div></div>
-      <p class="scrollnote" id="dur-scrollnote">↔ Scroll the table sideways to see every column.</p>
-      <div class="warn">
+      <p class="scrollnote" id="dur-scrollnote" data-i18n="lab.dur.scrollnote">↔ Scroll the table sideways to see every column.</p>
+      <div class="warn" data-i18n-html="lab.dur.partialWarn">
         <strong>The final payment is partial.</strong> A revenue-share contract collects a
         fixed share of revenue until the target is reached, so the last payment is
         whatever remains — not a full instalment. Multiplying a periodic payment by the
         duration therefore <em>overstates</em> the total.
       </div>
-      <details class="def"><summary>How duration is measured</summary><p id="def-dur"></p></details>
+      <details class="def"><summary data-i18n="lab.def.howDuration">How duration is measured</summary><p id="def-dur"></p></details>
     </div>
   </section>
 
   <section id="s-under" aria-labelledby="h-under">
     <div class="card">
       <details class="fold" data-fold="narrow">
-        <summary><h2 id="h-under">Under-reporting sensitivity</h2></summary>
+        <summary><h2 id="h-under" data-i18n="lab.under.h2">Under-reporting sensitivity</h2></summary>
         <p style="color:var(--muted);font-size:.9rem;margin-top:10px" id="under-why"></p>
         <div class="chart-wrap"><div id="under-table"></div></div>
         <div id="under-finding"></div>
@@ -404,41 +406,41 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
   </section>
 
   <section id="s-find" aria-labelledby="h-find">
-    <h2 id="h-find">What this shows — and what kind of claim each statement is</h2>
-    <p class="lede" style="font-size:.92rem">A proof and a simulation output are not the
+    <h2 id="h-find" data-i18n="lab.find.h2">What this shows — and what kind of claim each statement is</h2>
+    <p class="lede" style="font-size:.92rem" data-i18n="lab.find.lede">A proof and a simulation output are not the
       same kind of evidence. Every statement is labelled with which it is, and every
       scenario-dependent statement names its scenario.</p>
     <div id="findings"></div>
-    <details class="def"><summary>What the labels mean</summary><div id="taxonomy"></div></details>
+    <details class="def"><summary data-i18n="lab.find.taxonomy">What the labels mean</summary><div id="taxonomy"></div></details>
   </section>
 
   <section id="s-limits" class="two">
     <div class="card">
-      <h2>Assumptions</h2>
+      <h2 data-i18n="lab.limits.assumptions">Assumptions</h2>
       <ul class="plain" id="assumptions"></ul>
-      <details class="def"><summary>Glossary of terms used on this page</summary>
+      <details class="def"><summary data-i18n="lab.limits.glossary">Glossary of terms used on this page</summary>
         <dl class="gloss" id="glossary"></dl></details>
     </div>
     <div class="card">
-      <h2>Limitations &amp; responsible use</h2>
+      <h2 data-i18n="lab.limits.h2">Limitations &amp; responsible use</h2>
       <ul class="plain" id="caveats"></ul>
       <p style="font-size:.83rem;margin-top:12px">
-        <a href="/#approach">Approach</a> ·
-        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/METHODOLOGY_SPEC.md">Frozen specification</a> ·
-        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DERIVATIONS.md">Derivations</a> ·
-        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DECISION_LOG.md">Decision log</a>
+        <a href="/#approach" data-i18n="chrome.nav.approach">Approach</a> ·
+        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/METHODOLOGY_SPEC.md" data-i18n="lab.links.spec">Frozen specification</a> ·
+        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DERIVATIONS.md" data-i18n="lab.links.derivations">Derivations</a> ·
+        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DECISION_LOG.md" data-i18n="lab.links.decisionLog">Decision log</a>
       </p>
     </div>
   </section>
 
   <section id="s-prov">
     <div class="card">
-      <h2 style="font-size:1.1rem">Provenance</h2>
-      <p style="color:var(--muted);font-size:.88rem;margin-bottom:0">Every figure above is
+      <h2 style="font-size:1.1rem" data-i18n="lab.prov.h2">Provenance</h2>
+      <p style="color:var(--muted);font-size:.88rem;margin-bottom:0" data-i18n="lab.prov.body">Every figure above is
         read from a committed, checksummed result file. Identical code, configuration and
         seeds reproduce each byte-for-byte within a fixed runtime, and numerically at
         published precision on every platform tested.</p>
-      <details class="def fold" data-fold="narrow"><summary>Artifacts and checksums</summary>
+      <details class="def fold" data-fold="narrow"><summary data-i18n="lab.prov.summary">Artifacts and checksums</summary>
         <div class="chart-wrap"><div id="prov-table"></div></div></details>
     </div>
   </section>
@@ -448,9 +450,9 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
 </main>
 
 <footer><div class="wrap">
-  <p style="margin:0">Simulation output under <span class="mono" id="foot-spec">the frozen methodology specification</span>.
+  <p style="margin:0" data-i18n-html="lab.footer.spec">Simulation output under <span class="mono" id="foot-spec">the frozen methodology specification</span>.
   Reproduce with <span class="mono">python3 research/run_baseline.py</span>.</p>
-  <p style="margin:7px 0 0">The underwriting model elsewhere in this project is a secondary,
+  <p style="margin:7px 0 0" data-i18n-html="lab.footer.model">The underwriting model elsewhere in this project is a secondary,
   <strong>explicitly unvalidated</strong> component with no measured predictive validity,
   and plays no part in anything on this page.</p>
 </div></footer>
@@ -461,8 +463,42 @@ footer{border-top:1px solid var(--hairline);background:var(--surface);padding:22
    and, where monetary, already formatted in integer đồng. The only arithmetic
    here maps a value to a pixel position for a chart axis. */
 
-var STATE={scenario:null,data:null,manifest:null};
+var STATE={scenario:null,data:null,manifest:null,under:null,scenarios:null};
 function el(id){return document.getElementById(id);}
+
+/* ── catalogue access ───────────────────────────────────────────
+   This script is NOT deferred and runs its first render before /i18n.js has
+   loaded a catalogue, so every lookup carries the English string as its
+   fallback. A missing catalogue therefore degrades to the copy that is already
+   in the markup rather than to an empty label. The 'rbf:languagechange' event
+   — dispatched once when the runtime finishes loading, and again on every
+   switch — re-renders whatever this script wrote.
+   The English literal stays the ONLY copy held in code; the Vietnamese lives
+   in i18n/vi.json, keyed identically. */
+function t(key, en, vars){
+  var s = (window.RBF_I18N && window.RBF_I18N.t(key, vars)) || "";
+  if (s) return s;
+  s = (en == null) ? "" : String(en);
+  if (vars) Object.keys(vars).forEach(function(k){
+    s = s.split("{"+k+"}").join(String(vars[k]));
+  });
+  return s;
+}
+
+/* The runtime applies the shared `meta.title` / `meta.description` keys, which
+   belong to the overview. This page has its own, so it rewrites them after
+   every catalogue application. The English fallbacks are read out of the
+   document instead of being repeated here, so they cannot drift from <head>. */
+var PAGE_META_EN = {
+  title: document.title,
+  description: (document.querySelector('meta[name="description"]') || {
+    getAttribute: function(){ return ""; }}).getAttribute("content")
+};
+function applyPageMetadata(){
+  document.title = t('lab.meta.title', PAGE_META_EN.title);
+  var m = document.querySelector('meta[name="description"]');
+  if (m) m.setAttribute("content", t('lab.meta.description', PAGE_META_EN.description));
+}
 function esc(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
 function pct(x,dp){return (x==null)?"—":(x*100).toFixed(dp==null?1:dp)+"%";}
 // A-9: "undefined" is reserved for the case where the rate equation has no
@@ -470,24 +506,35 @@ function pct(x,dp){return (x==null)?"—":(x*100).toFixed(dp==null?1:dp)+"%";}
 // which asserted a causal link that does not exist: closure at month 7 misses
 // the target on every path and still returns about -86.5%. The API supplies
 // the reason, so the page states whichever one actually applies.
+// The reason sentence itself is API copy and is passed through untranslated.
 function apr(a){return a.effective_apr==null
-  ? ("Undefined — " + (a.apr_undefined_reason || "the rate equation has no root"))
+  ? t('lab.value.aprUndefined',"Undefined — {reason}",
+      {reason:(a.apr_undefined_reason || t('lab.value.noRoot',"the rate equation has no root"))})
   : pct(a.effective_apr,2);}
+// Non-completion inside the observation window, NOT a default.
 function dur(a){return a.duration_months_mean==null
-  ? "Not completed within 24 months" : num(a.duration_months_mean,1)+" mo";}
+  ? t('lab.value.notCompleted',"Not completed within 24 months")
+  : t('lab.unit.months',"{n} mo",{n:num(a.duration_months_mean,1)});}
 function num(x,dp){return (x==null)?"—":Number(x).toFixed(dp==null?1:dp);}
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 function armColor(a){return cssVar("--c-"+a.palette)||"#666";}
 
 /* ── states ─────────────────────────────────────────────────── */
-function show(which,detail){
+function show(which,detail,key){
   el("st-loading").hidden = which!=="loading";
   el("st-error").hidden   = which!=="error";
   el("st-unavailable").hidden = which!=="unavailable";
   el("status").hidden = (which==="ready");
   el("content").hidden = (which!=="ready");
   el("summary").hidden = (which!=="ready");
-  if(which==="error"){ el("err-detail").textContent = detail||"Unknown error."; }
+  if(which==="error"){
+    var n = el("err-detail");
+    n.textContent = detail||t('lab.error.unknownDetail',"Unknown error.");
+    /* The displayed message is bound to its key, so a language switch while
+       the error panel is open re-renders it through the declarative pass
+       rather than leaving the reader on the previous language. */
+    if(key) n.setAttribute("data-i18n",key); else n.removeAttribute("data-i18n");
+  }
 }
 el("retry").addEventListener("click",function(){init();});
 
@@ -498,18 +545,28 @@ el("retry").addEventListener("click",function(){init();});
    error-reporting SDKs. User copy is chosen from the STATUS CODE. Diagnostics
    carry the route, the status, and a request id if the server chose to expose
    one in a header — never response content. Exception detail belongs in the
-   server log. */
+   server log.
+
+   Each entry is a [key, English] pair so the copy is still selected by status
+   code, in one table, and is resolved in the reader's language at the moment it
+   is shown rather than at parse time — the catalogue has not loaded yet here. */
 var ERROR_COPY={
-  404:"That scenario is not in the published result set.",
-  429:"Too many requests. Wait a moment and try again.",
-  503:"The research artifacts are not available on this instance.",
-  0:"The server could not be reached. Check your connection and try again."
+  404:['lab.error.404',"That scenario is not in the published result set."],
+  429:['lab.error.429',"Too many requests. Wait a moment and try again."],
+  503:['lab.error.503',"The research artifacts are not available on this instance."],
+  0:['lab.error.network',"The server could not be reached. Check your connection and try again."]
 };
+function userMessageKey(status){
+  if(ERROR_COPY[status]) return ERROR_COPY[status][0];
+  if(status>=500) return 'lab.error.5xx';
+  if(status>=400) return 'lab.error.4xx';
+  return 'lab.error.unknown';
+}
 function userMessage(status){
-  if(ERROR_COPY[status]) return ERROR_COPY[status];
-  if(status>=500) return "The server could not complete this request.";
-  if(status>=400) return "That request could not be completed.";
-  return "Something went wrong loading this page.";
+  if(ERROR_COPY[status]) return t(ERROR_COPY[status][0], ERROR_COPY[status][1]);
+  if(status>=500) return t('lab.error.5xx',"The server could not complete this request.");
+  if(status>=400) return t('lab.error.4xx',"That request could not be completed.");
+  return t('lab.error.unknown',"Something went wrong loading this page.");
 }
 
 /* Only errors WE construct are safe to display. A TypeError from a render
@@ -519,14 +576,20 @@ function userMessage(status){
    the default, so a new throw site is safe until someone marks it otherwise. */
 var PUBLIC_FALLBACK = "The page could not display this research result.";
 
-function safeError(msg, status, code){
+function safeError(msg, status, code, key){
   var e = new Error(msg);
   e.status = status; e.code = code || "http_error"; e.publicSafe = true;
+  // The catalogue key travels with the error so the panel can re-render it in
+  // another language later. It is never a response value.
+  e.i18nKey = key || null;
   return e;
 }
 function publicMessage(e){
   return (e && e.publicSafe === true && typeof e.message === "string" && e.message)
-    ? e.message : PUBLIC_FALLBACK;
+    ? e.message : t('lab.error.publicFallback', PUBLIC_FALLBACK);
+}
+function publicKey(e){
+  return (e && e.publicSafe === true && e.i18nKey) ? e.i18nKey : 'lab.error.publicFallback';
 }
 /* Diagnostics carry identifiers only. Never a response body, never an exception
    message — an uncaught SyntaxError's message contains the offending bytes. */
@@ -538,18 +601,19 @@ async function getJSON(url){
   var r;
   try{ r = await fetch(url, {headers:{"Accept":"application/json"}}); }
   catch(net){ diag(url, 0, "network_error", null);
-              throw safeError(userMessage(0), 0, "network_error"); }
+              throw safeError(userMessage(0), 0, "network_error", userMessageKey(0)); }
   var rid=""; try{ rid = r.headers.get("x-request-id") || ""; }catch(e){}
   if(!r.ok){
     diag(url, r.status, "http_"+r.status, rid);
-    throw safeError(userMessage(r.status), r.status, "http_"+r.status);
+    throw safeError(userMessage(r.status), r.status, "http_"+r.status, userMessageKey(r.status));
   }
   /* A 200 can still carry unparseable bytes. The SyntaxError's message quotes
      them, so it is discarded rather than surfaced. */
   try{ return await r.json(); }
   catch(parse){
     diag(url, r.status, "parse_error", rid);
-    throw safeError("The research data could not be read.", r.status, "parse_error");
+    throw safeError(t('lab.error.parse',"The research data could not be read."),
+                    r.status, "parse_error", 'lab.error.parse');
   }
 }
 
@@ -562,8 +626,11 @@ function renderProvenance(m){
       '<td>'+esc(a.n_paths)+'</td><td>'+esc(a.base_seed)+'</td></tr>';
   }).join("");
   el("prov-table").innerHTML='<table class="data" style="min-width:600px">'+
-    '<thead><tr><th>Role</th><th style="text-align:left">File</th>'+
-    '<th style="text-align:left">SHA-256</th><th>Paths</th><th>Seed</th></tr></thead>'+
+    '<thead><tr><th data-i18n="lab.prov.col.role">'+esc(t('lab.prov.col.role',"Role"))+'</th>'+
+    '<th style="text-align:left" data-i18n="lab.prov.col.file">'+esc(t('lab.prov.col.file',"File"))+'</th>'+
+    '<th style="text-align:left" data-i18n="lab.prov.col.sha">'+esc(t('lab.prov.col.sha',"SHA-256"))+'</th>'+
+    '<th data-i18n="lab.prov.col.paths">'+esc(t('lab.prov.col.paths',"Paths"))+'</th>'+
+    '<th data-i18n="lab.prov.col.seed">'+esc(t('lab.prov.col.seed',"Seed"))+'</th></tr></thead>'+
     '<tbody>'+rows+'</tbody></table>';
   /* Only overwrite the default when there is something real to say. A blank or
      malformed spec_version previously produced "Simulation output under ." */
@@ -580,15 +647,25 @@ function renderProvenance(m){
 }
 
 /* ── scenario selector, grouped ─────────────────────────────── */
-var FAMILY={baseline:"Ordinary trading",favourable:"Favourable",
-            stress:"Stress",closure:"Closure / zero revenue"};
+/* `baseline`/`favourable`/`stress`/`closure` are the API's family VALUES and
+   are never translated — only the group heading a reader sees is. Each label is
+   resolved on call, not at parse time, so a language switch re-reads it. */
+var FAMILY={
+  baseline:   function(){return t('lab.family.baseline',"Ordinary trading");},
+  favourable: function(){return t('lab.family.favourable',"Favourable");},
+  stress:     function(){return t('lab.family.stress',"Stress");},
+  closure:    function(){return t('lab.family.closure',"Closure / zero revenue");}
+};
+function familyLabel(f){ return FAMILY[f](); }
 function renderScenarios(list){
+  STATE.scenarios=list;                // kept so a language switch can re-render
   var byFam={};
   list.forEach(function(s){(byFam[s.family]=byFam[s.family]||[]).push(s);});
   el("scn-groups").innerHTML=Object.keys(FAMILY).filter(function(f){return byFam[f];})
     .map(function(f){
-      return '<div class="scn-group"><h3>'+esc(FAMILY[f])+'</h3><div class="scn" role="group" '+
-        'aria-label="'+esc(FAMILY[f])+' scenarios">'+
+      return '<div class="scn-group"><h3>'+esc(familyLabel(f))+
+        '</h3><div class="scn" role="group" '+
+        'aria-label="'+esc(t('lab.scn.groupLabel',"{family} scenarios",{family:familyLabel(f)}))+'">'+
         byFam[f].map(function(s){
           return '<button type="button" aria-pressed="false" data-k="'+esc(s.key)+'">'+
             esc(s.label)+'</button>';}).join("")+'</div></div>';
@@ -606,13 +683,16 @@ function markSelected(key){
 function renderArms(arms){
   el("arms").innerHTML=arms.map(function(a){
     var p=a.palette;
-    var badge=a.kind==="rbf"?"Revenue-based":"Fixed payment";
+    // `a.kind` is the API's enum value; only its badge label is localised.
+    var badge=a.kind==="rbf"?t('lab.arm.kind.rbf',"Revenue-based")
+                            :t('lab.arm.kind.fixed',"Fixed payment");
     return '<article class="arm '+p+'">'+
       '<span class="tag '+p+'">'+esc(badge)+'</span>'+
       '<h3>'+esc(a.name)+'</h3>'+
       '<dl style="margin:8px 0 0">'+
-        kv("Cap factor", a.cap_factor==null?"none":"×"+num(a.cap_factor,4))+
-        kv("Advance", a.principal.display)+
+        kv(t('lab.arm.capFactor',"Cap factor"),
+           a.cap_factor==null?t('lab.value.none',"none"):"×"+num(a.cap_factor,4))+
+        kv(t('lab.arm.advance',"Advance"), a.principal.display)+
         kv(a.repayment_target.label, a.repayment_target.amount.display)+
         kv(a.apr_label, apr(a))+
         kv(a.duration_label, dur(a))+
@@ -620,25 +700,36 @@ function renderArms(arms){
         // are shown whenever either is partial. Showing the completion share
         // only when recovery is incomplete hid it at exactly 0% completion.
         (a.completed_share<1
-          ? kv("Paths completing within 24 months", pct(a.completed_share,1)) : "")+
+          ? kv(t('lab.arm.pathsCompleting',"Paths completing within 24 months"),
+               pct(a.completed_share,1)) : "")+
         (a.denominators_differ
-          ? kv("Paths with a defined rate", pct(a.apr_defined_share,1)) : "")+
+          ? kv(t('lab.arm.pathsRateDefined',"Paths with a defined rate"),
+               pct(a.apr_defined_share,1)) : "")+
       '</dl>'+
       // The rate's caveat sits next to the rate, not buried: where the target
       // is not reached this is an observed-window figure, not the cost of a
       // repaid contract.
       (a.completed_share<1
-        ? '<p class="small" style="margin:6px 0 0">Observed-window rate — read it beside the completion share above.</p>' : '')+
-      '<details><summary>What this contract is</summary><p>'+esc(a.note)+'</p>'+
+        ? '<p class="small" style="margin:6px 0 0" data-i18n="lab.arm.windowRateNote">'+
+          esc(t('lab.arm.windowRateNote',
+                "Observed-window rate — read it beside the completion share above."))+'</p>' : '')+
+      '<details><summary data-i18n="lab.arm.whatIsThis">'+
+      esc(t('lab.arm.whatIsThis',"What this contract is"))+'</summary><p>'+esc(a.note)+'</p>'+
       '<p><b>'+esc(a.repayment_target.label)+':</b> '+esc(a.repayment_target.basis)+'</p>'+
       // Both bases are rendered. The page previously showed duration_basis
       // only, so the APR's denominator and its observed-window caveat never
       // reached the reader at all -- the exact explanation A-9 exists to give.
-      (a.censored ? '<p><b>How the duration mean is computed:</b> '+esc(a.duration_basis)+'</p>' : '')+
-      '<p><b>How the rate is computed:</b> '+esc(a.apr_basis)+'</p>'+
+      (a.censored ? '<p><b data-i18n="lab.arm.durationBasisLabel">'+
+        esc(t('lab.arm.durationBasisLabel',"How the duration mean is computed:"))+
+        '</b> '+esc(a.duration_basis)+'</p>' : '')+
+      '<p><b data-i18n="lab.arm.aprBasisLabel">'+
+      esc(t('lab.arm.aprBasisLabel',"How the rate is computed:"))+
+      '</b> '+esc(a.apr_basis)+'</p>'+
       '</details></article>';
   }).join("");
 }
+// Labels this page owns arrive here already translated; API-supplied labels
+// (repayment target, rate, duration) are passed through as they arrive.
 function kv(k,v){return '<div class="kv"><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>';}
 
 function renderLegend(arms){
@@ -727,26 +818,46 @@ function groupedBars(svgId, arms, series, fmt, maxOverride){
   svg.innerHTML=(t?t.outerHTML:"")+body;
 }
 
+/* Declared out here because the threshold loop below binds `t` to its own
+   parameter; the threshold keys themselves are never translated. */
+function hpbSeriesLabel(threshold){
+  return t('lab.chart.hpb.series',"Months above {pct}% burden",
+           {pct:(parseFloat(threshold)*100).toFixed(0)});
+}
+function monthsFmt(v){return t('lab.unit.months',"{n} mo",{n:num(v,2)});}
+function recoveryLabel(m){return t('lab.chart.recovery.series',"Recovered by month {m}",{m:m});}
+
 function drawCharts(){
   if(!STATE.data)return;
   var arms=STATE.data.arms;
   groupedBars("chart-burden",arms,[
-    {label:"Mean burden",        value:function(a){return a.burden.mean;}},
-    {label:"90th percentile",    value:function(a){return a.burden.p90;}},
-    {label:"Peak (worst month)", value:function(a){return a.burden.max;}}
+    {label:t('lab.chart.burden.mean',"Mean burden"),   value:function(a){return a.burden.mean;}},
+    {label:t('lab.chart.burden.p90',"90th percentile"),value:function(a){return a.burden.p90;}},
+    {label:t('lab.chart.burden.max',"Peak (worst month)"),value:function(a){return a.burden.max;}}
   ],function(v){return pct(v,1);});
   groupedBars("chart-hpb",arms,["0.1","0.15","0.2","0.25"].map(function(t){
-    return {label:"Months above "+(parseFloat(t)*100).toFixed(0)+"% burden",
+    return {label:hpbSeriesLabel(t),
             value:function(a){return a.high_burden_months[t];}};
-  }),function(v){return num(v,2)+" mo";});
+  }),monthsFmt);
   groupedBars("chart-recovery",arms,[
-    {label:"Recovered by month 12",value:function(a){return a.recovery_ratio["12"];}},
-    {label:"Recovered by month 18",value:function(a){return a.recovery_ratio["18"];}},
-    {label:"Recovered by month 24",value:function(a){return a.recovery_ratio["24"];}}
+    {label:recoveryLabel(12),value:function(a){return a.recovery_ratio["12"];}},
+    {label:recoveryLabel(18),value:function(a){return a.recovery_ratio["18"];}},
+    {label:recoveryLabel(24),value:function(a){return a.recovery_ratio["24"];}}
   ],function(v){return pct(v,1);},1);
 }
 
 /* ── tables ─────────────────────────────────────────────────── */
+/* Columns 2…7 of the settlement table, in table order. "Incomplete recovery"
+   is censoring inside the 24-month window — not a default — and the
+   Vietnamese keeps that distinction. */
+var DUR_COLS=[
+  function(){return t('lab.dur.col.duration',"Mean duration");},
+  function(){return t('lab.dur.col.sd',"SD");},
+  function(){return t('lab.dur.col.completed24',"Completed in 24 mo");},
+  function(){return t('lab.dur.col.target',"Repayment target");},
+  function(){return t('lab.dur.col.totalRepaid',"Mean total repaid");},
+  function(){return t('lab.dur.col.incomplete',"Incomplete recovery");}
+];
 function renderDuration(arms){
   var rows=arms.map(function(a){
     /* The duration cell carries its OWN qualifier. One unconditional column
@@ -754,7 +865,8 @@ function renderDuration(arms){
        differently — at closure_m13 one arm's mean covers 92.4% of paths and
        another's covers 23.8%. */
     var durCell = esc(dur(a)) + (a.censored
-      ? '<br><span class="qual">completed paths only</span>' : '');
+      ? '<br><span class="qual" data-i18n="lab.dur.qual.completedOnly">'+
+        esc(t('lab.dur.qual.completedOnly',"completed paths only"))+'</span>' : '');
     return '<tr><th scope="row">'+esc(a.name)+'</th>'+
       tdRaw(durCell)+td(a.duration_sd==null?"—":"±"+num(a.duration_sd,2))+
       td(a.incomplete_recovery_rate>0?pct(a.completed_share,1):"100.0%")+
@@ -762,33 +874,58 @@ function renderDuration(arms){
       td(a.total_repaid_mean.display)+td(pct(a.incomplete_recovery_rate,1))+'</tr>';
   }).join("");
   el("dur-table").innerHTML='<table class="data">'+
-    '<thead><tr><th>Contract</th><th>Mean duration</th><th>SD</th>'+
-    '<th>Completed in 24 mo</th><th>Repayment target</th>'+
-    '<th>Mean total repaid</th><th>Incomplete recovery</th>'+
+    '<thead><tr><th>'+esc(t('lab.dur.col.contract',"Contract"))+'</th>'+
+    DUR_COLS.map(function(c){ return '<th>'+esc(c())+'</th>'; }).join("")+
     '</tr></thead><tbody>'+rows+'</tbody></table>';
+  paintStackedLabels();
   var sc=el("dur-scroll");
   el("dur-scrollnote").className="scrollnote"+(sc.scrollWidth>sc.clientWidth+1?" on":"");
+}
+
+/* Below 600px the container query stacks each row into a card and prints every
+   cell's label from --l2…--l7 (see the rule above). Those live in CSS, where a
+   catalogue cannot reach, so the SAME six keys the <th> cells use are written
+   onto the generated table as custom properties. One label, one key, two
+   renderings — never a second translation to keep in step. */
+function paintStackedLabels(){
+  var tbl=el("dur-table").querySelector("table");
+  if(!tbl) return;
+  DUR_COLS.forEach(function(c,i){
+    tbl.style.setProperty("--l"+(i+2), '"'+c().replace(/[\\"]/g,"")+'"');
+  });
 }
 function td(t){return '<td>'+esc(t)+'</td>';}
 function tdRaw(h){return '<td>'+h+'</td>';}
 
+/* The classification is an API enum value. It stays untouched in the class
+   name and in the data; only the badge a reader sees is localised, keyed by
+   that value. */
+function clsKey(c){ return 'lab.cls.'+(c||""); }
+function clsLabel(c){ return t(clsKey(c), (c||"").replace(/_/g," ")); }
+
 function renderUnderreporting(u){
+  STATE.under=u;                       // kept so a language switch can re-render
   if(!u){el("s-under").hidden=true;return;}
   el("s-under").hidden=false;
   el("under-why").textContent=u.why_not_a_scenario;
   el("under-table").innerHTML='<table class="data" style="min-width:560px">'+
-    '<thead><tr><th>Revenue the provider observes</th><th>Mean duration</th>'+
-    '<th>Mean simulated APR</th><th>Mean total repaid</th><th>Incomplete recovery</th>'+
+    '<thead><tr><th data-i18n="lab.under.col.observed">'+
+    esc(t('lab.under.col.observed',"Revenue the provider observes"))+'</th>'+
+    '<th data-i18n="lab.dur.col.duration">'+esc(t('lab.dur.col.duration',"Mean duration"))+'</th>'+
+    '<th data-i18n="lab.under.col.apr">'+esc(t('lab.under.col.apr',"Mean simulated APR"))+'</th>'+
+    '<th data-i18n="lab.dur.col.totalRepaid">'+esc(t('lab.dur.col.totalRepaid',"Mean total repaid"))+'</th>'+
+    '<th data-i18n="lab.dur.col.incomplete">'+esc(t('lab.dur.col.incomplete',"Incomplete recovery"))+'</th>'+
     '</tr></thead><tbody>'+u.rows.map(function(r){
-      return '<tr><th scope="row">'+esc(r.observed_share)+' of true revenue</th>'+
-        td(num(r.duration_months_mean,1)+" mo")+td(pct(r.effective_apr,2))+
+      return '<tr><th scope="row">'+
+        esc(t('lab.under.row.ofTrue',"{share} of true revenue",{share:r.observed_share}))+'</th>'+
+        td(t('lab.unit.months',"{n} mo",{n:num(r.duration_months_mean,1)}))+td(pct(r.effective_apr,2))+
         td(r.total_repaid_mean.display)+td(pct(r.incomplete_recovery_rate,1))+'</tr>';
     }).join("")+'</tbody></table>';
   el("under-finding").innerHTML=(u.findings||[]).map(function(f){
     return '<article class="finding" style="margin-top:12px">'+
       '<span class="cls cls-'+esc(f.classification)+'">'+
-      esc(f.classification.replace(/_/g," "))+'</span><p>'+esc(f.text)+'</p>'+
-      '<p class="src">source: '+esc(f.source)+'</p></article>';
+      esc(clsLabel(f.classification))+'</span><p>'+esc(f.text)+'</p>'+
+      '<p class="src">'+esc(t('lab.find.sourcePrefix',"source: "))+esc(f.source)+'</p></article>';
   }).join("");
 }
 
@@ -796,18 +933,23 @@ function renderUnderreporting(u){
 function renderFindings(list){
   el("findings").innerHTML=list.map(function(f){
     return '<article class="finding"><span class="cls cls-'+esc(f.classification)+'">'+
-      esc((f.classification||"").replace(/_/g," "))+'</span><p>'+esc(f.text)+'</p>'+
-      '<p class="src">source: '+esc(f.source)+'</p></article>';
+      esc(clsLabel(f.classification))+'</span><p>'+esc(f.text)+'</p>'+
+      '<p class="src">'+esc(t('lab.find.sourcePrefix',"source: "))+esc(f.source)+'</p></article>';
   }).join("");
 }
+/* Each caveat is this page's lead-in sentence followed by the API's own caveat
+   text. Only the lead-in is translated here; the API prose is passed through. */
 function renderDefs(d){
   el("def-burden").textContent=d.burden.definition+" "+d.burden.why;
-  el("burden-caveat").innerHTML="<strong>Read this with the chart.</strong> "+esc(d.burden.caveat);
+  el("burden-caveat").innerHTML=
+    t('lab.burden.caveatLead',"<strong>Read this with the chart.</strong>")+" "+esc(d.burden.caveat);
   el("def-hpb").textContent=d.high_burden_months.definition+" "+d.high_burden_months.why;
-  el("hpb-caveat").innerHTML="<strong>Thresholds are illustrative.</strong> "+
+  el("hpb-caveat").innerHTML=
+    t('lab.hpb.caveatLead',"<strong>Thresholds are illustrative.</strong>")+" "+
     esc(d.high_burden_months.caveat);
   el("def-recovery").textContent=d.recovery_ratio.definition+" "+d.recovery_ratio.why;
-  el("rec-caveat").innerHTML="<strong>Denominators differ by contract.</strong> "+
+  el("rec-caveat").innerHTML=
+    t('lab.recovery.caveatLead',"<strong>Denominators differ by contract.</strong>")+" "+
     esc(d.recovery_ratio.caveat);
   el("def-dur").textContent=d.duration_months_mean.definition+" "+
     d.duration_months_mean.why+" "+d.incomplete_recovery_rate.caveat;
@@ -860,7 +1002,7 @@ async function select(key){
     if(token !== REQ) return false;           // a newer request owns the page
     setBusy(false);
     if(e && e.publicSafe && e.status === 503) show("unavailable");
-    else show("error", publicMessage(e));
+    else show("error", publicMessage(e), publicKey(e));
     return false;
   }
 }
@@ -910,9 +1052,39 @@ async function init(){
     drawCharts();                   // charts need a laid-out, visible container
   }catch(e){
     if(e && e.publicSafe && e.status===503){show("unavailable");}
-    else{show("error", publicMessage(e));}
+    else{show("error", publicMessage(e), publicKey(e));}
   }
 }
+
+/* ── language ───────────────────────────────────────────────────
+   The runtime re-applies the catalogue over the existing DOM, which covers
+   every data-i18n element — including the ones written above. What it cannot
+   reach is copy composed in script around API values: the scenario group
+   labels, the units and qualifiers inside table cells, the SVG chart labels
+   (whose gutter is MEASURED from the label text, so a longer Vietnamese label
+   needs the bars laid out again) and the stacked-card labels that live in CSS.
+   Those are re-rendered here, from the data already in STATE — nothing is
+   re-fetched, and no API value is recomputed. The event also fires once when
+   the runtime finishes loading, which is what corrects a first render that
+   happened before the catalogue arrived. */
+window.addEventListener("rbf:languagechange",function(){
+  applyPageMetadata();
+  if(STATE.manifest) renderProvenance(STATE.manifest);
+  if(STATE.scenarios){
+    renderScenarios(STATE.scenarios);
+    markSelected(STATE.scenario);      // the selected pill survives the switch
+  }
+  if(STATE.data){
+    renderArms(STATE.data.arms);
+    renderLegend(STATE.data.arms);
+    renderDuration(STATE.data.arms);
+    renderDefs(STATE.data.metric_definitions);
+    renderFindings(STATE.data.findings);
+    drawCharts();
+  }
+  if(STATE.under!==null) renderUnderreporting(STATE.under);
+});
+
 init();
 </script>
 </body>

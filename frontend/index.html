@@ -13,119 +13,121 @@
 <link rel="icon" href="/rbf-mark.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/institutional.css">
+<script src="/i18n.js" defer></script>
 <script src="/overview.js" defer></script>
 </head>
 <body class="overview">
-<a class="rbf-skip" href="#main">Skip to content</a>
-<div class="status-line"><div class="site-width"><span>Independent research &amp; software prototype</span><span>Not a lending service</span></div></div>
+<a class="rbf-skip" href="#main" data-i18n="chrome.skip">Skip to content</a>
+<div class="status-line"><div class="site-width"><span data-i18n="chrome.status.independent">Independent research &amp; software prototype</span><span data-i18n="chrome.status.notLender">Not a lending service</span></div></div>
 <header class="site-header">
   <div class="site-width header-inner">
-    <a class="wordmark" href="/" aria-label="RBF home"><span class="rbf-mark" aria-hidden="true">R</span><span>RBF</span></a>
-    <nav class="desktop-nav" aria-label="Main navigation">
-      <a href="#approach">Approach</a><a href="/lab">Simulation Lab</a><a href="#research">Research</a>
+    <a class="wordmark" href="/" aria-label="RBF home" data-i18n-attr="aria-label:chrome.home"><span class="rbf-mark" aria-hidden="true">R</span><span>RBF</span></a>
+    <nav class="desktop-nav" aria-label="Main navigation" data-i18n-attr="aria-label:chrome.nav.main">
+      <a href="#approach" data-i18n="chrome.nav.approach">Approach</a><a href="/lab" data-i18n="chrome.nav.lab">Simulation Lab</a><a href="#research" data-i18n="chrome.nav.research">Research</a>
     </nav>
-    <a class="header-contact" href="#contact">Discuss the research <span aria-hidden="true">↗</span></a>
-    <button id="menu-toggle" class="menu-toggle" aria-controls="site-menu" aria-expanded="false">Menu <span aria-hidden="true">+</span></button>
+    <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label"><button type="button" data-lang-option="en" aria-pressed="true">English</button><span class="lang-sep" aria-hidden="true">/</span><button type="button" data-lang-option="vi" aria-pressed="false" lang="vi">Tiếng Việt</button></div><a class="header-contact" href="#contact"><span data-i18n="chrome.nav.contact">Discuss the research</span> <span aria-hidden="true">↗</span></a>
+    <button id="menu-toggle" class="menu-toggle" aria-controls="site-menu" aria-expanded="false"><span data-i18n="chrome.menu">Menu</span> <span aria-hidden="true">+</span></button>
   </div>
-  <nav id="site-menu" class="site-menu" aria-label="Mobile navigation" hidden>
-    <a href="#approach">Approach</a><a href="/lab">Simulation Lab</a><a href="#research">Research</a><a href="#contact">Discuss the research</a><a href="/demo.html">Interactive prototype</a>
+  <nav id="site-menu" class="site-menu" aria-label="Mobile navigation" data-i18n-attr="aria-label:chrome.nav.mobile" hidden>
+    <a href="#approach" data-i18n="chrome.nav.approach">Approach</a><a href="/lab" data-i18n="chrome.nav.lab">Simulation Lab</a><a href="#research" data-i18n="chrome.nav.research">Research</a><a href="#contact" data-i18n="chrome.nav.contact">Discuss the research</a><a href="/demo.html" data-i18n="chrome.nav.prototype">Interactive prototype</a>
+    <div class="lang-switch lang-switch-menu" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label"><button type="button" data-lang-option="en" aria-pressed="true">English</button><span class="lang-sep" aria-hidden="true">/</span><button type="button" data-lang-option="vi" aria-pressed="false" lang="vi">Tiếng Việt</button></div>
   </nav>
 </header>
 
 <main id="main">
   <section class="intro site-width" aria-labelledby="intro-title">
     <div class="intro-copy">
-      <p class="eyeline"><span class="short-rule" aria-hidden="true"></span>Revenue-based financing</p>
-      <h1 id="intro-title">A clearer view<br>of the <em>contract.</em></h1>
-      <p class="intro-lead">When revenue changes, the contract matters.<br class="desktop-break"> Understand the mechanics on both sides.</p>
-      <p class="intro-context">RBF studies how financing structures behave under volatile sales, motivated by Vietnamese e-commerce. Research and software—not a credit recommendation.</p>
-      <div class="intro-actions"><a class="action action-dark" href="/lab">Explore the Simulation Lab <span aria-hidden="true">↗</span></a><a class="underlink" href="#research">Read the research</a></div>
+      <p class="eyeline"><span class="short-rule" aria-hidden="true"></span><span data-i18n="hero.eyeline">Revenue-based financing</span></p>
+      <h1 id="intro-title" data-i18n-html="hero.title">A clearer view<br>of the <em>contract.</em></h1>
+      <p class="intro-lead" data-i18n-html="hero.lead">When revenue changes, the contract matters.<br class="desktop-break"> Understand the mechanics on both sides.</p>
+      <p class="intro-context" data-i18n="hero.context">RBF studies how financing structures behave under volatile sales, motivated by Vietnamese e-commerce. Research and software—not a credit recommendation.</p>
+      <div class="intro-actions"><a class="action action-dark" href="/lab"><span data-i18n="hero.cta.lab">Explore the Simulation Lab</span> <span aria-hidden="true">↗</span></a><a class="underlink" href="#research" data-i18n="hero.cta.research">Read the research</a></div>
     </div>
 
     <figure class="contract-figure" aria-labelledby="figure-title" aria-describedby="figure-caption">
-      <div class="figure-heading"><span>THE CONTRACT IN MOTION</span><span class="figure-index">01 / CONCEPT</span></div>
-      <h2 id="figure-title">One revenue path.<br>Two payment structures.</h2>
-      <div class="figure-controls" role="group" aria-label="Conceptual revenue path">
-        <button type="button" data-shape="steady" aria-pressed="false">Steady</button>
-        <button type="button" data-shape="decline" aria-pressed="true">Decline</button>
-        <button type="button" data-shape="interruption" aria-pressed="false">Interruption</button>
+      <div class="figure-heading"><span data-i18n="figure.heading">THE CONTRACT IN MOTION</span><span class="figure-index" data-i18n="figure.index">01 / CONCEPT</span></div>
+      <h2 id="figure-title" data-i18n-html="figure.title">One revenue path.<br>Two payment structures.</h2>
+      <div class="figure-controls" role="group" aria-label="Conceptual revenue path" data-i18n-attr="aria-label:figure.controls.label">
+        <button type="button" data-shape="steady" aria-pressed="false" data-i18n="figure.shape.steady">Steady</button>
+        <button type="button" data-shape="decline" aria-pressed="true" data-i18n="figure.shape.decline">Decline</button>
+        <button type="button" data-shape="interruption" aria-pressed="false" data-i18n="figure.shape.interruption">Interruption</button>
       </div>
       <svg id="contract-chart" viewBox="0 0 520 245" role="img" aria-labelledby="chart-title chart-desc">
-        <title id="chart-title">Conceptual decline: revenue-share payments fall with revenue; the fixed payment does not.</title>
-        <desc id="chart-desc">All series are indexed to their own initial level. This is an explanatory diagram, not a simulation result.</desc>
+        <title id="chart-title" data-i18n="figure.chart.title.decline">Conceptual decline: revenue-share payments fall with revenue; the fixed payment does not.</title>
+        <desc id="chart-desc" data-i18n="figure.chart.desc">All series are indexed to their own initial level. This is an explanatory diagram, not a simulation result.</desc>
         <g class="chart-grid"><path d="M30 40H490 M30 100H490 M30 160H490 M30 205H490"/></g>
         <path id="chart-area" d="M30 40L122 40L214 100L306 100L398 100L490 100L490 205L30 205Z" class="chart-area"/>
         <path d="M30 40H490" class="chart-fixed"/>
         <path id="chart-share" d="M30 40L122 40L214 100L306 100L398 100L490 100" class="chart-share"/>
         <circle id="chart-end" cx="490" cy="100" r="5" class="chart-end"/>
-        <g class="chart-axis"><text x="30" y="233">START</text><text x="490" y="233" text-anchor="end">TIME →</text></g>
+        <g class="chart-axis"><text x="30" y="233" data-i18n="figure.axis.start">START</text><text x="490" y="233" text-anchor="end" data-i18n="figure.axis.time">TIME →</text></g>
       </svg>
-      <div class="figure-legend"><span><i class="legend-line fixed" aria-hidden="true"></i>Fixed payment</span><span><i class="legend-line share" aria-hidden="true"></i>Revenue-share payment</span></div>
-      <p id="shape-description" class="shape-description" aria-live="polite">As revenue falls, an uncapped revenue-share payment falls with it. A fixed payment stays unchanged.</p>
-      <figcaption id="figure-caption">Conceptual illustration, not research output. Each series is indexed to its own starting level. Excludes cap clipping, rounding and settlement. A fixed net-sales/GMV ratio is assumed.</figcaption>
-      <noscript><p class="no-script-note">The decline example is shown. Interactive selection requires JavaScript; the research links work without it.</p></noscript>
+      <div class="figure-legend"><span><i class="legend-line fixed" aria-hidden="true"></i><span data-i18n="figure.legend.fixed">Fixed payment</span></span><span><i class="legend-line share" aria-hidden="true"></i><span data-i18n="figure.legend.share">Revenue-share payment</span></span></div>
+      <p id="shape-description" class="shape-description" aria-live="polite" data-i18n="figure.shape.decline.desc">As revenue falls, an uncapped revenue-share payment falls with it. A fixed payment stays unchanged.</p>
+      <figcaption id="figure-caption" data-i18n="figure.caption">Conceptual illustration, not research output. Each series is indexed to its own starting level. Excludes cap clipping, rounding and settlement. A fixed net-sales/GMV ratio is assumed.</figcaption>
+      <noscript><p class="no-script-note" data-i18n="figure.noscript">The decline example is shown. Interactive selection requires JavaScript; the research links work without it.</p></noscript>
     </figure>
   </section>
 
-  <div class="scope-band"><div class="site-width scope-inner"><p>Understand the structure.<br><strong>Keep the assumptions visible.</strong></p><ul><li>Contract mechanics</li><li>Scenario analysis</li><li>Reproducible research</li></ul></div></div>
+  <div class="scope-band"><div class="site-width scope-inner"><p data-i18n-html="scope.lead">Understand the structure.<br><strong>Keep the assumptions visible.</strong></p><ul><li data-i18n="scope.item1">Contract mechanics</li><li data-i18n="scope.item2">Scenario analysis</li><li data-i18n="scope.item3">Reproducible research</li></ul></div></div>
 
   <section class="approach-section site-width" id="approach" aria-labelledby="approach-title">
-    <div class="section-heading"><p class="eyeline">01 / Approach</p><h2 id="approach-title">The terms are only<br>half the story.</h2><p>A financing contract connects payments to a business that changes over time. RBF examines that connection without treating a model as evidence of what real merchants will do.</p></div>
+    <div class="section-heading"><p class="eyeline" data-i18n="approach.eyeline">01 / Approach</p><h2 id="approach-title" data-i18n-html="approach.title">The terms are only<br>half the story.</h2><p data-i18n="approach.lead">A financing contract connects payments to a business that changes over time. RBF examines that connection without treating a model as evidence of what real merchants will do.</p></div>
     <div class="approach-rows">
-      <article><span class="row-number">01</span><div><h3>Start with the contract.</h3><p>Identify the advance, remittance basis, payment schedule and repayment target. A cap factor describes a target—not an annual interest rate.</p></div></article>
-      <article><span class="row-number">02</span><div><h3>Change the revenue path.</h3><p>Inspect stable trading, declining sales and closure scenarios. Observe how the specified payment rules respond under the model’s assumptions.</p></div></article>
-      <article><span class="row-number">03</span><div><h3>Read both sides.</h3><p>Consider seller payment burden alongside provider recovery. Payment as a share of revenue does not establish affordability; incomplete target recovery is not a default prediction.</p></div></article>
+      <article><span class="row-number">01</span><div><h3 data-i18n="approach.1.title">Start with the contract.</h3><p data-i18n="approach.1.body">Identify the advance, remittance basis, payment schedule and repayment target. A cap factor describes a target—not an annual interest rate.</p></div></article>
+      <article><span class="row-number">02</span><div><h3 data-i18n="approach.2.title">Change the revenue path.</h3><p data-i18n="approach.2.body">Inspect stable trading, declining sales and closure scenarios. Observe how the specified payment rules respond under the model’s assumptions.</p></div></article>
+      <article><span class="row-number">03</span><div><h3 data-i18n="approach.3.title">Read both sides.</h3><p data-i18n="approach.3.body">Consider seller payment burden alongside provider recovery. Payment as a share of revenue does not establish affordability; incomplete target recovery is not a default prediction.</p></div></article>
     </div>
   </section>
 
   <section class="lab-feature" aria-labelledby="lab-title"><div class="site-width lab-feature-inner">
-    <div class="lab-feature-copy"><p class="eyeline">02 / Simulation Lab</p><h2 id="lab-title">Follow the result<br>back to its assumptions.</h2><p>Compare fixed-payment and revenue-based contracts using registered simulation outputs. Each scenario brings the burden, recovery and settlement views together.</p><a class="action action-light" href="/lab">Open the Lab <span aria-hidden="true">↗</span></a></div>
+    <div class="lab-feature-copy"><p class="eyeline" data-i18n="lab.eyeline">02 / Simulation Lab</p><h2 id="lab-title" data-i18n-html="lab.title">Follow the result<br>back to its assumptions.</h2><p data-i18n="lab.lead">Compare fixed-payment and revenue-based contracts using registered simulation outputs. Each scenario brings the burden, recovery and settlement views together.</p><a class="action action-light" href="/lab"><span data-i18n="lab.cta">Open the Lab</span> <span aria-hidden="true">↗</span></a></div>
     <div class="lab-index">
-      <a href="/lab#s-arms"><span>01</span><div><h3>Contracts</h3><p>What each repayment rule requires</p></div><b aria-hidden="true">↗</b></a>
-      <a href="/lab#s-burden"><span>02</span><div><h3>Payment burden</h3><p>The payment relative to modelled revenue</p></div><b aria-hidden="true">↗</b></a>
-      <a href="/lab#s-recovery"><span>03</span><div><h3>Provider recovery</h3><p>How much of the target is recovered, and when</p></div><b aria-hidden="true">↗</b></a>
-      <p class="lab-boundary">Simulation only. No observed seller repayment outcomes. Parameters are not estimates for the Vietnamese merchant population.</p>
+      <a href="/lab#s-arms"><span>01</span><div><h3 data-i18n="lab.idx1.title">Contracts</h3><p data-i18n="lab.idx1.body">What each repayment rule requires</p></div><b aria-hidden="true">↗</b></a>
+      <a href="/lab#s-burden"><span>02</span><div><h3 data-i18n="lab.idx2.title">Payment burden</h3><p data-i18n="lab.idx2.body">The payment relative to modelled revenue</p></div><b aria-hidden="true">↗</b></a>
+      <a href="/lab#s-recovery"><span>03</span><div><h3 data-i18n="lab.idx3.title">Provider recovery</h3><p data-i18n="lab.idx3.body">How much of the target is recovered, and when</p></div><b aria-hidden="true">↗</b></a>
+      <p class="lab-boundary" data-i18n="lab.boundary">Simulation only. No observed seller repayment outcomes. Parameters are not estimates for the Vietnamese merchant population.</p>
     </div>
   </div></section>
 
   <section class="research-section site-width" id="research" aria-labelledby="research-title">
-    <div class="section-topline"><p class="eyeline">03 / Research library</p><span>Read the argument. Inspect the evidence.</span></div>
+    <div class="section-topline"><p class="eyeline" data-i18n="research.eyeline">03 / Research library</p><span data-i18n="research.topline">Read the argument. Inspect the evidence.</span></div>
     <div class="research-layout">
       <article class="paper-feature">
         <div class="paper-spine" aria-hidden="true"><span>RBF</span><span>RESEARCH<br>2026</span></div>
-        <div><p class="eyeline">Independent working paper</p><h2 id="research-title">Revenue-contingent financing under volatile sales.</h2><p>A model-based comparison of repayment structures, with the assumptions and limits stated alongside the findings.</p><div class="paper-links"><a href="https://github.com/hoangle0919/sellerflow/blob/main/research/publication/reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf">English paper <span>↗</span></a><a lang="vi" href="https://github.com/hoangle0919/sellerflow/blob/main/research/publication/reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf">Bài nghiên cứu tiếng Việt <span>↗</span></a></div></div>
+        <div><p class="eyeline" data-i18n="research.paper.eyeline">Independent working paper</p><h2 id="research-title" data-i18n="research.paper.title">Revenue-contingent financing under volatile sales.</h2><p data-i18n="research.paper.body">A model-based comparison of repayment structures, with the assumptions and limits stated alongside the findings.</p><div class="paper-links"><a href="https://github.com/hoangle0919/sellerflow/blob/main/research/publication/reader_editions/papers/Revenue_Contingent_Financing_Professional_Paper.pdf"><span data-i18n="research.paper.en">English paper</span> <span>↗</span></a><a lang="vi" href="https://github.com/hoangle0919/sellerflow/blob/main/research/publication/reader_editions/papers/Tai_Tro_Hoan_Tra_Theo_Doanh_Thu_Bai_Nghien_Cuu.pdf"><span data-i18n="research.paper.vi">Bài nghiên cứu tiếng Việt</span> <span>↗</span></a></div></div>
       </article>
       <div class="research-resources">
-        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/publication/REPRODUCIBILITY_SUPPLEMENT.md"><span class="resource-label">SUPPLEMENT</span><h3>Verify the work <span aria-hidden="true">↗</span></h3><p>Artifact references, checksums and reproduction instructions.</p></a>
-        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DECISION_LOG.md"><span class="resource-label">DECISION RECORD</span><h3>See what changed <span aria-hidden="true">↗</span></h3><p>The corrections and methodological decisions behind the study.</p></a>
-        <a href="https://github.com/hoangle0919/sellerflow"><span class="resource-label">SOURCE</span><h3>Inspect the code <span aria-hidden="true">↗</span></h3><p>The public repository. Research and product code are distinct layers.</p></a>
+        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/publication/REPRODUCIBILITY_SUPPLEMENT.md"><span class="resource-label" data-i18n="research.res1.label">SUPPLEMENT</span><h3><span data-i18n="research.res1.title">Verify the work</span> <span aria-hidden="true">↗</span></h3><p data-i18n="research.res1.body">Artifact references, checksums and reproduction instructions.</p></a>
+        <a href="https://github.com/hoangle0919/sellerflow/blob/main/research/DECISION_LOG.md"><span class="resource-label" data-i18n="research.res2.label">DECISION RECORD</span><h3><span data-i18n="research.res2.title">See what changed</span> <span aria-hidden="true">↗</span></h3><p data-i18n="research.res2.body">The corrections and methodological decisions behind the study.</p></a>
+        <a href="https://github.com/hoangle0919/sellerflow"><span class="resource-label" data-i18n="research.res3.label">SOURCE</span><h3><span data-i18n="research.res3.title">Inspect the code</span> <span aria-hidden="true">↗</span></h3><p data-i18n="research.res3.body">The public repository. Research and product code are distinct layers.</p></a>
       </div>
     </div>
   </section>
 
   <section class="status-section" aria-labelledby="status-title"><div class="site-width">
-    <div class="section-topline"><p class="eyeline">04 / Development status</p><h2 id="status-title">Built, and being considered.</h2></div>
+    <div class="section-topline"><p class="eyeline" data-i18n="status.eyeline">04 / Development status</p><h2 id="status-title" data-i18n="status.title">Built, and being considered.</h2></div>
     <div class="status-columns">
-      <article><span class="status-tag">AVAILABLE TO EXPLORE</span><h3>The research prototype</h3><p>The existing demonstration combines an active scorer, rule-based checks and financing calculations. The scorer is an ensemble when its artifact loads, otherwise a heuristic. Neither path has measured predictive validity.</p><p>Its synthetic benchmark remains withdrawn. Scoring is not used to generate the Simulation Lab’s research results.</p><a class="underlink" href="/demo.html">Open the interactive prototype <span aria-hidden="true">↗</span></a></article>
-      <article><span class="status-tag status-outline">PROPOSED / NOT AVAILABLE</span><h3>Retrospective contract evaluation</h3><p>A separate, proposed tool would apply specified contracts to supplied revenue histories, with observed payments kept distinct from hypothetical cash flows.</p><p>No ingestion service or lender pilot is offered here. Construction awaits a reviewed specification; real data requires separate permissions and security review.</p><a class="underlink" href="#contact">Discuss the proposed scope <span aria-hidden="true">↗</span></a></article>
+      <article><span class="status-tag" data-i18n="status.a.tag">AVAILABLE TO EXPLORE</span><h3 data-i18n="status.a.title">The research prototype</h3><p data-i18n="status.a.body1">The existing demonstration combines an active scorer, rule-based checks and financing calculations. The scorer is an ensemble when its artifact loads, otherwise a heuristic. Neither path has measured predictive validity.</p><p data-i18n="status.a.body2">Its synthetic benchmark remains withdrawn. Scoring is not used to generate the Simulation Lab’s research results.</p><a class="underlink" href="/demo.html"><span data-i18n="status.a.cta">Open the interactive prototype</span> <span aria-hidden="true">↗</span></a></article>
+      <article><span class="status-tag status-outline" data-i18n="status.b.tag">PROPOSED / NOT AVAILABLE</span><h3 data-i18n="status.b.title">Retrospective contract evaluation</h3><p data-i18n="status.b.body1">A separate, proposed tool would apply specified contracts to supplied revenue histories, with observed payments kept distinct from hypothetical cash flows.</p><p data-i18n="status.b.body2">No ingestion service or lender pilot is offered here. Construction awaits a reviewed specification; real data requires separate permissions and security review.</p><a class="underlink" href="#contact"><span data-i18n="status.b.cta">Discuss the proposed scope</span> <span aria-hidden="true">↗</span></a></article>
     </div>
   </div></section>
 
   <section class="questions-section site-width" aria-labelledby="questions-title">
-    <div><p class="eyeline">Scope &amp; limitations</p><h2 id="questions-title">A few important<br>distinctions.</h2></div>
+    <div><p class="eyeline" data-i18n="questions.eyeline">Scope &amp; limitations</p><h2 id="questions-title" data-i18n-html="questions.title">A few important<br>distinctions.</h2></div>
     <div class="question-list">
-      <details><summary>Is RBF a lender?<span aria-hidden="true">+</span></summary><p>No. RBF holds no capital, makes no credit offers and is not a lending service. It is independent research and a software demonstration.</p></details>
-      <details><summary>Does the study predict who will repay?<span aria-hidden="true">+</span></summary><p>No. It examines contractual mechanics under specified revenue scenarios. It does not establish creditworthiness, predict default or assess suitability for a particular merchant.</p></details>
-      <details><summary>Do these scenarios describe Vietnamese merchants?<span aria-hidden="true">+</span></summary><p>No. Vietnamese e-commerce motivates the research, but the scenario parameters are modelling assumptions, not estimates from a representative seller dataset.</p></details>
-      <details><summary>Can I upload merchant records?<span aria-hidden="true">+</span></summary><p>Not here. There is no historical-record upload on this website. Use synthetic examples only in the prototype; its submission flow can store records and send administrator notifications.</p></details>
+      <details><summary><span data-i18n="questions.q1">Is RBF a lender?</span><span aria-hidden="true">+</span></summary><p data-i18n="questions.a1">No. RBF holds no capital, makes no credit offers and is not a lending service. It is independent research and a software demonstration.</p></details>
+      <details><summary><span data-i18n="questions.q2">Does the study predict who will repay?</span><span aria-hidden="true">+</span></summary><p data-i18n="questions.a2">No. It examines contractual mechanics under specified revenue scenarios. It does not establish creditworthiness, predict default or assess suitability for a particular merchant.</p></details>
+      <details><summary><span data-i18n="questions.q3">Do these scenarios describe Vietnamese merchants?</span><span aria-hidden="true">+</span></summary><p data-i18n="questions.a3">No. Vietnamese e-commerce motivates the research, but the scenario parameters are modelling assumptions, not estimates from a representative seller dataset.</p></details>
+      <details><summary><span data-i18n="questions.q4">Can I upload merchant records?</span><span aria-hidden="true">+</span></summary><p data-i18n="questions.a4">Not here. There is no historical-record upload on this website. Use synthetic examples only in the prototype; its submission flow can store records and send administrator notifications.</p></details>
     </div>
   </section>
 
   <section class="contact-section" id="contact" aria-labelledby="contact-title"><div class="site-width contact-inner">
-    <div><p class="eyeline">Start with a specific question</p><h2 id="contact-title">What would you<br>want to examine?</h2></div>
-    <div><p>If you work with merchant financing, I’d like to understand which contract questions are hardest to evaluate—and whether this research could be useful.</p><a class="action action-dark" href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20research%20discussion">Contact Hoang Le <span aria-hidden="true">↗</span></a><p class="contact-note">An exploratory conversation, not an offer of credit or a live pilot. Please do not send confidential merchant records.</p></div>
+    <div><p class="eyeline" data-i18n="contact.eyeline">Start with a specific question</p><h2 id="contact-title" data-i18n-html="contact.title">What would you<br>want to examine?</h2></div>
+    <div><p data-i18n="contact.body">If you work with merchant financing, I’d like to understand which contract questions are hardest to evaluate—and whether this research could be useful.</p><a class="action action-dark" href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20research%20discussion"><span data-i18n="contact.cta">Contact Hoang Le</span> <span aria-hidden="true">↗</span></a><p class="contact-note" data-i18n="contact.note">An exploratory conversation, not an offer of credit or a live pilot. Please do not send confidential merchant records.</p></div>
   </div></section>
 </main>
-<footer class="site-footer"><div class="site-width"><div class="footer-main"><a class="wordmark" href="/"><span class="rbf-mark" aria-hidden="true">R</span>RBF</a><p>Revenue-based financing.<br>Examined, not assumed.</p><nav aria-label="Footer navigation"><a href="/lab">Simulation Lab</a><a href="#research">Research</a><a href="/demo.html">Prototype</a><a href="/demo.html#privacy">Data handling</a></nav></div><div class="footer-bottom"><span>© 2026 Hoang Le · Independent research</span><span>No credit recommendation. No financial advice.</span></div></div></footer>
+<footer class="site-footer"><div class="site-width"><div class="footer-main"><a class="wordmark" href="/"><span class="rbf-mark" aria-hidden="true">R</span>RBF</a><p data-i18n-html="footer.tagline">Revenue-based financing.<br>Examined, not assumed.</p><nav aria-label="Footer navigation" data-i18n-attr="aria-label:footer.nav"><a href="/lab" data-i18n="chrome.nav.lab">Simulation Lab</a><a href="#research" data-i18n="chrome.nav.research">Research</a><a href="/demo.html" data-i18n="chrome.nav.prototype">Prototype</a><a href="/demo.html#privacy" data-i18n="footer.data">Data handling</a></nav></div><div class="footer-bottom"><span data-i18n="footer.copyright">© 2026 Hoang Le · Independent research</span><span data-i18n="footer.disclaimer">No credit recommendation. No financial advice.</span></div></div></footer>
 </body>
 </html>

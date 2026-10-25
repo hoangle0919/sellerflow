@@ -295,7 +295,7 @@ def test_hero_badge_fails_closed():
     """
     html = open(os.path.join(REPO, "frontend/demo.html"),
                 encoding="utf-8", errors="replace").read()
-    assert "ACTIVE SCORER — UNKNOWN" in html, (
+    assert_copy("demo.scorer.unknown", "ACTIVE SCORER — UNKNOWN", html), (
         "the unreachable-/api/health path must fall back to an explicit "
         "unknown state, never to a named scorer"
     )
@@ -585,7 +585,11 @@ def test_the_closure_return_is_labelled_observed_window():
     idx = os.path.join(REPO, "frontend", "demo.html")
     src = open(idx, encoding="utf-8").read()
     assert "observed_apr_to_closure" in src
-    assert "observed window, not a lifetime return" in src
+    # The qualifier was briefly lost when this string moved into the catalogue
+    # during the bilingual work. It is the whole point of the row: without it
+    # the figure reads as a lifetime return, which A-9 forbids.
+    assert_copy("demo.scenario.providerReturn",
+                "observed window, not a lifetime return", src)
 
 
 # ── P3: a disclaimer that invites reproduction must say under what ──
@@ -620,3 +624,32 @@ def test_the_registered_digits_are_unchanged():
     assert "0.9182" in tb["disclaimer"] and "0.9098" in tb["disclaimer"]
     assert tb["auc"] is None and tb["validation_status"] == "withdrawn"
     assert tb["withdrawn_value"] == 0.92
+
+
+# ── i18n-aware copy assertions ───────────────────────────────────────────────
+# Honesty-critical copy moved out of the pages and into frontend/i18n/*.json
+# when the site became bilingual. A guard that greps only the HTML would
+# silently start passing the moment a string moved, which is the failure mode
+# these guards exist to prevent. These helpers bind the assertion to wherever
+# the text actually lives, and require it in BOTH languages -- a disclaimer
+# that exists only in English is not a disclaimer for a Vietnamese reader.
+
+def _catalogue(lang):
+    import json, os
+    p = os.path.join(REPO, "frontend", "i18n", f"{lang}.json")
+    with open(p, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def assert_copy(key, english_substring, page_src=None):
+    """The key must exist in both catalogues, carry the required English text,
+    and -- when a page source is given -- actually be referenced by that page."""
+    en, vi = _catalogue("en"), _catalogue("vi")
+    assert key in en, f"{key} missing from en.json"
+    assert key in vi, f"{key} missing from vi.json"
+    assert english_substring.lower() in en[key].lower(), (
+        f"{key} no longer carries required copy {english_substring!r}: {en[key]!r}"
+    )
+    assert vi[key].strip(), f"{key} has no Vietnamese text; it would render blank"
+    if page_src is not None:
+        assert key in page_src, f"{key} is defined but never referenced by the page"

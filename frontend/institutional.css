@@ -217,3 +217,32 @@
 @media(max-width:540px){.site-width{width:calc(100% - 40px)}.status-line{font-size:9px;letter-spacing:0}.status-line>div{gap:15px;padding-block:9px}.status-line span:first-child{max-width:180px}.status-line span:last-child{text-align:right;max-width:100px}.intro{padding-top:36px;gap:32px}.intro h1{font-size:clamp(44px,13.6vw,57px)}.intro .eyeline{font-size:9px;letter-spacing:.1em;margin-bottom:22px}.intro-lead{font-size:18px;margin-top:24px!important}.desktop-break{display:none}.intro-context{font-size:13px}.intro-actions{align-items:start;gap:16px;margin-top:26px}.intro .action{font-size:12px;width:100%;padding:14px 18px}.contract-figure{padding:22px 20px 20px}.figure-heading{font-size:8px;letter-spacing:.08em}.contract-figure h2{font-size:29px;margin-block:24px 20px}.figure-controls button{font-size:10px;padding:11px 7px}.figure-legend{font-size:9px;gap:9px 16px}.shape-description{min-height:83px;font-size:12px}.contract-figure figcaption{font-size:10px}.scope-inner{display:block;padding-block:24px}.scope-inner p{font-size:13px}.scope-inner ul{display:flex;flex-wrap:wrap;margin-top:20px;gap:10px 20px;font-size:11px}.scope-inner li{padding:0 0 0 12px}.approach-section{padding-block:48px}.section-heading h2,.lab-feature h2,.contact-section h2{font-size:36px}.section-heading>p:last-child{font-size:14px}.approach-rows article{gap:16px;grid-template-columns:20px 1fr}.approach-rows h3{font-size:19px}.approach-rows p{font-size:13px}.lab-feature-inner{padding-block:45px}.lab-index a{gap:14px;padding-block:22px}.lab-index h3{font-size:20px}.lab-index a p{font-size:11px}.research-section{padding-block:46px}.paper-feature{grid-template-columns:38px 1fr;gap:20px}.paper-spine{padding:16px 6px;border-left-width:3px}.paper-spine>span:first-child{font-size:15px}.paper-spine>span:last-child{font-size:7px}.paper-feature h2{font-size:30px}.paper-feature p:not(.eyeline){font-size:13px}.paper-feature .eyeline{font-size:9px}.paper-links a{font-size:11px}.research-resources{display:block}.research-resources a{padding-block:18px!important}.research-resources h3{font-size:20px}.status-section .section-topline h2{font-size:28px}.status-columns{grid-template-columns:1fr;gap:32px}.status-columns article+article{padding:28px 0 0;border-left:0;border-top:1px solid #bcc7c9}.questions-section h2{font-size:33px}.question-list summary{font-size:14px}.question-list details{padding-block:18px}.contact-inner>div>p:not(.eyeline):not(.contact-note){font-size:14px}.footer-main{flex-wrap:wrap;gap:24px}.footer-main p{margin-left:auto;font-size:11px}.footer-main nav{width:100%;margin:0;grid-template-columns:1fr 1fr;gap:14px}.footer-bottom{flex-direction:column;gap:8px;font-size:9px}.prototype .brand{font-size:20px}.prototype .nav-actions .btn{font-size:10px;padding:9px 10px}.prototype .nav>.wrap{gap:10px;min-height:68px}.prototype .proof-head{flex-wrap:wrap;gap:6px}.prototype .hero{padding-block:34px}.prototype .hero h1{font-size:36px}.prototype .hero-body{font-size:14px}.prototype .proof-body{padding:18px}.prototype .prototype-details{padding:18px}.prototype .prototype-details>summary{font-size:16px}.lab-navigation .wordmark{font-size:20px}.lab-navigation .lab-nav-links{font-size:11px;gap:13px}.lab-navigation .rbf-mark{width:30px;height:34px;font-size:24px}.lab-shell header.hero{padding-block:32px 24px}.lab-shell .banner{font-size:11px}.lab-shell .summary{position:static}.lab-shell .card{padding:16px}.lab-shell .qbox{padding:14px 16px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media print{.site-header,.status-line,.site-menu,.menu-toggle,.intro-actions,.figure-controls{display:none!important}.overview{background:#fff}.site-width{width:100%}.intro,.approach-section,.research-layout,.contact-inner{display:block}.contract-figure{break-inside:avoid;margin-top:25px;print-color-adjust:exact}.overview section{padding-block:24px}.lab-feature,.site-footer{print-color-adjust:exact}.research-resources{margin-top:25px}.overview a{text-decoration:underline}}
+
+/* ── Language switch ────────────────────────────────────────────────────────
+   Text labels, never flags: a flag names a country, not a language, and
+   Vietnamese is not a flag. `.header-contact` already carries margin-left:auto,
+   so the switch claims the free space and the contact link follows it; both
+   existing rules are left untouched. */
+.lang-switch{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.02em}
+.lang-switch + .header-contact{margin-left:24px}
+.lang-switch button{border:0;background:none;padding:6px 2px;font:inherit;color:var(--muted-ink);cursor:pointer;border-bottom:1px solid transparent}
+.lang-switch button:hover{color:var(--navy)}
+.lang-switch button[aria-pressed="true"]{color:var(--navy);font-weight:600;border-bottom-color:var(--navy)}
+.lang-switch button:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+.lang-sep{color:var(--line)}
+.lang-switch-menu{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:13px}
+.lang-switch-menu button{padding:10px 2px}
+
+@media (max-width:820px){
+  .site-header .lang-switch:not(.lang-switch-menu){display:none}
+  .lang-switch + .header-contact{margin-left:0}
+}
+
+/* ── Amount display (VND / VND + ≈ USD) ──────────────────────────────────── */
+.fx-line{display:block;font-size:.82em;color:var(--muted-ink);margin-top:2px}
+.fx-note{font-size:11px;color:var(--muted-ink);line-height:1.5}
+.fx-warn{color:#8a6d3b}
+.fx-switch{display:inline-flex;align-items:center;gap:8px;font-size:12px}
+.fx-switch button{border:0;background:none;padding:6px 2px;font:inherit;color:var(--muted-ink);cursor:pointer;border-bottom:1px solid transparent}
+.fx-switch button[aria-pressed="true"]{color:var(--navy);font-weight:600;border-bottom-color:var(--navy)}
+.fx-switch button:focus-visible{outline:2px solid var(--navy);outline-offset:3px}

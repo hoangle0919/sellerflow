@@ -260,6 +260,20 @@ def public_config():
     return {"stripe_payment_link": STRIPE_PAYMENT_LINK}
 
 
+@app.get("/api/fx")
+def fx_quote(request: Request):
+    """Display metadata for the USD reference rate. Never affects a VND figure.
+
+    Imported lazily so that an upstream outage cannot affect application
+    startup, and so the deterministic modules keep no import path to it.
+    Returns a safe shape in every case, including failure: the caller decides
+    whether to render a USD equivalent from `status`.
+    """
+    rate_limit(request, "fx", limit=60, window_s=60)
+    import fx as _fx
+    return _fx.get_quote()
+
+
 # ── Stripe checkout → instant key issuance ──
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 

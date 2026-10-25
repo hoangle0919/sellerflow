@@ -85,7 +85,16 @@ def test_product_surface_labels_its_apr_as_a_base_case():
     # Where the product does use the shared phrase, it must scope it to the one
     # path it is describing rather than implying a summary statistic.
     if "observed window" in html or "observed-window" in html:
-        assert re.search(r"on this path|not a lifetime return", html, re.I), (
+        # The scoping phrase is user-visible copy and now lives in the i18n
+        # catalogue, while the page retains only the code that renders it.
+        # Search both, or this guard would pass on a page that shows the rate
+        # with no qualifier at all.
+        import json
+        with open(os.path.join(REPO, "frontend", "i18n", "en.json"),
+                  encoding="utf-8") as fh:
+            catalogue = " ".join(str(v) for v in json.load(fh).values())
+        assert re.search(r"on this path|not a lifetime return",
+                         html + " " + catalogue, re.I), (
             "the product's observed-window rate must be scoped to the single "
             "path it describes"
         )

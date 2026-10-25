@@ -557,8 +557,14 @@ def test_page_loads_no_framework_or_third_party_asset():
     for bad in ("cdn.", "unpkg", "jsdelivr", "googleapis", "react", "vue",
                 "jquery", "chart.js", "d3.", "gtag", "analytics"):
         assert bad not in html.lower(), f"third-party dependency: {bad}"
-    assert html.count("<script") == 1
-    assert "src=" not in html.split("<script")[1].split(">")[0]
+    # Two scripts now: the first-party i18n runtime, then the page's own inline
+    # client. Still hand-written, still no third party -- which is what this
+    # guard is actually about.
+    assert html.count("<script") == 2
+    assert '<script src="/i18n.js" defer></script>' in html
+    assert "src=" not in html.split("<script")[2].split(">")[0], (
+        "the page's own client must stay inline"
+    )
 
 
 def test_inline_javascript_stays_small():
@@ -646,7 +652,11 @@ def test_server_error_text_is_never_rendered_to_the_user():
     assert "console.warn" in html
     # Superseded by D-036: the panel is no longer handed ANY exception message,
     # safe or otherwise. Every path is routed through publicMessage().
-    assert 'show("error", publicMessage(e))' in html
+    # The call now also passes a catalogue key so the panel can render the
+    # message in the reader's language. The invariant is unchanged: what reaches
+    # the panel is chosen by us, never the exception text.
+    assert 'show("error", publicMessage(e), publicKey(e))' in html
+    assert "publicKey(" in html
     assert "body.detail" not in html and "(body&&body.detail)" not in html
 
 
@@ -902,7 +912,8 @@ def test_public_safe_is_a_whitelist_not_a_blacklist():
 
 def test_completion_share_is_a_visible_card_row():
     js = open(LAB_HTML, encoding="utf-8").read()
-    assert 'kv("Paths completing within 24 months", pct(a.completed_share,1))' in js
+    assert "pct(a.completed_share,1)" in js
+    assert_copy("lab.arm.pathsCompleting", "Paths completing within 24 months", js)
     assert "a.incomplete_recovery_rate>0" in js
 
 
@@ -1025,3 +1036,32 @@ def test_fully_incomplete_scenario_reports_a_rate_and_no_duration():
             assert a["effective_apr"] is not None
     txt = " ".join(f["text"] for f in d["findings"])
     assert "cannot be compared on rate alone" not in txt
+
+
+# ── i18n-aware copy assertions ───────────────────────────────────────────────
+# Honesty-critical copy moved out of the pages and into frontend/i18n/*.json
+# when the site became bilingual. A guard that greps only the HTML would
+# silently start passing the moment a string moved, which is the failure mode
+# these guards exist to prevent. These helpers bind the assertion to wherever
+# the text actually lives, and require it in BOTH languages -- a disclaimer
+# that exists only in English is not a disclaimer for a Vietnamese reader.
+
+def _catalogue(lang):
+    import json, os
+    p = os.path.join(REPO, "frontend", "i18n", f"{lang}.json")
+    with open(p, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def assert_copy(key, english_substring, page_src=None):
+    """The key must exist in both catalogues, carry the required English text,
+    and -- when a page source is given -- actually be referenced by that page."""
+    en, vi = _catalogue("en"), _catalogue("vi")
+    assert key in en, f"{key} missing from en.json"
+    assert key in vi, f"{key} missing from vi.json"
+    assert english_substring.lower() in en[key].lower(), (
+        f"{key} no longer carries required copy {english_substring!r}: {en[key]!r}"
+    )
+    assert vi[key].strip(), f"{key} has no Vietnamese text; it would render blank"
+    if page_src is not None:
+        assert key in page_src, f"{key} is defined but never referenced by the page"

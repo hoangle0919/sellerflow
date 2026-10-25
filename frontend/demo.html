@@ -15,6 +15,7 @@
 <link rel="icon" href="/rbf-mark.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script src="/i18n.js" defer></script>
 <style>
 /* Self-hosted fonts (Google Fonts woff2, subset: latin, latin-ext, vietnamese) */
 /* Archivo — vietnamese */
@@ -636,74 +637,74 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 <!-- P1: the deployment's status has to be visible where the visitor arrives, not
      only on /lab or in the README. The paper cites this URL; anyone following it
      lands here. Placed above the nav, unconditional, not dismissible. -->
-<div class="demo-banner"><div class="wrap"><b>Research prototype</b><span>Not a lending service. RBF holds no capital and makes no credit offers. Use synthetic examples only. The score is unvalidated; submitted examples may be stored and may trigger administrator notifications.</span></div></div>
+<div class="demo-banner"><div class="wrap"><b data-i18n="demo.banner.tag">Research prototype</b><span data-i18n="demo.banner.body">Not a lending service. RBF holds no capital and makes no credit offers. Use synthetic examples only. The score is unvalidated; submitted examples may be stored and may trigger administrator notifications.</span></div></div>
 
-<a class="rbf-skip" href="#page-landing">Skip to prototype</a>
-<nav class="nav" aria-label="Prototype navigation"><div class="wrap">
-<a class="brand" href="/"><span class="rbf-mark" aria-hidden="true">R</span>RBF <span class="brand-context">/ Prototype</span></a>
-<div class="nav-links"><a href="/">Overview</a><a href="/lab">Simulation Lab</a><button class="text-link" onclick="go('landing')">Prototype</button></div>
-<div class="nav-actions"><button class="text-link" onclick="go('dashboard')">Dashboard</button><button class="btn btn-primary" onclick="go('apply')">Enter synthetic example</button><button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button></div>
+<a class="rbf-skip" href="#page-landing" data-i18n="demo.skip">Skip to prototype</a>
+<nav class="nav" aria-label="Prototype navigation" data-i18n-attr="aria-label:demo.nav.label"><div class="wrap">
+<a class="brand" href="/"><span class="rbf-mark" aria-hidden="true">R</span>RBF <span class="brand-context" data-i18n="demo.brand.context">/ Prototype</span></a>
+<div class="nav-links"><a href="/" data-i18n="demo.nav.overview">Overview</a><a href="/lab" data-i18n="chrome.nav.lab">Simulation Lab</a><button class="text-link" onclick="go('landing')" data-i18n="demo.nav.prototype">Prototype</button></div>
+<div class="nav-actions"><div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label"><button type="button" data-lang-option="en" aria-pressed="true">English</button><span class="lang-sep" aria-hidden="true">/</span><button type="button" data-lang-option="vi" aria-pressed="false" lang="vi">Tiếng Việt</button></div><button class="text-link" onclick="go('dashboard')" data-i18n="demo.nav.dashboard">Dashboard</button><button class="btn btn-primary" onclick="go('apply')" data-i18n="demo.cta.enterExample">Enter synthetic example</button><button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Open menu" data-i18n-attr="aria-label:demo.nav.menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button></div>
 </div></nav>
-<div class="mobile-menu" id="mobile-menu"><a href="/">Overview</a><a href="/lab">Simulation Lab</a><button onclick="go('landing')">Prototype</button><button onclick="go('dashboard')">Dashboard</button></div>
+<div class="mobile-menu" id="mobile-menu"><a href="/" data-i18n="demo.nav.overview">Overview</a><a href="/lab" data-i18n="chrome.nav.lab">Simulation Lab</a><button onclick="go('landing')" data-i18n="demo.nav.prototype">Prototype</button><button onclick="go('dashboard')" data-i18n="demo.nav.dashboard">Dashboard</button></div>
 <main id="page-landing" class="page active">
   <section class="hero">
     <div class="wrap">
-      <span class="label">Interactive prototype / synthetic examples only</span>
-      <h1>Explore the mechanics.<br>Keep the limits in view.</h1>
-      <p class="hero-body">Adjust an illustrative merchant profile to inspect the existing scoring-and-financing pipeline. This prototype is separate from the simulation study and the proposed retrospective evaluation tool. Neither scoring path has measured predictive validity.</p>
+      <span class="label" data-i18n="demo.hero.label">Interactive prototype / synthetic examples only</span>
+      <h1 data-i18n-html="demo.hero.title">Explore the mechanics.<br>Keep the limits in view.</h1>
+      <p class="hero-body" data-i18n="demo.hero.body">Adjust an illustrative merchant profile to inspect the existing scoring-and-financing pipeline. This prototype is separate from the simulation study and the proposed retrospective evaluation tool. Neither scoring path has measured predictive validity.</p>
       <div class="hero-actions">
-        <button class="btn btn-primary" onclick="go('apply')">Enter synthetic example</button>
-        <a class="text-link" onclick="jump('how')">Read the methodology →</a>
+        <button class="btn btn-primary" onclick="go('apply')" data-i18n="demo.cta.enterExample">Enter synthetic example</button>
+        <a class="text-link" onclick="jump('how')" data-i18n="demo.hero.methodology">Read the methodology →</a>
       </div>
       <hr class="hero-rule">
       <div class="data-strip">
-        <span>active scorer — RF+LR or heuristic</span><span>rule-based integrity screen</span><span>deterministic financing engine</span><span>Vietnam</span>
+        <span data-i18n="demo.strip.scorer">active scorer — RF+LR or heuristic</span><span data-i18n="demo.strip.integrity">rule-based integrity screen</span><span data-i18n="demo.strip.engine">deterministic financing engine</span><span data-i18n="demo.strip.market">Vietnam</span>
       </div>
 
       <div class="proof-card">
-        <div class="proof-head"><span>ILLUSTRATIVE DEMO · ADJUST THE PROFILE</span><span id="hero-model" title="The ensemble is optional at runtime; this label is read from /api/health.">ACTIVE SCORER — CHECKING…</span></div>
+        <div class="proof-head"><span data-i18n="demo.proof.head">ILLUSTRATIVE DEMO · ADJUST THE PROFILE</span><span id="hero-model" title="The ensemble is optional at runtime; this label is read from /api/health." data-i18n="demo.scorer.checking" data-i18n-attr="title:demo.scorer.title.default">ACTIVE SCORER — CHECKING…</span></div>
         <div class="proof-body">
           <div>
             <div class="proof-shop" id="hv-shop">Thời Trang Linh Chi</div>
-            <div class="proof-sub"><span id="hv-plat">Shopee</span> · <span id="hv-days-sub">680</span> days active</div>
+            <div class="proof-sub"><span id="hv-plat">Shopee</span> · <span id="hv-days-sub">680</span> <span data-i18n="demo.hero.daysActiveUnit">days active</span></div>
             <div class="hero-presets" id="hero-presets">
-              <button class="preset-btn active" data-preset="strong" onclick="heroApplyPreset('strong',this)">Strong operator</button>
-              <button class="preset-btn" data-preset="growth" onclick="heroApplyPreset('growth',this)">Fast-growth</button>
-              <button class="preset-btn" data-preset="volatile" onclick="heroApplyPreset('volatile',this)">Volatile</button>
-              <button class="preset-btn" data-preset="thin" onclick="heroApplyPreset('thin',this)">Thin-file</button>
+              <button class="preset-btn active" data-preset="strong" onclick="heroApplyPreset('strong',this)" data-i18n="demo.preset.strong">Strong operator</button>
+              <button class="preset-btn" data-preset="growth" onclick="heroApplyPreset('growth',this)" data-i18n="demo.preset.growth">Fast-growth</button>
+              <button class="preset-btn" data-preset="volatile" onclick="heroApplyPreset('volatile',this)" data-i18n="demo.preset.volatile">Volatile</button>
+              <button class="preset-btn" data-preset="thin" onclick="heroApplyPreset('thin',this)" data-i18n="demo.preset.thin">Thin-file</button>
             </div>
             <div class="hero-controls">
-              <div class="hc-row"><label for="hc-rev">Monthly revenue</label><input type="range" id="hc-rev" min="10" max="500" step="5" value="185"><span class="hc-val mono" id="hv-rev">185,000,000₫</span></div>
-              <div class="hc-row"><label for="hc-growth">Growth (MoM)</label><input type="range" id="hc-growth" min="-30" max="60" step="1" value="22"><span class="hc-val mono" id="hv-growth">+22%</span></div>
-              <div class="hc-row"><label for="hc-return">Return rate</label><input type="range" id="hc-return" min="0" max="25" step="0.2" value="2.8"><span class="hc-val mono" id="hv-return">2.8%</span></div>
-              <div class="hc-row"><label for="hc-rating">Store rating</label><input type="range" id="hc-rating" min="3" max="5" step="0.1" value="4.9"><span class="hc-val mono" id="hv-rating">4.9</span></div>
-              <div class="hc-row"><label for="hc-late">Late shipments</label><input type="range" id="hc-late" min="0" max="20" step="0.2" value="1.8"><span class="hc-val mono" id="hv-late">1.8%</span></div>
-              <div class="hc-row"><label for="hc-days">Days active</label><input type="range" id="hc-days" min="30" max="1000" step="10" value="680"><span class="hc-val mono" id="hv-days">680d</span></div>
+              <div class="hc-row"><label for="hc-rev" data-i18n="demo.field.monthlyRevenue">Monthly revenue</label><input type="range" id="hc-rev" min="10" max="500" step="5" value="185"><span class="hc-val mono" id="hv-rev">185,000,000₫</span></div>
+              <div class="hc-row"><label for="hc-growth" data-i18n="demo.field.growthMoM">Growth (MoM)</label><input type="range" id="hc-growth" min="-30" max="60" step="1" value="22"><span class="hc-val mono" id="hv-growth">+22%</span></div>
+              <div class="hc-row"><label for="hc-return" data-i18n="demo.field.returnRate">Return rate</label><input type="range" id="hc-return" min="0" max="25" step="0.2" value="2.8"><span class="hc-val mono" id="hv-return">2.8%</span></div>
+              <div class="hc-row"><label for="hc-rating" data-i18n="demo.field.rating">Store rating</label><input type="range" id="hc-rating" min="3" max="5" step="0.1" value="4.9"><span class="hc-val mono" id="hv-rating">4.9</span></div>
+              <div class="hc-row"><label for="hc-late" data-i18n="demo.field.lateShipments">Late shipments</label><input type="range" id="hc-late" min="0" max="20" step="0.2" value="1.8"><span class="hc-val mono" id="hv-late">1.8%</span></div>
+              <div class="hc-row"><label for="hc-days" data-i18n="demo.field.daysActive">Days active</label><input type="range" id="hc-days" min="30" max="1000" step="10" value="680"><span class="hc-val mono" id="hv-days">680d</span></div>
             </div>
             <div class="hero-chips" id="hero-chips"></div>
             <p class="hero-reason" id="hero-reason"></p>
           </div>
           <div class="decision-box" id="hd-box">
             <div class="hd-head">
-              <span class="label">Illustrative output</span>
+              <span class="label" data-i18n="demo.hd.output">Illustrative output</span>
               <span class="hd-tier" id="hd-tier">—</span>
             </div>
             <div class="decision-word" id="hd-word">Loading example…</div>
             <div class="hd-pdline" id="hd-pdline">No current result. This prototype is unvalidated.</div>
             <div class="hd-advance">
-              <span class="hd-advance-label">Illustrative advance</span>
+              <span class="hd-advance-label" data-i18n="demo.field.advance">Illustrative advance</span>
               <div class="hd-amount mono" id="hd-limit">—</div>
             </div>
             <hr>
-            <div class="decision-row"><span>Remittance</span><span id="hd-rate">—</span></div>
-            <div class="decision-row"><span>Repayment cap</span><span id="hd-pd">—</span></div>
-            <div class="decision-row"><span>Est. duration</span><span id="hd-dur">—</span></div>
-            <div class="decision-row"><span>Cost (APR)</span><span id="hd-apr">—</span></div>
-            <button class="hero-full-link text-link" id="hero-full-link" onclick="heroViewFull()" disabled>View full example →</button>
+            <div class="decision-row"><span data-i18n="demo.field.remittance">Remittance</span><span id="hd-rate">—</span></div>
+            <div class="decision-row"><span data-i18n="demo.field.repaymentCap">Repayment cap</span><span id="hd-pd">—</span></div>
+            <div class="decision-row"><span data-i18n="demo.hd.duration">Est. duration</span><span id="hd-dur">—</span></div>
+            <div class="decision-row"><span data-i18n="demo.hd.apr">Cost (APR)</span><span id="hd-apr">—</span></div>
+            <button class="hero-full-link text-link" id="hero-full-link" onclick="heroViewFull()" disabled data-i18n="demo.hero.viewFull">View full example →</button>
           </div>
         </div>
-        <div class="proof-foot" id="hero-foot" aria-live="polite">Loading the prototype response…</div>
-        <button class="btn btn-ghost" id="hero-retry" onclick="heroRunPreview()" hidden>Retry preview</button>
+        <div class="proof-foot" id="hero-foot" aria-live="polite" data-i18n="demo.hero.loading">Loading the prototype response…</div>
+        <button class="btn btn-ghost" id="hero-retry" onclick="heroRunPreview()" hidden data-i18n="demo.hero.retry">Retry preview</button>
       </div>
     </div>
   </section>
@@ -711,21 +712,21 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <section class="section">
     <div class="wrap argument">
       <div>
-        <span class="label">Why this exists</span>
-        <h2>A different data source, not a proven better one.</h2>
+        <span class="label" data-i18n="demo.arg.label">Why this exists</span>
+        <h2 data-i18n="demo.arg.title">A different data source, not a proven better one.</h2>
       </div>
       <div>
         <div class="arg-entry">
           <span class="arg-num">01</span>
-          <div><h3>A thin bureau file is not no signal</h3><p>Where a seller's bureau history is thin, order data, customer ratings and delivery performance still accumulate continuously. Whether those predict repayment is not a claim this project tests — it has no seller outcomes to test against, and no comparison against bureau data was performed.</p></div>
+          <div><h3 data-i18n="demo.arg.1.title">A thin bureau file is not no signal</h3><p data-i18n="demo.arg.1.body">Where a seller's bureau history is thin, order data, customer ratings and delivery performance still accumulate continuously. Whether those predict repayment is not a claim this project tests — it has no seller outcomes to test against, and no comparison against bureau data was performed.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">02</span>
-          <div><h3>Revenue data, as submitted</h3><p>The shipped prototype takes merchant-submitted figures and does not connect to any platform API. Reading revenue directly from platforms is the design intent, not the current behaviour — so today these values are self-reported, which is exactly what the integrity screen exists to test.</p></div>
+          <div><h3 data-i18n="demo.arg.2.title">Revenue data, as submitted</h3><p data-i18n="demo.arg.2.body">The shipped prototype takes merchant-submitted figures and does not connect to any platform API. Reading revenue directly from platforms is the design intent, not the current behaviour — so today these values are self-reported, which is exactly what the integrity screen exists to test.</p></div>
         </div>
         <div class="arg-entry">
           <span class="arg-num">03</span>
-          <div><h3>Structure that flexes with revenue</h3><p>Repayment is a percentage of revenue, not a fixed installment — a slow month lengthens the term rather than raising the payment. It does not remove the risk: permanent revenue cessation before completion, while a balance is still outstanding, can prevent the cap from ever being reached.</p></div>
+          <div><h3 data-i18n="demo.arg.3.title">Structure that flexes with revenue</h3><p data-i18n="demo.arg.3.body">Repayment is a percentage of revenue, not a fixed installment — a slow month lengthens the term rather than raising the payment. It does not remove the risk: permanent revenue cessation before completion, while a balance is still outstanding, can prevent the cap from ever being reached.</p></div>
         </div>
       </div>
     </div>
@@ -734,48 +735,48 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <section class="section" id="how">
     <div class="wrap">
       <div class="how-head">
-        <span class="label">How it works</span>
-        <h2>From revenue data to a financing structure.</h2>
+        <span class="label" data-i18n="demo.how.label">How it works</span>
+        <h2 data-i18n="demo.how.title">From revenue data to a financing structure.</h2>
       </div>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><h3>Assess merchant revenue</h3><p>Operational metrics as submitted by the merchant. The shipped prototype does not connect to any platform API, so these figures are self-reported and unverified.</p></div>
-        <div class="step"><span class="step-num">2</span><h3>The active scorer rates risk</h3><p>The active scorer produces an <strong>unvalidated demo risk score</strong> and per-signal flags. When the model artifact loads, that is a Random Forest and Logistic Regression ensemble, trained on synthetic data whose label is a formula over the same features; when it does not, a deterministic heuristic runs instead. <strong>Neither path has measured predictive validity</strong>, and the score carries no predictive claim. The score sets the risk tier, and the tier sets the advance, remittance rate, cap factor and eligibility — so the active scorer can change the terms shown. <code>/api/health</code> reports which path is running.</p></div>
-        <div class="step"><span class="step-num">3</span><h3>Structure the financing</h3><p>Illustrative advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each. Response time is not benchmarked.</p></div>
+        <div class="step"><span class="step-num">1</span><h3 data-i18n="demo.how.1.title">Assess merchant revenue</h3><p data-i18n="demo.how.1.body">Operational metrics as submitted by the merchant. The shipped prototype does not connect to any platform API, so these figures are self-reported and unverified.</p></div>
+        <div class="step"><span class="step-num">2</span><h3 data-i18n="demo.how.2.title">The active scorer rates risk</h3><p><span data-i18n-html="demo.how.2.body">The active scorer produces an <strong>unvalidated demo risk score</strong> and per-signal flags. When the model artifact loads, that is a Random Forest and Logistic Regression ensemble, trained on synthetic data whose label is a formula over the same features; when it does not, a deterministic heuristic runs instead. <strong>Neither path has measured predictive validity</strong>, and the score carries no predictive claim. The score sets the risk tier, and the tier sets the advance, remittance rate, cap factor and eligibility — so the active scorer can change the terms shown.</span> <code>/api/health</code><span data-i18n="demo.how.2.reports"> reports which path is running.</span></p></div>
+        <div class="step"><span class="step-num">3</span><h3 data-i18n="demo.structureFinancing">Structure the financing</h3><p data-i18n="demo.how.3.body">Illustrative advance, remittance percentage, repayment cap, and downside scenarios — with the reasoning behind each. Response time is not benchmarked.</p></div>
       </div>
 
       <div class="flow" id="methodology-flow">
-        <div class="flow-node" data-key="signals">Operational signals</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="normalize">Feature normalization</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="ensemble">Active scorer</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="pd">Demo risk score</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="tier">Risk tier</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="integrity">Integrity screen</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="limit">Financing structure</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="rate">Repayment scenarios</div><span class="flow-sep">→</span>
-        <div class="flow-node" data-key="explain">Explanation</div>
+        <div class="flow-node" data-key="signals" data-i18n="demo.flow.signals">Operational signals</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="normalize" data-i18n="demo.flow.normalize">Feature normalization</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="ensemble" data-i18n="demo.flow.ensemble">Active scorer</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="pd" data-i18n="demo.flow.pd">Demo risk score</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="tier" data-i18n="demo.flow.tier">Risk tier</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="integrity" data-i18n="demo.flow.integrity">Integrity screen</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="limit" data-i18n="demo.flow.limit">Financing structure</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="rate" data-i18n="demo.flow.rate">Repayment scenarios</div><span class="flow-sep">→</span>
+        <div class="flow-node" data-key="explain" data-i18n="demo.flow.explain">Explanation</div>
       </div>
-      <p class="flow-desc" id="flow-desc">Hover a step to see what it does.</p>
+      <p class="flow-desc" id="flow-desc" data-i18n="demo.flow.hint">Hover a step to see what it does.</p>
     </div>
   </section>
 
-  <section class="section" id="lenders"><div class="wrap"><details class="prototype-details"><summary>Developer reference — demonstration API</summary><p class="demo-note">The preview is illustrative and does not persist an assessment. The submission endpoint in these examples stores records and may notify the administrator. Do not send real merchant data.</p><div class="code-card">
+  <section class="section" id="lenders"><div class="wrap"><details class="prototype-details"><summary data-i18n="demo.api.summary">Developer reference — demonstration API</summary><p class="demo-note" data-i18n="demo.api.note">The preview is illustrative and does not persist an assessment. The submission endpoint in these examples stores records and may notify the administrator. Do not send real merchant data.</p><div class="code-card">
         <div class="code-tabs">
           <button class="code-tab active" onclick="setLang('curl',this)">cURL</button>
           <button class="code-tab" onclick="setLang('python',this)">Python</button>
           <button class="code-tab" onclick="setLang('node',this)">Node</button>
-          <button class="copy-btn code-tab" id="code-copy" onclick="copyCode()">Copy</button>
+          <button class="copy-btn code-tab" id="code-copy" onclick="copyCode()" data-i18n="demo.api.copy">Copy</button>
         </div>
         <div class="code-body"><pre id="code-block"></pre></div>
         <div class="console-run">
-          <button class="btn btn-ghost" id="console-run-btn" onclick="runConsole()">Run sample request</button>
+          <button class="btn btn-ghost" id="console-run-btn" onclick="runConsole()" data-i18n="demo.api.run">Run sample request</button>
           <span class="latency-badge" id="console-latency"></span>
         </div>
         <div class="api-out" id="console-out">
-          <div class="api-out-head"><span class="label">Response</span><span class="api-status" id="console-status"></span></div>
+          <div class="api-out-head"><span class="label" data-i18n="demo.api.response">Response</span><span class="api-status" id="console-status"></span></div>
           <pre id="console-out-pre"></pre>
         </div>
       </div></details></div></section>
-  <section class="section" id="pricing"><div class="wrap"><p class="demo-note"><b>No commercial service is offered here.</b> Illustrative product design is not a service on sale. Subscription tiers and the access-list form have been retired from this presentation. <a href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20research%20enquiry">Contact Hoang about the research</a>.</p></div></section>
+  <section class="section" id="pricing"><div class="wrap"><p class="demo-note"><b data-i18n="demo.pricing.lead">No commercial service is offered here.</b> <span data-i18n="demo.pricing.body">Illustrative product design is not a service on sale. Subscription tiers and the access-list form have been retired from this presentation.</span> <a href="mailto:lehuuhoang1909@gmail.com?subject=RBF%20research%20enquiry" data-i18n="demo.pricing.contact">Contact Hoang about the research</a>.</p></div></section>
 </main>
 
 <div id="page-apply" class="page">
@@ -784,47 +785,47 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
       <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
       <div class="progress-label label" id="progress-label">Step 1 of 3</div>
       <div id="step-1">
-        <h2>Tell us about the merchant</h2><p class="sub">Basic merchant and channel information.</p>
-        <div class="field"><label for="f_shop_name">Merchant name</label><input id="f_shop_name" data-req><div class="err-msg">Merchant name is required.</div></div>
-        <div class="field"><label for="f_platform">Platform</label><select id="f_platform"><option>Shopee</option><option>TikTok Shop</option><option>Lazada</option></select></div>
-        <p class="field-note">
+        <h2 data-i18n="demo.apply.s1.title">Tell us about the merchant</h2><p class="sub" data-i18n="demo.apply.s1.sub">Basic merchant and channel information.</p>
+        <div class="field"><label for="f_shop_name" data-i18n="demo.field.merchantName">Merchant name</label><input id="f_shop_name" data-req><div class="err-msg" data-i18n="demo.err.merchantName">Merchant name is required.</div></div>
+        <div class="field"><label for="f_platform" data-i18n="demo.field.platform">Platform</label><select id="f_platform"><option>Shopee</option><option>TikTok Shop</option><option>Lazada</option></select></div>
+        <p class="field-note" data-i18n="demo.apply.contactNote">
           No contact name or phone number is collected. Neither is used by the assessment —
           the analysis reads ten operational figures only — so this demonstration does not ask for them.
         </p>
         <div class="field-row">
-          <div class="field"><label for="f_monthly_revenue">Monthly revenue (VND)</label><input id="f_monthly_revenue" type="number" data-req min="1"><div class="err-msg">Enter monthly revenue.</div></div>
-          <div class="field"><label for="f_order_volume">Orders / month</label><input id="f_order_volume" type="number" data-req min="1"><div class="err-msg">Enter order volume.</div></div>
+          <div class="field"><label for="f_monthly_revenue" data-i18n="demo.field.monthlyRevenueVnd">Monthly revenue (VND)</label><input id="f_monthly_revenue" type="number" data-req min="1"><div class="err-msg" data-i18n="demo.err.monthlyRevenue">Enter monthly revenue.</div></div>
+          <div class="field"><label for="f_order_volume" data-i18n="demo.field.ordersMonth">Orders / month</label><input id="f_order_volume" type="number" data-req min="1"><div class="err-msg" data-i18n="demo.err.orderVolume">Enter order volume.</div></div>
         </div>
-        <div class="apply-nav"><span></span><button class="btn btn-primary" onclick="next(1)">Continue</button></div>
+        <div class="apply-nav"><span></span><button class="btn btn-primary" onclick="next(1)" data-i18n="demo.apply.continue">Continue</button></div>
       </div>
       <div id="step-2" style="display:none">
-        <h2>Operating signals</h2><p class="sub">Enter rates as decimals. Example: 0.05 means 5%.</p>
+        <h2 data-i18n="demo.apply.s2.title">Operating signals</h2><p class="sub" data-i18n="demo.apply.s2.sub">Enter rates as decimals. Example: 0.05 means 5%.</p>
         <div class="field-row">
-          <div class="field"><label for="f_revenue_growth">Revenue growth</label><input id="f_revenue_growth" type="number" step="0.01" data-req min="-0.35" max="0.9"><div class="err-msg">Enter -0.35 to 0.90.</div></div>
-          <div class="field"><label for="f_avg_order_value">Average order value</label><input id="f_avg_order_value" type="number" data-req min="1"><div class="err-msg">Enter average order value.</div></div>
+          <div class="field"><label for="f_revenue_growth" data-i18n="demo.field.revenueGrowth">Revenue growth</label><input id="f_revenue_growth" type="number" step="0.01" data-req min="-0.35" max="0.9"><div class="err-msg" data-i18n="demo.err.growthRange">Enter -0.35 to 0.90.</div></div>
+          <div class="field"><label for="f_avg_order_value" data-i18n="demo.field.aov">Average order value</label><input id="f_avg_order_value" type="number" data-req min="1"><div class="err-msg" data-i18n="demo.err.aov">Enter average order value.</div></div>
         </div>
         <div class="field-row">
-          <div class="field"><label for="f_return_rate">Return rate</label><input id="f_return_rate" type="number" step="0.001" data-req min="0" max="0.4"><div class="err-msg">Enter 0 to 0.40.</div></div>
-          <div class="field"><label for="f_late_ship_rate">Late shipment rate</label><input id="f_late_ship_rate" type="number" step="0.001" data-req min="0" max="0.4"><div class="err-msg">Enter 0 to 0.40.</div></div>
+          <div class="field"><label for="f_return_rate" data-i18n="demo.field.returnRate">Return rate</label><input id="f_return_rate" type="number" step="0.001" data-req min="0" max="0.4"><div class="err-msg" data-i18n="demo.err.rate040">Enter 0 to 0.40.</div></div>
+          <div class="field"><label for="f_late_ship_rate" data-i18n="demo.field.lateShipRate">Late shipment rate</label><input id="f_late_ship_rate" type="number" step="0.001" data-req min="0" max="0.4"><div class="err-msg" data-i18n="demo.err.rate040">Enter 0 to 0.40.</div></div>
         </div>
         <div class="field-row">
-          <div class="field"><label for="f_rating">Store rating</label><input id="f_rating" type="number" step="0.1" data-req min="1" max="5"><div class="err-msg">Enter rating 1 to 5.</div></div>
-          <div class="field"><label for="f_days_active">Days active</label><input id="f_days_active" type="number" data-req min="1"><div class="err-msg">Enter days active.</div></div>
+          <div class="field"><label for="f_rating" data-i18n="demo.field.rating">Store rating</label><input id="f_rating" type="number" step="0.1" data-req min="1" max="5"><div class="err-msg" data-i18n="demo.err.rating">Enter rating 1 to 5.</div></div>
+          <div class="field"><label for="f_days_active" data-i18n="demo.field.daysActive">Days active</label><input id="f_days_active" type="number" data-req min="1"><div class="err-msg" data-i18n="demo.err.daysActive">Enter days active.</div></div>
         </div>
         <div class="field-row">
-          <div class="field"><label for="f_inventory_turnover">Inventory turnover</label><input id="f_inventory_turnover" type="number" step="0.1" data-req min="0"><div class="err-msg">Enter turnover.</div></div>
-          <div class="field"><label for="f_previous_loans">Previous loans</label><input id="f_previous_loans" type="number" data-req min="0"><div class="err-msg">Enter previous loans.</div></div>
+          <div class="field"><label for="f_inventory_turnover" data-i18n="demo.field.inventoryTurnover">Inventory turnover</label><input id="f_inventory_turnover" type="number" step="0.1" data-req min="0"><div class="err-msg" data-i18n="demo.err.turnover">Enter turnover.</div></div>
+          <div class="field"><label for="f_previous_loans" data-i18n="demo.field.previousLoans">Previous loans</label><input id="f_previous_loans" type="number" data-req min="0"><div class="err-msg" data-i18n="demo.err.previousLoans">Enter previous loans.</div></div>
         </div>
-        <div class="apply-nav"><button class="btn btn-ghost" onclick="back(2)">Back</button><button class="btn btn-primary" onclick="next(2)">Review</button></div>
+        <div class="apply-nav"><button class="btn btn-ghost" onclick="back(2)" data-i18n="demo.back">Back</button><button class="btn btn-primary" onclick="next(2)" data-i18n="demo.apply.review">Review</button></div>
       </div>
       <div id="step-3" style="display:none">
-        <h2>Review assessment</h2><p class="sub">Confirm the submitted merchant profile.</p>
+        <h2 data-i18n="demo.apply.s3.title">Review assessment</h2><p class="sub" data-i18n="demo.apply.s3.sub">Confirm the submitted merchant profile.</p>
         <div class="preview-list" id="preview-list"></div>
         <div class="decide-seq" id="decide-seq">
           <div class="progress"><div class="progress-fill" id="seq-fill" style="width:0%"></div></div>
-          <div class="seq-text" id="seq-text">Reading merchant profile</div>
+          <div class="seq-text" id="seq-text" data-i18n="demo.seq.read">Reading merchant profile</div>
         </div>
-        <div class="apply-nav"><button class="btn btn-ghost" onclick="back(3)">Back</button><button class="btn btn-primary" id="submit-btn" onclick="submitApplication()">Run assessment</button></div>
+        <div class="apply-nav"><button class="btn btn-ghost" onclick="back(3)" data-i18n="demo.back">Back</button><button class="btn btn-primary" id="submit-btn" onclick="submitApplication()" data-i18n="demo.apply.run">Run assessment</button></div>
       </div>
     </div>
   </div></div>
@@ -834,41 +835,41 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <div class="app-shell"><div class="wrap result-wrap">
     <div class="result-head" id="result-head">
       <div class="result-top">
-        <div><div class="result-id" id="r-id">RBF-</div><div class="result-verdict" id="r-verdict">Illustrative tier</div><div class="result-shop"><span id="r-shop">Merchant</span> <span id="r-plat"></span></div></div>
-        <button class="btn btn-ghost" onclick="shareResult()">Share</button>
+        <div><div class="result-id" id="r-id">RBF-</div><div class="result-verdict" id="r-verdict" data-i18n="demo.result.verdictPlaceholder">Illustrative tier</div><div class="result-shop"><span id="r-shop">Merchant</span> <span id="r-plat"></span></div></div>
+        <button class="btn btn-ghost" onclick="shareResult()" data-i18n="demo.share">Share</button>
       </div>
       <div class="metric-grid">
-        <div class="metric"><div class="label">Illustrative advance</div><div class="mv" id="r-limit">—</div></div>
-        <div class="metric"><div class="label">Remittance</div><div class="mv" id="r-rate">—</div></div>
-        <div class="metric"><div class="label">Repayment cap</div><div class="mv" id="r-cap">—</div></div>
-        <div class="metric"><div class="label">Demo score — unvalidated</div><div class="mv" id="r-pd">—</div></div>
+        <div class="metric"><div class="label" data-i18n="demo.field.advance">Illustrative advance</div><div class="mv" id="r-limit">—</div></div>
+        <div class="metric"><div class="label" data-i18n="demo.field.remittance">Remittance</div><div class="mv" id="r-rate">—</div></div>
+        <div class="metric"><div class="label" data-i18n="demo.field.repaymentCap">Repayment cap</div><div class="mv" id="r-cap">—</div></div>
+        <div class="metric"><div class="label" data-i18n="demo.result.demoScore">Demo score — unvalidated</div><div class="mv" id="r-pd">—</div></div>
       </div>
-      <p class="small">The score and tier are demonstration outputs, not a prediction of repayment or a credit recommendation.</p>
+      <p class="small" data-i18n="demo.result.scoreNote">The score and tier are demonstration outputs, not a prediction of repayment or a credit recommendation.</p>
       <div class="gate-banner" id="gate-banner" style="display:none"></div>
     </div>
-    <div class="result-section"><h3>Structure the financing</h3>
+    <div class="result-section"><h3 data-i18n="demo.structureFinancing">Structure the financing</h3>
       <div class="preview-list" id="structure-list"></div>
       <p class="small" id="structure-note" style="margin-top:12px"></p>
     </div>
-    <div class="result-section" id="scenario-section"><h3>Test downside scenarios</h3>
-      <p class="small" style="margin-bottom:14px">These hypothetical scenarios apply the displayed remittance rate to net sales under stated assumptions. Lower positive sales can extend repayment; cessation before completion can leave the cap unrecovered. These scenarios do not model default or establish affordability.</p>
-      <div class="table-scroll"><table class="scenario-table"><thead><tr><th>Scenario</th><th>Monthly revenue</th><th>Periodic remittance</th><th>Repayment duration</th></tr></thead><tbody id="scenario-body"></tbody></table></div>
+    <div class="result-section" id="scenario-section"><h3 data-i18n="demo.result.scenariosTitle">Test downside scenarios</h3>
+      <p class="small" style="margin-bottom:14px" data-i18n="demo.result.scenariosIntro">These hypothetical scenarios apply the displayed remittance rate to net sales under stated assumptions. Lower positive sales can extend repayment; cessation before completion can leave the cap unrecovered. These scenarios do not model default or establish affordability.</p>
+      <div class="table-scroll"><table class="scenario-table"><thead><tr><th data-i18n="demo.th.scenario">Scenario</th><th data-i18n="demo.field.monthlyRevenue">Monthly revenue</th><th data-i18n="demo.th.periodicRemittance">Periodic remittance</th><th data-i18n="demo.th.repaymentDuration">Repayment duration</th></tr></thead><tbody id="scenario-body"></tbody></table></div>
       <p class="small sc-note" id="scenario-closure-note" style="margin-top:12px"></p>
     </div>
-    <div class="result-section"><h3>Review the evidence</h3><div class="finding-list" id="finding-list"></div></div>
-    <div class="result-section" id="integrity-section"><h3>Integrity screen <span class="sev-badge low" id="int-level">Clear</span></h3>
+    <div class="result-section"><h3 data-i18n="demo.result.evidenceTitle">Review the evidence</h3><div class="finding-list" id="finding-list"></div></div>
+    <div class="result-section" id="integrity-section"><h3><span data-i18n="demo.flow.integrity">Integrity screen</span> <span class="sev-badge low" id="int-level">Clear</span></h3>
       <p class="small" id="int-disclosure" style="margin:6px 0 14px"></p>
       <div class="finding-list" id="integrity-checks"></div>
     </div>
-    <div class="result-section"><h3>Illustrative factors</h3>
+    <div class="result-section"><h3 data-i18n="demo.result.factorsTitle">Illustrative factors</h3>
       <div class="why-grid">
-        <div class="why-col pos"><h4>Illustrative positive signals</h4><ul id="why-pos"></ul></div>
-        <div class="why-col adj"><h4>Illustrative caution signals</h4><ul id="why-adj"></ul></div>
-        <div class="why-col next"><h4>Additional information</h4><ul id="why-next"></ul></div>
+        <div class="why-col pos"><h4 data-i18n="demo.why.posTitle">Illustrative positive signals</h4><ul id="why-pos"></ul></div>
+        <div class="why-col adj"><h4 data-i18n="demo.why.adjTitle">Illustrative caution signals</h4><ul id="why-adj"></ul></div>
+        <div class="why-col next"><h4 data-i18n="demo.why.nextTitle">Additional information</h4><ul id="why-next"></ul></div>
       </div>
     </div>
-    <div class="result-section"><h3>Example interpretation</h3><p class="reasoning" id="r-reasoning">The score and tier are unvalidated demonstration outputs. The financing figures on this page follow the displayed contract assumptions; they are not a loan offer. Structured inputs and limitations are shown above.</p><details class="explain"><summary>What this means</summary><div class="ex-body" id="r-explain"></div></details>
-      <div class="result-actions"><button class="btn btn-ghost" onclick="go('apply')">New synthetic example</button><button class="btn btn-primary" onclick="go('dashboard')">View dashboard</button></div>
+    <div class="result-section"><h3 data-i18n="demo.result.interpTitle">Example interpretation</h3><p class="reasoning" id="r-reasoning" data-i18n="demo.result.reasoning">The score and tier are unvalidated demonstration outputs. The financing figures on this page follow the displayed contract assumptions; they are not a loan offer. Structured inputs and limitations are shown above.</p><details class="explain"><summary data-i18n="demo.result.whatThisMeans">What this means</summary><div class="ex-body" id="r-explain"></div></details>
+      <div class="result-actions"><button class="btn btn-ghost" onclick="go('apply')" data-i18n="demo.newExample">New synthetic example</button><button class="btn btn-primary" onclick="go('dashboard')" data-i18n="demo.result.viewDashboard">View dashboard</button></div>
     </div>
   </div></div>
 </div>
@@ -877,44 +878,44 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
   <div class="login-overlay" id="login-overlay">
     <div class="login-box">
       <div class="brand"><span class="brand-mark"></span>RBF</div>
-      <h3>Prototype dashboard</h3><p>Enter your access password to view the demonstration records.</p>
-      <input id="login-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()">
-      <button class="btn btn-primary btn-block" style="margin-top:12px" id="login-btn" onclick="tryLogin()">Sign in</button>
+      <h3 data-i18n="demo.login.title">Prototype dashboard</h3><p data-i18n="demo.login.body">Enter your access password to view the demonstration records.</p>
+      <input id="login-pw" type="password" placeholder="Password" data-i18n-attr="placeholder:demo.login.password" onkeydown="if(event.key==='Enter')tryLogin()">
+      <button class="btn btn-primary btn-block" style="margin-top:12px" id="login-btn" onclick="tryLogin()" data-i18n="demo.login.signIn">Sign in</button>
       <div class="login-err" id="login-err">Incorrect password. Try again.</div>
     </div>
   </div>
   <div class="dash" id="dash-shell" style="display:none">
     <div class="dash-layout">
       <aside class="dash-side">
-        <div class="ds-group">Demonstration records</div>
-        <div class="ds-item active" data-filter="all" onclick="setFilter('all')"><span>All merchants</span><span class="cnt" id="c-all">0</span></div>
-        <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span>Low-risk tier</span><span class="cnt" id="c-approved">0</span></div>
-        <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span>Medium-risk tier</span><span class="cnt" id="c-conditional">0</span></div>
-        <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span>High-risk tier</span><span class="cnt" id="c-rejected">0</span></div>
-        <div class="ds-group">Live activity</div>
-        <div class="ds-item" data-filter="live" onclick="setFilter('live')"><span>Submitted examples</span><span class="cnt" id="c-live">0</span></div>
-        <div class="ds-group">Actions</div>
-        <div class="ds-item" onclick="go('apply')"><span>New synthetic example</span></div>
-        <div class="ds-item" onclick="loadPortfolio()"><span>Refresh</span></div>
-        <div class="ds-item" onclick="exportCSV()"><span>Export CSV</span></div>
-        <div class="ds-item" onclick="exportLeads()"><span>Export leads</span></div>
-        <div class="ds-item" onclick="signOut()"><span>Sign out</span></div>
+        <div class="ds-group" data-i18n="demo.dash.records">Demonstration records</div>
+        <div class="ds-item active" data-filter="all" onclick="setFilter('all')"><span data-i18n="demo.dash.allMerchants">All merchants</span><span class="cnt" id="c-all">0</span></div>
+        <div class="ds-item" data-filter="APPROVED" onclick="setFilter('APPROVED')"><span data-i18n="demo.dash.lowTier">Low-risk tier</span><span class="cnt" id="c-approved">0</span></div>
+        <div class="ds-item" data-filter="CONDITIONAL" onclick="setFilter('CONDITIONAL')"><span data-i18n="demo.dash.mediumTier">Medium-risk tier</span><span class="cnt" id="c-conditional">0</span></div>
+        <div class="ds-item" data-filter="REJECTED" onclick="setFilter('REJECTED')"><span data-i18n="demo.dash.highTier">High-risk tier</span><span class="cnt" id="c-rejected">0</span></div>
+        <div class="ds-group" data-i18n="demo.dash.liveActivity">Live activity</div>
+        <div class="ds-item" data-filter="live" onclick="setFilter('live')"><span data-i18n="demo.dash.submitted">Submitted examples</span><span class="cnt" id="c-live">0</span></div>
+        <div class="ds-group" data-i18n="demo.dash.actions">Actions</div>
+        <div class="ds-item" onclick="go('apply')"><span data-i18n="demo.newExample">New synthetic example</span></div>
+        <div class="ds-item" onclick="loadPortfolio()"><span data-i18n="demo.dash.refresh">Refresh</span></div>
+        <div class="ds-item" onclick="exportCSV()"><span data-i18n="demo.dash.exportCsv">Export CSV</span></div>
+        <div class="ds-item" onclick="exportLeads()"><span data-i18n="demo.dash.exportLeads">Export leads</span></div>
+        <div class="ds-item" onclick="signOut()"><span data-i18n="demo.dash.signOut">Sign out</span></div>
       </aside>
       <section class="dash-main">
-        <div class="dash-top"><h2>Demonstration records</h2><input class="dash-search" id="dash-search" placeholder="Search merchant name…" oninput="renderTable()"></div>
-        <p class="small">Unvalidated demonstration records. Legacy demo limits are separate from the financing terms shown in individual examples.</p>
+        <div class="dash-top"><h2 data-i18n="demo.dash.records">Demonstration records</h2><input class="dash-search" id="dash-search" placeholder="Search merchant name…" data-i18n-attr="placeholder:demo.dash.search" oninput="renderTable()"></div>
+        <p class="small" data-i18n="demo.dash.note">Unvalidated demonstration records. Legacy demo limits are separate from the financing terms shown in individual examples.</p>
         <div class="traffic-line" id="traffic-line"></div>
         <div class="stat-row">
-          <div class="dstat"><div class="label">Total merchants</div><div class="dv" id="st-total">0</div></div>
-          <div class="dstat"><div class="label">Low-risk tier share</div><div class="dv" id="st-approval">0%</div></div>
-          <div class="dstat"><div class="label">Sum of demo limits</div><div class="dv" id="st-exposure">—</div></div>
-          <div class="dstat"><div class="label">Avg demo score</div><div class="dv" id="st-pd">0%</div></div>
+          <div class="dstat"><div class="label" data-i18n="demo.stat.total">Total merchants</div><div class="dv" id="st-total">0</div></div>
+          <div class="dstat"><div class="label" data-i18n="demo.stat.lowShare">Low-risk tier share</div><div class="dv" id="st-approval">0%</div></div>
+          <div class="dstat"><div class="label" data-i18n="demo.stat.sumLimits">Sum of demo limits</div><div class="dv" id="st-exposure">—</div></div>
+          <div class="dstat"><div class="label" data-i18n="demo.stat.avgScore">Avg demo score</div><div class="dv" id="st-pd">0%</div></div>
         </div>
         <div class="charts-row">
-          <div class="chart-card"><h3>Illustrative tier distribution</h3><div class="donut-wrap"><div id="donut"></div><div class="donut-legend" id="donut-legend"></div></div></div>
-          <div class="chart-card"><h3>Merchants by platform</h3><div class="bars" id="platform-bars"></div></div>
+          <div class="chart-card"><h3 data-i18n="demo.chart.tierDistribution">Illustrative tier distribution</h3><div class="donut-wrap"><div id="donut"></div><div class="donut-legend" id="donut-legend"></div></div></div>
+          <div class="chart-card"><h3 data-i18n="demo.chart.byPlatform">Merchants by platform</h3><div class="bars" id="platform-bars"></div></div>
         </div>
-        <div class="table-card"><div class="table-scroll"><table><thead><tr><th>ID</th><th>Merchant</th><th>Platform</th><th>Revenue</th><th>Demo score</th><th>Illustrative tier</th><th>Legacy demo limit</th><th>Date</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
+        <div class="table-card"><div class="table-scroll"><table><thead><tr><th data-i18n="demo.th.id">ID</th><th data-i18n="demo.merchant">Merchant</th><th data-i18n="demo.field.platform">Platform</th><th data-i18n="demo.th.revenue">Revenue</th><th data-i18n="demo.th.demoScore">Demo score</th><th data-i18n="demo.th.tier">Illustrative tier</th><th data-i18n="demo.th.legacyLimit">Legacy demo limit</th><th data-i18n="demo.th.date">Date</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
       </section>
     </div>
   </div>
@@ -922,39 +923,39 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 
 <div id="page-privacy" class="page">
   <div class="app-shell"><div class="wrap prose">
-    <span class="label">Privacy</span>
-    <h2 style="margin:10px 0 24px">How we handle your data</h2>
-    <h3>What we collect</h3>
-    <p>When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the resulting illustrative risk tier and the assessment record. <b>This form does not ask for a contact name or phone number.</b> Those fields were removed in September 2026 because the assessment never used them, and data that is not needed should not be collected — this is a demonstration, not a credit decision our model produces. Contact values stored on records submitted before that change are no longer displayed or included in any export, though they may remain in stored historical rows. The access-list form is no longer presented on this site; older access-list records may remain.</p>
-    <h3>How it is used</h3>
-    <p>Submitted metrics generate an illustrative assessment and can be displayed in the password-protected demonstration dashboard. Waitlist emails are used only to contact you about access. Submissions may trigger an administrator email through the configured notification provider. Do not submit real merchant or borrower records to this demonstration.</p>
-    <h3>Retention and deletion</h3>
-    <p>Data is retained while the service operates. To have your records deleted, write to lehuuhoang1909@gmail.com from the address you signed up with and we will remove them.</p>
-    <h3>Status</h3>
-    <p>RBF is a <b>research demonstration, not a lending service</b> — it holds no capital and makes no credit offers. The risk model is a baseline trained on synthetic data and has no measured predictive validity; the active scorer assigns a tier that controls the terms used by the deterministic financing calculations. Neither is a lending commitment or an offer of credit, and results should be reviewed before any financing decision.</p>
-    <p class="small" style="margin-top:24px">Last updated October 2026 · lehuuhoang1909@gmail.com</p>
-    <div style="margin-top:32px"><button class="btn btn-ghost" onclick="go('landing')">Back</button></div>
+    <span class="label" data-i18n="demo.privacy.label">Privacy</span>
+    <h2 style="margin:10px 0 24px" data-i18n="demo.privacy.title">How we handle your data</h2>
+    <h3 data-i18n="demo.privacy.collectTitle">What we collect</h3>
+    <p><span data-i18n="demo.privacy.collect1">When you apply for an assessment, we store the business metrics you submit — shop name, platform, revenue, orders, returns, ratings, and operating history — together with the resulting illustrative risk tier and the assessment record.</span> <b data-i18n="demo.privacy.collect2">This form does not ask for a contact name or phone number.</b> <span data-i18n="demo.privacy.collect3">Those fields were removed in September 2026 because the assessment never used them, and data that is not needed should not be collected — this is a demonstration, not a credit decision our model produces. Contact values stored on records submitted before that change are no longer displayed or included in any export, though they may remain in stored historical rows. The access-list form is no longer presented on this site; older access-list records may remain.</span></p>
+    <h3 data-i18n="demo.privacy.useTitle">How it is used</h3>
+    <p data-i18n="demo.privacy.use">Submitted metrics generate an illustrative assessment and can be displayed in the password-protected demonstration dashboard. Waitlist emails are used only to contact you about access. Submissions may trigger an administrator email through the configured notification provider. Do not submit real merchant or borrower records to this demonstration.</p>
+    <h3 data-i18n="demo.privacy.retentionTitle">Retention and deletion</h3>
+    <p data-i18n="demo.privacy.retention">Data is retained while the service operates. To have your records deleted, write to lehuuhoang1909@gmail.com from the address you signed up with and we will remove them.</p>
+    <h3 data-i18n="demo.privacy.statusTitle">Status</h3>
+    <p><span data-i18n="demo.privacy.status1">RBF is a</span> <b data-i18n="demo.privacy.status2">research demonstration, not a lending service</b> <span data-i18n="demo.privacy.status3">— it holds no capital and makes no credit offers. The risk model is a baseline trained on synthetic data and has no measured predictive validity; the active scorer assigns a tier that controls the terms used by the deterministic financing calculations. Neither is a lending commitment or an offer of credit, and results should be reviewed before any financing decision.</span></p>
+    <p class="small" style="margin-top:24px" data-i18n="demo.privacy.updated">Last updated October 2026 · lehuuhoang1909@gmail.com</p>
+    <div style="margin-top:32px"><button class="btn btn-ghost" onclick="go('landing')" data-i18n="demo.back">Back</button></div>
   </div></div>
 </div>
 
-<footer class="prototype-footer"><div class="wrap"><a class="brand" href="/">RBF</a><p>Independent financing research &amp; software prototype.</p><div class="foot-links"><a href="/">Overview</a><a href="/lab">Simulation Lab</a><button class="text-link" onclick="go('privacy')">Data handling</button><a href="mailto:lehuuhoang1909@gmail.com">Contact</a></div><p class="small">No approval, creditworthiness or suitability conclusion.</p></div></footer>
+<footer class="prototype-footer"><div class="wrap"><a class="brand" href="/">RBF</a><p data-i18n="demo.footer.tagline">Independent financing research &amp; software prototype.</p><div class="foot-links"><a href="/" data-i18n="demo.nav.overview">Overview</a><a href="/lab" data-i18n="chrome.nav.lab">Simulation Lab</a><button class="text-link" onclick="go('privacy')" data-i18n="footer.data">Data handling</button><a href="mailto:lehuuhoang1909@gmail.com" data-i18n="demo.footer.contact">Contact</a></div><p class="small" data-i18n="demo.footer.disclaimer">No approval, creditworthiness or suitability conclusion.</p></div></footer>
 
 <div class="login-overlay" id="key-modal" style="display:none">
   <div class="login-box">
     <div class="brand"><span class="brand-mark"></span>RBF</div>
     <h3 id="key-title">Pilot API key</h3>
     <div id="key-form">
-      <p>Free tier — 100 assessments per month. One key per email.</p>
+      <p data-i18n="demo.key.free">Free tier — 100 assessments per month. One key per email.</p>
       <input id="key-email" type="email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')requestKey()">
-      <button class="btn btn-primary btn-block" style="margin-top:12px" id="key-btn" onclick="requestKey()">Issue key</button>
+      <button class="btn btn-primary btn-block" style="margin-top:12px" id="key-btn" onclick="requestKey()" data-i18n="demo.key.issue">Issue key</button>
       <div class="login-err" id="key-err"></div>
     </div>
     <div id="key-result" style="display:none">
-      <p>Your key — shown once, store it now. Send it as an <span class="mono">X-API-Key</span> header.</p>
+      <p><span data-i18n="demo.key.shownOnce">Your key — shown once, store it now. Send it as an</span> <span class="mono">X-API-Key</span><span data-i18n="demo.key.headerSuffix"> header.</span></p>
       <div class="mono small" id="key-value" style="word-break:break-all;padding:12px;border:1px solid var(--hairline);border-radius:6px;background:var(--paper)"></div>
-      <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="copyKey()">Copy key</button>
+      <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="copyKey()" data-i18n="demo.key.copy">Copy key</button>
     </div>
-    <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="closeKeyModal()">Close</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="closeKeyModal()" data-i18n="demo.key.close">Close</button>
   </div>
 </div>
 
@@ -962,6 +963,21 @@ tr{cursor:pointer}tbody tr:hover td{background:var(--paper)}
 
 <script>
 const API = window.location.origin;
+/* ── Bilingual bridge ──────────────────────────────────────────────────
+   This page script parses before the deferred /i18n.js, so a lookup made
+   while the script first runs can land before the catalogues do. It then
+   returns '' — and `setElText` leaves the markup's own English in place
+   rather than blanking an element — after which `repaintDynamicCopy`
+   redoes every string this script wrote itself. The runtime fires
+   'rbf:languagechange' once on init and again on each switch, so the
+   first paint is corrected by the same path a later switch uses.
+
+   Catalogue keys localize how a value READS. Nothing below changes a value
+   that is sent to, compared against or received from the API: platform,
+   decision and risk-tier values stay exactly as the API states them. */
+const t = (key, vars) => (window.RBF_I18N ? window.RBF_I18N.t(key, vars) : '');
+function setElText(el, key, vars){ const s = t(key, vars); if(el && s) el.textContent = s; }
+function setI18nText(id, key, vars){ setElText(document.getElementById(id), key, vars); }
 const getToken = () => sessionStorage.getItem('sf_token');
 async function callAPI(endpoint, options = {}) {
   try {
@@ -1037,19 +1053,19 @@ node:`<span class="k">const</span> res = <span class="k">await</span> fetch(<spa
 console.log(<span class="k">await</span> res.json());`
 };
 function setLang(lang, btn){ document.querySelectorAll('.code-tab').forEach(t=>t.classList.remove('active')); if(btn) btn.classList.add('active'); document.getElementById('code-block').innerHTML = CODE[lang]; }
-function copyCode(){ navigator.clipboard?.writeText(document.getElementById('code-block').innerText).then(()=>toast('API example copied')).catch(()=>toast('Copy unavailable')); }
+function copyCode(){ navigator.clipboard?.writeText(document.getElementById('code-block').innerText).then(()=>toast(t('demo.toast.apiCopied'))).catch(()=>toast(t('demo.toast.copyUnavailable'))); }
 async function runConsole(){
   const btn=document.getElementById('console-run-btn'), out=document.getElementById('console-out'),
         pre=document.getElementById('console-out-pre'), badge=document.getElementById('console-latency');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Running'; badge.style.display='none';
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> '+t('demo.api.running'); badge.style.display='none';
   const params=new URLSearchParams({monthly_revenue:185000000,revenue_growth:0.22,order_volume:420,avg_order_value:440000,return_rate:0.028,rating:4.9,days_active:680,inventory_turnover:6.2,late_ship_rate:0.018,previous_loans:2});
   const t0=performance.now();
   const data=await callAPI('/api/assess/preview?'+params.toString());
   const ms=Math.round(performance.now()-t0);
-  btn.disabled=false; btn.textContent='Run sample request';
+  btn.disabled=false; setElText(btn,'demo.api.run');
   out.style.display='block';
   const status=document.getElementById('console-status');
-  if(!data||data.__rate_limited){ status.className='api-status err'; status.textContent='Error'; pre.textContent='Request failed. Try again in a moment.'; return; }
+  if(!data||data.__rate_limited){ status.className='api-status err'; status.textContent=t('demo.api.error'); pre.textContent=t('demo.api.requestFailed'); return; }
   status.className='api-status'; status.textContent='200 OK';
   const s=(data.financing&&data.financing.structure)||{};
   pre.textContent=JSON.stringify({
@@ -1062,28 +1078,39 @@ async function runConsole(){
   badge.style.display='inline-block'; badge.textContent=ms+'ms';
 }
 const FLOW_DESC={
-  signals:'Revenue, growth, returns, ratings, and fulfillment — pulled directly from the merchant submission.',
-  normalize:'Raw metrics are scaled and bounded so a fast-growing large merchant and a stable small merchant are compared fairly.',
-  ensemble:'When the model artifact is available, a Random Forest and a Logistic Regression model each score the normalized profile independently. The ensemble is optional at runtime — if the artifact fails to build or load, a deterministic heuristic scores instead, and /api/health reports which path is active. The two paths read different inputs and can reach different tiers.',
-  tier:'The demo risk score is thresholded into Low, Medium or High Risk. The tier — not the score — is what the financing engine consumes: it sets the advance percentage, the remittance rate, the cap factor, and whether an illustrative structure is displayed. High Risk shows no structure. The formulas are deterministic once the tier is fixed, but a change of scoring path can change the tier and therefore every figure below.',
-  pd:'The two model outputs are blended into a single unvalidated demo risk score — 65% RF, 35% LR. It is not a probability of default: the training label was generated by a formula over the same features (D-001).',
-  integrity:'Five rule-based checks — revenue reconciliation, exposure velocity, growth plausibility, and more — screen for misrepresentation alongside the credit score. An elevated flag marks the demonstration assessment for manual review. Rule-based screening, not a supervised fraud model.',
-  limit:'The illustrative Low Risk tier uses an advance sized to 15% of annual revenue; Medium Risk uses 8%. All deterministic — no model computes this arithmetic.',
-  rate:'Repayment is simulated as a percentage of revenue (the remittance) collected until a fixed repayment cap is reached — under base, decline, and growth assumptions.',
-  explain:'Per-signal risk findings and a plain-language rationale are generated alongside the numeric structure.',
+  signals:'demo.flowdesc.signals',
+  normalize:'demo.flowdesc.normalize',
+  ensemble:'demo.flowdesc.ensemble',
+  tier:'demo.flowdesc.tier',
+  pd:'demo.flowdesc.pd',
+  integrity:'demo.flowdesc.integrity',
+  limit:'demo.flowdesc.limit',
+  rate:'demo.flowdesc.rate',
+  explain:'demo.flowdesc.explain',
 };
+/* The node's own label comes from the DOM, which the runtime has already
+   localized, so only the description needs a lookup here. */
+let activeFlowKey=null;
+function paintFlowDesc(){
+  if(!activeFlowKey) return;
+  const node=document.querySelector('#methodology-flow .flow-node[data-key="'+activeFlowKey+'"]');
+  const desc=document.getElementById('flow-desc');
+  if(!node||!desc) return;
+  desc.innerHTML=`<b>${node.textContent}</b> — ${t(FLOW_DESC[activeFlowKey])}`;
+}
 document.querySelectorAll('#methodology-flow .flow-node').forEach(node=>{
   const activate=()=>{
     document.querySelectorAll('#methodology-flow .flow-node').forEach(n=>n.classList.remove('active'));
     node.classList.add('active');
-    document.getElementById('flow-desc').innerHTML=`<b>${node.textContent}</b> — ${FLOW_DESC[node.dataset.key]}`;
+    activeFlowKey=node.dataset.key;
+    paintFlowDesc();
   };
   node.addEventListener('mouseenter', activate);
   node.addEventListener('click', activate);
 });
-let applyData={};
+let applyData={}, applyStep=1, resultLastData=null;
 function resetApply(){ showStep(1); document.querySelectorAll('#page-apply input').forEach(i=>i.classList.remove('invalid')); document.querySelectorAll('#page-apply .field').forEach(f=>f.classList.remove('show-err')); }
-function showStep(step){ [1,2,3].forEach(s=>document.getElementById('step-'+s).style.display=s===step?'block':'none'); document.getElementById('progress-fill').style.width=(step/3*100)+'%'; document.getElementById('progress-label').textContent=`Step ${step} of 3`; window.scrollTo(0,0); }
+function showStep(step){ applyStep=step; [1,2,3].forEach(s=>document.getElementById('step-'+s).style.display=s===step?'block':'none'); document.getElementById('progress-fill').style.width=(step/3*100)+'%'; setI18nText('progress-label','demo.apply.step',{n:step}); window.scrollTo(0,0); }
 function validateField(input){
   const field=input.closest('.field'); let ok=true; const v=input.value.trim();
   if(input.hasAttribute('data-req') && v==='') ok=false;
@@ -1102,7 +1129,7 @@ function validateStep(step){
 }
 const val=id=>document.getElementById(id).value.trim(), num=id=>parseFloat(val(id))||0, int=id=>parseInt(val(id))||0;
 function next(step){
-  if(!validateStep(step)){ toast('Fix the highlighted fields'); return; }
+  if(!validateStep(step)){ toast(t('demo.toast.fixFields')); return; }
   if(step===1){
     applyData={shop_name:val('f_shop_name'),platform:val('f_platform'),monthly_revenue:num('f_monthly_revenue'),order_volume:int('f_order_volume')};
     showStep(2);
@@ -1113,14 +1140,14 @@ function next(step){
 }
 function back(step){ showStep(step-1); }
 function renderPreview(){
-  const rows=[['Shop',applyData.shop_name],['Platform',applyData.platform],['Monthly revenue',fmtVND(applyData.monthly_revenue)],['Revenue growth',signed(applyData.revenue_growth)],['Return rate',pct(applyData.return_rate)],['Late shipments',pct(applyData.late_ship_rate)],['Rating',applyData.rating+' / 5.0'],['Days active',applyData.days_active+' days']];
+  const rows=[[t('demo.preview.shop'),applyData.shop_name],[t('demo.field.platform'),applyData.platform],[t('demo.field.monthlyRevenue'),fmtVND(applyData.monthly_revenue)],[t('demo.field.revenueGrowth'),signed(applyData.revenue_growth)],[t('demo.field.returnRate'),pct(applyData.return_rate)],[t('demo.field.lateShipments'),pct(applyData.late_ship_rate)],[t('demo.preview.rating'),applyData.rating+' / 5.0'],[t('demo.field.daysActive'),applyData.days_active+' '+t('demo.unit.days')]];
   document.getElementById('preview-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
 }
-const DECISION_STEPS=['Reading merchant profile','Normalizing platform metrics','Checking revenue stability','Computing the demo risk score','Structuring the financing','Simulating repayment scenarios','Example ready'];
+const DECISION_STEPS=['demo.seq.read','demo.seq.normalize','demo.seq.stability','demo.seq.score','demo.seq.structure','demo.seq.scenarios','demo.seq.ready'];
 async function runDecisionSequence(){
   const fill=document.getElementById('seq-fill'), text=document.getElementById('seq-text');
   for(let i=0;i<DECISION_STEPS.length;i++){
-    text.textContent=DECISION_STEPS[i];
+    setElText(text,DECISION_STEPS[i]);
     fill.style.width=((i+1)/DECISION_STEPS.length*100)+'%';
     await new Promise(r=>setTimeout(r, i<DECISION_STEPS.length-1?155:60));
   }
@@ -1133,16 +1160,20 @@ async function submitApplication(){
     runDecisionSequence(),
     callAPI('/api/sellers/submit',{method:'POST',body:JSON.stringify(applyData)}),
   ]);
-  seq.style.display='none'; pv.style.display=''; btn.disabled=false; btn.style.display=''; btn.textContent='Run assessment';
-  if(data&&data.__rate_limited){ toast('Too many submissions from this connection. Try again later.'); return; }
-  if(!data){ toast('Could not reach the scoring service. Please try again.'); return; }
+  seq.style.display='none'; pv.style.display=''; btn.disabled=false; btn.style.display=''; setElText(btn,'demo.apply.run');
+  if(data&&data.__rate_limited){ toast(t('demo.toast.tooManySubmissions')); return; }
+  if(!data){ toast(t('demo.toast.noScoringService')); return; }
   renderResult({...applyData,...data}); go('result');
 }
 /* Backend enum values are unchanged for compatibility. Only the DISPLAY
    changes: these are illustrative risk tiers from a demonstration rule, not
    lending decisions. Nothing here approves, conditions or declines anything. */
-const VERDICT={APPROVED:'Illustrative low-risk tier',CONDITIONAL:'Illustrative medium-risk tier',REJECTED:'Illustrative high-risk tier'};
-const EXPLAIN={APPROVED:'This profile falls in the illustrative low-risk tier. The demo advance is sized to annual revenue and structured at the low-risk remittance and repayment cap. No underwriting standard has been validated — the tier is a demonstration of the rule, not an approval.',CONDITIONAL:'This profile falls in the illustrative medium-risk tier, where the demonstration rule sizes a reduced advance. The tier reflects the rule, not a validated assessment of the merchant.',REJECTED:'This profile falls in the illustrative high-risk tier under the demonstration rule. Returns, shipping reliability, ratings and operating history are the inputs that move it. No risk threshold here has been validated against outcomes.'};
+const VERDICT={APPROVED:'demo.verdict.approved',CONDITIONAL:'demo.verdict.conditional',REJECTED:'demo.verdict.rejected'};
+const EXPLAIN={APPROVED:'demo.explain.approved',CONDITIONAL:'demo.explain.conditional',REJECTED:'demo.explain.rejected'};
+/* Display labels for the engine's own tier values. The value is the key;
+   an unrecognised tier falls through to the API's own string rather than
+   being hidden or guessed at. */
+const TIER_LABEL={'Low Risk':'demo.tier.low','Medium Risk':'demo.tier.medium','High Risk':'demo.tier.high'};
 const FLAG_CLASS={green:'pass',amber:'warn',red:'fail'}, SIGNAL_LABEL={return_rate:'Return rate',late_ship_rate:'Late shipments',revenue_growth:'Revenue growth',rating:'Store rating',days_active:'Days active',inventory_turnover:'Inventory turnover'};
 function computeSignals(s){
   const f=(v,lo,hi)=>v<=lo?'green':v<=hi?'amber':'red';
@@ -1150,21 +1181,22 @@ function computeSignals(s){
 }
 function signalDisplay(k,v){ if(k==='revenue_growth') return signed(v); if(k==='rating') return Number(v).toFixed(1)+' / 5'; if(k==='days_active') return Math.round(v)+'d'; if(k==='inventory_turnover') return Number(v).toFixed(1)+'x'; return pct(v); }
 function renderResult(s){
+  resultLastData=s;
   const dec=s.decision||'CONDITIONAL';
   const financing=s.financing||{structure:{},scenarios:[],risk_findings:[],information_needed:[],data_completeness_pct:null};
   const structure=financing.structure||{};
   document.getElementById('result-head').className='result-head '+dec;
   document.getElementById('r-id').textContent=s.seller_id||s.id||'RBF-';
-  document.getElementById('r-verdict').textContent=VERDICT[dec]||dec;
-  document.getElementById('r-shop').textContent=s.shop_name||'Merchant';
+  document.getElementById('r-verdict').textContent=VERDICT[dec]?t(VERDICT[dec]):dec;
+  document.getElementById('r-shop').textContent=s.shop_name||t('demo.merchant');
   document.getElementById('r-plat').textContent=s.platform?' · '+s.platform:'';
   document.getElementById('r-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
-  document.getElementById('r-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' of revenue':'—';
+  document.getElementById('r-rate').textContent=structure.remittance_pct?pct(structure.remittance_pct)+' '+t('demo.hero.ofRevenue'):'—';
   document.getElementById('r-cap').textContent=fmtVND(structure.repayment_cap);
   document.getElementById('r-pd').textContent=pct(s.pd_score);
   // The scorer's legacy free-text rationale uses a different advance rule.
   // Do not present it as the rationale for the financing figures shown here.
-  document.getElementById('r-explain').textContent=EXPLAIN[dec]||'';
+  document.getElementById('r-explain').textContent=EXPLAIN[dec]?t(EXPLAIN[dec]):'';
   const signals=(s.signals&&Object.keys(s.signals).length)?s.signals:computeSignals(s);
   renderWhyPanel(signals);
   renderStructure(structure, financing);
@@ -1174,24 +1206,24 @@ function renderResult(s){
 }
 function renderStructure(structure, financing){
   const rows=[];
-  rows.push(['Illustrative advance', fmtVND(structure.recommended_amount)]);
-  if(structure.requested_amount) rows.push(['Requested amount', fmtVND(structure.requested_amount)+(structure.exceeds_recommendation?' — exceeds recommendation':'')]);
-  rows.push(['Remittance', structure.remittance_pct?pct(structure.remittance_pct)+(structure.collection_base==='net_of_returns'?' of monthly net revenue':' of monthly revenue'):'—']);
+  rows.push([t('demo.field.advance'), fmtVND(structure.recommended_amount)]);
+  if(structure.requested_amount) rows.push([t('demo.field.requestedAmount'), fmtVND(structure.requested_amount)+(structure.exceeds_recommendation?' '+t('demo.structure.exceeds'):'')]);
+  rows.push([t('demo.field.remittance'), structure.remittance_pct?pct(structure.remittance_pct)+' '+t(structure.collection_base==='net_of_returns'?'demo.structure.ofMonthlyNet':'demo.structure.ofMonthly'):'—']);
   if(structure.collection_base==='net_of_returns' && structure.net_collectible_revenue!=null)
-    rows.push(['Collected on (net of '+pct(structure.return_rate_applied||0,1)+' returns)', fmtVND(structure.net_collectible_revenue)]);
-  rows.push(['Repayment cap', fmtVND(structure.repayment_cap)]);
-  rows.push(['Base-case repayment term', structure.base_case_duration_months?structure.base_case_duration_months+' months':'—']);
-  rows.push(['Effective APR (base case)', structure.effective_apr_base_case!=null?pct(structure.effective_apr_base_case,1):'—']);
-  rows.push(['Factor rate', structure.factor_rate?structure.factor_rate.toFixed(2)+'×':'—']);
+    rows.push([t('demo.structure.collectedOn',{pct:pct(structure.return_rate_applied||0,1)}), fmtVND(structure.net_collectible_revenue)]);
+  rows.push([t('demo.field.repaymentCap'), fmtVND(structure.repayment_cap)]);
+  rows.push([t('demo.structure.baseTerm'), structure.base_case_duration_months?structure.base_case_duration_months+' '+t('demo.unit.months'):'—']);
+  rows.push([t('demo.structure.aprBase'), structure.effective_apr_base_case!=null?pct(structure.effective_apr_base_case,1):'—']);
+  rows.push([t('demo.structure.factorRate'), structure.factor_rate?structure.factor_rate.toFixed(2)+'×':'—']);
   const severe=(financing.scenarios||[]).find(sc=>sc.case==='severe_decline');
-  rows.push(['Downside repayment term (-40% revenue)', severe&&severe.repayment_duration_months?severe.repayment_duration_months+' months':'—']);
-  rows.push(['Data completeness', financing.data_completeness_pct!=null?financing.data_completeness_pct+'%':'—']);
+  rows.push([t('demo.structure.downsideTerm'), severe&&severe.repayment_duration_months?severe.repayment_duration_months+' '+t('demo.unit.months'):'—']);
+  rows.push([t('demo.structure.dataCompleteness'), financing.data_completeness_pct!=null?financing.data_completeness_pct+'%':'—']);
   document.getElementById('structure-list').innerHTML=rows.map(r=>`<div class="preview-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
   const note=document.getElementById('structure-note');
   let noteTxt;
   if(structure.note){ noteTxt=structure.note; }
-  else if((financing.information_needed||[]).length){ noteTxt='Information still required: '+financing.information_needed[0]+(financing.information_needed.length>1?` (+${financing.information_needed.length-1} more below)`:''); }
-  else { noteTxt='Base case assumes revenue holds at the reported level; downside cases apply a persistent revenue decline.'; }
+  else if((financing.information_needed||[]).length){ noteTxt=t('demo.structure.infoRequired',{item:financing.information_needed[0]})+(financing.information_needed.length>1?t('demo.structure.infoMore',{n:financing.information_needed.length-1}):''); }
+  else { noteTxt=t('demo.structure.baseAssumption'); }
   // A-9: a rate must carry its basis. `apr_basis` was computed by the engine and
   // dropped here, so a reader saw "Effective APR (base case) 13.2%" with nothing
   // saying what the base case assumes or which way a decline moves it. Appended
@@ -1205,15 +1237,15 @@ function renderStructure(structure, financing){
 }
 function renderScenarios(scenarios){
   const body=document.getElementById('scenario-body');
-  if(!scenarios.length){ body.innerHTML='<tr><td colspan="4"><div class="empty">No financing structure was recommended for this risk tier, so no repayment scenario applies.</div></td></tr>'; return; }
+  if(!scenarios.length){ body.innerHTML='<tr><td colspan="4"><div class="empty">'+t('demo.scenario.empty')+'</div></td></tr>'; return; }
   body.innerHTML=scenarios.map(sc=>{
     // Closure is the one row where the cap is never reached. A duration cell
     // would be meaningless, so it states what goes unrecovered instead.
     if(sc.case==='closure'){
-      const share=sc.share_of_cap_unrecovered!=null?` (${pct(sc.share_of_cap_unrecovered,0)} of cap)`:'';
-      return `<tr class="sc-closure"><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.amount_collected)} collected</td><td class="t-num sc-unrec">${fmtVND(sc.amount_unrecovered)} unrecovered${share}</td></tr>`;
+      const share=sc.share_of_cap_unrecovered!=null?' '+t('demo.scenario.ofCap',{pct:pct(sc.share_of_cap_unrecovered,0)}):'';
+      return `<tr class="sc-closure"><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${t('demo.scenario.collected',{amount:fmtVND(sc.amount_collected)})}</td><td class="t-num sc-unrec">${t('demo.scenario.unrecovered',{amount:fmtVND(sc.amount_unrecovered)})}${share}</td></tr>`;
     }
-    return `<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' mo':'—'}</td></tr>`;
+    return `<tr><td>${sc.label}</td><td class="t-num">${fmtVND(sc.scenario_monthly_revenue)}</td><td class="t-num">${fmtVND(sc.periodic_remittance)}</td><td class="t-num">${sc.repayment_duration_months?sc.repayment_duration_months+' '+t('demo.unit.mo'):'—'}</td></tr>`;
   }).join('');
   const closure=scenarios.find(s=>s.case==='closure');
   const note=document.getElementById('scenario-closure-note');
@@ -1222,36 +1254,38 @@ function renderScenarios(scenarios){
     // The provider's realised rate on that path, stated beside the unrecovered
     // balance rather than instead of it (A-9): an observed-window figure.
     if(closure&&closure.observed_apr_to_closure!=null){
-      txt+=` Return to the provider on this path: ${pct(closure.observed_apr_to_closure,1)} (observed window, not a lifetime return).`;
+      txt+=' '+t('demo.scenario.providerReturn',{apr:pct(closure.observed_apr_to_closure,1)});
     }
     note.textContent=txt;
   }
 }
-const SEV_LABEL={low:'Low',medium:'Medium',high:'High',unknown:'Unknown'};
-const INT_LEVEL={clear:['Clear','low'],review:['Review','medium'],high:['Elevated','high']};
+const SEV_LABEL={low:'demo.sev.low',medium:'demo.sev.medium',high:'demo.sev.high',unknown:'demo.sev.unknown'};
+const INT_LEVEL={clear:['demo.int.clear','low'],review:['demo.int.review','medium'],high:['demo.int.elevated','high']};
 function renderIntegrity(intg){
   const sec=document.getElementById('integrity-section');
   if(!intg){ sec.style.display='none'; return; }
   sec.style.display='';
-  const [lbl,cls]=INT_LEVEL[intg.level]||['—','unknown'];
+  const [lblKey,cls]=INT_LEVEL[intg.level]||[null,'unknown'];
+  const lbl=lblKey?t(lblKey):'—';
+  const flagsTxt=t(intg.flags===1?'demo.int.flagsOne':'demo.int.flagsMany',{n:intg.flags});
   const badge=document.getElementById('int-level');
-  badge.textContent=lbl+' · '+intg.flags+' flag'+(intg.flags===1?'':'s');
+  badge.textContent=lbl+' · '+flagsTxt;
   badge.className='sev-badge '+cls;
   document.getElementById('int-disclosure').textContent=intg.disclosure||'';
   const banner=document.getElementById('gate-banner');
   if(banner){
     if(intg.level==='high'){
       banner.style.display=''; banner.className='gate-banner high';
-      banner.textContent=`Assessment flagged for review — integrity screen elevated (${intg.flags} flag${intg.flags===1?'':'s'}). The demonstration assessment below is marked for manual review; it assumes reported figures are accurate; verify submitted revenue before relying on the assessment.`;
+      banner.textContent=t('demo.gate.high',{flags:flagsTxt});
     } else if(intg.level==='review'){
       banner.style.display=''; banner.className='gate-banner review';
-      banner.textContent='The integrity screen flagged items to confirm. This demonstration assessment is marked for manual review.';
+      banner.textContent=t('demo.gate.review');
     } else { banner.style.display='none'; }
   }
   document.getElementById('integrity-checks').innerHTML=(intg.checks||[]).map(c=>{
     const flagged=c.status==='flag';
     const bc=!flagged?'low':(c.severity==='high'?'high':'medium');
-    const bt=!flagged?'Pass':(c.severity==='high'?'High':c.severity==='info'?'Notice':'Medium');
+    const bt=t(!flagged?'demo.sev.pass':(c.severity==='high'?'demo.sev.high':c.severity==='info'?'demo.sev.notice':'demo.sev.medium'));
     return `<div class="finding-card">
       <div class="finding-top"><span class="finding-cat">${c.check}</span><span class="sev-badge ${bc}">${bt}</span></div>
       ${c.evidence?`<div class="finding-evidence">${c.evidence}</div>`:''}
@@ -1262,26 +1296,26 @@ function renderIntegrity(intg){
 function renderFindings(findings){
   document.getElementById('finding-list').innerHTML=findings.map(f=>`
     <div class="finding-card">
-      <div class="finding-top"><span class="finding-cat">${f.category}</span><span class="sev-badge ${f.severity}">${SEV_LABEL[f.severity]||f.severity}</span></div>
+      <div class="finding-top"><span class="finding-cat">${f.category}</span><span class="sev-badge ${f.severity}">${SEV_LABEL[f.severity]?t(SEV_LABEL[f.severity]):f.severity}</span></div>
       <div class="finding-evidence">${f.evidence}</div>
       <div class="finding-why">${f.why_it_matters}</div>
-      ${f.resolution_needed?`<div class="finding-resolution">Needed to resolve: ${f.resolution_needed}</div>`:''}
+      ${f.resolution_needed?`<div class="finding-resolution">${t('demo.finding.needed',{text:f.resolution_needed})}</div>`:''}
     </div>`).join('');
 }
 const WHY_DRIVER={
-  revenue_growth:v=>`${signed(v)} MoM revenue growth`, return_rate:v=>`${pct(v)} return rate`,
-  rating:v=>`${Number(v).toFixed(1)} store rating`, late_ship_rate:v=>`${pct(v)} late shipment rate`,
-  days_active:v=>`${Math.round(v)} days operating history`, inventory_turnover:v=>`${Number(v).toFixed(1)}x inventory turnover`,
+  revenue_growth:v=>t('demo.why.driver.revenueGrowth',{v:signed(v)}), return_rate:v=>t('demo.why.driver.returnRate',{v:pct(v)}),
+  rating:v=>t('demo.why.driver.rating',{v:Number(v).toFixed(1)}), late_ship_rate:v=>t('demo.why.driver.lateShip',{v:pct(v)}),
+  days_active:v=>t('demo.why.driver.daysActive',{v:Math.round(v)}), inventory_turnover:v=>t('demo.why.driver.turnover',{v:Number(v).toFixed(1)}),
 };
 const WHY_RISK={
-  revenue_growth:v=>v<0?'revenue growth is negative':'revenue growth needs monitoring', return_rate:v=>`return rate elevated at ${pct(v)}`,
-  rating:()=>'store rating below this demonstration rule’s threshold', late_ship_rate:v=>`late shipments elevated at ${pct(v)}`,
-  days_active:v=>`limited operating history (${Math.round(v)}d)`, inventory_turnover:()=>'slow-moving inventory',
+  revenue_growth:v=>v<0?t('demo.why.risk.growthNegative'):t('demo.why.risk.growthWatch'), return_rate:v=>t('demo.why.risk.returnRate',{v:pct(v)}),
+  rating:()=>t('demo.why.risk.rating'), late_ship_rate:v=>t('demo.why.risk.lateShip',{v:pct(v)}),
+  days_active:v=>t('demo.why.risk.daysActive',{v:Math.round(v)}), inventory_turnover:()=>t('demo.why.risk.turnover'),
 };
 const WHY_IMPROVE={
-  revenue_growth:'Month-by-month revenue history to contextualize the growth figure', return_rate:'Return records and the calculation basis',
-  rating:'Rating counts and the measurement period', late_ship_rate:'Shipment records for the stated period',
-  days_active:'Trading-history coverage and gaps', inventory_turnover:'Inventory records and the turnover calculation basis',
+  revenue_growth:'demo.why.improve.revenueGrowth', return_rate:'demo.why.improve.returnRate',
+  rating:'demo.why.improve.rating', late_ship_rate:'demo.why.improve.lateShip',
+  days_active:'demo.why.improve.daysActive', inventory_turnover:'demo.why.improve.turnover',
 };
 const WHY_ORDER=['revenue_growth','return_rate','rating','late_ship_rate','days_active','inventory_turnover'];
 const WHY_SEVERITY={red:0,amber:1,green:2};
@@ -1292,16 +1326,16 @@ function renderWhyPanel(signals){
     if(sig.flag==='green') drivers.push(WHY_DRIVER[k](sig.value));
     else { risks.push(WHY_RISK[k](sig.value)); weak.push({k,sev:WHY_SEVERITY[sig.flag]}); }
   });
-  risks.push('no verified payout data (self-reported only)');
+  risks.push(t('demo.why.risk.noPayout'));
   weak.sort((a,b)=>a.sev-b.sev);
-  const improve=weak.slice(0,3).map(w=>WHY_IMPROVE[w.k]);
-  improve.push('This prototype does not verify submitted data. Do not upload confidential records.');
-  const li=arr=>arr.map(t=>`<li>${t}</li>`).join('') || '<li>No strong signal in this category yet.</li>';
+  const improve=weak.slice(0,3).map(w=>t(WHY_IMPROVE[w.k]));
+  improve.push(t('demo.why.improve.noVerification'));
+  const li=arr=>arr.map(item=>`<li>${item}</li>`).join('') || `<li>${t('demo.why.none')}</li>`;
   document.getElementById('why-pos').innerHTML=li(drivers);
   document.getElementById('why-adj').innerHTML=li(risks);
   document.getElementById('why-next').innerHTML=li(improve.slice(0,4));
 }
-function shareResult(){ navigator.clipboard?.writeText(location.href).then(()=>toast('Link copied')).catch(()=>toast('Copy unavailable')); }
+function shareResult(){ navigator.clipboard?.writeText(location.href).then(()=>toast(t('demo.toast.linkCopied'))).catch(()=>toast(t('demo.toast.copyUnavailable'))); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window.toastT); window.toastT=setTimeout(()=>t.classList.remove('show'),2200); }
 let sellers=[], stats=null, filter='all';
 const loggedIn=()=>!!getToken();
@@ -1310,7 +1344,7 @@ async function tryLogin(){
   const btn=document.getElementById('login-btn'); btn.disabled=true;
   try {
     const res=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('login-pw').value})});
-    if(!res.ok){ document.getElementById('login-err').textContent=res.status===429?'Too many attempts. Try again in a few minutes.':'Incorrect password. Try again.'; throw new Error(); }
+    if(!res.ok){ document.getElementById('login-err').textContent=t(res.status===429?'demo.login.tooManyAttempts':'demo.login.incorrect'); throw new Error(); }
     const d=await res.json();
     sessionStorage.setItem('sf_token',d.token);
     document.getElementById('login-err').style.display='none';
@@ -1322,21 +1356,21 @@ async function tryLogin(){
 async function loadPortfolio(){
   const data=await callAPI('/api/portfolio');
   if(data&&data.__unauthorized){ sellers=[]; stats=null; initDashboard(); return; }
-  if(!data){ toast('Could not load portfolio. Please retry.'); return; }
+  if(!data){ toast(t('demo.toast.portfolioFailed')); return; }
   sellers=data.sellers; stats=data.stats;
   renderStats(); renderCounts(); renderCharts(); renderTable();
 }
-function renderStats(){ document.getElementById('st-total').textContent=stats.total; document.getElementById('st-approval').textContent=Math.round(stats.approval_rate*100)+'%'; document.getElementById('st-exposure').textContent=fmtVND(stats.total_exposure); document.getElementById('st-pd').textContent=pct(stats.avg_pd); const t=document.getElementById('traffic-line'); if(t){ const last=stats.last_visit?new Date(stats.last_visit).toLocaleString():'—'; t.innerHTML=`<b>${stats.visits_total||0}</b> visits · <b>${stats.visits_today||0}</b> today · <b>${stats.live_submissions||0}</b> submitted examples · last visit ${last}`; } }
+function renderStats(){ document.getElementById('st-total').textContent=stats.total; document.getElementById('st-approval').textContent=Math.round(stats.approval_rate*100)+'%'; document.getElementById('st-exposure').textContent=fmtVND(stats.total_exposure); document.getElementById('st-pd').textContent=pct(stats.avg_pd); const t=document.getElementById('traffic-line'); if(t){ const I=window.RBF_I18N||{t:()=>''}; const last=stats.last_visit?new Date(stats.last_visit).toLocaleString():'—'; t.innerHTML=`<b>${stats.visits_total||0}</b> ${I.t('demo.dash.visits')} · <b>${stats.visits_today||0}</b> ${I.t('demo.dash.today')} · <b>${stats.live_submissions||0}</b> ${I.t('demo.dash.submittedExamples')} · ${I.t('demo.dash.lastVisit')} ${last}`; } }
 function renderCounts(){ document.getElementById('c-all').textContent=stats.total; document.getElementById('c-approved').textContent=stats.approved; document.getElementById('c-conditional').textContent=stats.conditional; document.getElementById('c-rejected').textContent=stats.rejected; document.getElementById('c-live').textContent=sellers.filter(s=>s.source==='live').length; }
 function drawDonut(elId,data){ const total=data.reduce((s,d)=>s+d.value,0)||1; let offset=0, r=38, cx=50, cy=50, circ=2*Math.PI*r; const slices=data.map(d=>{ const p=d.value/total; const sl=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="16" stroke-dasharray="${p*circ} ${circ}" stroke-dashoffset="${-offset*circ}" transform="rotate(-90 ${cx} ${cy})"/>`; offset+=p; return sl; }); document.getElementById(elId).innerHTML=`<svg viewBox="0 0 100 100" style="width:124px;height:124px">${slices.join('')}<circle cx="50" cy="50" r="29" fill="#FFFFFF" stroke="#E8E8E5" stroke-width="1"/><text x="50" y="54" text-anchor="middle" font-family="Spline Sans Mono" font-size="15" fill="#1A1A1A">${total}</text></svg>`; }
-function renderCharts(){ const dist=[{label:'Low risk',value:stats.approved,color:'#2E6B4F'},{label:'Medium risk',value:stats.conditional,color:'#8A6D3B'},{label:'High risk',value:stats.rejected,color:'#8C3A38'}]; drawDonut('donut',dist); document.getElementById('donut-legend').innerHTML=dist.map(d=>`<div class="leg"><span class="sw" style="background:${d.color}"></span>${d.label}<b>${d.value}</b></div>`).join(''); const plats=['Shopee','TikTok Shop','Lazada']; const counts=plats.map(p=>sellers.filter(s=>s.platform===p).length), max=Math.max(...counts,1); document.getElementById('platform-bars').innerHTML=plats.map((p,i)=>`<div><div class="bl"><span>${p}</span><b>${counts[i]}</b></div><div class="bar-track"><div class="bar-fill" style="width:${counts[i]/max*100}%"></div></div></div>`).join(''); }
+function renderCharts(){ const dist=[{label:t('demo.chart.lowRisk'),value:stats.approved,color:'#2E6B4F'},{label:t('demo.chart.mediumRisk'),value:stats.conditional,color:'#8A6D3B'},{label:t('demo.chart.highRisk'),value:stats.rejected,color:'#8C3A38'}]; drawDonut('donut',dist); document.getElementById('donut-legend').innerHTML=dist.map(d=>`<div class="leg"><span class="sw" style="background:${d.color}"></span>${d.label}<b>${d.value}</b></div>`).join(''); const plats=['Shopee','TikTok Shop','Lazada']; const counts=plats.map(p=>sellers.filter(s=>s.platform===p).length), max=Math.max(...counts,1); document.getElementById('platform-bars').innerHTML=plats.map((p,i)=>`<div><div class="bl"><span>${p}</span><b>${counts[i]}</b></div><div class="bar-track"><div class="bar-fill" style="width:${counts[i]/max*100}%"></div></div></div>`).join(''); }
 function setFilter(f){ filter=f; document.querySelectorAll('.ds-item[data-filter]').forEach(el=>el.classList.toggle('active',el.dataset.filter===f)); renderTable(); }
-function renderTable(){ const q=(document.getElementById('dash-search').value||'').toLowerCase(); let rows=sellers.filter(s=>filter==='all'?true:filter==='live'?s.source==='live':s.decision===filter); if(q) rows=rows.filter(s=>(s.shop_name||'').toLowerCase().includes(q)); const pdColor=pd=>pd<.25?'#2E6B4F':pd<.55?'#8A6D3B':'#8C3A38'; const tb=document.getElementById('tbody'); if(!rows.length){ tb.innerHTML='<tr><td colspan="8"><div class="empty">No sellers match this view.</div></td></tr>'; return; } tb.innerHTML=rows.map(s=>`<tr onclick="openSeller('${(s.id||'').replace(/'/g,'')}')"><td class="t-id">${s.id||'—'}</td><td><div class="tn">${s.shop_name||''}${s.source==='live'?' <span class="live-tag">LIVE</span>':''}</div></td><td>${s.platform||''}</td><td class="t-num">${fmtVND(s.monthly_revenue)}</td><td><div class="pd-wrap"><span class="pd-dot" style="background:${pdColor(+s.pd_score||0)}"></span><span class="t-num">${pct(s.pd_score)}</span></div></td><td><span class="badge ${s.decision}">${VERDICT[s.decision]||'Unclassified'}</span></td><td class="t-num">${fmtVND(s.credit_limit)}</td><td class="t-num">${(s.created_at||'').slice(0,10)}</td></tr>`).join(''); }
+function renderTable(){ const q=(document.getElementById('dash-search').value||'').toLowerCase(); let rows=sellers.filter(s=>filter==='all'?true:filter==='live'?s.source==='live':s.decision===filter); if(q) rows=rows.filter(s=>(s.shop_name||'').toLowerCase().includes(q)); const pdColor=pd=>pd<.25?'#2E6B4F':pd<.55?'#8A6D3B':'#8C3A38'; const tb=document.getElementById('tbody'); if(!rows.length){ tb.innerHTML='<tr><td colspan="8"><div class="empty">'+t('demo.dash.noMatch')+'</div></td></tr>'; return; } tb.innerHTML=rows.map(s=>`<tr onclick="openSeller('${(s.id||'').replace(/'/g,'')}')"><td class="t-id">${s.id||'—'}</td><td><div class="tn">${s.shop_name||''}${s.source==='live'?' <span class="live-tag">'+t('demo.dash.live')+'</span>':''}</div></td><td>${s.platform||''}</td><td class="t-num">${fmtVND(s.monthly_revenue)}</td><td><div class="pd-wrap"><span class="pd-dot" style="background:${pdColor(+s.pd_score||0)}"></span><span class="t-num">${pct(s.pd_score)}</span></div></td><td><span class="badge ${s.decision}">${VERDICT[s.decision]?t(VERDICT[s.decision]):t('demo.dash.unclassified')}</span></td><td class="t-num">${fmtVND(s.credit_limit)}</td><td class="t-num">${(s.created_at||'').slice(0,10)}</td></tr>`).join(''); }
 function openSeller(id){ const s=sellers.find(x=>x.id===id); if(!s) return; renderResult({...s,seller_id:s.id}); go('result'); }
 function exportCSV(){
-  if(!sellers.length){ toast('Nothing to export'); return; }
+  if(!sellers.length){ toast(t('demo.toast.nothingToExport')); return; }
   downloadCSV(sellers,['id','shop_name','platform','monthly_revenue','revenue_growth','order_volume','avg_order_value','return_rate','rating','days_active','inventory_turnover','late_ship_rate','previous_loans','pd_score','decision','credit_limit','interest_rate','risk_tier','created_at'],'rbf-portfolio.csv');
-  toast('Portfolio exported');
+  toast(t('demo.toast.portfolioExported'));
 }
 function downloadCSV(rows, cols, filename){
   const esc=v=>{ v=v==null?'':String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
@@ -1348,30 +1382,30 @@ function downloadCSV(rows, cols, filename){
 async function exportLeads(){
   const data=await callAPI('/api/waitlist/entries');
   if(data&&data.__unauthorized){ initDashboard(); return; }
-  if(!data){ toast('Could not load leads.'); return; }
-  if(!data.entries.length){ toast('No leads yet'); return; }
+  if(!data){ toast(t('demo.toast.leadsFailed')); return; }
+  if(!data.entries.length){ toast(t('demo.toast.noLeads')); return; }
   downloadCSV(data.entries,['position','email','company','role','created_at'],'rbf-leads.csv');
-  toast(`${data.entries.length} lead${data.entries.length>1?'s':''} exported`);
+  toast(t(data.entries.length>1?'demo.toast.leadsExportedMany':'demo.toast.leadsExportedOne',{n:data.entries.length}));
 }
 function signOut(){ sessionStorage.removeItem('sf_token'); sellers=[]; stats=null; initDashboard(); }
-function openKeyModal(){ document.getElementById('key-modal').style.display='flex'; document.getElementById('key-title').textContent='Pilot API key'; document.getElementById('key-form').style.display='block'; document.getElementById('key-result').style.display='none'; document.getElementById('key-err').style.display='none'; setTimeout(()=>document.getElementById('key-email').focus(),120); }
+function openKeyModal(){ document.getElementById('key-modal').style.display='flex'; setI18nText('key-title','demo.key.pilotTitle'); document.getElementById('key-form').style.display='block'; document.getElementById('key-result').style.display='none'; document.getElementById('key-err').style.display='none'; setTimeout(()=>document.getElementById('key-email').focus(),120); }
 function closeKeyModal(){ document.getElementById('key-modal').style.display='none'; }
 async function requestKey(){
   const email=document.getElementById('key-email').value.trim();
   const err=document.getElementById('key-err');
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Enter a valid email.'; err.style.display='block'; return; }
-  const btn=document.getElementById('key-btn'); btn.disabled=true; btn.textContent='Issuing…';
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent=t('demo.key.invalidEmail'); err.style.display='block'; return; }
+  const btn=document.getElementById('key-btn'); btn.disabled=true; setElText(btn,'demo.key.issuing');
   try {
     const res=await fetch(`${API}/api/keys/issue`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,company:'',plan:'pilot'})});
     const d=await res.json();
-    if(!res.ok){ err.textContent=d.detail||'Could not issue a key. Try again.'; err.style.display='block'; return; }
+    if(!res.ok){ err.textContent=d.detail||t('demo.key.issueFailed'); err.style.display='block'; return; }
     document.getElementById('key-form').style.display='none';
     document.getElementById('key-result').style.display='block';
     document.getElementById('key-value').textContent=d.api_key;
-  } catch { err.textContent='Could not reach the server.'; err.style.display='block'; }
-  finally { btn.disabled=false; btn.textContent='Issue key'; }
+  } catch { err.textContent=t('demo.key.noServer'); err.style.display='block'; }
+  finally { btn.disabled=false; setElText(btn,'demo.key.issue'); }
 }
-function copyKey(){ navigator.clipboard?.writeText(document.getElementById('key-value').textContent).then(()=>toast('Key copied')).catch(()=>toast('Copy unavailable')); }
+function copyKey(){ navigator.clipboard?.writeText(document.getElementById('key-value').textContent).then(()=>toast(t('demo.toast.keyCopied'))).catch(()=>toast(t('demo.toast.copyUnavailable'))); }
 function contactEmail(topic){
   const subject=encodeURIComponent(`RBF — ${topic}`);
   const body=encodeURIComponent('Hi,\n\nWe are interested in the '+topic+'.\n\nCompany:\nMonthly assessment volume:\nTimeline:\n\nThanks,');
@@ -1382,7 +1416,7 @@ function contactEmail(topic){
    intentionally disabled so the CTA stays "Talk to us". */
 async function claimPurchase(sid){
   openKeyModal();
-  document.getElementById('key-title').textContent='Your Scale API key';
+  setI18nText('key-title','demo.key.scaleTitle');
   document.getElementById('key-form').style.display='none';
   const err=document.getElementById('key-err');
   try {
@@ -1392,10 +1426,10 @@ async function claimPurchase(sid){
       document.getElementById('key-result').style.display='block';
       document.getElementById('key-value').textContent=d.api_key;
     } else {
-      err.textContent=d.detail||'Could not verify the payment. Write to lehuuhoang1909@gmail.com.';
+      err.textContent=d.detail||t('demo.key.claimFailed');
       err.style.display='block';
     }
-  } catch { err.textContent='Could not reach the server. Refresh to retry.'; err.style.display='block'; }
+  } catch { err.textContent=t('demo.key.noServerRefresh'); err.style.display='block'; }
 }
 const _sid=new URLSearchParams(location.search).get('session_id');
 if(_sid){ history.replaceState({},'',location.pathname); claimPurchase(_sid); }
@@ -1413,8 +1447,9 @@ let heroProfile={shop:'Thời Trang Linh Chi', platform:'Shopee'};
 function heroApplyPreset(key, btn){
   const p=HERO_PRESETS[key]; if(!p) return;
   clearTimeout(heroDebounce);
-  clearHeroResult('Updating example…');
-  document.getElementById('hero-foot').textContent='Deterministic financing engine · recalculating…';
+  clearHeroResult('demo.hero.d.updating');
+  heroFootKey='demo.hero.foot.recalculating';
+  setI18nText('hero-foot','demo.hero.foot.recalculating');
   const set=(id,v)=>{document.getElementById(id).value=v;};
   set('hc-rev',p.rev); set('hc-growth',p.growth); set('hc-return',p.ret);
   set('hc-rating',p.rating); set('hc-late',p.late); set('hc-days',p.days);
@@ -1428,12 +1463,12 @@ function heroApplyPreset(key, btn){
   heroRunPreview();
 }
 const CHIP_DEFS={
-  return_rate:{pos:'Low return rate',watch:'Return rate needs watching',neg:'High return risk'},
-  late_ship_rate:{pos:'Reliable fulfillment',watch:'Shipping delays creeping in',neg:'Late shipment risk'},
-  revenue_growth:{pos:'Strong revenue growth',watch:'Growth volatility',neg:'Declining revenue'},
-  rating:{pos:'High customer trust',watch:'Rating below premium tier',neg:'Weak store rating'},
-  days_active:{pos:'High platform tenure',watch:'Limited operating history',neg:'Thin operating history'},
-  inventory_turnover:{pos:'Healthy inventory turnover',watch:'Slow-moving inventory',neg:'Inventory turnover risk'},
+  return_rate:{pos:'demo.chip.returnRate.pos',watch:'demo.chip.returnRate.watch',neg:'demo.chip.returnRate.neg'},
+  late_ship_rate:{pos:'demo.chip.lateShip.pos',watch:'demo.chip.lateShip.watch',neg:'demo.chip.lateShip.neg'},
+  revenue_growth:{pos:'demo.chip.revenueGrowth.pos',watch:'demo.chip.revenueGrowth.watch',neg:'demo.chip.revenueGrowth.neg'},
+  rating:{pos:'demo.chip.rating.pos',watch:'demo.chip.rating.watch',neg:'demo.chip.rating.neg'},
+  days_active:{pos:'demo.chip.daysActive.pos',watch:'demo.chip.daysActive.watch',neg:'demo.chip.daysActive.neg'},
+  inventory_turnover:{pos:'demo.chip.turnover.pos',watch:'demo.chip.turnover.watch',neg:'demo.chip.turnover.neg'},
 };
 const FLAG_CHIP_CLASS={green:'pos',amber:'watch',red:'neg'};
 function renderChips(signals){
@@ -1443,9 +1478,9 @@ function renderChips(signals){
     .sort((a,b)=>(rank[signals[a].flag]??1)-(rank[signals[b].flag]??1))
     .map(k=>{
       const cls=FLAG_CHIP_CLASS[signals[k].flag]||'watch';
-      return `<span class="chip ${cls}"><i></i>${CHIP_DEFS[k]?.[cls]||k}</span>`;
+      return `<span class="chip ${cls}"><i></i>${t(CHIP_DEFS[k]?.[cls]||'')||k}</span>`;
     });
-  chips.push('<span class="chip miss"><i></i>Verified payout data — self-reported only</span>');
+  chips.push('<span class="chip miss"><i></i>'+t('demo.chip.noPayout')+'</span>');
   return chips.join('');
 }
 function paintSliders(){
@@ -1480,33 +1515,33 @@ function heroRenderDecision(d, ms){
   const structure=(d.financing&&d.financing.structure)||{};
   box.className='decision-box'+(cls?' '+cls:'');
   word.className='decision-word'+(cls?' '+cls:'');
-  word.textContent=VERDICT[d.decision]||d.decision;
-  document.getElementById('hd-tier').textContent=d.risk_tier||'—';
+  word.textContent=VERDICT[d.decision]?t(VERDICT[d.decision]):d.decision;
+  document.getElementById('hd-tier').textContent=d.risk_tier?(TIER_LABEL[d.risk_tier]?t(TIER_LABEL[d.risk_tier]):d.risk_tier):'—';
   /* Labelled as a synthetic demo score, not a validated PD: the model is
      trained on generated data whose label is a formula over the same features
      (D-001). Labelling it a PD would assert predictive validity that this
      project has withdrawn. */
-  document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?('Demo score '+pct(d.pd_score,1)+' — synthetic, not a validated default probability'):'';
+  document.getElementById('hd-pdline').textContent=(d.pd_score!=null)?t('demo.hero.demoScoreLine',{v:pct(d.pd_score,1)}):'';
   document.getElementById('hd-limit').textContent=fmtVND(structure.amount_used_for_structure||structure.recommended_amount);
   /* A-1: say which base, or the merchant cannot reconcile the figure —
      it is deliberately below remittance_pct x gross revenue. */
   document.getElementById('hd-rate').textContent=structure.remittance_pct
-    ?pct(structure.remittance_pct)+(structure.collection_base==='net_of_returns'?' of net revenue':' of revenue')
+    ?pct(structure.remittance_pct)+' '+t(structure.collection_base==='net_of_returns'?'demo.hero.ofNetRevenue':'demo.hero.ofRevenue')
     :'—';
   document.getElementById('hd-pd').textContent=fmtVND(structure.repayment_cap);
   const dur=structure.base_case_duration_months;
-  document.getElementById('hd-dur').textContent=dur?dur+(dur===1?' month':' months'):'—';
+  document.getElementById('hd-dur').textContent=dur?dur+' '+t(dur===1?'demo.unit.month':'demo.unit.months'):'—';
   /* The factor rate alone hides the price: the same 1.15 costs far more over
      12 months than over 26, so the annualised cost travels with it. Null where
      the IRR is undefined — shown as a dash, never as 0%. */
   const apr=structure.effective_apr_base_case;
-  document.getElementById('hd-apr').textContent=(apr!=null)?pct(apr,1)+' APR':'—';
+  document.getElementById('hd-apr').textContent=(apr!=null)?t('demo.hero.aprValue',{v:pct(apr,1)}):'—';
   document.getElementById('hero-chips').innerHTML=renderChips(d.signals||{});
-  document.getElementById('hero-reason').textContent='Illustrative financing terms follow the displayed assumptions. The separate demo score is unvalidated and is not a credit recommendation.';
-  heroLastData=d;
+  document.getElementById('hero-reason').textContent=t('demo.hero.reason');
+  heroLastData=d; if(ms!=null) heroLastMs=ms;
   document.getElementById('hero-full-link').disabled=false;
   document.getElementById('hero-retry').hidden=true;
-  if(ms!=null) document.getElementById('hero-foot').textContent=`Deterministic financing engine · live response ${ms}ms`;
+  if(ms!=null){ heroFootKey=null; setI18nText('hero-foot','demo.hero.foot.live',{ms:ms}); }
 }
 function heroViewFull(){
   if(!heroLastData) return;
@@ -1514,21 +1549,23 @@ function heroViewFull(){
   go('result');
   window.scrollTo(0,0);
 }
-let heroDebounce, heroInFlight=false, heroPending=false, heroLastData=null;
-function clearHeroResult(message){
-  heroLastData=null;
+let heroDebounce, heroInFlight=false, heroPending=false, heroLastData=null, heroLastMs=null,
+    heroPlaceholderKey='demo.hero.d.loading', heroFootKey='demo.hero.foot.loading';
+function clearHeroResult(messageKey){
+  heroLastData=null; heroLastMs=null; heroPlaceholderKey=messageKey;
   document.getElementById('hd-box').className='decision-box';
-  document.getElementById('hd-word').textContent=message;
+  setI18nText('hd-word',messageKey);
   ['hd-tier','hd-limit','hd-rate','hd-pd','hd-dur','hd-apr'].forEach(id=>document.getElementById(id).textContent='—');
-  document.getElementById('hd-pdline').textContent='No current result. This prototype is unvalidated.';
+  setI18nText('hd-pdline','demo.hero.d.noResult');
   document.getElementById('hero-chips').textContent='';
   document.getElementById('hero-reason').textContent='';
   document.getElementById('hero-full-link').disabled=true;
   document.getElementById('hero-retry').hidden=true;
 }
 function heroShowUnavailable(){
-  clearHeroResult('Preview unavailable');
-  document.getElementById('hero-foot').textContent='The prototype API could not provide a result. No example figures are shown in its place.';
+  clearHeroResult('demo.hero.d.unavailable');
+  heroFootKey='demo.hero.foot.unavailable';
+  setI18nText('hero-foot','demo.hero.foot.unavailable');
   document.getElementById('hero-retry').hidden=false;
 }
 async function heroRunPreview(){
@@ -1557,18 +1594,18 @@ async function heroRunPreview(){
   if(heroPending){ heroPending=false; heroRunPreview(); }
 }
 function heroOnInput(){
-  clearHeroResult('Updating example…');
+  clearHeroResult('demo.hero.d.updating');
   heroUpdateLabels(heroReadValues());
   paintSliders();
   document.querySelectorAll('.preset-btn.active').forEach(b=>b.classList.remove('active'));
   const box=document.getElementById('hd-box'); if(box) box.classList.add('is-updating');
-  const foot=document.getElementById('hero-foot'); if(foot) foot.textContent='Deterministic financing engine · recalculating…';
+  const foot=document.getElementById('hero-foot'); if(foot){ heroFootKey='demo.hero.foot.recalculating'; setElText(foot,'demo.hero.foot.recalculating'); }
   clearTimeout(heroDebounce);
   heroDebounce=setTimeout(heroRunPreview, 220);
 }
 document.querySelectorAll('.hero-controls input[type=range]').forEach(el=>el.addEventListener('input', heroOnInput));
 paintSliders();
-clearHeroResult('Loading example…');
+clearHeroResult('demo.hero.d.loading');
 heroRunPreview();
 
 /* Premium scroll-reveal — progressive enhancement */
@@ -1594,26 +1631,58 @@ heroRunPreview();
 
    Fails closed: if /api/health is unreachable the badge says the path is
    unknown, never that the ensemble is active. */
+/* The scoring path itself is read from /api/health and compared unchanged;
+   only its badge reads in the active language. The resolved state is held so
+   a language switch repaints the live answer, not the markup's placeholder. */
+var scorerBadge = null;
+function paintScorerBadge(){
+  var el = document.getElementById('hero-model');
+  if(!el || !scorerBadge) return;
+  if(scorerBadge.text) el.textContent = scorerBadge.text;   // model identifier, not copy
+  else if(scorerBadge.textKey) setElText(el, scorerBadge.textKey);
+  var ti = scorerBadge.titleKey ? t(scorerBadge.titleKey) : '';
+  if(ti) el.setAttribute('title', ti);
+}
 (function(){
   var el = document.getElementById('hero-model');
   if(!el) return;
   fetch('/api/health').then(function(r){ return r.json(); }).then(function(h){
     if(h.scoring_path === 'ensemble'){
-      el.textContent = 'RF+LR ENSEMBLE v1.0';
-      el.title = 'Model artifact loaded and smoke-tested. Source: /api/health.';
+      scorerBadge = { text: 'RF+LR ENSEMBLE v1.0', titleKey: 'demo.scorer.title.ensemble' };
     }else if(h.scoring_path === 'heuristic'){
-      el.textContent = 'HEURISTIC FALLBACK';
-      el.title = 'The model artifact is not loaded, so a deterministic '
-               + 'heuristic is scoring. This can change the assigned risk '
-               + 'tier and therefore the terms shown. Source: /api/health.';
+      scorerBadge = { textKey: 'demo.scorer.heuristic', titleKey: 'demo.scorer.title.heuristic' };
     }else{
-      el.textContent = 'ACTIVE SCORER — UNKNOWN';
+      scorerBadge = { textKey: 'demo.scorer.unknown' };
     }
+    paintScorerBadge();
   }).catch(function(){
-    el.textContent = 'ACTIVE SCORER — UNKNOWN';
-    el.title = 'Could not reach /api/health.';
+    scorerBadge = { textKey: 'demo.scorer.unknown', titleKey: 'demo.scorer.title.unreachable' };
+    paintScorerBadge();
   });
 })();
+/* ── One repaint for everything this script rendered itself ─────────────
+   The runtime has already re-applied the declarative bindings by the time
+   this runs, so a placeholder it restored from the markup is overwritten
+   here with the copy for the state actually on screen. */
+function repaintDynamicCopy(){
+  /* meta.title / meta.description are shared keys the runtime applies to
+     every page that loads it; restore this page's own metadata after it. */
+  var mt = t('demo.meta.title'); if(mt) document.title = mt;
+  var md = t('demo.meta.description');
+  var mdEl = document.querySelector('meta[name="description"]');
+  if(md && mdEl) mdEl.setAttribute('content', md);
+  setI18nText('progress-label','demo.apply.step',{n:applyStep});
+  paintFlowDesc();
+  paintScorerBadge();
+  if(heroLastData){ try { heroRenderDecision(heroLastData, heroLastMs); } catch(_) { /* leave the figures as rendered */ } }
+  else {
+    setI18nText('hd-word', heroPlaceholderKey);
+    setI18nText('hd-pdline', 'demo.hero.d.noResult');
+    if(heroFootKey) setI18nText('hero-foot', heroFootKey);
+  }
+  if(resultLastData){ try { renderResult(resultLastData); } catch(_) { /* leave the result as rendered */ } }
+}
+window.addEventListener('rbf:languagechange', repaintDynamicCopy);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeMenu(); });
 const initialPage=location.hash.slice(1);
 if(['apply','dashboard','privacy'].includes(initialPage)) go(initialPage);
