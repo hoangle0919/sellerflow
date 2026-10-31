@@ -54,6 +54,13 @@ TIMEOUT_S = 6
 MAX_BYTES = 256 * 1024
 CACHE_TTL_S = 3600
 
+#: Negative caching. After a failed fetch, do not try again for this long,
+#: doubling up to the ceiling. Without it, every request during an upstream
+#: outage pays the full TIMEOUT_S before failing, which is how a slow third
+#: party turns into an outage of ours.
+BACKOFF_BASE_S = 60
+BACKOFF_MAX_S = 900
+
 #: A USD/VND rate is ~2.5e4. Anything under this is a wrong pair or an
 #: inverted orientation, not a cheap dollar.
 MIN_PLAUSIBLE_RATE = Decimal("1000")
@@ -72,10 +79,19 @@ ERR_BAD_RATE = "fx_bad_rate"
 ERR_BAD_DATE = "fx_bad_date"
 ERR_TOO_OLD = "fx_rate_too_old"
 
+#: The lock guards the module's state ONLY. It is never held across the
+#: network call. An earlier version did hold it, which meant that during an
+#: upstream stall every caller queued behind a TIMEOUT_S fetch; because FastAPI
+#: runs sync endpoints in a bounded worker pool, enough queued callers would
+#: have starved the whole application, not just this endpoint. A third party
+#: being slow must never become an outage here.
 _lock = threading.Lock()
 _cache: Optional[Dict[str, Any]] = None       # last VALIDATED quote
 _cache_fetched_at: float = 0.0
 _last_error: Optional[str] = None
+_fetching: bool = False                       # single-flight: one refresher
+_failed_until: float = 0.0                    # negative-cache deadline
+_fail_streak: int = 0
 
 
 def _utc_today() -> date:
@@ -221,32 +237,57 @@ def _unavailable(code: str) -> Dict[str, Any]:
 
 
 def get_quote(force: bool = False) -> Dict[str, Any]:
-    """Display metadata for the current reference rate. Never raises.
+    """Display metadata for the current reference rate. Never raises, and never
+    blocks on the network while holding the module lock.
+
+    Single-flight: at most one thread fetches at a time. Everyone else is served
+    the cached quote, or an unavailable payload, *immediately* -- a stalled
+    upstream costs one thread, not the worker pool.
 
     Lazy: nothing is fetched at import or startup, so an upstream outage cannot
     stop the application booting or affect any VND figure.
     """
-    global _cache, _cache_fetched_at, _last_error
-    with _lock:   # also deduplicates concurrent refreshes within the process
-        now = time.time()
-        if (not force and _cache is not None
-                and now - _cache_fetched_at < CACHE_TTL_S):
+    global _cache, _cache_fetched_at, _last_error, _fetching, _failed_until, _fail_streak
+
+    now = time.time()
+    with _lock:
+        if not force and _cache is not None and now - _cache_fetched_at < CACHE_TTL_S:
             return _render(_cache, _cache_fetched_at, False, None)
-        try:
-            quote = _fetch()
-        except ValueError as e:
-            _last_error = str(e)
+        # Someone is already refreshing, or we are inside a backoff window after
+        # a failure. Either way, answer from what we have rather than queueing.
+        if _fetching or (not force and now < _failed_until):
             if _cache is not None:
+                return _render(_cache, _cache_fetched_at, True, _last_error)
+            return _unavailable(_last_error or ERR_UNREACHABLE)
+        _fetching = True
+        cache_snapshot, snapshot_at = _cache, _cache_fetched_at
+
+    # ── network call happens OUTSIDE the lock ────────────────────────────────
+    try:
+        quote = _fetch()
+    except ValueError as e:
+        with _lock:
+            _fetching = False
+            _last_error = str(e)
+            _fail_streak = min(_fail_streak + 1, 8)
+            _failed_until = time.time() + min(
+                BACKOFF_BASE_S * (2 ** (_fail_streak - 1)), BACKOFF_MAX_S)
+            if cache_snapshot is not None:
                 # Keep serving the last VALIDATED quote, under the same
                 # freshness bands, and say plainly that the refresh failed.
-                # `fetched_at` is NOT rewritten: a failed refresh of an old
+                # `snapshot_at` is NOT rewritten: a failed refresh of an old
                 # observation is not a newly dated rate.
-                return _render(_cache, _cache_fetched_at, True, _last_error)
+                return _render(cache_snapshot, snapshot_at, True, _last_error)
             return _unavailable(_last_error)
+
+    with _lock:
+        _fetching = False
         _cache = quote
-        _cache_fetched_at = now
+        _cache_fetched_at = time.time()
         _last_error = None
-        return _render(quote, now, False, None)
+        _fail_streak = 0
+        _failed_until = 0.0
+        return _render(_cache, _cache_fetched_at, False, None)
 
 
 def approximate_usd(vnd: int, vnd_per_usd: str) -> Optional[str]:
@@ -266,6 +307,7 @@ def approximate_usd(vnd: int, vnd_per_usd: str) -> Optional[str]:
 
 
 def _reset_for_tests() -> None:
-    global _cache, _cache_fetched_at, _last_error
+    global _cache, _cache_fetched_at, _last_error, _fetching, _failed_until, _fail_streak
     with _lock:
         _cache, _cache_fetched_at, _last_error = None, 0.0, None
+        _fetching, _failed_until, _fail_streak = False, 0.0, 0

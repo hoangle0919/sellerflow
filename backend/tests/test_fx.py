@@ -6,6 +6,7 @@ oracle: a provider outage must not turn this suite red.
 """
 import json
 import threading
+import time
 import urllib.error
 from datetime import date, datetime, timedelta, timezone
 
@@ -206,12 +207,77 @@ def test_failed_refresh_serves_cache_and_says_so_without_rewriting_fetched_at(mo
     assert second["fetched_at"] < now_iso
 
 
-def test_service_recovery_clears_the_failed_flag(monkeypatch):
+def test_a_failure_opens_a_backoff_window_that_suppresses_refetching(monkeypatch):
+    """Negative caching. Without it, every request during an upstream outage
+    pays the full timeout before failing."""
+    calls = []
+    monkeypatch.setattr(fx.urllib.request, "urlopen",
+                        lambda r, timeout=None, context=None: (_ for _ in ()).throw(
+                            urllib.error.URLError("down")) if calls.append(1) is None else None)
+    assert fx.get_quote()["status"] == fx.STATUS_UNAVAILABLE
+    assert len(calls) == 1
+    for _ in range(5):
+        assert fx.get_quote()["status"] == fx.STATUS_UNAVAILABLE
+    assert len(calls) == 1, "backoff window must suppress further fetches"
+    assert fx._failed_until > time.time()
+
+
+def test_backoff_grows_but_is_bounded(monkeypatch):
+    _patch(monkeypatch, exc=urllib.error.URLError("down"))
+    waits = []
+    for _ in range(10):
+        fx._failed_until = 0.0            # allow the next attempt
+        fx.get_quote()
+        waits.append(fx._failed_until - time.time())
+    assert waits[1] > waits[0], "backoff should grow"
+    assert max(waits) <= fx.BACKOFF_MAX_S + 1, "backoff must be bounded"
+
+
+def test_an_explicit_refresh_bypasses_the_backoff_window(monkeypatch):
     _patch(monkeypatch, exc=urllib.error.URLError("down"))
     assert fx.get_quote()["status"] == fx.STATUS_UNAVAILABLE
     _patch(monkeypatch, _doc())
+    assert fx.get_quote()["status"] == fx.STATUS_UNAVAILABLE   # still backed off
+    good = fx.get_quote(force=True)
+    assert good["status"] == fx.STATUS_OK and good["refresh_failed"] is False
+    assert fx._failed_until == 0.0 and fx._fail_streak == 0
+
+
+def test_service_recovery_once_the_window_expires(monkeypatch):
+    _patch(monkeypatch, exc=urllib.error.URLError("down"))
+    assert fx.get_quote()["status"] == fx.STATUS_UNAVAILABLE
+    fx._failed_until = 0.0                # simulate the window elapsing
+    _patch(monkeypatch, _doc())
     good = fx.get_quote()
     assert good["status"] == fx.STATUS_OK and good["refresh_failed"] is False
+
+
+def test_the_module_lock_is_not_held_across_network_io(monkeypatch):
+    """The finding this guards: a stalled upstream must cost one thread, not
+    the worker pool. FastAPI runs sync endpoints in a bounded threadpool, so a
+    lock held across a slow fetch would starve the whole application."""
+    started, release = threading.Event(), threading.Event()
+
+    def stalled(req, timeout=None, context=None):
+        started.set()
+        release.wait(5)                   # hold the "network" open
+        return _Resp(_doc())
+
+    monkeypatch.setattr(fx.urllib.request, "urlopen", stalled)
+    slow = threading.Thread(target=fx.get_quote)
+    slow.start()
+    assert started.wait(2), "fetch did not begin"
+
+    # While that fetch is stalled, another caller must return promptly.
+    done = threading.Event()
+    def other():
+        fx.get_quote()
+        done.set()
+    threading.Thread(target=other).start()
+    assert done.wait(1.5), "a second caller blocked behind the in-flight fetch"
+
+    release.set()
+    slow.join(5)
 
 
 def test_concurrent_refreshes_are_deduplicated(monkeypatch):
