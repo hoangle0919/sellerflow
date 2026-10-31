@@ -27,6 +27,7 @@ always shown beside the number.
 """
 from __future__ import annotations
 
+import http.client
 import json
 import ssl
 import threading
@@ -178,7 +179,10 @@ def _fetch() -> Dict[str, Any]:
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT_S, context=_ssl_context()) as r:
             raw = r.read(MAX_BYTES + 1)
-    except (urllib.error.HTTPError, urllib.error.URLError, OSError, TimeoutError):
+    except (urllib.error.HTTPError, urllib.error.URLError, OSError, TimeoutError,
+            http.client.HTTPException):
+        # HTTPException (BadStatusLine, IncompleteRead) is NOT an OSError, so it
+        # needs naming explicitly or a malformed upstream response escapes.
         # Upstream status codes and internal exceptions are deliberately not
         # surfaced to the browser; the caller gets a safe code only.
         raise ValueError(ERR_UNREACHABLE)
@@ -263,12 +267,29 @@ def get_quote(force: bool = False) -> Dict[str, Any]:
         cache_snapshot, snapshot_at = _cache, _cache_fetched_at
 
     # ── network call happens OUTSIDE the lock ────────────────────────────────
+    quote: Optional[Dict[str, Any]] = None
+    err: Optional[str] = None
     try:
         quote = _fetch()
     except ValueError as e:
+        err = str(e)
+    except Exception:
+        # `_fetch` converts the transport errors it anticipates. Anything it
+        # did not must still be contained: this function's contract is that it
+        # never raises, and an escape here would leave `_fetching` set.
+        err = ERR_UNREACHABLE
+    finally:
+        # The single-flight flag is released unconditionally, including on an
+        # exception that is not an `Exception` at all. Without this, one escaped
+        # error wedges the adapter permanently -- every later caller sees a
+        # refresh "in progress" that will never finish, so the rate can never
+        # recover for the life of the process.
         with _lock:
             _fetching = False
-            _last_error = str(e)
+
+    with _lock:
+        if err is not None:
+            _last_error = err
             _fail_streak = min(_fail_streak + 1, 8)
             _failed_until = time.time() + min(
                 BACKOFF_BASE_S * (2 ** (_fail_streak - 1)), BACKOFF_MAX_S)
@@ -280,8 +301,6 @@ def get_quote(force: bool = False) -> Dict[str, Any]:
                 return _render(cache_snapshot, snapshot_at, True, _last_error)
             return _unavailable(_last_error)
 
-    with _lock:
-        _fetching = False
         _cache = quote
         _cache_fetched_at = time.time()
         _last_error = None

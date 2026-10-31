@@ -4,6 +4,7 @@ One test (`test_live_smoke`) touches the network and is skipped unless
 RBF_FX_LIVE=1. It demonstrates connectivity only. It is never a correctness
 oracle: a provider outage must not turn this suite red.
 """
+import http.client
 import json
 import threading
 import time
@@ -250,6 +251,39 @@ def test_service_recovery_once_the_window_expires(monkeypatch):
     _patch(monkeypatch, _doc())
     good = fx.get_quote()
     assert good["status"] == fx.STATUS_OK and good["refresh_failed"] is False
+
+
+@pytest.mark.parametrize("exc", [
+    RuntimeError("unexpected"),
+    http.client.IncompleteRead(b""),
+    http.client.BadStatusLine("garbage"),
+    MemoryError(),
+])
+def test_an_unexpected_exception_does_not_wedge_the_adapter(monkeypatch, exc):
+    """The single-flight flag must be released no matter how the fetch ends.
+
+    If it is not, every later caller sees a refresh "in progress" that will
+    never finish, and the rate can never recover for the life of the process --
+    a worse outage than the one single-flight was added to prevent.
+    """
+    _patch(monkeypatch, exc=exc)
+    q = fx.get_quote()
+    assert q["status"] == fx.STATUS_UNAVAILABLE
+    assert q["error"] == fx.ERR_UNREACHABLE
+    assert fx._fetching is False, "single-flight flag left set; adapter is wedged"
+
+    # ...and the adapter must still be able to recover.
+    _patch(monkeypatch, _doc())
+    good = fx.get_quote(force=True)
+    assert good["status"] == fx.STATUS_OK
+
+
+def test_httpexception_is_converted_by_fetch_not_leaked(monkeypatch):
+    """HTTPException is not an OSError, so it needs naming explicitly or a
+    malformed upstream response escapes the conversion in _fetch."""
+    _patch(monkeypatch, exc=http.client.BadStatusLine("nonsense"))
+    assert fx.get_quote()["error"] == fx.ERR_UNREACHABLE
+    assert fx._fetching is False
 
 
 def test_the_module_lock_is_not_held_across_network_io(monkeypatch):
